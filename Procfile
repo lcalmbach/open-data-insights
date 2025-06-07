@@ -1,1 +1,1 @@
-web: gunicorn report_generator.report_generator.wsgi
+web: gunicorn report_generator.wsgi
