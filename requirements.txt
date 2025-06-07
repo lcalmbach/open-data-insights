@@ -1,0 +1,13 @@
+Django>=4.2,<5.0
+psycopg2-binary>=2.9
+python-dotenv>=1.0
+django-widget-tweaks==1.5.0
+django-crispy-forms
+crispy_bootstrap5
+django-countries
+pandas
+markdown
+gunicorn 
+psycopg2-binary 
+dj-database-url 
+whitenoise

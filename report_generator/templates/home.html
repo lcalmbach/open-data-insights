@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load markdown_extras %}
+
+{% block title %}Home - Open Data Stories{% endblock %}
+
+{% block content %}
+<div class="splash-container">
+    <img src="{% static 'reports/splash.png' %}" alt="Data Pipeline" class="splash-image">
+    <h1 class="headline">Story of the Day</h1>
+
+    {% if story %}
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ story.title }}</h5>
+                <p class="card-text">{{ story.content|markdownify|safe }}</p>
+                <p class="text-muted">Published on {{ story.published_date|date:"F j, Y" }}</p>
+            </div>
+        </div>
+    {% else %}
+        <p class="mt-4">No story is available today. Please check back later.</p>
+    {% endif %}
+
+    <p class="mt-4">
+        <a href="{% url 'about' %}" class="btn btn-outline-secondary">About this App</a>
+    </p>
+</div>
+{% endblock %}

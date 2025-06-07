@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Login - Report Generator{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Login</h2>
+
+{% if form.errors|length > 1 %}
+    Please correct the errors below.
+{% else %}
+    Please correct the error below.
+{% endif %}
+
+<form method="post" novalidate>
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary mt-3">Login</button>
+</form>
+
+<p class="mt-3">
+    Don't have an account?
+    <a href="{% url 'account:register' %}">Register here</a>.
+</p>
+<p class="mt-3">
+  <a href="{% url 'account:password_reset' %}">Forgot your password?</a>
+</p>
+{% endblock %}

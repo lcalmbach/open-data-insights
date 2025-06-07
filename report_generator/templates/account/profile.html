@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>My Profile</h2>
+  <p>Email: {{ request.user.email }}</p>
+  <p>Name: {{ request.user.first_name }} {{ request.user.last_name }}</p>
+  <p>Country: {{ request.user.country }}</p>
+  <hr>
+  <h3>Data Insights Subscriptions</h3>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.subscriptions }}
+    <button type="submit" class="btn btn-primary mt-3">Save Subscriptions</button>
+  </form>
+{% endblock %}

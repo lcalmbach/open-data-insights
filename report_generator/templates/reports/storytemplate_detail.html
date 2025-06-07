@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load markdown_extras %}
+
+{% block content %}
+  <h2>{{ template.title }}</h2>
+  <div class="markdown-body">
+    {{ template.description|markdownify|safe }}
+  </div>
+  <p class="text-muted">Last updated: {{ template.updated_at|date:"F j, Y" }}</p>
+  <a href="{{ back_url }}" class="btn btn-secondary mt-3">
+  <i class="bi bi-arrow-left-circle"></i> Back
+</a>
+
+{% endblock %}

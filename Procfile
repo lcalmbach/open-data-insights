@@ -1,0 +1,1 @@
+web: gunicorn report_generator.wsgi

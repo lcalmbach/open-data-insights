@@ -1,0 +1,52 @@
+<!-- templates/navbar.html -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'home' %}">Report Generator</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <!-- Linksbündige Navigation -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'home' %}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'explore' %}">Explore</a>
+        </li>
+        {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'account:logout' %}">Logout</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'account:login' %}">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'account:register' %}">Register</a>
+        </li>
+        {% endif %}
+      </ul>
+
+      <!-- Rechtsbündige Initialen-Anzeige -->
+      {% if user.is_authenticated %}
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'account:profile' %}">
+            {% with user.first_name|slice:":1" as fi %}
+              {% with user.last_name|slice:":1" as li %}
+              <span class="badge bg-secondary rounded-circle p-2 text-uppercase"
+                style="width: 2.5rem; height: 2.5rem; display: inline-flex; align-items: center; justify-content: center;">
+                {{ fi }}{{ li }}
+              </span>
+              {% endwith %}
+            {% endwith %}
+          </a>
+        </li>
+      </ul>
+      {% endif %}
+    </div>
+  </div>
+</nav>
