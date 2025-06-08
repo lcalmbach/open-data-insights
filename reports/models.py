@@ -218,7 +218,7 @@ class StoryTemplate(models.Model):
         blank=True,
         help_text="Instructions for the AI model to generate the story."
     )
-    reference_value_command = models.CharField(
+    reference_value_command = models.TextField(
         null=True,
         blank=True,
         help_text="sql command to get the reference value"
@@ -264,8 +264,8 @@ class StoryTemplateContext(models.Model):
         related_name='contexts',
         help_text="The story this context belongs to."
     )
-    description = models.CharField(
-        max_length=255,
+    description = models.TextField(
+        max_length=1000,
         help_text="Name of the context, e.g., 'Context monthly average with all previous years of same month'"
     )    
     key = models.CharField(
@@ -278,13 +278,12 @@ class StoryTemplateContext(models.Model):
         related_name='context_periods',
         help_text="The context period for this context, e.g., 'day', 'month', 'season', 'year'."
     )
-    sql_command = models.CharField(
+    sql_command = models.TextField(
         null=True,
         blank=True,
         help_text="sql command to get the value to compare with the reference value"   
     )
-    follow_up_command = models.CharField(
-        max_length=255,
+    follow_up_command = models.TextField(
         null=True,
         blank=True,
         help_text="command holding the condition on whether follow up contexts are executed. e.g. if reference day is a heat day, check on how many heat days there were in the current month or season."

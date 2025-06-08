@@ -11,7 +11,6 @@ from account.forms import SubscriptionForm
 @never_cache
 def home_view(request):
     story = Story.objects.order_by('-published_date').first()  # oder beliebige Logik
-    print(story.content)
     return render(request, 'home.html', {'story': story})
 
 

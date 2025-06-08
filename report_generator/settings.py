@@ -1,6 +1,7 @@
 import dj_database_url
 import os
 from pathlib import Path
+from decouple import config
 
 """
 Django settings for report_generator project.
@@ -23,10 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False # True
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -55,9 +56,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -94,21 +95,24 @@ WSGI_APPLICATION = "report_generator.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {}
-DATABASES['default'] = dj_database_url.config(conn_max_age=600)
-#DATABASES = {
-#"default": {
-#    "ENGINE": "django.db.backends.postgresql",
-#    "NAME": config("DB_NAME"),
-#    "USER": config("DB_USER"),
-#    "PASSWORD": config("DB_PASSWORD"),
-#    "HOST": config("DB_HOST"),
-#    "PORT": config("DB_PORT", cast=int),
-#    "OPTIONS": {
-#        "options": "-c search_path=report_generator"
-#    },
-#}
-#}
-
+DATABASE_URL = config("DATABASE_URL", default=None)
+DATABASE_URL = False
+if DATABASE_URL:
+    DATABASES["default"] = dj_database_url.config(conn_max_age=600)
+else:
+    DATABASES = {
+        "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config("DB_NAME"),
+        "USER": config("DB_USER"),
+        "PASSWORD": config("DB_PASSWORD"),
+        "HOST": config("DB_HOST"),
+        "PORT": config("DB_PORT", cast=int),
+        "OPTIONS": {
+                "options": "-c search_path=report_generator"
+            }
+        }
+    }
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
