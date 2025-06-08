@@ -96,7 +96,6 @@ WSGI_APPLICATION = "report_generator.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {}
 DATABASE_URL = config("DATABASE_URL", default=None)
-DATABASE_URL = False
 if DATABASE_URL:
     DATABASES["default"] = dj_database_url.config(conn_max_age=600)
 else:
