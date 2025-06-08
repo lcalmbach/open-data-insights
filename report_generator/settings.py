@@ -98,11 +98,14 @@ DATABASES = {}
 DATABASE_URL = config("DATABASE_URL", default=None)
 
 if DATABASE_URL:
-    DATABASES["default"] = dj_database_url.parse(
-        DATABASE_URL,
-        conn_max_age=600,
-        options="-c search_path=report_generator"
-    )
+    DATABASES = {
+        "default": dj_database_url.config(conn_max_age=600)
+    }
+    # Manually inject the search_path into OPTIONS
+    DATABASES["default"]["OPTIONS"] = {
+        "options": "-c search_path=report_generator"
+    }
+
 else:
     DATABASES = {
         "default": {
