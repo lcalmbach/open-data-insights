@@ -96,18 +96,22 @@ WSGI_APPLICATION = "report_generator.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {}
 DATABASE_URL = config("DATABASE_URL", default=None)
+
 if DATABASE_URL:
-    DATABASES["default"] = dj_database_url.config(conn_max_age=600)
+    DATABASES["default"] = dj_database_url.config(
+        conn_max_age=600,
+        options="-c search_path=report_generator"
+    )
 else:
     DATABASES = {
         "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME"),
-        "USER": config("DB_USER"),
-        "PASSWORD": config("DB_PASSWORD"),
-        "HOST": config("DB_HOST"),
-        "PORT": config("DB_PORT", cast=int),
-        "OPTIONS": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": config("DB_NAME"),
+            "USER": config("DB_USER"),
+            "PASSWORD": config("DB_PASSWORD"),
+            "HOST": config("DB_HOST"),
+            "PORT": config("DB_PORT", cast=int),
+            "OPTIONS": {
                 "options": "-c search_path=report_generator"
             }
         }
