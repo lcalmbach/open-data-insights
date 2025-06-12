@@ -4,3 +4,20 @@
     display: block;
     margin: 0 auto 1rem auto;
 }
+
+.custom-navbar {
+  background-color: steelblue !important;
+}
+
+.custom-navbar .nav-link,
+.custom-navbar .navbar-brand {
+  color: white !important;
+}
+
+.custom-navbar .dropdown-menu {
+  background-color: #f0f8ff; /* optional: light powder variant */
+}
+
+.custom-navbar .dropdown-item:hover {
+  background-color: #d0e0f0;
+}

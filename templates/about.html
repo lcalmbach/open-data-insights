@@ -1,22 +1,26 @@
 {% extends 'base.html' %}
-{% block title %}About - Open Data Stories{% endblock %}
+{% block title %}About - OGD-Data Insights{% endblock %}
 
 {% block content %}
-<h1>About Open Data Stories</h1>
+<h1>About OGD-Data Insights</h1>
 
 <p>
-Across the world, Open Data platforms are publishing an ever-growing number of high-quality datasets that cover all aspects of daily life – from weather and environment to transportation, health, and more. But with this abundance comes a new challenge: it's becoming harder to find meaningful insights hidden within the data.
+Across the world, Open Data platforms are publishing an ever-growing number of high-quality datasets that cover all aspects of daily life – from weather and the environment to transportation, health, and more. But with this abundance comes a new challenge: it's becoming harder to find meaningful insights hidden within the data.
 </p>
 
 <p>
-Open Data Stories helps make sense of this complexity by using artificial intelligence to generate short, readable stories based on open datasets. Each story is triggered by predefined rules that identify events worth reporting – for example, when temperatures reach extreme highs or lows, or when environmental standards are exceeded.
+OGD-Data Insights helps make sense of this complexity by using artificial intelligence to generate short, readable stories based on open datasets. Each story is triggered by predefined rules that identify events worth reporting – for example, when temperatures reach extreme highs or lows, or when environmental standards are exceeded. When such an event is detected, AI generates a story that explains what happened and why it matters. 
 </p>
 
 <p>
-When such an event is detected, AI generates a story that explains what happened and why it matters. You can subscribe to specific datasets or topics and receive new stories automatically. The latest story is also published on this website as an example.
+This app automatically creates new stories every day. One of them is randomly selected and shown on the home page. You can use the explorer menu to browse all generated insights and access the underlying data.
 </p>
 
 <p>
-To receive insightful stories tailored to your interests, simply register on this site and subscribe to specific datasets or themes in your profile. Whenever a relevant event is detected in your chosen topics, you'll automatically receive a freshly generated story — directly in your inbox.
+To receive tailored stories that match your interests, simply register and subscribe to specific datasets or themes via your <a href="{% url 'account:profile' %}">profile page</a>. Whenever a relevant event is detected, you'll receive a freshly generated story — directly in your inbox.
+</p>
+
+<p>
+OGD-Data Insights is built with Django, PostgreSQL, and the OpenAI GPT-4 model. All stories are based on data from publicly available, official Open Data platforms. The goal is to help everyone – from engaged citizens to decision-makers – better understand the world through data.
 </p>
 {% endblock %}

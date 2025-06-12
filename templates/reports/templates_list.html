@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Explore Story Definitions{% endblock %}
+
+{% block content %}
+<div class="row">
+  <!-- Linke Seite: Template-Liste -->
+  <div class="col-md-4">
+    <h4>Available Story Definitions</h4>
+    <ul class="list-group">
+      {% for template in templates %}
+        <a href="?template={{ template.id }}"
+           class="list-group-item list-group-item-action {% if template.id == selected_template.id %}active{% endif %}">
+          {{ template.title }}
+        </a>
+      {% empty %}
+        <li class="list-group-item">No templates found.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Rechte Seite: Details -->
+  <div class="col-md-8">
+    {% if selected_template %}
+      <h3>{{ selected_template.title }}</h3>
+      <hr>
+      <div>{{ selected_template.description|linebreaks }}</div>
+    {% else %}
+      <p>Select a template on the left to view its details here.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

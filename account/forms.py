@@ -16,12 +16,12 @@ class SubscriptionForm(forms.Form):
         queryset=StoryTemplate.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=False,
-        label="Your subscriptions"
+        label="Your subscriptions",
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['subscriptions'].label_from_instance = self.custom_label
+        self.fields["subscriptions"].label_from_instance = self.custom_label
 
     def custom_label(self, obj):
         url = f"/templates/{obj.pk}/"
