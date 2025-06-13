@@ -31,10 +31,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     country = CountryField(blank_label="(select country)")
+    is_confirmed = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(auto_now_add=True)
+    last_active = models.DateTimeField(auto_now=True)
 
     is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-
+    is_staff = models.BooleanField(default=False)  # ✅ required for admin access
+    
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name", "country", "password"]
 

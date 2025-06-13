@@ -1,18 +1,17 @@
 from django.urls import path
-from . import views
 from django.contrib.auth import views as auth_views
+from django.shortcuts import render
+from . import views
 
-app_name = "account"  # ← this enables the 'account:' prefix in {% url %}
-
+app_name = 'account'
 urlpatterns = [
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
-    path("register/", views.register_view, name="register"),
-    path("register/", views.register, name="register"),
+    path("register/", views.register, name="register"),  # keep only one
     path("confirm/<uidb64>/<token>/", views.confirm_email, name="confirm_email"),
-    path(
-        "email-sent/", lambda r: render(r, "account/email_sent.html"), name="email_sent"
-    ),
+    path("email-sent/", lambda r: render(r, "account/email_sent.html"), name="email_sent"),
+
+    # Password reset flow (via email)
     path(
         "password-reset/",
         auth_views.PasswordResetView.as_view(
@@ -28,11 +27,9 @@ urlpatterns = [
         name="password_reset_done",
     ),
     path(
-        "reset/<uidb64>/<token>/",
-        auth_views.PasswordResetConfirmView.as_view(
-            template_name="account/password_reset_confirm.html"
-        ),
-        name="password_reset_confirm",
+        "confirm/<uidb64>/<token>/",
+        views.confirm_email,
+        name="confirm_email",
     ),
     path(
         "reset/done/",
@@ -41,5 +38,6 @@ urlpatterns = [
         ),
         name="password_reset_complete",
     ),
+
     path("profile/", views.profile_view, name="profile"),
 ]

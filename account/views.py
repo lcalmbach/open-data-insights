@@ -60,9 +60,9 @@ def register(request):
             token = default_token_generator.make_token(user)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             domain = get_current_site(request).domain
-            confirmation_link = reverse("account:confirm_email", args=[uid, token])
+            confirmation_link = reverse("account:confirm_email", kwargs={"uidb64": uid, "token": token})
             activate_url = f"http://{domain}{confirmation_link}"
-
+            print(activate_url)
             subject = "Confirm your email"
             message = render_to_string(
                 "account/email_confirmation.txt",
@@ -73,7 +73,8 @@ def register(request):
             )
 
             send_mail(subject, message, "noreply@yourdomain.com", [user.email])
-            return redirect("account:email_sent")
+            messages.success(request, "Account created! Please check your email to confirm your address.")
+            return redirect("home")
 
     else:
         form = RegistrationForm()
@@ -82,28 +83,23 @@ def register(request):
 
 def confirm_email(request, uidb64, token):
     try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (User.DoesNotExist, ValueError, TypeError, OverflowError):
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = get_user_model().objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, get_user_model().DoesNotExist):
         user = None
 
-    if user and default_token_generator.check_token(user, token):
-        user.is_active = True
-        user.save()
-        return render(request, "account/email_confirmed.html")
+    if user is not None and default_token_generator.check_token(user, token):
+        if not user.is_active:
+            user.is_active = True
+            user.save()
+            messages.success(request, "Deine E-Mail-Adresse wurde bestätigt. Du kannst dich jetzt einloggen.")
+        else:
+            messages.info(request, "Deine E-Mail-Adresse war bereits bestätigt.")
+        return redirect("login")  # oder dein home-View
     else:
-        return render(request, "account/email_invalid.html")
+        messages.error(request, "Dieser Bestätigungslink ist ungültig oder abgelaufen.")
+        return render(request, "account/email_confirmation_invalid.html")
 
-
-def profile_view(request):
-    return render(request, "account/profile.html")
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-from .forms import SubscriptionForm
-from reports.models import StoryTemplateSubscription
 
 
 @login_required
@@ -130,7 +126,7 @@ def profile_view(request):
                     cancellation_date__isnull=True,
                     defaults={"user": user, "story_template": template},
                 )
-
+            messages.success(request, "Your subscriptions have been saved.")
             return redirect("account:profile")  # <– wichtig: Namespace!
     else:
         current_subscriptions = StoryTemplateSubscription.objects.filter(

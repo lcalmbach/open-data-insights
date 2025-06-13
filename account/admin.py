@@ -6,8 +6,8 @@ from .models import CustomUser
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ["email", "is_staff", "is_active"]
-    list_filter = ["is_staff", "is_active", "groups"]
+    list_display = ["last_name", "first_name", "email", "is_confirmed"]
+    list_filter = ["last_name", "is_confirmed"]
     search_fields = ["email"]
     ordering = ["email"]
     fieldsets = UserAdmin.fieldsets + (

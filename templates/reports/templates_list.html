@@ -23,7 +23,7 @@
     {% if selected_template %}
       <h3>{{ selected_template.title }}</h3>
       <hr>
-      <div>{{ selected_template.description|linebreaks }}</div>
+      <div>{{ selected_template.description_html|safe }}</div>
     {% else %}
       <p>Select a template on the left to view its details here.</p>
     {% endif %}

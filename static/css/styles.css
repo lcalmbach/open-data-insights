@@ -21,3 +21,39 @@
 .custom-navbar .dropdown-item:hover {
   background-color: #d0e0f0;
 }
+
+.star-rating {
+      direction: rtl;
+      display: inline-flex;
+      font-size: 2rem;
+  }
+
+  .star-rating input[type="radio"] {
+      display: none;
+  }
+
+  .star-rating label {
+      cursor: pointer;
+      color: #ccc;
+      transition: color 0.2s;
+  }
+
+  .star-rating input[type="radio"]:checked ~ label,
+  .star-rating label:hover,
+  .star-rating label:hover ~ label {
+      color: gold;
+  }
+
+  textarea {
+      width: 100%;
+      height: 100px;
+  }
+
+  .form-container {
+      max-width: 400px;
+      margin: auto;
+  }
+
+  .submit-button {
+      margin-top: 1em;
+  }

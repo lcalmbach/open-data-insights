@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Rate this Story{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1>Rate: {{ story.title }}</h1>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label>Rating:</label><br>
+        <div class="star-rating">
+          {% for i in "54321" %}
+            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}">
+            <label for="star{{ i }}">★</label>
+          {% endfor %}
+        </div>
+      </div>
+
+      {{ form.rating_text|as_crispy_field }}
+
+      <button type="submit" class="btn btn-primary mt-3">Submit Rating</button>
+    </form>
+  </div>
+
+  <style>
+    .star-rating {
+        direction: rtl;
+        font-size: 2rem;
+        unicode-bidi: bidi-override;
+    }
+
+    .star-rating input {
+        display: none;
+    }
+
+    .star-rating label {
+        color: #ccc;
+        cursor: pointer;
+    }
+
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        color: gold;
+    }
+  </style>
+{% endblock %}

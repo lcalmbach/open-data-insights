@@ -10,4 +10,5 @@ urlpatterns = [
     path(
         "templates/<int:pk>/", views.storytemplate_detail_view, name="template_detail"
     ),
+    path("stories/<int:story_id>/rate/", views.rate_story, name="rate_story"),
 ]

@@ -26,7 +26,7 @@
       <p><strong>Published:</strong> {{ selected_story.published_date|date:"F j, Y" }}</p>
       <p><strong>Reference period:</strong> {{ selected_story.reference_period }}</p>
       <hr>
-      <div>{{ selected_story.content|linebreaks }}</div>
+      <div>{{ selected_story.content_html|safe }}</div>
     {% else %}
       <p>Select a story on the left to view its details here.</p>
     {% endif %}
