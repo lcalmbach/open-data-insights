@@ -23,4 +23,22 @@ To receive tailored stories that match your interests, simply register and subsc
 <p>
 OGD-Data Insights is built with Django, PostgreSQL, and the OpenAI GPT-4 model. All stories are based on data from publicly available, official Open Data platforms. The goal is to help everyone – from engaged citizens to decision-makers – better understand the world through data.
 </p>
+<br>
+<div class="card mt-4 mx-auto" style="max-width: 400px; font-size: 0.9rem;">
+  <div class="card-header bg-light py-2 px-3">
+    ℹ️ Impressum
+  </div>
+  <div class="card-body py-3 px-3">
+    <p class="mb-1"><strong>Version:</strong> {{ app_info.version }}</p>
+    <p class="mb-1">
+      <strong>Author:</strong>
+      <a href="mailto:{{ app_info.author_email }}">{{ app_info.author_name }}</a>
+    </p>
+    <p class="mb-0">
+      <i class="bi bi-github"></i>
+      <a href="{{ app_info.repo_url }}" target="_blank" class="ms-1">{{ app_info.repo_url }}</a>
+    </p>
+  </div>
+</div>
+
 {% endblock %}

@@ -177,3 +177,10 @@ MARKDOWNIFY = {
         "STRIP": False,
     }
 }
+
+APP_INFO = {
+    "version": "0.0.1",
+    "author_name": "Lukas Calmbach",
+    "author_email": "lcalmbach@gmail.com",
+    "repo_url": "https://github.com/lcalmbach/open-data-insights",
+}

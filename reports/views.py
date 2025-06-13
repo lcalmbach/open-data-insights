@@ -9,6 +9,8 @@ from account.forms import SubscriptionForm
 import markdown2
 from .models import Story, StoryRating
 from .forms import StoryRatingForm
+from django.conf import settings
+from django.views.generic import TemplateView
 
 @never_cache
 def home_view(request):
@@ -87,3 +89,12 @@ def rate_story(request, story_id):
         form = StoryRatingForm()
 
     return render(request, "reports/story_rating.html", {"form": form, "story": story})
+
+
+class AboutView(TemplateView):
+    template_name = "about.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["app_info"] = settings.APP_INFO
+        return context
