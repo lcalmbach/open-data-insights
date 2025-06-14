@@ -5,7 +5,7 @@ from crispy_forms.layout import Submit
 
 class StoryRatingForm(forms.Form):
     rating = forms.IntegerField(min_value=1, max_value=5, label="Sterne")
-    rating_text = forms.CharField(widget=forms.Textarea, required=False, label="Dein Feedback")
+    rating_text = forms.CharField(widget=forms.Textarea, required=False, label="Your Feedback (optional)")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

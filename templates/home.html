@@ -7,7 +7,9 @@
 <div class="splash-container">
     <img src="{% static 'reports/splash.png' %}" alt="Data Pipeline" class="splash-image">
     <h1 class="headline">Insight of the Day</h1>
-
+    <div class="text-end">
+        <a href="{% url 'rate_story' story.id %}">Rate this insight ⭐️</a>
+    </div>
     {% if story %}
     <div class="card mt-4">
         <div class="card-body">
@@ -19,9 +21,5 @@
     {% else %}
     <p class="mt-4">No story is available today. Please check back later.</p>
     {% endif %}
-    <br>
-    <div class="text-end">
-        <a href="{% url 'rate_story' story.id %}">Rate this insight ⭐️</a>
-    </div>
 </div>
 {% endblock %}
