@@ -57,3 +57,17 @@
   .submit-button {
       margin-top: 1em;
   }
+
+  .arrow-link {
+  text-decoration: none;
+  color: inherit; /* optionally inherit text color */
+}
+
+.arrow-link:hover {
+  text-decoration: none;
+}
+
+.strong-steelblue {
+  color: steelblue;
+  font-weight: bold;
+}

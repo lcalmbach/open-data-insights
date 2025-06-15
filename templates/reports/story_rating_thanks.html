@@ -3,7 +3,7 @@
 
 {% block content %}
   <div class="container text-center mt-5">
-    <h1 class="mb-4">Thank you for your rating!</h1>
+    <h1 class="mb-4">Thank you for your rating {{ user.first_name }}!</h1>
     <p class="lead">
       You successfully rated the story <strong>{{ story.title }}</strong>.
     </p>

@@ -4,22 +4,38 @@
 {% block title %}OGD Data Insights{% endblock %}
 
 {% block content %}
-<div class="splash-container">
+<div class="splash-container text-center">
     <img src="{% static 'reports/splash.png' %}" alt="Data Pipeline" class="splash-image">
-    <h1 class="headline">Insight of the Day</h1>
-    <div class="text-end">
-        <a href="{% url 'rate_story' story.id %}">Rate this insight ⭐️</a>
-    </div>
+    <h1 class="headline">
+        <span class="strong-steelblue">O</span>pen
+        <span class="strong-steelblue">D</span>ata
+        <span class="strong-steelblue">I</span>nsight of the Day
+    </h1>
+
     {% if story %}
-    <div class="card mt-4">
-        <div class="card-body">
-            <h5 class="card-title">{{ story.title }}</h5>
-            <p class="card-text">{{ story.content_html|safe }}</p>
-            <p class="text-muted">Published on {{ story.published_date|date:"F j, Y" }}</p>
+    <div class="d-flex justify-content-center align-items-center">
+        {% if prev_story_id %}
+        <a href="{% url 'view_story' prev_story_id %}" class="me-3 fs-3 arrow-link">⬅️</a>
+        {% endif %}
+
+        <div style="max-width: 800px; width: 100%;">
+            <div class="text-end mb-2">
+                <a href="{% url 'rate_story' story.id %}">Rate this insight ⭐️</a>
+            </div>
+
+            <div class="card mt-2">
+                <div class="card-body text-start">
+                    <h5 class="card-title">{{ story.title }}</h5>
+                    <p class="card-text">{{ story.content_html|safe }}</p>
+                    <p class="text-muted">Published on {{ story.published_date|date:"F j, Y" }}</p>
+                </div>
+            </div>
         </div>
+
+        {% if next_story_id %}
+        <a href="{% url 'view_story' next_story_id %}" class="ms-3 fs-3 arrow-link">➡️</a>
+        {% endif %}
     </div>
-    {% else %}
-    <p class="mt-4">No story is available today. Please check back later.</p>
     {% endif %}
 </div>
 {% endblock %}

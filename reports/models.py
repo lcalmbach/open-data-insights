@@ -112,12 +112,24 @@ class ContextPeriod(LookupValue):
 class Dataset(models.Model):
     name = models.CharField(max_length=255, help_text="Name of the dataset.")
     description = models.TextField(blank=True, help_text="Description of the dataset.")
+    source = models.CharField(
+        max_length=255, help_text="Source of the dataset, e.g., 'ods', 'worldbank"
+    )
     fields_selection = models.JSONField(
+        blank=True,
+        null=True,
         default=list,
         help_text="List of fields in the dataset to be imported. Empty list if all fields will be imported.",
     )
+    import_filter = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Filter to be applied during import, e.g., 'temperature > 0'. If empty, no filter is applied.",
+    )
     aggregations = models.JSONField(
         default=list,
+        blank=True,
+        null=True,
         help_text="List of aggregations to be applied to the if data frequency is > daily. Format: {'group_by_field: 'timestamp', 'target_field_name': 'date', 'parameters': [precipitation: ['sum'], 'temperature': ['min', 'max', 'mean']]}",
     )
     active = models.BooleanField(
@@ -126,6 +138,8 @@ class Dataset(models.Model):
     )
     constants = models.JSONField(
         default=list,
+        blank=True,
+        null=True,
         help_text="List of constants to be added to the dataset. format: [{'field_name': 'station', 'type': 'int', 'value': 1}]. These constants will be added to each record during import.",
     )
     source_identifier = models.CharField(
@@ -157,12 +171,10 @@ class Dataset(models.Model):
         default=False,
         help_text="Indicates if time aggregation fields (year, month, dayinyear, season) should be added.",
     )
-    add_is_weekend_field = models.BooleanField(
-        default=False,
-        help_text="Indicates if a field to check if the date is a weekend should be added.",
-    )
     delete_records_with_missing_values = models.JSONField(
         default=list,
+        null=True,
+        blank=True,
         help_text="List of fields for which records with missing values should be deleted.",
     )
     last_import_date = models.DateTimeField(
@@ -174,6 +186,8 @@ class Dataset(models.Model):
     # format for calculated fields: [{'field_name': 'new_field', 'type': 'int', 'command': 'update script'}]
     calculated_fields = models.JSONField(
         default=list,
+        null=True,
+        blank=True,
         help_text="List of fields to be calculated by the commnds defined in post_import_commands.",
     )
 
@@ -209,7 +223,6 @@ class StoryTemplate(models.Model):
     class Meta:
         verbose_name = "Story Template"
         verbose_name_plural = "Story Templates"
-        
 
     def __str__(self):
         return self.title
@@ -299,7 +312,7 @@ class StoryTemplatePeriodOfInterestValues(models.Model):
     )
     title = models.CharField(
         max_length=255,
-        help_text="Title of the period of interest value, e.g., 'Monthly Average Temperature'."
+        help_text="Title of the period of interest value, e.g., 'Monthly Average Temperature'.",
     )
     sql_command = models.TextField(
         max_length=4000,

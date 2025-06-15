@@ -12,11 +12,24 @@ from .forms import StoryRatingForm
 from django.conf import settings
 from django.views.generic import TemplateView
 
+
 @never_cache
 def home_view(request):
-    story = Story.objects.order_by("-published_date").first()  # oder beliebige Logik
+    stories = list(Story.objects.order_by("published_date"))
+    if not stories:
+        return render(request, "home.html", {"story": None})
+
+    story = stories[0]  # Älteste zuerst; ggf. umdrehen je nach Sortierung
+    index = 0
+    next_story_id = stories[1].id if len(stories) > 1 else None
+
     story.content_html = markdown2.markdown(story.content, extras=["tables"])
-    return render(request, "home.html", {"story": story})
+
+    return render(request, "home.html", {
+        "story": story,
+        "prev_story_id": None,
+        "next_story_id": next_story_id,
+    })
 
 
 def templates_view(request):
@@ -26,7 +39,9 @@ def templates_view(request):
 
     if selected_template_id:
         selected_template = get_object_or_404(StoryTemplate, id=selected_template_id)
-        selected_template.description_html = markdown2.markdown(selected_template.description, extras=["tables"])
+        selected_template.description_html = markdown2.markdown(
+            selected_template.description, extras=["tables"]
+        )
 
     return render(
         request,
@@ -45,7 +60,9 @@ def stories_view(request):
 
     if selected_story_id:
         selected_story = get_object_or_404(Story, id=selected_story_id)
-        selected_story.content_html = markdown2.markdown(selected_story.content, extras=["tables"])
+        selected_story.content_html = markdown2.markdown(
+            selected_story.content, extras=["tables"]
+        )
 
     return render(
         request,
@@ -55,6 +72,7 @@ def stories_view(request):
             "selected_story": selected_story,
         },
     )
+
 
 @login_required
 def storytemplate_detail_view(request, pk):
@@ -68,6 +86,7 @@ def storytemplate_detail_view(request, pk):
             "back_url": back_url,
         },
     )
+
 
 @login_required
 def rate_story(request, story_id):
@@ -98,3 +117,29 @@ class AboutView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["app_info"] = settings.APP_INFO
         return context
+
+
+def view_story(request, story_id=None):
+    stories = list(Story.objects.order_by("published_date"))
+    if not stories:
+        return render(request, "home.html", {"story": None})
+
+    if story_id is None:
+        story = stories[0]  # Default to the first story
+    else:
+        story = get_object_or_404(Story, id=story_id)
+
+    index = stories.index(story)
+    prev_story_id = stories[index - 1].id if index > 0 else None
+    next_story_id = stories[index + 1].id if index < len(stories) - 1 else None
+
+    story.content_html = markdown2.markdown(story.content, extras=["tables"])
+    return render(
+        request,
+        "home.html",
+        {
+            "story": story,
+            "prev_story_id": prev_story_id,
+            "next_story_id": next_story_id,
+        },
+    )
