@@ -121,6 +121,16 @@ class Dataset(models.Model):
         default=list,
         help_text="List of fields in the dataset to be imported. Empty list if all fields will be imported.",
     )
+    import_month = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Month of the year when the dataset should be imported. If left empty, the dataset will be imported every month.",
+    )
+    import_day = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Day of the month when the dataset should be imported. If left empty, the dataset will be imported every day.",
+    )
     import_filter = models.TextField(
         blank=True,
         null=True,
@@ -203,6 +213,22 @@ class StoryTemplate(models.Model):
     active = models.BooleanField(
         default=True,
         help_text="Indicates if the story template is active. Only active templates will be used for generating stories.",
+    )
+    has_data_sql = models.TextField(
+        blank=True, null=True,
+        help_text="SQL command to check if there is data for a given date.",
+    )
+    run_year = models.IntegerField(
+        blank=True, null=True,
+        help_text="Run only in this specific year. Leave blank to run every year.",
+    )
+    run_month = models.IntegerField(
+        blank=True, null=True,
+        help_text="Run only in this specific month (1–12). Leave blank to run every month.",
+    )
+    run_day = models.IntegerField(
+        blank=True, null=True,
+        help_text="Run only on this specific day of the month (1–31). Leave blank to run every day",
     )
     title = models.CharField(max_length=255, help_text="Title of the story template.")
     description = models.TextField(

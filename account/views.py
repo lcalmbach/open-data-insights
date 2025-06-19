@@ -62,7 +62,6 @@ def register(request):
             domain = get_current_site(request).domain
             confirmation_link = reverse("account:confirm_email", kwargs={"uidb64": uid, "token": token})
             activate_url = f"http://{domain}{confirmation_link}"
-            print(activate_url)
             subject = "Confirm your email"
             message = render_to_string(
                 "account/email_confirmation.txt",
@@ -72,7 +71,7 @@ def register(request):
                 },
             )
 
-            send_mail(subject, message, "noreply@yourdomain.com", [user.email])
+            send_mail(subject, message, "lcalmbach@gmail.com", [user.email])
             messages.success(request, "Account created! Please check your email to confirm your address.")
             return redirect("home")
 

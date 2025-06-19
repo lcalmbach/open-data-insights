@@ -6,7 +6,8 @@ from .models import (
     StoryTemplatePeriodOfInterestValues,
     LookupCategory,
     LookupValue,
-    Dataset
+    Dataset,
+    StoryTemplateSubscription
 )
 
 
@@ -14,11 +15,14 @@ from .models import (
 class StoryAdmin(admin.ModelAdmin):
     list_display = (
         "title",
+        "template",
         "published_date",
-        "reference_period_start",
-        "reference_period_end",
     )
-    list_filter = ("published_date",)
+    sorted_by = (
+        "template",
+        "published_date",
+    )
+    list_filter = ("template",)
     search_fields = ("title",)
 
 
@@ -29,6 +33,7 @@ class StoryTemplateAdmin(admin.ModelAdmin):
         "title",
     )
     search_fields = ("title",)
+    list_filter = ["title"]  # shows a filter sidebar
 
 
 @admin.register(StoryTemplateContext)
@@ -53,6 +58,7 @@ class StoryTemplatePeriodOfInterestValuesAdmin(admin.ModelAdmin):
         "story_template",
         "sort_key",
     )
+    list_filter = ("story_template",)
 
 
 @admin.register(LookupCategory)
@@ -85,3 +91,17 @@ class DatasetAdmin(admin.ModelAdmin):
     sorted_by = (
         "name",
     )
+    search_fields = ["name"]  # shows a filter sidebar
+
+
+@admin.register(StoryTemplateSubscription)
+class StoryTemplateSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ("story_template", "user", "create_date")
+    sortable_by = (
+        "user", "story_template"
+    )
+    sorted_by = (
+        "user",
+    )
+    search_fields = ["user"]  # shows a filter sidebar
+    list_filter = ("user","story_template")

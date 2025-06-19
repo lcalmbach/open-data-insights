@@ -15,7 +15,7 @@ from django.views.generic import TemplateView
 
 @never_cache
 def home_view(request):
-    stories = list(Story.objects.order_by("published_date"))
+    stories = list(Story.objects.order_by("-published_date"))
     if not stories:
         return render(request, "home.html", {"story": None})
 
