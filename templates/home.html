@@ -4,38 +4,44 @@
 {% block title %}OGD Data Insights{% endblock %}
 
 {% block content %}
-<div class="splash-container text-center">
-    <img src="{% static 'reports/splash.png' %}" alt="Data Pipeline" class="splash-image">
-    <h1 class="headline">
-        <span class="strong-steelblue">O</span>pen
-        <span class="strong-steelblue">D</span>ata
-        <span class="strong-steelblue">I</span>nsight of the Day
-    </h1>
+<div class="d-flex justify-content-center mb-3">
+    <div style="max-width: 800px; width: 100%;" class="d-flex justify-content-between align-items-center">
+        <h1 class="headline">
+            <span class="strong-steelblue">O</span>pen
+            <span class="strong-steelblue">D</span>ata
+            <span class="strong-steelblue">I</span>nsight of the Day
+        </h1>
 
-    {% if story %}
-    <div class="d-flex justify-content-center align-items-center">
-        {% if prev_story_id %}
-        <a href="{% url 'view_story' prev_story_id %}" class="me-3 fs-3 arrow-link">⬅️</a>
-        {% endif %}
-
-        <div style="max-width: 800px; width: 100%;">
-            <div class="text-end mb-2">
-                <a href="{% url 'rate_story' story.id %}">Rate this insight ⭐️</a>
-            </div>
-
-            <div class="card mt-2">
-                <div class="card-body text-start">
-                    <h5 class="card-title">{{ story.title }}</h5>
-                    <p class="card-text">{{ story.content_html|safe }}</p>
-                    <p class="text-muted">Published on {{ story.published_date|date:"F j, Y" }}</p>
-                </div>
+        <div>
+            <div>
+                {% if prev_story_id %}
+                <a href="{% url 'view_story' prev_story_id %}" title="Previous Insight"
+                    class="me-3 fs-3 arrow-link">⬅️</a>
+                {% endif %}
+                {% if next_story_id %}
+                <a href="{% url 'view_story' next_story_id %}" title="Next Insight" class="ms-3 fs-3 arrow-link">➡️</a>
+                {% endif %}
             </div>
         </div>
-
-        {% if next_story_id %}
-        <a href="{% url 'view_story' next_story_id %}" class="ms-3 fs-3 arrow-link">➡️</a>
-        {% endif %}
     </div>
-    {% endif %}
+</div>
+
+
+{% if story %}
+<div class="d-flex justify-content-center align-items-center">
+    <div style="max-width: 800px; width: 100%;">
+        <div class="text-end mb-2">
+            <a href="{% url 'rate_story' story.id %}">Rate this insight ⭐️</a>
+        </div>
+
+        <div class="card mt-2">
+            <div class="card-body text-start">
+                <p class="card-text">{{ story.content_html|safe }}</p>
+                <p class="text-muted">Published on {{ story.published_date|date:"F j, Y" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 </div>
 {% endblock %}
