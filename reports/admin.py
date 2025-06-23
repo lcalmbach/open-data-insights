@@ -7,13 +7,15 @@ from .models import (
     LookupCategory,
     LookupValue,
     Dataset,
-    StoryTemplateSubscription
+    StoryTemplateSubscription,
+    StoryLog
 )
 
 
 @admin.register(Story)
 class StoryAdmin(admin.ModelAdmin):
     list_display = (
+        "id",
         "title",
         "template",
         "published_date",
@@ -23,7 +25,7 @@ class StoryAdmin(admin.ModelAdmin):
         "published_date",
     )
     list_filter = ("template",)
-    search_fields = ("title",)
+    search_fields = ("id", "title",)
 
 
 @admin.register(StoryTemplate)
@@ -105,3 +107,10 @@ class StoryTemplateSubscriptionAdmin(admin.ModelAdmin):
     )
     search_fields = ["user"]  # shows a filter sidebar
     list_filter = ("user","story_template")
+
+@admin.register(StoryLog)
+class StoryLogAdmin(admin.ModelAdmin):
+    list_display = ("story_template", "story", "publish_date", "reference_period_start", "reference_period_end")
+    sortable_by = ("story_template", "publish_date")
+    search_fields = ("story_template__title", "story__title")
+

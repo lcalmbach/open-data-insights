@@ -12,7 +12,6 @@ from .forms import StoryRatingForm
 from django.conf import settings
 from django.views.generic import TemplateView
 
-
 @never_cache
 def home_view(request):
     stories = list(Story.objects.order_by("-published_date"))
@@ -22,7 +21,6 @@ def home_view(request):
     story = stories[0]  # Älteste zuerst; ggf. umdrehen je nach Sortierung
     index = 0
     next_story_id = stories[1].id if len(stories) > 1 else None
-
     story.content_html = markdown2.markdown(story.content, extras=["tables"])
 
     return render(request, "home.html", {
@@ -91,7 +89,6 @@ def storytemplate_detail_view(request, pk):
 @login_required
 def rate_story(request, story_id):
     story = get_object_or_404(Story, pk=story_id)
-
     if request.method == "POST":
         form = StoryRatingForm(request.POST)
         rating = request.POST.get("rating")
@@ -128,7 +125,6 @@ def view_story(request, story_id=None):
         story = stories[0]  # Default to the first story
     else:
         story = get_object_or_404(Story, id=story_id)
-
     index = stories.index(story)
     prev_story_id = stories[index - 1].id if index > 0 else None
     next_story_id = stories[index + 1].id if index < len(stories) - 1 else None

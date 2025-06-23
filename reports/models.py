@@ -218,17 +218,13 @@ class StoryTemplate(models.Model):
         blank=True, null=True,
         help_text="SQL command to check if there is data for a given date.",
     )
-    run_year = models.IntegerField(
-        blank=True, null=True,
-        help_text="Run only in this specific year. Leave blank to run every year.",
+    publish_conditions = models.TextField(
+        help_text="SQL command to check if the story should be published. If this command returns no results, the story will not be published.",
     )
-    run_month = models.IntegerField(
-        blank=True, null=True,
-        help_text="Run only in this specific month (1–12). Leave blank to run every month.",
-    )
-    run_day = models.IntegerField(
-        blank=True, null=True,
-        help_text="Run only on this specific day of the month (1–31). Leave blank to run every day",
+    most_recent_day_sql = models.TextField(
+        blank=True,
+        null=True,
+        help_text="SQL command to get the most recent day for which data is available. This is used to determine the reference period for the story.",
     )
     title = models.CharField(max_length=255, help_text="Title of the story template.")
     description = models.TextField(
@@ -252,32 +248,6 @@ class StoryTemplate(models.Model):
 
     def __str__(self):
         return self.title
-
-
-class StoryTemplateParameter(models.Model):
-    story_template = models.ForeignKey(
-        StoryTemplate,
-        on_delete=models.CASCADE,
-        related_name="parameters",
-        help_text="parameters used in the story template, e.g., 'max_temperature_degc', 'precipitation_mm', etc.",
-    )
-    name = models.CharField(
-        max_length=255,
-        help_text="Name of the parameter, e.g., 'max_temperature_degc', 'precipitation_mm', etc.",
-    )
-    db_field_name = models.CharField(
-        max_length=255,
-        help_text="Database field name for the parameter, e.g., 'max_temperature', 'precipitation', etc.",
-    )
-    unit = models.CharField(
-        max_length=50, help_text="Unit of the parameter, e.g., '°C', 'mm', etc."
-    )
-    description = models.TextField(
-        blank=True, help_text="Description of the parameter."
-    )
-
-    def __str__(self):
-        return self.name
 
 
 class StoryTemplateContext(models.Model):
@@ -395,6 +365,39 @@ class Story(models.Model):
 
     def __str__(self):
         return f"Report {self.title} - {self.published_date}"
+
+
+class StoryLog(models.Model):
+    story_template = models.ForeignKey(
+        StoryTemplate,
+        on_delete=models.CASCADE,
+        related_name="story_logs",
+        help_text="The story template this log belongs to.",
+    )
+    story = models.ForeignKey(
+        Story,
+        on_delete=models.CASCADE,
+        related_name="story_logs",
+        help_text="The story this log belongs to.",
+    )
+    publish_date = models.DateField(
+        help_text="Date for which the log is created. Defaults to yesterday.",
+    )
+    reference_period_start = models.DateField(
+        default=default_yesterday,
+        help_text="Start date of the reference period for the log.",
+    )
+    reference_period_end = models.DateField(
+        default=default_yesterday,
+        help_text="End date of the reference period for the log.",
+    )   
+
+    class Meta:
+        verbose_name = "Story Log"
+        verbose_name_plural = "Story Logs"
+
+    def __str__(self):
+        return f"Report {self.story_template.title} - {self.reference_period_start}"
 
 
 class StoryRating(models.Model):

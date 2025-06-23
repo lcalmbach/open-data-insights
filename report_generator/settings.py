@@ -145,11 +145,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
-
-USE_I18N = True
-
+TIME_ZONE = 'Europe/Zurich'
 USE_TZ = True
+USE_I18N = True
 
 
 STATIC_URL = '/static/'
@@ -179,8 +177,10 @@ MARKDOWNIFY = {
 }
 
 APP_INFO = {
-    "version": "0.0.3",
+    "version": "0.0.4",
+    "version_date": "2025-06-23",
     "author_name": "Lukas Calmbach",
     "author_email": "lcalmbach@gmail.com",
     "repo_url": "https://github.com/lcalmbach/open-data-insights",
 }
+
