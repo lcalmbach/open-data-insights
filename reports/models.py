@@ -357,6 +357,13 @@ class Story(models.Model):
     )
     content = models.TextField(help_text="Content of the story.", blank=True, null=True)
 
+    @property
+    def reference_period(self):
+        if self.reference_period_start == self.reference_period_end:
+            return self.reference_period_start.strftime('%Y-%m-%d')
+        else:
+            return f"{ self.reference_period_start.strftime('%Y-%m-%d') } – { self.reference_period_end.strftime('%Y-%m-%d') }"
+
     def reference_month(self):
         return self.reference_period_start.strftime("%B %Y")
 

@@ -4,29 +4,37 @@
 {% block title %}OGD Data Insights{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-center mb-3">
-    <div style="max-width: 800px; width: 100%;" class="d-flex justify-content-between align-items-center">
-        <h1 class="headline">
-            <span class="strong-steelblue">O</span>pen
-            <span class="strong-steelblue">D</span>ata
-            <span class="strong-steelblue">I</span>nsight of the Day
-        </h1>
 
-        <div>
-            <div>
-                {% if prev_story_id %}
-                <a href="{% url 'view_story' prev_story_id %}" title="Previous Insight"
-                    class="me-3 fs-3 arrow-link">⬅️</a>
-                {% endif %}
-                {% if next_story_id %}
-                <a href="{% url 'view_story' next_story_id %}" title="Next Insight" class="ms-3 fs-3 arrow-link">➡️</a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+<!-- Splash image centered -->
+<div class="text-center mb-4">
+    <img src="{% static 'reports/splash.png' %}" alt="Splash image" class="img-fluid"
+        style="max-width: 600px; height: auto;">
 </div>
 
+<hr class="mb-4">
 
+<!-- Headline and description -->
+<div class="text-center mb-4" style="max-width: 800px; margin: 0 auto;">
+    <h1 class="headline">
+        <span class="strong-steelblue">O</span>pen
+        <span class="strong-steelblue">D</span>ata
+        <span class="strong-steelblue">I</span>nsight of the Day
+    </h1>
+    <p class="lead text-muted" style="font-size: 1.05rem;">
+        Data Insights are generated daily from a variety of Open Data sources based on defined conditions — such as the detection of historically extreme values. Subscribe to insights from your preferred datasets and never miss a noteworthy event in your data.
+    </p>
+    <br>
+    {% if prev_story_id %}
+    <a href="{% url 'view_story' prev_story_id %}" title="Previous Insight" class="btn btn-outline-secondary btn-sm">←
+        Previous</a>
+    {% endif %}
+    {% if next_story_id %}
+    <a href="{% url 'view_story' next_story_id %}" title="Next Insight"
+        class="btn btn-outline-secondary btn-sm ms-2">Next →</a>
+    {% endif %}
+</div>
+
+<!-- Story block -->
 {% if story %}
 <div class="d-flex justify-content-center align-items-center">
     <div style="max-width: 800px; width: 100%;">
@@ -34,14 +42,32 @@
             <a href="{% url 'rate_story' story.id %}">Rate this insight ⭐️</a>
         </div>
 
-        <div class="card mt-2">
+        <div class="card mt-2 shadow-sm">
             <div class="card-body text-start">
-                <p class="card-text">{{ story.content_html|safe }}</p>
-                <p class="text-muted">Published on {{ story.published_date|date:"F j, Y" }}</p>
+                <h5 class="card-title fw-bold">
+                    {{ story.title }}
+                    <span class="badge bg-secondary float-end">{{ story.published_date|date:"Y-m-d" }}</span>
+                </h5>
+                <p class="card-text mt-3">{{ story.content_html|safe }}</p>
             </div>
         </div>
+
+        <!-- Call to action -->
+        <div class="text-center mt-4">
+            <p class="text-muted">Want daily insights like this? <a href="{% url 'account:register' %}">Subscribe
+                    now</a>.</p>
+        </div>
     </div>
+
+</div>
+{% if not user.is_authenticated %}
+<div class="text-center mt-4">
+    <p class="text-muted">
+        Want daily insights like this?
+        <a href="{% url 'account:register' %}">Subscribe now</a>.
+    </p>
 </div>
 {% endif %}
-</div>
+{% endif %}
+
 {% endblock %}
