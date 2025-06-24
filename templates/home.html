@@ -21,7 +21,9 @@
         <span class="strong-steelblue">I</span>nsight of the Day
     </h1>
     <p class="lead text-muted" style="font-size: 1.05rem;">
-        Data Insights are generated daily from a variety of Open Data sources based on defined conditions — such as the detection of historically extreme values. Subscribe to insights from your preferred datasets and never miss a noteworthy event in your data.
+        Data Insights are generated daily from a variety of Open Data sources based on defined conditions — such as the
+        detection of historically extreme values. Subscribe to insights from your preferred datasets and never miss a
+        noteworthy event in your data.
     </p>
     <br>
     {% if prev_story_id %}
@@ -52,22 +54,25 @@
             </div>
         </div>
 
-        <!-- Call to action -->
-        <div class="text-center mt-4">
-            <p class="text-muted">Want daily insights like this? <a href="{% url 'account:register' %}">Subscribe
-                    now</a>.</p>
-        </div>
+        {% if not user.is_authenticated %}
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    Want daily insights like this?
+                    <a href="{% url 'account:register' %}">Register now</a>.
+                </p>
+            </div>
+        {% else %}
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    Want to receive data insights by mail?
+                    <a href="{% url 'account:profile' %}">Subscribe</a>.
+                </p>
+            </div>
+        {% endif %}
     </div>
 
 </div>
-{% if not user.is_authenticated %}
-<div class="text-center mt-4">
-    <p class="text-muted">
-        Want daily insights like this?
-        <a href="{% url 'account:register' %}">Subscribe now</a>.
-    </p>
-</div>
-{% endif %}
+
 {% endif %}
 
 {% endblock %}
