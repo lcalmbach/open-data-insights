@@ -2,13 +2,37 @@
 {% block title %}Explore Stories{% endblock %}
 
 {% block content %}
+<!-- Filter Form -->
+<form method="get" class="row g-3 mb-4">
+  <div class="col-md-4">
+    <label for="template" class="form-label">Search</label>
+    <select class="form-select" id="template" name="template">
+      <option value="">All templates</option>
+      {% for template in templates %}
+        <option value="{{ template.id }}" {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
+          {{ template.title }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-6">
+    <label for="search" class="form-label">&nbsp;</label>
+    <input type="text" class="form-control" id="search" name="search"
+           value="{{ request.GET.search }}" placeholder="Title or description...">
+  </div>
+  <div class="col-md-2 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary w-100">Filter</button>
+  </div>
+</form>
+<hr>
+<!-- Main Content -->
 <div class="row">
-  <!-- Linke Seite: Story-Liste -->
+  <!-- Left: Story List -->
   <div class="col-md-4">
     <h4>Available Stories</h4>
     <ul class="list-group">
       {% for story in stories %}
-        <a href="?story={{ story.id }}"
+        <a href="?story={{ story.id }}&template={{ request.GET.template }}&search={{ request.GET.search }}"
            class="list-group-item list-group-item-action {% if story.id == selected_story.id %}active{% endif %}">
           {{ story.title }}<br>
           <small class="text-muted">{{ story.published_date|date:"Y-m-d" }}</small>
@@ -19,7 +43,7 @@
     </ul>
   </div>
 
-  <!-- Rechte Seite: Details -->
+  <!-- Right: Story Details -->
   <div class="col-md-8">
     {% if selected_story %}
       <h3>{{ selected_story.title }}</h3>

@@ -245,6 +245,7 @@ class StoryTemplate(models.Model):
     class Meta:
         verbose_name = "Story Template"
         verbose_name_plural = "Story Templates"
+        ordering = ['title']  # or any other field
 
     def __str__(self):
         return self.title

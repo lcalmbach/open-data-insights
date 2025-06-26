@@ -11,6 +11,7 @@ from .models import Story, StoryRating
 from .forms import StoryRatingForm
 from django.conf import settings
 from django.views.generic import TemplateView
+from django.db.models import Q
 
 @never_cache
 def home_view(request):
@@ -52,24 +53,36 @@ def templates_view(request):
 
 
 def stories_view(request):
-    stories = Story.objects.order_by("-published_date")
-    selected_story_id = request.GET.get("story")
-    selected_story = None
+     # Fetch all templates
+    templates = StoryTemplate.objects.order_by("title")
 
-    if selected_story_id:
-        selected_story = get_object_or_404(Story, id=selected_story_id)
-        selected_story.content_html = markdown2.markdown(
-            selected_story.content, extras=["tables"]
+    # Base queryset
+    stories = Story.objects.select_related('template').order_by("-published_date")
+
+    # Filter by selected template
+    template_id = request.GET.get('template')
+    if template_id:
+        stories = stories.filter(template_id=template_id)
+
+    # Filter by search query
+    search = request.GET.get('search')
+    if search:
+        stories = stories.filter(
+            Q(title__icontains=search) | Q(content__icontains=search)
         )
 
-    return render(
-        request,
-        "reports/stories_list.html",
-        {
-            "stories": stories,
-            "selected_story": selected_story,
-        },
-    )
+    # Selected story (for detail view)
+    story_id = request.GET.get('story')
+    if not stories.filter(id=story_id).exists():
+        story_id = stories.first().id if stories else None
+    selected_story = stories.filter(id=story_id).first() if story_id else None
+    if selected_story:
+        selected_story.content_html = markdown2.markdown(selected_story.content, extras=["tables"])
+    return render(request, 'reports/stories_list.html', {
+        'templates': templates,
+        'stories': stories,
+        'selected_story': selected_story,
+    })
 
 
 @login_required
@@ -117,7 +130,7 @@ class AboutView(TemplateView):
 
 
 def view_story(request, story_id=None):
-    stories = list(Story.objects.order_by("published_date"))
+    stories = list(Story.objects.order_by("-published_date"))
     if not stories:
         return render(request, "home.html", {"story": None})
 

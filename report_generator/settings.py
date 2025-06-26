@@ -177,8 +177,8 @@ MARKDOWNIFY = {
 }
 
 APP_INFO = {
-    "version": "0.0.5",
-    "version_date": "2025-06-24",
+    "version": "0.0.6",
+    "version_date": "2025-06-26",
     "author_name": "Lukas Calmbach",
     "author_email": "lcalmbach@gmail.com",
     "repo_url": "https://github.com/lcalmbach/open-data-insights",
