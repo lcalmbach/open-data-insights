@@ -166,7 +166,7 @@ class Dataset(models.Model):
         max_length=255,
         blank=True,
         null=True,
-        help_text="Field in the database that contains the timestamp.",
+        help_text="Field in the database that contordering = ['title']  # or any other fieldains the timestamp.",
     )
     record_identifier_field = models.CharField(
         max_length=255,
@@ -204,6 +204,7 @@ class Dataset(models.Model):
     class Meta:
         verbose_name = "Dataset"
         verbose_name_plural = "Datasets"
+        ordering = ['name']  # or any other field
 
     def __str__(self):
         return self.name

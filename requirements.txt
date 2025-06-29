@@ -14,3 +14,7 @@ whitenoise
 python-decouple
 markdown2
 django-markdownify
+pyarrow
+requests
+openai
+sqlalchemy

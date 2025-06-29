@@ -46,10 +46,6 @@
 
         <div class="card mt-2 shadow-sm">
             <div class="card-body text-start">
-                <h5 class="card-title fw-bold">
-                    {{ story.title }}
-                    <span class="badge bg-secondary float-end">{{ story.published_date|date:"Y-m-d" }}</span>
-                </h5>
                 <p class="card-text mt-3">{{ story.content_html|safe }}</p>
             </div>
         </div>
