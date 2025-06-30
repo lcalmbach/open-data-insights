@@ -164,8 +164,6 @@ class Story:
         )
         
         self.season, self.season_year = self.get_season()
-        
-        
         self.has_data_sql = self.template.get("has_data_sql", None)
         self.publish_conditions = self.template.get("publish_conditions", {})
         self.content = None  # will be filled when the story is generated
@@ -301,7 +299,9 @@ class Story:
             return f"{self.template['title']} ({self.season_name()} {self.reference_period_start.year})"
         elif self.template["reference_period_id"] == 38:  # yearly
             return f"{self.template['title']} ({self.reference_period_start.year})"
-
+        else:
+            return self.template['title']
+            
     def get_reference_values(self) -> str:
         """
         Retrieves the reference values for the story from the database.
@@ -362,7 +362,7 @@ class Story:
         Returns:
             bool: True if the story is due, False otherwise.
         """
-        if self.template["reference_period_id"] == 35:  # daily
+        if self.template["reference_period_id"] in (35, 56):  # daily, irregular
             period_start = self.most_recent_day
             period_end = self.most_recent_day
         elif self.template["reference_period_id"] == 36:  # monthly

@@ -1,7 +1,7 @@
 import json
 import logging
-from .utils import setup_logger
-from .data_news import Dataset, Story
+from daily_tasks.utils import setup_logger
+from daily_tasks.data_news import Dataset, Story
 from datetime import date, timedelta
 import sys
 import psycopg2

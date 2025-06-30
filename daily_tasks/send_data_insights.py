@@ -7,7 +7,7 @@ import markdown
 import pandas as pd
 from dotenv import load_dotenv
 from decouple import config
-from .utils import setup_logger
+from daily_tasks.utils import setup_logger
 
 load_dotenv()
 logger = setup_logger(name=__name__, log_file="logs/mail.log")

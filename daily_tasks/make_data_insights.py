@@ -1,7 +1,7 @@
 import json
 import logging
-from .utils import setup_logger
-from .data_news import Dataset, Story
+from daily_tasks.utils import setup_logger
+from daily_tasks.data_news import Dataset, Story
 from datetime import date, timedelta
 import sys
 import psycopg2
@@ -68,4 +68,4 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    main(story_id=args.id, run_date=args.date, force=args.force)
+    run(story_id=args.id, run_date=args.date, force=args.force)
