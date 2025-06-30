@@ -176,6 +176,7 @@ class Story:
         self.context_values = {}
         self.context_values["context_data"] = self.get_context_data()
         self.title = self.get_title()
+        self.post_publish_command = self.template.get("post_publish_command", None) 
 
     def is_published(self) -> Optional[datetime]:
         sql = """SELECT count(*) as result 
@@ -516,6 +517,7 @@ class Story:
             }
             self.dbclient.run_action_query(cmd, params)
             cmd = "insert into report_generator.reports_story (template_id, title, published_date, reference_period_start, reference_period_end, reference_values, ai_model) values (:template_id, :title, :published_date, :reference_period_start, :reference_period_end, :reference_values, :ai_model)"
+            print(self.measured_values)
             params = {
                 "template_id": int(self.template["id"]),
                 "published_date": self.published_date,
@@ -544,6 +546,8 @@ class Story:
         logger.info(f"response received from OpenAI API")
         save_story_record()
         save_log_record()
+        if self.post_publish_command:
+            self.dbclient.run_action_query(self.post_publish_command)
 
     def generate_report_text(self):
         """

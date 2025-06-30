@@ -242,6 +242,12 @@ class StoryTemplate(models.Model):
         default=0.3,
         help_text="Temperature parameter for the AI model. Controls the randomness of the output.",
     )
+    post_publish_command = models.TextField(
+        blank=True,
+        null=True,
+        help_text="SQL command to be executed after the story is published. This can be used to update the story template or perform other actions.",
+    )
+
 
     class Meta:
         verbose_name = "Story Template"
@@ -285,19 +291,6 @@ class StoryTemplateContext(models.Model):
         null=True,
         blank=True,
         help_text="command holding the condition on whether this context is created. e.g. if reference day is a heat day, check on how many heat days there were in the current month or season.",
-    )
-    follow_up_command = models.TextField(
-        null=True,
-        blank=True,
-        help_text="command holding the condition on whether follow up contexts are executed. e.g. if reference day is a heat day, check on how many heat days there were in the current month or season.",
-    )
-    predecessor = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="contexts",
-        help_text="master context for this context, in case follow_up_condition is met.",
     )
 
 
