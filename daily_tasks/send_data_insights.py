@@ -8,6 +8,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from decouple import config
 from daily_tasks.utils import setup_logger
+import time
 
 load_dotenv()
 logger = setup_logger(name=__name__, log_file="logs/mail.log")
@@ -58,7 +59,6 @@ def run():
         conn,
         params=(today,),
     )
-
     if df.empty:
         logger.info(f"no insights found for today. {today}")
     else:
@@ -69,13 +69,16 @@ def run():
                 row["story"], extensions=["markdown.extensions.tables"]
             )
             to_email = row["email"]
-
-            send_mail(
-                subject=subject,
-                html_body=html_body,
-                from_email="lcalmbach@gmail.com",
-                to_email=to_email,
-            )
+            try:
+                send_mail(
+                    subject=subject,
+                    html_body=html_body,
+                    from_email="lcalmbach@gmail.com",
+                    to_email=to_email,
+                )
+            except Exception as e:
+                logger.error(f"Error sending email to {to_email}: {e}")
+            time.sleep(2)
         cmd = "update report_generator.reports_story set is_sent = true"
         with conn.cursor() as cur:
             cur.execute(cmd)
