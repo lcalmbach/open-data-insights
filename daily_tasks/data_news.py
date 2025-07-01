@@ -32,6 +32,7 @@ cmd_last_postgres_record = (
     """SELECT COUNT(*) as cnt, MAX({}) as last_record_timestamp FROM opendata."{}" """
 )
 files_path = Path("./files")
+files_path.mkdir(parents=True, exist_ok=True)
 url_azure_blob = "https://{}/api/explore/v2.1/catalog/datasets/{}/exports/azure_blob?lang=de&timezone=Europe%2FBerlin&use_labels=false&delimiter=%3B"
 report_config_file = "./reports_config.json"
 logger = setup_logger(name=__name__, log_file="logs/sync.log")
@@ -665,7 +666,6 @@ class Dataset:
             "delimiter": ";",
         }
         local_csv_file = str(filename).replace(".parquet", ".csv")
-        Path(local_csv_file).parent.mkdir(parents=True, exist_ok=True)
         
         if where_clause:
             params["where"] = where_clause

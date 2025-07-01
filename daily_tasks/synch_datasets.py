@@ -1,6 +1,6 @@
 import json
 import logging
-from daily_tasks.utils import setup_logger
+from daily_tasks.utils import setup_logger, delete_all_files_in_folder
 from daily_tasks.data_news import Dataset, Story
 from datetime import date, timedelta
 import sys
@@ -8,6 +8,8 @@ import psycopg2
 import pandas as pd
 from decouple import config
 import argparse
+from pathlib import Path
+
 
 logger = setup_logger(name=__name__, log_file="logs/sync.log")
 conn = psycopg2.connect(
@@ -40,6 +42,8 @@ def run(dataset_id=None):
             dataset = Dataset(row)
             dataset.synchronize()
     logger.info("Synchronisation was completed successfully.")
+    folder = Path("./files")
+    delete_all_files_in_folder(folder)
 
 
 if __name__ == "__main__":

@@ -71,3 +71,5 @@
 2025-07-01 06:56:00,350 - INFO - Found 1 stories to send.
 2025-07-01 06:56:01,302 - INFO - Email sent to lcalmbach@gmail.com
 2025-07-01 06:56:01,303 - INFO - Updated all records to is_sent = true.
+2025-07-01 18:26:45,773 - INFO - Starting sending mails...
+2025-07-01 18:26:45,779 - INFO - no insights found for today. 2025-07-01
