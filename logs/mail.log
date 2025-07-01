@@ -53,3 +53,21 @@
 2025-06-29 22:59:05,602 - INFO - Email sent to lcalmbach@gmail.com
 2025-06-29 22:59:06,297 - INFO - Email sent to lcalmbach@gmail.com
 2025-06-29 22:59:07,121 - INFO - Email sent to lcalmbach@gmail.com
+2025-06-30 17:10:49,785 - INFO - Starting sending mails...
+2025-06-30 17:10:49,788 - INFO - Found 2 stories to send.
+2025-06-30 17:10:50,934 - INFO - Email sent to lcalmbach@gmail.com
+2025-06-30 17:10:51,627 - INFO - Email sent to lcalmbach@gmail.com
+2025-06-30 17:42:32,931 - INFO - Starting sending mails...
+2025-06-30 17:42:32,932 - INFO - Found 2 stories to send.
+2025-06-30 17:42:34,026 - INFO - Email sent to lcalmbach@gmail.com
+2025-06-30 17:42:34,780 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-01 06:46:09,257 - INFO - Starting sending mails...
+2025-07-01 06:46:09,259 - INFO - Found 3 stories to send.
+2025-07-01 06:49:52,106 - INFO - Starting sending mails...
+2025-07-01 06:49:52,166 - INFO - Found 3 stories to send.
+2025-07-01 06:55:43,292 - INFO - Starting sending mails...
+2025-07-01 06:55:43,352 - INFO - Found 1 stories to send.
+2025-07-01 06:56:00,289 - INFO - Starting sending mails...
+2025-07-01 06:56:00,350 - INFO - Found 1 stories to send.
+2025-07-01 06:56:01,302 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-01 06:56:01,303 - INFO - Updated all records to is_sent = true.

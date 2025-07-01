@@ -352,6 +352,11 @@ class Story(models.Model):
     )
     content = models.TextField(help_text="Content of the story.", blank=True, null=True)
 
+    is_sent = models.BooleanField(
+        default=False,
+        help_text="Indicates if the story has been sent to the user.",
+    )
+    
     @property
     def reference_period(self):
         if self.reference_period_start == self.reference_period_end:

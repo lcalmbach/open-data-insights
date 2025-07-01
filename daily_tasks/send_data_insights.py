@@ -52,18 +52,15 @@ def run():
     today = date.today()
 
     # 2. View in DataFrame laden
+    cmd = "SELECT * FROM report_generator.v_insights2send"
     df = pd.read_sql_query(
-        """
-        SELECT *
-        FROM report_generator.v_template_subscriptions
-        WHERE published_date = %s
-    """,
+        cmd,
         conn,
         params=(today,),
     )
 
     if df.empty:
-        logger.info("Keine Storys für heute.")
+        logger.info(f"no insights found for today. {today}")
     else:
         logger.info(f"Found {len(df)} stories to send.")
         for _, row in df.iterrows():
@@ -79,6 +76,11 @@ def run():
                 from_email="lcalmbach@gmail.com",
                 to_email=to_email,
             )
+        cmd = "update report_generator.reports_story set is_sent = true"
+        with conn.cursor() as cur:
+            cur.execute(cmd)
+            conn.commit()
+        logger.info("Updated all records to is_sent = true.")
     conn.close()
 
 
