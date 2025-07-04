@@ -221,6 +221,8 @@ class StoryTemplate(models.Model):
     )
     publish_conditions = models.TextField(
         help_text="SQL command to check if the story should be published. If this command returns no results, the story will not be published.",
+        blank=True,
+        null=True,
     )
     most_recent_day_sql = models.TextField(
         blank=True,
@@ -247,7 +249,6 @@ class StoryTemplate(models.Model):
         null=True,
         help_text="SQL command to be executed after the story is published. This can be used to update the story template or perform other actions.",
     )
-
 
     class Meta:
         verbose_name = "Story Template"

@@ -3496,3 +3496,1353 @@
 2025-07-01 18:26:45,759 - INFO - Generating data insight: Metadata on Published OGD Datasets Basel-Stadt
 2025-07-01 18:26:45,773 - INFO - No data available or story 'Metadata on Published OGD Datasets Basel-Stadt' is not due for generation on 2025-07-01.
 2025-07-01 18:26:45,773 - INFO - All data insights have been created.
+2025-07-03 07:29:32,731 - INFO - Starting data synchronisation...
+2025-07-03 07:29:32,732 - INFO - Synchronizing: Virus Wastewater Monitoring
+2025-07-03 07:29:33,100 - INFO - Starting import for 100302
+2025-07-03 07:29:33,122 - INFO - New data available in ODS. Last record date: 2025-06-30 00:00:00+00:00
+2025-07-03 07:29:33,386 - INFO - Downloaded 43 records from ODS.
+2025-07-03 07:29:33,394 - INFO - Deleting records with missing values in fields: ['sample_ba_nr']
+2025-07-03 07:29:33,394 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:29:33,419 - INFO - 0 records were read from files/100302_agg.parquet.
+2025-07-03 07:29:33,419 - INFO - data was uploaded to Table ds_100302 successfully.
+2025-07-03 07:29:33,420 - INFO - 0 records added to target database table ds_100302.
+2025-07-03 07:29:33,420 - INFO - Synchronisation for 100302 completed in 0.32 seconds.
+2025-07-03 07:29:33,420 - INFO - Synchronizing: Weather Data at NBCN Station Binningen
+2025-07-03 07:29:33,832 - INFO - Starting import for 100254
+2025-07-03 07:29:33,873 - INFO - New data available in ODS. Last record date: 2025-07-01 00:00:00+00:00
+2025-07-03 07:29:34,171 - INFO - Downloaded 2 records from ODS.
+2025-07-03 07:29:34,172 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:29:34,187 - INFO - 2 records were read from files/100254_agg.parquet.
+2025-07-03 07:29:34,192 - INFO - data was uploaded to Table ds_100254 successfully.
+2025-07-03 07:29:34,192 - INFO - 2 records added to target database table ds_100254.
+2025-07-03 07:29:34,268 - INFO - Post-import command executed: UPDATE opendata.ds_100254 SET is_frost_day = (tre200dn <= 0)::int
+2025-07-03 07:29:34,326 - INFO - Post-import command executed: UPDATE opendata.ds_100254 SET is_ice_day = (tre200dx <= 0)::int
+2025-07-03 07:29:34,383 - INFO - Post-import command executed: UPDATE opendata.ds_100254 SET is_summer_day = (tre200dx >= 25)::int
+2025-07-03 07:29:34,438 - INFO - Post-import command executed: UPDATE opendata.ds_100254 SET is_hot_day = (tre200dx >= 30)::int
+2025-07-03 07:29:34,495 - INFO - Post-import command executed: UPDATE opendata.ds_100254 SET is_tropical_night = (tre200dn >= 25)::int
+2025-07-03 07:29:34,495 - INFO - Synchronisation for 100254 completed in 0.66 seconds.
+2025-07-03 07:29:34,495 - INFO - Synchronizing: Air Quality at NCBN station Binningen
+2025-07-03 07:29:34,866 - INFO - Starting import for 100051
+2025-07-03 07:29:34,882 - INFO - New data available in ODS. Last record date: 2025-07-03 23:00:00+00:00
+2025-07-03 07:29:35,108 - INFO - Downloaded 24 records from ODS.
+2025-07-03 07:29:35,110 - INFO - Numbr of records before time stamp coercion: 24
+2025-07-03 07:29:35,111 - INFO - Number of records after time stamp coercion: 24
+2025-07-03 07:29:35,126 - INFO - number of records: 1 after aggregation.
+2025-07-03 07:29:35,126 - INFO - Deleting records with missing values in fields: ['max_o3_ug_m3']
+2025-07-03 07:29:35,126 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:29:35,131 - INFO - 1 records were read from files/100051_agg.parquet.
+2025-07-03 07:29:35,135 - INFO - data was uploaded to Table ds_100051 successfully.
+2025-07-03 07:29:35,135 - INFO - 1 records added to target database table ds_100051.
+2025-07-03 07:29:35,135 - INFO - Synchronisation for 100051 completed in 0.27 seconds.
+2025-07-03 07:29:35,135 - INFO - Synchronizing: Rhine river discharge and water level
+2025-07-03 07:29:35,587 - INFO - Starting import for 100089
+2025-07-03 07:29:35,602 - INFO - New data available in ODS. Last record date: 2025-07-03 05:10:00+00:00
+2025-07-03 07:29:36,770 - INFO - Downloaded 288 records from ODS.
+2025-07-03 07:29:36,772 - INFO - Numbr of records before time stamp coercion: 288
+2025-07-03 07:29:36,772 - INFO - Number of records after time stamp coercion: 288
+2025-07-03 07:29:36,775 - INFO - number of records: 1 after aggregation.
+2025-07-03 07:29:36,775 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:29:36,779 - INFO - 1 records were read from files/100089_agg.parquet.
+2025-07-03 07:29:36,782 - INFO - data was uploaded to Table ds_100089 successfully.
+2025-07-03 07:29:36,782 - INFO - 1 records added to target database table ds_100089.
+2025-07-03 07:29:36,782 - INFO - Synchronisation for 100089 completed in 1.20 seconds.
+2025-07-03 07:29:36,783 - INFO - Synchronizing: Air traffic at airport Basel/Mulhouse
+2025-07-03 07:29:37,880 - INFO - Starting import for 100078
+2025-07-03 07:29:37,898 - INFO - No new data for dataset ds_100078 was found.
+2025-07-03 07:29:37,898 - INFO - Synchronisation for 100078 completed in 0.02 seconds.
+2025-07-03 07:29:37,898 - INFO - Synchronizing: Dog population in Basel by breed
+2025-07-03 07:29:38,193 - INFO - Starting import for 100444
+2025-07-03 07:29:38,193 - INFO - Synchronisation for 100444 completed in 0.00 seconds.
+2025-07-03 07:29:38,193 - INFO - Synchronizing: Dog Population since 1970
+2025-07-03 07:29:38,522 - INFO - Starting import for 100445
+2025-07-03 07:29:38,523 - INFO - Synchronisation for 100445 completed in 0.00 seconds.
+2025-07-03 07:29:38,523 - INFO - Synchronizing: Dognames in Basel-Stadt
+2025-07-03 07:29:38,854 - INFO - Starting import for 100446
+2025-07-03 07:29:38,854 - INFO - Synchronisation for 100446 completed in 0.00 seconds.
+2025-07-03 07:29:38,854 - INFO - Synchronizing: Land price by community in Baselland
+2025-07-03 07:29:39,405 - INFO - Starting import for 12070
+2025-07-03 07:29:39,405 - INFO - Synchronisation for 12070 completed in 0.00 seconds.
+2025-07-03 07:29:39,406 - INFO - Synchronizing: kGWR Baselland
+2025-07-03 07:29:39,773 - INFO - Starting import for 12160
+2025-07-03 07:29:39,773 - INFO - Synchronisation for 12160 completed in 0.00 seconds.
+2025-07-03 07:29:39,773 - INFO - Synchronizing: Population of Basel
+2025-07-03 07:29:40,020 - INFO - Starting import for 100059
+2025-07-03 07:29:40,020 - INFO - Synchronisation for 100059 completed in 0.00 seconds.
+2025-07-03 07:29:40,020 - INFO - Synchronizing: Daily overnight stays, available and occupied rooms in Basel
+2025-07-03 07:29:40,398 - INFO - Starting import for 100106
+2025-07-03 07:29:40,398 - INFO - Synchronisation for 100106 completed in 0.00 seconds.
+2025-07-03 07:29:40,399 - INFO - Synchronizing: Population of Baselland by age, gender and nationality
+2025-07-03 07:29:40,833 - INFO - Starting import for 10010
+2025-07-03 07:29:40,833 - INFO - Synchronisation for 10010 completed in 0.00 seconds.
+2025-07-03 07:29:40,834 - INFO - Synchronizing: Population of Basel-Stadt by residential district
+2025-07-03 07:29:41,117 - INFO - Starting import for 100060
+2025-07-03 07:29:41,117 - INFO - Synchronisation for 100060 completed in 0.00 seconds.
+2025-07-03 07:29:41,117 - INFO - Synchronizing: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-03 07:29:41,541 - INFO - Starting import for 100413
+2025-07-03 07:29:41,562 - INFO - No new data for dataset ds_100413 was found.
+2025-07-03 07:29:41,562 - INFO - Synchronisation for 100413 completed in 0.02 seconds.
+2025-07-03 07:29:41,562 - INFO - Synchronizing: Daily arrivals and overnight stays by origin in Basel
+2025-07-03 07:29:41,904 - INFO - Starting import for 100414
+2025-07-03 07:29:41,930 - INFO - No new data for dataset ds_100414 was found.
+2025-07-03 07:29:41,931 - INFO - Synchronisation for 100414 completed in 0.03 seconds.
+2025-07-03 07:29:41,931 - INFO - Synchronizing: Rent prices in the canton of Baselland/Switzerland
+2025-07-03 07:29:42,420 - INFO - Starting import for 13010
+2025-07-03 07:29:42,420 - INFO - Synchronisation for 13010 completed in 0.00 seconds.
+2025-07-03 07:29:42,420 - INFO - Synchronizing: Dwellings Basel-Stadt (GWR)
+2025-07-03 07:29:42,821 - INFO - Starting import for 100232
+2025-07-03 07:29:42,821 - INFO - Synchronisation for 100232 completed in 0.00 seconds.
+2025-07-03 07:29:42,822 - INFO - Synchronizing: Opendata Datasets Basel-Stadt
+2025-07-03 07:29:43,233 - INFO - Starting import for 100057
+2025-07-03 07:29:43,233 - INFO - Synchronisation for 100057 completed in 0.00 seconds.
+2025-07-03 07:29:43,233 - INFO - Synchronizing: Addresses in Basel
+2025-07-03 07:29:43,664 - INFO - Starting import for 100231
+2025-07-03 07:29:43,664 - INFO - Synchronisation for 100231 completed in 0.00 seconds.
+2025-07-03 07:29:43,664 - INFO - Synchronizing: Electricity consumption in Basel
+2025-07-03 07:29:44,104 - INFO - Starting import for 100233
+2025-07-03 07:29:44,122 - INFO - New data available in ODS. Last record date: 2025-06-29 21:45:00+00:00
+2025-07-03 07:29:44,489 - INFO - Downloaded 96 records from ODS.
+2025-07-03 07:29:44,491 - INFO - Numbr of records before time stamp coercion: 96
+2025-07-03 07:29:44,492 - INFO - Number of records after time stamp coercion: 96
+2025-07-03 07:29:44,504 - INFO - number of records: 1 after aggregation.
+2025-07-03 07:29:44,504 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:29:44,507 - INFO - 1 records were read from files/100233_agg.parquet.
+2025-07-03 07:29:44,511 - INFO - data was uploaded to Table ds_100233 successfully.
+2025-07-03 07:29:44,511 - INFO - 1 records added to target database table ds_100233.
+2025-07-03 07:29:44,511 - INFO - Synchronisation for 100233 completed in 0.41 seconds.
+2025-07-03 07:29:44,511 - INFO - Synchronisation was completed successfully.
+2025-07-03 07:29:44,520 - INFO - Generating data insights...
+2025-07-03 07:29:44,521 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-03 07:31:02,012 - INFO - Starting data synchronisation...
+2025-07-03 07:31:02,012 - INFO - Synchronizing: Virus Wastewater Monitoring
+2025-07-03 07:31:03,085 - INFO - Starting import for 100302
+2025-07-03 07:31:03,105 - INFO - New data available in ODS. Last record date: 2025-06-30 00:00:00+00:00
+2025-07-03 07:31:03,499 - INFO - Downloaded 43 records from ODS.
+2025-07-03 07:31:03,506 - INFO - Deleting records with missing values in fields: ['sample_ba_nr']
+2025-07-03 07:31:03,507 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:31:03,518 - INFO - 0 records were read from files/100302_agg.parquet.
+2025-07-03 07:31:03,518 - INFO - data was uploaded to Table ds_100302 successfully.
+2025-07-03 07:31:03,519 - INFO - 0 records added to target database table ds_100302.
+2025-07-03 07:31:03,519 - INFO - Synchronisation for 100302 completed in 0.43 seconds.
+2025-07-03 07:31:03,519 - INFO - Synchronizing: Weather Data at NBCN Station Binningen
+2025-07-03 07:31:04,546 - INFO - Starting import for 100254
+2025-07-03 07:31:04,589 - INFO - No new data for dataset ds_100254 was found.
+2025-07-03 07:31:04,589 - INFO - Synchronisation for 100254 completed in 0.04 seconds.
+2025-07-03 07:31:04,589 - INFO - Synchronizing: Air Quality at NCBN station Binningen
+2025-07-03 07:31:05,326 - INFO - Starting import for 100051
+2025-07-03 07:31:05,342 - INFO - New data available in ODS. Last record date: 2025-07-03 23:00:00+00:00
+2025-07-03 07:31:06,546 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:31:06,547 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:31:06,547 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:31:06,551 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:31:06,551 - INFO - Deleting records with missing values in fields: ['max_o3_ug_m3']
+2025-07-03 07:31:06,552 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:31:06,556 - INFO - 0 records were read from files/100051_agg.parquet.
+2025-07-03 07:31:06,556 - INFO - data was uploaded to Table ds_100051 successfully.
+2025-07-03 07:31:06,557 - INFO - 0 records added to target database table ds_100051.
+2025-07-03 07:31:06,557 - INFO - Synchronisation for 100051 completed in 1.23 seconds.
+2025-07-03 07:31:06,557 - INFO - Synchronizing: Rhine river discharge and water level
+2025-07-03 07:31:07,884 - INFO - Starting import for 100089
+2025-07-03 07:31:07,903 - INFO - New data available in ODS. Last record date: 2025-07-03 05:20:00+00:00
+2025-07-03 07:31:08,241 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:31:08,242 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:31:08,242 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:31:08,244 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:31:08,245 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:31:08,248 - INFO - 0 records were read from files/100089_agg.parquet.
+2025-07-03 07:31:08,248 - INFO - data was uploaded to Table ds_100089 successfully.
+2025-07-03 07:31:08,248 - INFO - 0 records added to target database table ds_100089.
+2025-07-03 07:31:08,249 - INFO - Synchronisation for 100089 completed in 0.36 seconds.
+2025-07-03 07:31:08,249 - INFO - Synchronizing: Air traffic at airport Basel/Mulhouse
+2025-07-03 07:31:08,854 - INFO - Starting import for 100078
+2025-07-03 07:31:08,873 - INFO - No new data for dataset ds_100078 was found.
+2025-07-03 07:31:08,873 - INFO - Synchronisation for 100078 completed in 0.02 seconds.
+2025-07-03 07:31:08,873 - INFO - Synchronizing: Dog population in Basel by breed
+2025-07-03 07:31:09,806 - INFO - Starting import for 100444
+2025-07-03 07:31:09,806 - INFO - Synchronisation for 100444 completed in 0.00 seconds.
+2025-07-03 07:31:09,806 - INFO - Synchronizing: Dog Population since 1970
+2025-07-03 07:31:10,496 - INFO - Starting import for 100445
+2025-07-03 07:31:10,496 - INFO - Synchronisation for 100445 completed in 0.00 seconds.
+2025-07-03 07:31:10,496 - INFO - Synchronizing: Dognames in Basel-Stadt
+2025-07-03 07:31:11,120 - INFO - Starting import for 100446
+2025-07-03 07:31:11,120 - INFO - Synchronisation for 100446 completed in 0.00 seconds.
+2025-07-03 07:31:11,121 - INFO - Synchronizing: Land price by community in Baselland
+2025-07-03 07:31:11,563 - INFO - Starting import for 12070
+2025-07-03 07:31:11,563 - INFO - Synchronisation for 12070 completed in 0.00 seconds.
+2025-07-03 07:31:11,563 - INFO - Synchronizing: kGWR Baselland
+2025-07-03 07:31:12,011 - INFO - Starting import for 12160
+2025-07-03 07:31:12,012 - INFO - Synchronisation for 12160 completed in 0.00 seconds.
+2025-07-03 07:31:12,012 - INFO - Synchronizing: Population of Basel
+2025-07-03 07:31:12,891 - INFO - Starting import for 100059
+2025-07-03 07:31:12,891 - INFO - Synchronisation for 100059 completed in 0.00 seconds.
+2025-07-03 07:31:12,891 - INFO - Synchronizing: Daily overnight stays, available and occupied rooms in Basel
+2025-07-03 07:31:14,522 - INFO - Starting import for 100106
+2025-07-03 07:31:14,522 - INFO - Synchronisation for 100106 completed in 0.00 seconds.
+2025-07-03 07:31:14,522 - INFO - Synchronizing: Population of Baselland by age, gender and nationality
+2025-07-03 07:31:15,056 - INFO - Starting import for 10010
+2025-07-03 07:31:15,056 - INFO - Synchronisation for 10010 completed in 0.00 seconds.
+2025-07-03 07:31:15,056 - INFO - Synchronizing: Population of Basel-Stadt by residential district
+2025-07-03 07:31:15,506 - INFO - Starting import for 100060
+2025-07-03 07:31:15,507 - INFO - Synchronisation for 100060 completed in 0.00 seconds.
+2025-07-03 07:31:15,507 - INFO - Synchronizing: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-03 07:31:15,984 - INFO - Starting import for 100413
+2025-07-03 07:31:15,999 - INFO - No new data for dataset ds_100413 was found.
+2025-07-03 07:31:15,999 - INFO - Synchronisation for 100413 completed in 0.02 seconds.
+2025-07-03 07:31:16,000 - INFO - Synchronizing: Daily arrivals and overnight stays by origin in Basel
+2025-07-03 07:31:16,621 - INFO - Starting import for 100414
+2025-07-03 07:31:16,649 - INFO - No new data for dataset ds_100414 was found.
+2025-07-03 07:31:16,649 - INFO - Synchronisation for 100414 completed in 0.03 seconds.
+2025-07-03 07:31:16,649 - INFO - Synchronizing: Rent prices in the canton of Baselland/Switzerland
+2025-07-03 07:31:17,253 - INFO - Starting import for 13010
+2025-07-03 07:31:17,254 - INFO - Synchronisation for 13010 completed in 0.00 seconds.
+2025-07-03 07:31:17,254 - INFO - Synchronizing: Dwellings Basel-Stadt (GWR)
+2025-07-03 07:31:17,767 - INFO - Starting import for 100232
+2025-07-03 07:31:17,767 - INFO - Synchronisation for 100232 completed in 0.00 seconds.
+2025-07-03 07:31:17,767 - INFO - Synchronizing: Opendata Datasets Basel-Stadt
+2025-07-03 07:31:18,325 - INFO - Starting import for 100057
+2025-07-03 07:31:18,325 - INFO - Synchronisation for 100057 completed in 0.00 seconds.
+2025-07-03 07:31:18,326 - INFO - Synchronizing: Addresses in Basel
+2025-07-03 07:31:18,889 - INFO - Starting import for 100231
+2025-07-03 07:31:18,890 - INFO - Synchronisation for 100231 completed in 0.00 seconds.
+2025-07-03 07:31:18,890 - INFO - Synchronizing: Electricity consumption in Basel
+2025-07-03 07:31:19,616 - INFO - Starting import for 100233
+2025-07-03 07:31:19,634 - INFO - No new data for dataset ds_100233 was found.
+2025-07-03 07:31:19,634 - INFO - Synchronisation for 100233 completed in 0.02 seconds.
+2025-07-03 07:31:19,634 - INFO - Synchronisation was completed successfully.
+2025-07-03 07:31:19,642 - INFO - Generating data insights...
+2025-07-03 07:31:19,642 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-03 07:31:19,675 - INFO - initializing story db record Rhine river water level and discharge daily report for 2025-07-03
+2025-07-03 07:31:19,677 - INFO - initializing comparisons
+2025-07-03 07:31:19,677 - INFO - sending prompt to OpenAI API
+2025-07-03 07:31:27,601 - INFO - response received from OpenAI API
+2025-07-03 07:31:27,613 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:31:27,614 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:31:27,614 - INFO - All data insights have been created.
+2025-07-03 07:31:27,615 - INFO - Generating data insight: Buildings in Baselland
+2025-07-03 07:33:37,904 - INFO - Starting data synchronisation...
+2025-07-03 07:33:37,904 - INFO - Synchronizing: Virus Wastewater Monitoring
+2025-07-03 07:33:38,311 - INFO - Starting import for 100302
+2025-07-03 07:33:38,333 - INFO - New data available in ODS. Last record date: 2025-06-30 00:00:00+00:00
+2025-07-03 07:33:39,158 - INFO - Downloaded 43 records from ODS.
+2025-07-03 07:33:39,165 - INFO - Deleting records with missing values in fields: ['sample_ba_nr']
+2025-07-03 07:33:39,165 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:33:39,177 - INFO - 0 records were read from files/100302_agg.parquet.
+2025-07-03 07:33:39,177 - INFO - data was uploaded to Table ds_100302 successfully.
+2025-07-03 07:33:39,177 - INFO - 0 records added to target database table ds_100302.
+2025-07-03 07:33:39,177 - INFO - Synchronisation for 100302 completed in 0.87 seconds.
+2025-07-03 07:33:39,178 - INFO - Synchronizing: Weather Data at NBCN Station Binningen
+2025-07-03 07:33:39,582 - INFO - Starting import for 100254
+2025-07-03 07:33:39,622 - INFO - No new data for dataset ds_100254 was found.
+2025-07-03 07:33:39,622 - INFO - Synchronisation for 100254 completed in 0.04 seconds.
+2025-07-03 07:33:39,622 - INFO - Synchronizing: Air Quality at NCBN station Binningen
+2025-07-03 07:33:39,975 - INFO - Starting import for 100051
+2025-07-03 07:33:39,993 - INFO - New data available in ODS. Last record date: 2025-07-03 23:00:00+00:00
+2025-07-03 07:33:40,269 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:33:40,269 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:33:40,270 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:33:40,275 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:33:40,275 - INFO - Deleting records with missing values in fields: ['max_o3_ug_m3']
+2025-07-03 07:33:40,275 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:33:40,280 - INFO - 0 records were read from files/100051_agg.parquet.
+2025-07-03 07:33:40,280 - INFO - data was uploaded to Table ds_100051 successfully.
+2025-07-03 07:33:40,281 - INFO - 0 records added to target database table ds_100051.
+2025-07-03 07:33:40,281 - INFO - Synchronisation for 100051 completed in 0.31 seconds.
+2025-07-03 07:33:40,281 - INFO - Synchronizing: Rhine river discharge and water level
+2025-07-03 07:33:40,675 - INFO - Starting import for 100089
+2025-07-03 07:33:40,691 - INFO - New data available in ODS. Last record date: 2025-07-03 05:20:00+00:00
+2025-07-03 07:33:41,054 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:33:41,055 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:33:41,055 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:33:41,057 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:33:41,057 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:33:41,061 - INFO - 0 records were read from files/100089_agg.parquet.
+2025-07-03 07:33:41,062 - INFO - data was uploaded to Table ds_100089 successfully.
+2025-07-03 07:33:41,062 - INFO - 0 records added to target database table ds_100089.
+2025-07-03 07:33:41,062 - INFO - Synchronisation for 100089 completed in 0.39 seconds.
+2025-07-03 07:33:41,062 - INFO - Synchronizing: Air traffic at airport Basel/Mulhouse
+2025-07-03 07:33:41,453 - INFO - Starting import for 100078
+2025-07-03 07:33:41,472 - INFO - No new data for dataset ds_100078 was found.
+2025-07-03 07:33:41,472 - INFO - Synchronisation for 100078 completed in 0.02 seconds.
+2025-07-03 07:33:41,472 - INFO - Synchronizing: Dog population in Basel by breed
+2025-07-03 07:33:41,916 - INFO - Starting import for 100444
+2025-07-03 07:33:41,916 - INFO - Synchronisation for 100444 completed in 0.00 seconds.
+2025-07-03 07:33:41,917 - INFO - Synchronizing: Dog Population since 1970
+2025-07-03 07:33:42,306 - INFO - Starting import for 100445
+2025-07-03 07:33:42,306 - INFO - Synchronisation for 100445 completed in 0.00 seconds.
+2025-07-03 07:33:42,307 - INFO - Synchronizing: Dognames in Basel-Stadt
+2025-07-03 07:33:42,658 - INFO - Starting import for 100446
+2025-07-03 07:33:42,658 - INFO - Synchronisation for 100446 completed in 0.00 seconds.
+2025-07-03 07:33:42,659 - INFO - Synchronizing: Land price by community in Baselland
+2025-07-03 07:33:43,087 - INFO - Starting import for 12070
+2025-07-03 07:33:43,087 - INFO - Synchronisation for 12070 completed in 0.00 seconds.
+2025-07-03 07:33:43,087 - INFO - Synchronizing: kGWR Baselland
+2025-07-03 07:33:43,401 - INFO - Starting import for 12160
+2025-07-03 07:33:43,401 - INFO - Synchronisation for 12160 completed in 0.00 seconds.
+2025-07-03 07:33:43,401 - INFO - Synchronizing: Population of Basel
+2025-07-03 07:33:43,736 - INFO - Starting import for 100059
+2025-07-03 07:33:43,736 - INFO - Synchronisation for 100059 completed in 0.00 seconds.
+2025-07-03 07:33:43,736 - INFO - Synchronizing: Daily overnight stays, available and occupied rooms in Basel
+2025-07-03 07:33:44,055 - INFO - Starting import for 100106
+2025-07-03 07:33:44,055 - INFO - Synchronisation for 100106 completed in 0.00 seconds.
+2025-07-03 07:33:44,056 - INFO - Synchronizing: Population of Baselland by age, gender and nationality
+2025-07-03 07:33:44,630 - INFO - Starting import for 10010
+2025-07-03 07:33:44,630 - INFO - Synchronisation for 10010 completed in 0.00 seconds.
+2025-07-03 07:33:44,630 - INFO - Synchronizing: Population of Basel-Stadt by residential district
+2025-07-03 07:33:45,911 - INFO - Starting import for 100060
+2025-07-03 07:33:45,911 - INFO - Synchronisation for 100060 completed in 0.00 seconds.
+2025-07-03 07:33:45,911 - INFO - Synchronizing: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-03 07:33:46,339 - INFO - Starting import for 100413
+2025-07-03 07:33:46,354 - INFO - No new data for dataset ds_100413 was found.
+2025-07-03 07:33:46,354 - INFO - Synchronisation for 100413 completed in 0.02 seconds.
+2025-07-03 07:33:46,354 - INFO - Synchronizing: Daily arrivals and overnight stays by origin in Basel
+2025-07-03 07:33:46,633 - INFO - Starting import for 100414
+2025-07-03 07:33:46,663 - INFO - No new data for dataset ds_100414 was found.
+2025-07-03 07:33:46,664 - INFO - Synchronisation for 100414 completed in 0.03 seconds.
+2025-07-03 07:33:46,664 - INFO - Synchronizing: Rent prices in the canton of Baselland/Switzerland
+2025-07-03 07:33:47,222 - INFO - Starting import for 13010
+2025-07-03 07:33:47,222 - INFO - Synchronisation for 13010 completed in 0.00 seconds.
+2025-07-03 07:33:47,222 - INFO - Synchronizing: Dwellings Basel-Stadt (GWR)
+2025-07-03 07:33:47,622 - INFO - Starting import for 100232
+2025-07-03 07:33:47,622 - INFO - Synchronisation for 100232 completed in 0.00 seconds.
+2025-07-03 07:33:47,623 - INFO - Synchronizing: Opendata Datasets Basel-Stadt
+2025-07-03 07:33:47,949 - INFO - Starting import for 100057
+2025-07-03 07:33:47,949 - INFO - Synchronisation for 100057 completed in 0.00 seconds.
+2025-07-03 07:33:47,949 - INFO - Synchronizing: Addresses in Basel
+2025-07-03 07:33:48,276 - INFO - Starting import for 100231
+2025-07-03 07:33:48,276 - INFO - Synchronisation for 100231 completed in 0.00 seconds.
+2025-07-03 07:33:48,276 - INFO - Synchronizing: Electricity consumption in Basel
+2025-07-03 07:33:48,641 - INFO - Starting import for 100233
+2025-07-03 07:33:48,657 - INFO - No new data for dataset ds_100233 was found.
+2025-07-03 07:33:48,657 - INFO - Synchronisation for 100233 completed in 0.02 seconds.
+2025-07-03 07:33:48,657 - INFO - Synchronisation was completed successfully.
+2025-07-03 07:33:48,666 - INFO - Generating data insights...
+2025-07-03 07:33:48,666 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-03 07:33:48,689 - INFO - No data available or story 'Rhine river water level and discharge daily report' is not due for generation on 2025-07-03.
+2025-07-03 07:33:48,689 - INFO - All data insights have been created.
+2025-07-03 07:33:48,689 - INFO - Generating data insight: Buildings in Baselland
+2025-07-03 07:38:29,771 - INFO - Starting data synchronisation...
+2025-07-03 07:38:29,771 - INFO - Synchronizing: Virus Wastewater Monitoring
+2025-07-03 07:38:30,064 - INFO - Starting import for 100302
+2025-07-03 07:38:30,086 - INFO - New data available in ODS. Last record date: 2025-06-30 00:00:00+00:00
+2025-07-03 07:38:30,393 - INFO - Downloaded 43 records from ODS.
+2025-07-03 07:38:30,400 - INFO - Deleting records with missing values in fields: ['sample_ba_nr']
+2025-07-03 07:38:30,400 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:38:30,413 - INFO - 0 records were read from files/100302_agg.parquet.
+2025-07-03 07:38:30,413 - INFO - data was uploaded to Table ds_100302 successfully.
+2025-07-03 07:38:30,414 - INFO - 0 records added to target database table ds_100302.
+2025-07-03 07:38:30,414 - INFO - Synchronisation for 100302 completed in 0.35 seconds.
+2025-07-03 07:38:30,414 - INFO - Synchronizing: Weather Data at NBCN Station Binningen
+2025-07-03 07:38:30,793 - INFO - Starting import for 100254
+2025-07-03 07:38:30,832 - INFO - No new data for dataset ds_100254 was found.
+2025-07-03 07:38:30,832 - INFO - Synchronisation for 100254 completed in 0.04 seconds.
+2025-07-03 07:38:30,832 - INFO - Synchronizing: Air Quality at NCBN station Binningen
+2025-07-03 07:38:31,200 - INFO - Starting import for 100051
+2025-07-03 07:38:31,215 - INFO - New data available in ODS. Last record date: 2025-07-03 23:00:00+00:00
+2025-07-03 07:38:31,437 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:38:31,438 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:38:31,438 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:38:31,442 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:38:31,442 - INFO - Deleting records with missing values in fields: ['max_o3_ug_m3']
+2025-07-03 07:38:31,443 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:38:31,448 - INFO - 0 records were read from files/100051_agg.parquet.
+2025-07-03 07:38:31,448 - INFO - data was uploaded to Table ds_100051 successfully.
+2025-07-03 07:38:31,448 - INFO - 0 records added to target database table ds_100051.
+2025-07-03 07:38:31,448 - INFO - Synchronisation for 100051 completed in 0.25 seconds.
+2025-07-03 07:38:31,448 - INFO - Synchronizing: Rhine river discharge and water level
+2025-07-03 07:38:31,841 - INFO - Starting import for 100089
+2025-07-03 07:38:31,857 - INFO - New data available in ODS. Last record date: 2025-07-03 05:20:00+00:00
+2025-07-03 07:38:32,048 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:38:32,048 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:38:32,048 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:38:32,051 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:38:32,051 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:38:32,054 - INFO - 0 records were read from files/100089_agg.parquet.
+2025-07-03 07:38:32,054 - INFO - data was uploaded to Table ds_100089 successfully.
+2025-07-03 07:38:32,054 - INFO - 0 records added to target database table ds_100089.
+2025-07-03 07:38:32,054 - INFO - Synchronisation for 100089 completed in 0.21 seconds.
+2025-07-03 07:38:32,054 - INFO - Synchronizing: Air traffic at airport Basel/Mulhouse
+2025-07-03 07:38:32,336 - INFO - Starting import for 100078
+2025-07-03 07:38:32,353 - INFO - No new data for dataset ds_100078 was found.
+2025-07-03 07:38:32,353 - INFO - Synchronisation for 100078 completed in 0.02 seconds.
+2025-07-03 07:38:32,353 - INFO - Synchronizing: Dog population in Basel by breed
+2025-07-03 07:38:32,716 - INFO - Starting import for 100444
+2025-07-03 07:38:32,716 - INFO - Synchronisation for 100444 completed in 0.00 seconds.
+2025-07-03 07:38:32,716 - INFO - Synchronizing: Dog Population since 1970
+2025-07-03 07:38:33,037 - INFO - Starting import for 100445
+2025-07-03 07:38:33,037 - INFO - Synchronisation for 100445 completed in 0.00 seconds.
+2025-07-03 07:38:33,037 - INFO - Synchronizing: Dognames in Basel-Stadt
+2025-07-03 07:38:33,432 - INFO - Starting import for 100446
+2025-07-03 07:38:33,432 - INFO - Synchronisation for 100446 completed in 0.00 seconds.
+2025-07-03 07:38:33,432 - INFO - Synchronizing: Land price by community in Baselland
+2025-07-03 07:38:33,711 - INFO - Starting import for 12070
+2025-07-03 07:38:33,711 - INFO - Synchronisation for 12070 completed in 0.00 seconds.
+2025-07-03 07:38:33,711 - INFO - Synchronizing: kGWR Baselland
+2025-07-03 07:38:34,034 - INFO - Starting import for 12160
+2025-07-03 07:38:34,034 - INFO - Synchronisation for 12160 completed in 0.00 seconds.
+2025-07-03 07:38:34,035 - INFO - Synchronizing: Population of Basel
+2025-07-03 07:38:34,294 - INFO - Starting import for 100059
+2025-07-03 07:38:34,294 - INFO - Synchronisation for 100059 completed in 0.00 seconds.
+2025-07-03 07:38:34,294 - INFO - Synchronizing: Daily overnight stays, available and occupied rooms in Basel
+2025-07-03 07:38:34,670 - INFO - Starting import for 100106
+2025-07-03 07:38:34,670 - INFO - Synchronisation for 100106 completed in 0.00 seconds.
+2025-07-03 07:38:34,670 - INFO - Synchronizing: Population of Baselland by age, gender and nationality
+2025-07-03 07:38:34,991 - INFO - Starting import for 10010
+2025-07-03 07:38:34,991 - INFO - Synchronisation for 10010 completed in 0.00 seconds.
+2025-07-03 07:38:34,992 - INFO - Synchronizing: Population of Basel-Stadt by residential district
+2025-07-03 07:38:35,355 - INFO - Starting import for 100060
+2025-07-03 07:38:35,355 - INFO - Synchronisation for 100060 completed in 0.00 seconds.
+2025-07-03 07:38:35,355 - INFO - Synchronizing: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-03 07:38:35,721 - INFO - Starting import for 100413
+2025-07-03 07:38:35,737 - INFO - No new data for dataset ds_100413 was found.
+2025-07-03 07:38:35,737 - INFO - Synchronisation for 100413 completed in 0.02 seconds.
+2025-07-03 07:38:35,737 - INFO - Synchronizing: Daily arrivals and overnight stays by origin in Basel
+2025-07-03 07:38:36,042 - INFO - Starting import for 100414
+2025-07-03 07:38:36,068 - INFO - No new data for dataset ds_100414 was found.
+2025-07-03 07:38:36,068 - INFO - Synchronisation for 100414 completed in 0.03 seconds.
+2025-07-03 07:38:36,068 - INFO - Synchronizing: Rent prices in the canton of Baselland/Switzerland
+2025-07-03 07:38:36,413 - INFO - Starting import for 13010
+2025-07-03 07:38:36,413 - INFO - Synchronisation for 13010 completed in 0.00 seconds.
+2025-07-03 07:38:36,414 - INFO - Synchronizing: Dwellings Basel-Stadt (GWR)
+2025-07-03 07:38:36,744 - INFO - Starting import for 100232
+2025-07-03 07:38:36,744 - INFO - Synchronisation for 100232 completed in 0.00 seconds.
+2025-07-03 07:38:36,744 - INFO - Synchronizing: Opendata Datasets Basel-Stadt
+2025-07-03 07:38:37,063 - INFO - Starting import for 100057
+2025-07-03 07:38:37,063 - INFO - Synchronisation for 100057 completed in 0.00 seconds.
+2025-07-03 07:38:37,063 - INFO - Synchronizing: Addresses in Basel
+2025-07-03 07:38:37,471 - INFO - Starting import for 100231
+2025-07-03 07:38:37,471 - INFO - Synchronisation for 100231 completed in 0.00 seconds.
+2025-07-03 07:38:37,472 - INFO - Synchronizing: Electricity consumption in Basel
+2025-07-03 07:38:37,772 - INFO - Starting import for 100233
+2025-07-03 07:38:37,788 - INFO - No new data for dataset ds_100233 was found.
+2025-07-03 07:38:37,788 - INFO - Synchronisation for 100233 completed in 0.02 seconds.
+2025-07-03 07:38:37,788 - INFO - Synchronisation was completed successfully.
+2025-07-03 07:38:37,796 - INFO - Generating data insights...
+2025-07-03 07:38:37,796 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-03 07:38:37,821 - INFO - initializing story db record Rhine river water level and discharge daily report for 2025-07-03
+2025-07-03 07:38:37,824 - INFO - initializing comparisons
+2025-07-03 07:38:37,824 - INFO - sending prompt to OpenAI API
+2025-07-03 07:38:44,860 - INFO - response received from OpenAI API
+2025-07-03 07:38:44,871 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:38:44,871 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:38:44,871 - INFO - All data insights have been created.
+2025-07-03 07:38:44,872 - INFO - Generating data insight: Buildings in Baselland
+2025-07-03 07:38:45,013 - INFO - initializing story db record Buildings in Baselland for 2025-07-03
+2025-07-03 07:38:45,025 - INFO - initializing comparisons
+2025-07-03 07:38:45,025 - INFO - sending prompt to OpenAI API
+2025-07-03 07:39:00,978 - INFO - response received from OpenAI API
+2025-07-03 07:39:00,989 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:39:00,990 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:39:00,990 - INFO - All data insights have been created.
+2025-07-03 07:39:00,990 - INFO - Generating data insight: Heat day report
+2025-07-03 07:39:01,082 - WARNING - No data found for context key: rank_this_year
+2025-07-03 07:39:01,098 - WARNING - No data found for context key: temperature_percentile_all_time
+2025-07-03 07:39:01,138 - INFO - initializing story db record Heat day report for 2025-07-03
+2025-07-03 07:39:01,139 - INFO - initializing comparisons
+2025-07-03 07:39:01,139 - INFO - sending prompt to OpenAI API
+2025-07-03 07:39:10,903 - INFO - response received from OpenAI API
+2025-07-03 07:39:10,915 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:39:10,916 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:39:10,916 - INFO - All data insights have been created.
+2025-07-03 07:39:10,916 - INFO - Generating data insight: Seasonal weather report
+2025-07-03 07:41:02,842 - INFO - Starting data synchronisation...
+2025-07-03 07:41:02,842 - INFO - Synchronizing: Virus Wastewater Monitoring
+2025-07-03 07:41:03,537 - INFO - Starting import for 100302
+2025-07-03 07:41:03,560 - INFO - New data available in ODS. Last record date: 2025-06-30 00:00:00+00:00
+2025-07-03 07:41:04,463 - INFO - Downloaded 43 records from ODS.
+2025-07-03 07:41:04,470 - INFO - Deleting records with missing values in fields: ['sample_ba_nr']
+2025-07-03 07:41:04,470 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:41:04,483 - INFO - 0 records were read from files/100302_agg.parquet.
+2025-07-03 07:41:04,483 - INFO - data was uploaded to Table ds_100302 successfully.
+2025-07-03 07:41:04,483 - INFO - 0 records added to target database table ds_100302.
+2025-07-03 07:41:04,483 - INFO - Synchronisation for 100302 completed in 0.95 seconds.
+2025-07-03 07:41:04,483 - INFO - Synchronizing: Weather Data at NBCN Station Binningen
+2025-07-03 07:41:04,920 - INFO - Starting import for 100254
+2025-07-03 07:41:04,963 - INFO - No new data for dataset ds_100254 was found.
+2025-07-03 07:41:04,963 - INFO - Synchronisation for 100254 completed in 0.04 seconds.
+2025-07-03 07:41:04,963 - INFO - Synchronizing: Air Quality at NCBN station Binningen
+2025-07-03 07:41:05,431 - INFO - Starting import for 100051
+2025-07-03 07:41:05,448 - INFO - New data available in ODS. Last record date: 2025-07-03 23:00:00+00:00
+2025-07-03 07:41:05,684 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:41:05,685 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:41:05,685 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:41:05,689 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:41:05,690 - INFO - Deleting records with missing values in fields: ['max_o3_ug_m3']
+2025-07-03 07:41:05,690 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:41:05,695 - INFO - 0 records were read from files/100051_agg.parquet.
+2025-07-03 07:41:05,695 - INFO - data was uploaded to Table ds_100051 successfully.
+2025-07-03 07:41:05,695 - INFO - 0 records added to target database table ds_100051.
+2025-07-03 07:41:05,695 - INFO - Synchronisation for 100051 completed in 0.26 seconds.
+2025-07-03 07:41:05,696 - INFO - Synchronizing: Rhine river discharge and water level
+2025-07-03 07:41:06,392 - INFO - Starting import for 100089
+2025-07-03 07:41:06,410 - INFO - New data available in ODS. Last record date: 2025-07-03 05:30:00+00:00
+2025-07-03 07:41:06,622 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:41:06,623 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:41:06,623 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:41:06,626 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:41:06,626 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:41:06,630 - INFO - 0 records were read from files/100089_agg.parquet.
+2025-07-03 07:41:06,631 - INFO - data was uploaded to Table ds_100089 successfully.
+2025-07-03 07:41:06,631 - INFO - 0 records added to target database table ds_100089.
+2025-07-03 07:41:06,631 - INFO - Synchronisation for 100089 completed in 0.24 seconds.
+2025-07-03 07:41:06,631 - INFO - Synchronizing: Air traffic at airport Basel/Mulhouse
+2025-07-03 07:41:07,055 - INFO - Starting import for 100078
+2025-07-03 07:41:07,072 - INFO - No new data for dataset ds_100078 was found.
+2025-07-03 07:41:07,073 - INFO - Synchronisation for 100078 completed in 0.02 seconds.
+2025-07-03 07:41:07,073 - INFO - Synchronizing: Dog population in Basel by breed
+2025-07-03 07:41:07,518 - INFO - Starting import for 100444
+2025-07-03 07:41:07,518 - INFO - Synchronisation for 100444 completed in 0.00 seconds.
+2025-07-03 07:41:07,519 - INFO - Synchronizing: Dog Population since 1970
+2025-07-03 07:41:08,143 - INFO - Starting import for 100445
+2025-07-03 07:41:08,143 - INFO - Synchronisation for 100445 completed in 0.00 seconds.
+2025-07-03 07:41:08,143 - INFO - Synchronizing: Dognames in Basel-Stadt
+2025-07-03 07:41:08,566 - INFO - Starting import for 100446
+2025-07-03 07:41:08,566 - INFO - Synchronisation for 100446 completed in 0.00 seconds.
+2025-07-03 07:41:08,566 - INFO - Synchronizing: Land price by community in Baselland
+2025-07-03 07:41:08,924 - INFO - Starting import for 12070
+2025-07-03 07:41:08,924 - INFO - Synchronisation for 12070 completed in 0.00 seconds.
+2025-07-03 07:41:08,925 - INFO - Synchronizing: kGWR Baselland
+2025-07-03 07:41:09,299 - INFO - Starting import for 12160
+2025-07-03 07:41:09,299 - INFO - Synchronisation for 12160 completed in 0.00 seconds.
+2025-07-03 07:41:09,299 - INFO - Synchronizing: Population of Basel
+2025-07-03 07:41:09,781 - INFO - Starting import for 100059
+2025-07-03 07:41:09,781 - INFO - Synchronisation for 100059 completed in 0.00 seconds.
+2025-07-03 07:41:09,782 - INFO - Synchronizing: Daily overnight stays, available and occupied rooms in Basel
+2025-07-03 07:41:10,109 - INFO - Starting import for 100106
+2025-07-03 07:41:10,110 - INFO - Synchronisation for 100106 completed in 0.00 seconds.
+2025-07-03 07:41:10,110 - INFO - Synchronizing: Population of Baselland by age, gender and nationality
+2025-07-03 07:41:10,474 - INFO - Starting import for 10010
+2025-07-03 07:41:10,474 - INFO - Synchronisation for 10010 completed in 0.00 seconds.
+2025-07-03 07:41:10,474 - INFO - Synchronizing: Population of Basel-Stadt by residential district
+2025-07-03 07:41:10,952 - INFO - Starting import for 100060
+2025-07-03 07:41:10,952 - INFO - Synchronisation for 100060 completed in 0.00 seconds.
+2025-07-03 07:41:10,953 - INFO - Synchronizing: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-03 07:41:11,385 - INFO - Starting import for 100413
+2025-07-03 07:41:11,401 - INFO - No new data for dataset ds_100413 was found.
+2025-07-03 07:41:11,401 - INFO - Synchronisation for 100413 completed in 0.02 seconds.
+2025-07-03 07:41:11,401 - INFO - Synchronizing: Daily arrivals and overnight stays by origin in Basel
+2025-07-03 07:41:11,827 - INFO - Starting import for 100414
+2025-07-03 07:41:11,852 - INFO - No new data for dataset ds_100414 was found.
+2025-07-03 07:41:11,852 - INFO - Synchronisation for 100414 completed in 0.03 seconds.
+2025-07-03 07:41:11,852 - INFO - Synchronizing: Rent prices in the canton of Baselland/Switzerland
+2025-07-03 07:41:12,479 - INFO - Starting import for 13010
+2025-07-03 07:41:12,479 - INFO - Synchronisation for 13010 completed in 0.00 seconds.
+2025-07-03 07:41:12,479 - INFO - Synchronizing: Dwellings Basel-Stadt (GWR)
+2025-07-03 07:41:12,804 - INFO - Starting import for 100232
+2025-07-03 07:41:12,805 - INFO - Synchronisation for 100232 completed in 0.00 seconds.
+2025-07-03 07:41:12,805 - INFO - Synchronizing: Opendata Datasets Basel-Stadt
+2025-07-03 07:41:13,143 - INFO - Starting import for 100057
+2025-07-03 07:41:13,143 - INFO - Synchronisation for 100057 completed in 0.00 seconds.
+2025-07-03 07:41:13,143 - INFO - Synchronizing: Addresses in Basel
+2025-07-03 07:41:13,534 - INFO - Starting import for 100231
+2025-07-03 07:41:13,534 - INFO - Synchronisation for 100231 completed in 0.00 seconds.
+2025-07-03 07:41:13,534 - INFO - Synchronizing: Electricity consumption in Basel
+2025-07-03 07:41:13,996 - INFO - Starting import for 100233
+2025-07-03 07:41:14,012 - INFO - No new data for dataset ds_100233 was found.
+2025-07-03 07:41:14,012 - INFO - Synchronisation for 100233 completed in 0.02 seconds.
+2025-07-03 07:41:14,012 - INFO - Synchronisation was completed successfully.
+2025-07-03 07:41:14,021 - INFO - Generating data insights...
+2025-07-03 07:41:14,021 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-03 07:41:14,044 - INFO - initializing story db record Rhine river water level and discharge daily report for 2025-07-03
+2025-07-03 07:41:14,046 - INFO - initializing comparisons
+2025-07-03 07:41:14,046 - INFO - sending prompt to OpenAI API
+2025-07-03 07:41:22,884 - INFO - response received from OpenAI API
+2025-07-03 07:41:22,886 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:41:22,886 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:41:22,886 - INFO - All data insights have been created.
+2025-07-03 07:41:22,887 - INFO - Generating data insight: Buildings in Baselland
+2025-07-03 07:41:23,030 - INFO - No data available or story 'Buildings in Baselland' is not due for generation on 2025-07-03.
+2025-07-03 07:41:23,030 - INFO - All data insights have been created.
+2025-07-03 07:41:23,030 - INFO - Generating data insight: Heat day report
+2025-07-03 07:41:23,110 - WARNING - No data found for context key: rank_this_year
+2025-07-03 07:41:23,127 - WARNING - No data found for context key: temperature_percentile_all_time
+2025-07-03 07:41:23,156 - INFO - initializing story db record Heat day report for 2025-07-03
+2025-07-03 07:41:23,169 - INFO - initializing comparisons
+2025-07-03 07:41:23,169 - INFO - sending prompt to OpenAI API
+2025-07-03 07:41:31,604 - INFO - response received from OpenAI API
+2025-07-03 07:41:31,615 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:41:31,693 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:41:31,693 - INFO - All data insights have been created.
+2025-07-03 07:41:31,693 - INFO - Generating data insight: Seasonal weather report
+2025-07-03 07:46:15,154 - INFO - Starting data synchronisation...
+2025-07-03 07:46:15,155 - INFO - Synchronizing: Virus Wastewater Monitoring
+2025-07-03 07:46:16,517 - INFO - Starting import for 100302
+2025-07-03 07:46:16,541 - INFO - New data available in ODS. Last record date: 2025-06-30 00:00:00+00:00
+2025-07-03 07:46:16,773 - INFO - Downloaded 43 records from ODS.
+2025-07-03 07:46:16,780 - INFO - Deleting records with missing values in fields: ['sample_ba_nr']
+2025-07-03 07:46:16,780 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:46:16,793 - INFO - 0 records were read from files/100302_agg.parquet.
+2025-07-03 07:46:16,793 - INFO - data was uploaded to Table ds_100302 successfully.
+2025-07-03 07:46:16,793 - INFO - 0 records added to target database table ds_100302.
+2025-07-03 07:46:16,793 - INFO - Synchronisation for 100302 completed in 0.28 seconds.
+2025-07-03 07:46:16,793 - INFO - Synchronizing: Weather Data at NBCN Station Binningen
+2025-07-03 07:46:17,273 - INFO - Starting import for 100254
+2025-07-03 07:46:17,311 - INFO - No new data for dataset ds_100254 was found.
+2025-07-03 07:46:17,311 - INFO - Synchronisation for 100254 completed in 0.04 seconds.
+2025-07-03 07:46:17,312 - INFO - Synchronizing: Air Quality at NCBN station Binningen
+2025-07-03 07:46:18,549 - INFO - Starting import for 100051
+2025-07-03 07:46:18,568 - INFO - New data available in ODS. Last record date: 2025-07-03 23:00:00+00:00
+2025-07-03 07:46:18,792 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:46:18,792 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:46:18,792 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:46:18,797 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:46:18,797 - INFO - Deleting records with missing values in fields: ['max_o3_ug_m3']
+2025-07-03 07:46:18,798 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:46:18,803 - INFO - 0 records were read from files/100051_agg.parquet.
+2025-07-03 07:46:18,803 - INFO - data was uploaded to Table ds_100051 successfully.
+2025-07-03 07:46:18,803 - INFO - 0 records added to target database table ds_100051.
+2025-07-03 07:46:18,803 - INFO - Synchronisation for 100051 completed in 0.25 seconds.
+2025-07-03 07:46:18,803 - INFO - Synchronizing: Rhine river discharge and water level
+2025-07-03 07:46:19,125 - INFO - Starting import for 100089
+2025-07-03 07:46:19,144 - INFO - New data available in ODS. Last record date: 2025-07-03 05:30:00+00:00
+2025-07-03 07:46:19,406 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:46:19,406 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:46:19,407 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:46:19,409 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:46:19,409 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:46:19,413 - INFO - 0 records were read from files/100089_agg.parquet.
+2025-07-03 07:46:19,413 - INFO - data was uploaded to Table ds_100089 successfully.
+2025-07-03 07:46:19,413 - INFO - 0 records added to target database table ds_100089.
+2025-07-03 07:46:19,413 - INFO - Synchronisation for 100089 completed in 0.29 seconds.
+2025-07-03 07:46:19,413 - INFO - Synchronizing: Air traffic at airport Basel/Mulhouse
+2025-07-03 07:46:19,790 - INFO - Starting import for 100078
+2025-07-03 07:46:19,808 - INFO - New data available in ODS. Last record date: 2025-07-03 00:00:00+00:00
+2025-07-03 07:46:19,977 - INFO - Downloaded 4 records from ODS.
+2025-07-03 07:46:19,978 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:46:19,983 - INFO - 4 records were read from files/100078_agg.parquet.
+2025-07-03 07:46:19,990 - INFO - data was uploaded to Table ds_100078 successfully.
+2025-07-03 07:46:19,991 - INFO - 4 records added to target database table ds_100078.
+2025-07-03 07:46:19,991 - INFO - Synchronisation for 100078 completed in 0.20 seconds.
+2025-07-03 07:46:19,991 - INFO - Synchronizing: Dog population in Basel by breed
+2025-07-03 07:46:20,439 - INFO - Starting import for 100444
+2025-07-03 07:46:20,439 - INFO - Synchronisation for 100444 completed in 0.00 seconds.
+2025-07-03 07:46:20,439 - INFO - Synchronizing: Dog Population since 1970
+2025-07-03 07:46:20,895 - INFO - Starting import for 100445
+2025-07-03 07:46:20,895 - INFO - Synchronisation for 100445 completed in 0.00 seconds.
+2025-07-03 07:46:20,895 - INFO - Synchronizing: Dognames in Basel-Stadt
+2025-07-03 07:46:21,270 - INFO - Starting import for 100446
+2025-07-03 07:46:21,270 - INFO - Synchronisation for 100446 completed in 0.00 seconds.
+2025-07-03 07:46:21,270 - INFO - Synchronizing: Land price by community in Baselland
+2025-07-03 07:46:21,745 - INFO - Starting import for 12070
+2025-07-03 07:46:21,745 - INFO - Synchronisation for 12070 completed in 0.00 seconds.
+2025-07-03 07:46:21,745 - INFO - Synchronizing: kGWR Baselland
+2025-07-03 07:46:22,009 - INFO - Starting import for 12160
+2025-07-03 07:46:22,010 - INFO - Synchronisation for 12160 completed in 0.00 seconds.
+2025-07-03 07:46:22,010 - INFO - Synchronizing: Population of Basel
+2025-07-03 07:46:22,382 - INFO - Starting import for 100059
+2025-07-03 07:46:22,382 - INFO - Synchronisation for 100059 completed in 0.00 seconds.
+2025-07-03 07:46:22,382 - INFO - Synchronizing: Daily overnight stays, available and occupied rooms in Basel
+2025-07-03 07:46:23,958 - INFO - Starting import for 100106
+2025-07-03 07:46:23,958 - INFO - Synchronisation for 100106 completed in 0.00 seconds.
+2025-07-03 07:46:23,958 - INFO - Synchronizing: Population of Baselland by age, gender and nationality
+2025-07-03 07:46:24,280 - INFO - Starting import for 10010
+2025-07-03 07:46:24,280 - INFO - Synchronisation for 10010 completed in 0.00 seconds.
+2025-07-03 07:46:24,280 - INFO - Synchronizing: Population of Basel-Stadt by residential district
+2025-07-03 07:46:24,592 - INFO - Starting import for 100060
+2025-07-03 07:46:24,592 - INFO - Synchronisation for 100060 completed in 0.00 seconds.
+2025-07-03 07:46:24,592 - INFO - Synchronizing: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-03 07:46:25,016 - INFO - Starting import for 100413
+2025-07-03 07:46:25,032 - INFO - No new data for dataset ds_100413 was found.
+2025-07-03 07:46:25,032 - INFO - Synchronisation for 100413 completed in 0.02 seconds.
+2025-07-03 07:46:25,032 - INFO - Synchronizing: Daily arrivals and overnight stays by origin in Basel
+2025-07-03 07:46:25,401 - INFO - Starting import for 100414
+2025-07-03 07:46:25,427 - INFO - No new data for dataset ds_100414 was found.
+2025-07-03 07:46:25,427 - INFO - Synchronisation for 100414 completed in 0.03 seconds.
+2025-07-03 07:46:25,427 - INFO - Synchronizing: Rent prices in the canton of Baselland/Switzerland
+2025-07-03 07:46:25,875 - INFO - Starting import for 13010
+2025-07-03 07:46:25,875 - INFO - Synchronisation for 13010 completed in 0.00 seconds.
+2025-07-03 07:46:25,875 - INFO - Synchronizing: Dwellings Basel-Stadt (GWR)
+2025-07-03 07:46:26,270 - INFO - Starting import for 100232
+2025-07-03 07:46:26,271 - INFO - Synchronisation for 100232 completed in 0.00 seconds.
+2025-07-03 07:46:26,271 - INFO - Synchronizing: Opendata Datasets Basel-Stadt
+2025-07-03 07:46:26,712 - INFO - Starting import for 100057
+2025-07-03 07:46:26,712 - INFO - Synchronisation for 100057 completed in 0.00 seconds.
+2025-07-03 07:46:26,713 - INFO - Synchronizing: Addresses in Basel
+2025-07-03 07:46:27,116 - INFO - Starting import for 100231
+2025-07-03 07:46:27,116 - INFO - Synchronisation for 100231 completed in 0.00 seconds.
+2025-07-03 07:46:27,116 - INFO - Synchronizing: Electricity consumption in Basel
+2025-07-03 07:46:27,711 - INFO - Starting import for 100233
+2025-07-03 07:46:27,727 - INFO - No new data for dataset ds_100233 was found.
+2025-07-03 07:46:27,727 - INFO - Synchronisation for 100233 completed in 0.02 seconds.
+2025-07-03 07:46:27,727 - INFO - Synchronisation was completed successfully.
+2025-07-03 07:46:27,737 - INFO - Generating data insights...
+2025-07-03 07:46:27,737 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-03 07:50:04,260 - INFO - Starting data synchronisation...
+2025-07-03 07:50:04,261 - INFO - Synchronizing: Virus Wastewater Monitoring
+2025-07-03 07:50:05,223 - INFO - Starting import for 100302
+2025-07-03 07:50:05,244 - INFO - New data available in ODS. Last record date: 2025-06-30 00:00:00+00:00
+2025-07-03 07:50:06,113 - INFO - Downloaded 43 records from ODS.
+2025-07-03 07:50:06,119 - INFO - Deleting records with missing values in fields: ['sample_ba_nr']
+2025-07-03 07:50:06,120 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:50:06,133 - INFO - 0 records were read from files/100302_agg.parquet.
+2025-07-03 07:50:06,133 - INFO - data was uploaded to Table ds_100302 successfully.
+2025-07-03 07:50:06,133 - INFO - 0 records added to target database table ds_100302.
+2025-07-03 07:50:06,133 - INFO - Synchronisation for 100302 completed in 0.91 seconds.
+2025-07-03 07:50:06,134 - INFO - Synchronizing: Weather Data at NBCN Station Binningen
+2025-07-03 07:50:07,576 - INFO - Starting import for 100254
+2025-07-03 07:50:07,617 - INFO - No new data for dataset ds_100254 was found.
+2025-07-03 07:50:07,617 - INFO - Synchronisation for 100254 completed in 0.04 seconds.
+2025-07-03 07:50:07,617 - INFO - Synchronizing: Air Quality at NCBN station Binningen
+2025-07-03 07:50:09,042 - INFO - Starting import for 100051
+2025-07-03 07:50:09,059 - INFO - New data available in ODS. Last record date: 2025-07-03 23:00:00+00:00
+2025-07-03 07:50:09,457 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:50:09,458 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:50:09,458 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:50:09,462 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:50:09,462 - INFO - Deleting records with missing values in fields: ['max_o3_ug_m3']
+2025-07-03 07:50:09,463 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:50:09,467 - INFO - 0 records were read from files/100051_agg.parquet.
+2025-07-03 07:50:09,467 - INFO - data was uploaded to Table ds_100051 successfully.
+2025-07-03 07:50:09,468 - INFO - 0 records added to target database table ds_100051.
+2025-07-03 07:50:09,468 - INFO - Synchronisation for 100051 completed in 0.43 seconds.
+2025-07-03 07:50:09,468 - INFO - Synchronizing: Rhine river discharge and water level
+2025-07-03 07:50:10,098 - INFO - Starting import for 100089
+2025-07-03 07:50:10,118 - INFO - New data available in ODS. Last record date: 2025-07-03 05:30:00+00:00
+2025-07-03 07:50:11,255 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:50:11,256 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:50:11,256 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:50:11,259 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:50:11,259 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:50:11,263 - INFO - 0 records were read from files/100089_agg.parquet.
+2025-07-03 07:50:11,263 - INFO - data was uploaded to Table ds_100089 successfully.
+2025-07-03 07:50:11,263 - INFO - 0 records added to target database table ds_100089.
+2025-07-03 07:50:11,263 - INFO - Synchronisation for 100089 completed in 1.16 seconds.
+2025-07-03 07:50:11,263 - INFO - Synchronizing: Air traffic at airport Basel/Mulhouse
+2025-07-03 07:50:11,870 - INFO - Starting import for 100078
+2025-07-03 07:50:11,887 - INFO - No new data for dataset ds_100078 was found.
+2025-07-03 07:50:11,888 - INFO - Synchronisation for 100078 completed in 0.02 seconds.
+2025-07-03 07:50:11,888 - INFO - Synchronizing: Dog population in Basel by breed
+2025-07-03 07:50:12,622 - INFO - Starting import for 100444
+2025-07-03 07:50:12,622 - INFO - Synchronisation for 100444 completed in 0.00 seconds.
+2025-07-03 07:50:12,622 - INFO - Synchronizing: Dog Population since 1970
+2025-07-03 07:50:13,302 - INFO - Starting import for 100445
+2025-07-03 07:50:13,302 - INFO - Synchronisation for 100445 completed in 0.00 seconds.
+2025-07-03 07:50:13,302 - INFO - Synchronizing: Dognames in Basel-Stadt
+2025-07-03 07:50:13,964 - INFO - Starting import for 100446
+2025-07-03 07:50:13,964 - INFO - Synchronisation for 100446 completed in 0.00 seconds.
+2025-07-03 07:50:13,964 - INFO - Synchronizing: Land price by community in Baselland
+2025-07-03 07:50:14,394 - INFO - Starting import for 12070
+2025-07-03 07:50:14,394 - INFO - Synchronisation for 12070 completed in 0.00 seconds.
+2025-07-03 07:50:14,395 - INFO - Synchronizing: kGWR Baselland
+2025-07-03 07:50:15,364 - INFO - Starting import for 12160
+2025-07-03 07:50:15,365 - INFO - Synchronisation for 12160 completed in 0.00 seconds.
+2025-07-03 07:50:15,365 - INFO - Synchronizing: Population of Basel
+2025-07-03 07:50:16,047 - INFO - Starting import for 100059
+2025-07-03 07:50:16,047 - INFO - Synchronisation for 100059 completed in 0.00 seconds.
+2025-07-03 07:50:16,047 - INFO - Synchronizing: Daily overnight stays, available and occupied rooms in Basel
+2025-07-03 07:50:17,706 - INFO - Starting import for 100106
+2025-07-03 07:50:17,706 - INFO - Synchronisation for 100106 completed in 0.00 seconds.
+2025-07-03 07:50:17,706 - INFO - Synchronizing: Population of Baselland by age, gender and nationality
+2025-07-03 07:50:19,242 - INFO - Starting import for 10010
+2025-07-03 07:50:19,242 - INFO - Synchronisation for 10010 completed in 0.00 seconds.
+2025-07-03 07:50:19,242 - INFO - Synchronizing: Population of Basel-Stadt by residential district
+2025-07-03 07:50:19,690 - INFO - Starting import for 100060
+2025-07-03 07:50:19,691 - INFO - Synchronisation for 100060 completed in 0.00 seconds.
+2025-07-03 07:50:19,691 - INFO - Synchronizing: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-03 07:50:20,208 - INFO - Starting import for 100413
+2025-07-03 07:50:20,224 - INFO - No new data for dataset ds_100413 was found.
+2025-07-03 07:50:20,224 - INFO - Synchronisation for 100413 completed in 0.02 seconds.
+2025-07-03 07:50:20,224 - INFO - Synchronizing: Daily arrivals and overnight stays by origin in Basel
+2025-07-03 07:50:20,742 - INFO - Starting import for 100414
+2025-07-03 07:50:20,769 - INFO - No new data for dataset ds_100414 was found.
+2025-07-03 07:50:20,769 - INFO - Synchronisation for 100414 completed in 0.03 seconds.
+2025-07-03 07:50:20,769 - INFO - Synchronizing: Rent prices in the canton of Baselland/Switzerland
+2025-07-03 07:50:21,275 - INFO - Starting import for 13010
+2025-07-03 07:50:21,275 - INFO - Synchronisation for 13010 completed in 0.00 seconds.
+2025-07-03 07:50:21,275 - INFO - Synchronizing: Dwellings Basel-Stadt (GWR)
+2025-07-03 07:50:21,783 - INFO - Starting import for 100232
+2025-07-03 07:50:21,783 - INFO - Synchronisation for 100232 completed in 0.00 seconds.
+2025-07-03 07:50:21,784 - INFO - Synchronizing: Opendata Datasets Basel-Stadt
+2025-07-03 07:50:23,430 - INFO - Starting import for 100057
+2025-07-03 07:50:23,430 - INFO - Synchronisation for 100057 completed in 0.00 seconds.
+2025-07-03 07:50:23,430 - INFO - Synchronizing: Addresses in Basel
+2025-07-03 07:50:23,858 - INFO - Starting import for 100231
+2025-07-03 07:50:23,858 - INFO - Synchronisation for 100231 completed in 0.00 seconds.
+2025-07-03 07:50:23,859 - INFO - Synchronizing: Electricity consumption in Basel
+2025-07-03 07:50:24,392 - INFO - Starting import for 100233
+2025-07-03 07:50:24,411 - INFO - No new data for dataset ds_100233 was found.
+2025-07-03 07:50:24,411 - INFO - Synchronisation for 100233 completed in 0.02 seconds.
+2025-07-03 07:50:24,411 - INFO - Synchronisation was completed successfully.
+2025-07-03 07:50:24,419 - INFO - Generating data insights...
+2025-07-03 07:50:24,419 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-03 07:52:02,337 - INFO - Starting data synchronisation...
+2025-07-03 07:52:02,337 - INFO - Synchronizing: Virus Wastewater Monitoring
+2025-07-03 07:52:02,942 - INFO - Starting import for 100302
+2025-07-03 07:52:02,963 - INFO - New data available in ODS. Last record date: 2025-06-30 00:00:00+00:00
+2025-07-03 07:52:03,357 - INFO - Downloaded 43 records from ODS.
+2025-07-03 07:52:03,364 - INFO - Deleting records with missing values in fields: ['sample_ba_nr']
+2025-07-03 07:52:03,364 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:52:03,376 - INFO - 0 records were read from files/100302_agg.parquet.
+2025-07-03 07:52:03,376 - INFO - data was uploaded to Table ds_100302 successfully.
+2025-07-03 07:52:03,376 - INFO - 0 records added to target database table ds_100302.
+2025-07-03 07:52:03,376 - INFO - Synchronisation for 100302 completed in 0.43 seconds.
+2025-07-03 07:52:03,377 - INFO - Synchronizing: Weather Data at NBCN Station Binningen
+2025-07-03 07:52:03,834 - INFO - Starting import for 100254
+2025-07-03 07:52:03,876 - INFO - No new data for dataset ds_100254 was found.
+2025-07-03 07:52:03,876 - INFO - Synchronisation for 100254 completed in 0.04 seconds.
+2025-07-03 07:52:03,876 - INFO - Synchronizing: Air Quality at NCBN station Binningen
+2025-07-03 07:52:06,754 - INFO - Starting import for 100051
+2025-07-03 07:52:06,771 - INFO - New data available in ODS. Last record date: 2025-07-03 23:00:00+00:00
+2025-07-03 07:52:07,067 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:52:07,068 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:52:07,068 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:52:07,073 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:52:07,073 - INFO - Deleting records with missing values in fields: ['max_o3_ug_m3']
+2025-07-03 07:52:07,073 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:52:07,078 - INFO - 0 records were read from files/100051_agg.parquet.
+2025-07-03 07:52:07,078 - INFO - data was uploaded to Table ds_100051 successfully.
+2025-07-03 07:52:07,078 - INFO - 0 records added to target database table ds_100051.
+2025-07-03 07:52:07,078 - INFO - Synchronisation for 100051 completed in 0.32 seconds.
+2025-07-03 07:52:07,078 - INFO - Synchronizing: Rhine river discharge and water level
+2025-07-03 07:52:07,830 - INFO - Starting import for 100089
+2025-07-03 07:52:07,847 - INFO - New data available in ODS. Last record date: 2025-07-03 05:40:00+00:00
+2025-07-03 07:52:08,162 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:52:08,163 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:52:08,163 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:52:08,165 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:52:08,166 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:52:08,169 - INFO - 0 records were read from files/100089_agg.parquet.
+2025-07-03 07:52:08,169 - INFO - data was uploaded to Table ds_100089 successfully.
+2025-07-03 07:52:08,169 - INFO - 0 records added to target database table ds_100089.
+2025-07-03 07:52:08,169 - INFO - Synchronisation for 100089 completed in 0.34 seconds.
+2025-07-03 07:52:08,170 - INFO - Synchronizing: Air traffic at airport Basel/Mulhouse
+2025-07-03 07:52:08,990 - INFO - Starting import for 100078
+2025-07-03 07:52:09,007 - INFO - No new data for dataset ds_100078 was found.
+2025-07-03 07:52:09,007 - INFO - Synchronisation for 100078 completed in 0.02 seconds.
+2025-07-03 07:52:09,007 - INFO - Synchronizing: Dog population in Basel by breed
+2025-07-03 07:52:09,637 - INFO - Starting import for 100444
+2025-07-03 07:52:09,638 - INFO - Synchronisation for 100444 completed in 0.00 seconds.
+2025-07-03 07:52:09,638 - INFO - Synchronizing: Dog Population since 1970
+2025-07-03 07:52:10,229 - INFO - Starting import for 100445
+2025-07-03 07:52:10,229 - INFO - Synchronisation for 100445 completed in 0.00 seconds.
+2025-07-03 07:52:10,229 - INFO - Synchronizing: Dognames in Basel-Stadt
+2025-07-03 07:52:10,876 - INFO - Starting import for 100446
+2025-07-03 07:52:10,876 - INFO - Synchronisation for 100446 completed in 0.00 seconds.
+2025-07-03 07:52:10,876 - INFO - Synchronizing: Land price by community in Baselland
+2025-07-03 07:52:11,405 - INFO - Starting import for 12070
+2025-07-03 07:52:11,406 - INFO - Synchronisation for 12070 completed in 0.00 seconds.
+2025-07-03 07:52:11,406 - INFO - Synchronizing: kGWR Baselland
+2025-07-03 07:52:11,943 - INFO - Starting import for 12160
+2025-07-03 07:52:11,943 - INFO - Synchronisation for 12160 completed in 0.00 seconds.
+2025-07-03 07:52:11,943 - INFO - Synchronizing: Population of Basel
+2025-07-03 07:52:12,334 - INFO - Starting import for 100059
+2025-07-03 07:52:12,334 - INFO - Synchronisation for 100059 completed in 0.00 seconds.
+2025-07-03 07:52:12,334 - INFO - Synchronizing: Daily overnight stays, available and occupied rooms in Basel
+2025-07-03 07:52:12,673 - INFO - Starting import for 100106
+2025-07-03 07:52:12,673 - INFO - Synchronisation for 100106 completed in 0.00 seconds.
+2025-07-03 07:52:12,673 - INFO - Synchronizing: Population of Baselland by age, gender and nationality
+2025-07-03 07:52:13,076 - INFO - Starting import for 10010
+2025-07-03 07:52:13,076 - INFO - Synchronisation for 10010 completed in 0.00 seconds.
+2025-07-03 07:52:13,076 - INFO - Synchronizing: Population of Basel-Stadt by residential district
+2025-07-03 07:52:13,435 - INFO - Starting import for 100060
+2025-07-03 07:52:13,435 - INFO - Synchronisation for 100060 completed in 0.00 seconds.
+2025-07-03 07:52:13,435 - INFO - Synchronizing: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-03 07:52:14,404 - INFO - Starting import for 100413
+2025-07-03 07:52:14,423 - INFO - No new data for dataset ds_100413 was found.
+2025-07-03 07:52:14,423 - INFO - Synchronisation for 100413 completed in 0.02 seconds.
+2025-07-03 07:52:14,423 - INFO - Synchronizing: Daily arrivals and overnight stays by origin in Basel
+2025-07-03 07:52:14,883 - INFO - Starting import for 100414
+2025-07-03 07:52:14,910 - INFO - No new data for dataset ds_100414 was found.
+2025-07-03 07:52:14,910 - INFO - Synchronisation for 100414 completed in 0.03 seconds.
+2025-07-03 07:52:14,910 - INFO - Synchronizing: Rent prices in the canton of Baselland/Switzerland
+2025-07-03 07:52:15,863 - INFO - Starting import for 13010
+2025-07-03 07:52:15,864 - INFO - Synchronisation for 13010 completed in 0.00 seconds.
+2025-07-03 07:52:15,864 - INFO - Synchronizing: Dwellings Basel-Stadt (GWR)
+2025-07-03 07:52:16,248 - INFO - Starting import for 100232
+2025-07-03 07:52:16,248 - INFO - Synchronisation for 100232 completed in 0.00 seconds.
+2025-07-03 07:52:16,249 - INFO - Synchronizing: Opendata Datasets Basel-Stadt
+2025-07-03 07:52:16,603 - INFO - Starting import for 100057
+2025-07-03 07:52:16,603 - INFO - Synchronisation for 100057 completed in 0.00 seconds.
+2025-07-03 07:52:16,603 - INFO - Synchronizing: Addresses in Basel
+2025-07-03 07:52:17,082 - INFO - Starting import for 100231
+2025-07-03 07:52:17,082 - INFO - Synchronisation for 100231 completed in 0.00 seconds.
+2025-07-03 07:52:17,082 - INFO - Synchronizing: Electricity consumption in Basel
+2025-07-03 07:52:17,487 - INFO - Starting import for 100233
+2025-07-03 07:52:17,505 - INFO - No new data for dataset ds_100233 was found.
+2025-07-03 07:52:17,505 - INFO - Synchronisation for 100233 completed in 0.02 seconds.
+2025-07-03 07:52:17,505 - INFO - Synchronisation was completed successfully.
+2025-07-03 07:52:17,513 - INFO - Generating data insights...
+2025-07-03 07:52:17,513 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-03 07:52:17,536 - INFO - initializing story db record Rhine river water level and discharge daily report for 2025-07-03
+2025-07-03 07:52:17,548 - INFO - initializing comparisons
+2025-07-03 07:52:17,548 - INFO - sending prompt to OpenAI API
+2025-07-03 07:52:25,799 - INFO - response received from OpenAI API
+2025-07-03 07:52:25,810 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:52:25,811 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:52:25,811 - INFO - All data insights have been created.
+2025-07-03 07:52:25,811 - INFO - Generating data insight: Buildings in Baselland
+2025-07-03 07:52:25,957 - INFO - No data available or story 'Buildings in Baselland' is not due for generation on 2025-07-03.
+2025-07-03 07:52:25,957 - INFO - All data insights have been created.
+2025-07-03 07:52:25,957 - INFO - Generating data insight: Heat day report
+2025-07-03 07:52:26,041 - WARNING - No data found for context key: rank_this_year
+2025-07-03 07:52:26,054 - WARNING - No data found for context key: temperature_percentile_all_time
+2025-07-03 07:52:26,079 - INFO - initializing story db record Heat day report for 2025-07-03
+2025-07-03 07:52:26,091 - INFO - initializing comparisons
+2025-07-03 07:52:26,091 - INFO - sending prompt to OpenAI API
+2025-07-03 07:52:34,794 - INFO - response received from OpenAI API
+2025-07-03 07:52:34,795 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:52:34,796 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:52:34,796 - INFO - All data insights have been created.
+2025-07-03 07:52:34,796 - INFO - Generating data insight: Seasonal weather report
+2025-07-03 07:52:34,872 - INFO - initializing story db record Seasonal weather report for 2025-07-03
+2025-07-03 07:52:34,874 - INFO - initializing comparisons
+2025-07-03 07:52:34,875 - INFO - sending prompt to OpenAI API
+2025-07-03 07:52:48,237 - INFO - response received from OpenAI API
+2025-07-03 07:52:48,248 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:52:48,249 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:52:48,249 - INFO - All data insights have been created.
+2025-07-03 07:52:48,249 - INFO - Generating data insight: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-03 07:52:48,261 - INFO - initializing story db record Wastewater Monitoring for Viral RNA – ARA Basel for 2025-07-03
+2025-07-03 07:52:48,262 - INFO - initializing comparisons
+2025-07-03 07:52:48,263 - INFO - sending prompt to OpenAI API
+2025-07-03 07:52:50,156 - INFO - response received from OpenAI API
+2025-07-03 07:52:50,167 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:52:50,168 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:52:50,168 - INFO - All data insights have been created.
+2025-07-03 07:52:50,168 - INFO - Generating data insight: Dog population in Basel
+2025-07-03 07:52:50,254 - INFO - initializing story db record Dog population in Basel for 2025-07-03
+2025-07-03 07:52:50,256 - INFO - initializing comparisons
+2025-07-03 07:52:50,256 - INFO - sending prompt to OpenAI API
+2025-07-03 07:52:56,806 - INFO - response received from OpenAI API
+2025-07-03 07:52:56,808 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:52:56,809 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:52:56,809 - INFO - All data insights have been created.
+2025-07-03 07:52:56,809 - INFO - Generating data insight: Monthly weather report
+2025-07-03 07:52:56,919 - INFO - initializing story db record Monthly weather report for 2025-07-03
+2025-07-03 07:52:56,931 - INFO - initializing comparisons
+2025-07-03 07:52:56,931 - INFO - sending prompt to OpenAI API
+2025-07-03 07:53:07,202 - INFO - response received from OpenAI API
+2025-07-03 07:53:07,213 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:53:07,214 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:53:07,214 - INFO - All data insights have been created.
+2025-07-03 07:53:07,214 - INFO - Generating data insight: Monthly electricity consumption
+2025-07-03 07:53:07,229 - INFO - initializing story db record Monthly electricity consumption for 2025-07-03
+2025-07-03 07:53:07,230 - INFO - initializing comparisons
+2025-07-03 07:53:07,230 - INFO - sending prompt to OpenAI API
+2025-07-03 07:53:19,926 - INFO - response received from OpenAI API
+2025-07-03 07:53:19,928 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:53:19,929 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:53:19,929 - INFO - All data insights have been created.
+2025-07-03 07:53:19,929 - INFO - Generating data insight: Monthly Tourism Insight – Basel, Switzerland
+2025-07-03 07:53:19,979 - INFO - initializing story db record Monthly Tourism Insight – Basel, Switzerland for 2025-07-03
+2025-07-03 07:53:19,981 - INFO - initializing comparisons
+2025-07-03 07:53:19,981 - INFO - sending prompt to OpenAI API
+2025-07-03 07:53:21,282 - INFO - response received from OpenAI API
+2025-07-03 07:53:21,293 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:53:21,294 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:53:21,294 - INFO - All data insights have been created.
+2025-07-03 07:53:21,295 - INFO - Generating data insight: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-03 07:53:21,315 - WARNING - No data found for context key: rank_this_year
+2025-07-03 07:53:21,319 - INFO - No data available or story 'Daily Air Traffic at Airport Basel/Mulhouse' is not due for generation on 2025-07-03.
+2025-07-03 07:53:21,319 - INFO - All data insights have been created.
+2025-07-03 07:53:21,319 - INFO - Generating data insight: Rent price in the canton of Baselland
+2025-07-03 07:53:21,333 - INFO - No data available or story 'Rent price in the canton of Baselland' is not due for generation on 2025-07-03.
+2025-07-03 07:53:21,334 - INFO - All data insights have been created.
+2025-07-03 07:53:21,334 - INFO - Generating data insight: Daily Air Quality in Basel
+2025-07-03 07:53:21,348 - INFO - No data available or story 'Daily Air Quality in Basel' is not due for generation on 2025-07-03.
+2025-07-03 07:53:21,348 - INFO - All data insights have been created.
+2025-07-03 07:53:21,348 - INFO - Generating data insight: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-03 07:53:21,361 - INFO - No data available or story 'Metadata on Published OGD Datasets Basel-Stadt' is not due for generation on 2025-07-03.
+2025-07-03 07:53:21,361 - INFO - All data insights have been created.
+2025-07-03 07:59:26,112 - INFO - Starting data synchronisation...
+2025-07-03 07:59:26,112 - INFO - Synchronizing: Virus Wastewater Monitoring
+2025-07-03 07:59:26,529 - INFO - Starting import for 100302
+2025-07-03 07:59:26,551 - INFO - New data available in ODS. Last record date: 2025-06-30 00:00:00+00:00
+2025-07-03 07:59:26,824 - INFO - Downloaded 43 records from ODS.
+2025-07-03 07:59:26,831 - INFO - Deleting records with missing values in fields: ['sample_ba_nr']
+2025-07-03 07:59:26,831 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:59:26,844 - INFO - 0 records were read from files/100302_agg.parquet.
+2025-07-03 07:59:26,844 - INFO - data was uploaded to Table ds_100302 successfully.
+2025-07-03 07:59:26,845 - INFO - 0 records added to target database table ds_100302.
+2025-07-03 07:59:26,845 - INFO - Synchronisation for 100302 completed in 0.32 seconds.
+2025-07-03 07:59:26,845 - INFO - Synchronizing: Weather Data at NBCN Station Binningen
+2025-07-03 07:59:28,199 - INFO - Starting import for 100254
+2025-07-03 07:59:28,239 - INFO - No new data for dataset ds_100254 was found.
+2025-07-03 07:59:28,239 - INFO - Synchronisation for 100254 completed in 0.04 seconds.
+2025-07-03 07:59:28,239 - INFO - Synchronizing: Air Quality at NCBN station Binningen
+2025-07-03 07:59:28,476 - INFO - Starting import for 100051
+2025-07-03 07:59:28,493 - INFO - New data available in ODS. Last record date: 2025-07-03 23:00:00+00:00
+2025-07-03 07:59:28,695 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:59:28,696 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:59:28,696 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:59:28,701 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:59:28,701 - INFO - Deleting records with missing values in fields: ['max_o3_ug_m3']
+2025-07-03 07:59:28,702 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:59:28,707 - INFO - 0 records were read from files/100051_agg.parquet.
+2025-07-03 07:59:28,708 - INFO - data was uploaded to Table ds_100051 successfully.
+2025-07-03 07:59:28,708 - INFO - 0 records added to target database table ds_100051.
+2025-07-03 07:59:28,708 - INFO - Synchronisation for 100051 completed in 0.23 seconds.
+2025-07-03 07:59:28,708 - INFO - Synchronizing: Rhine river discharge and water level
+2025-07-03 07:59:29,024 - INFO - Starting import for 100089
+2025-07-03 07:59:29,042 - INFO - New data available in ODS. Last record date: 2025-07-03 05:40:00+00:00
+2025-07-03 07:59:29,287 - INFO - Downloaded 0 records from ODS.
+2025-07-03 07:59:29,287 - INFO - Numbr of records before time stamp coercion: 0
+2025-07-03 07:59:29,287 - INFO - Number of records after time stamp coercion: 0
+2025-07-03 07:59:29,290 - INFO - number of records: 0 after aggregation.
+2025-07-03 07:59:29,290 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-03 07:59:29,294 - INFO - 0 records were read from files/100089_agg.parquet.
+2025-07-03 07:59:29,294 - INFO - data was uploaded to Table ds_100089 successfully.
+2025-07-03 07:59:29,294 - INFO - 0 records added to target database table ds_100089.
+2025-07-03 07:59:29,294 - INFO - Synchronisation for 100089 completed in 0.27 seconds.
+2025-07-03 07:59:29,294 - INFO - Synchronizing: Air traffic at airport Basel/Mulhouse
+2025-07-03 07:59:29,571 - INFO - Starting import for 100078
+2025-07-03 07:59:29,591 - INFO - No new data for dataset ds_100078 was found.
+2025-07-03 07:59:29,591 - INFO - Synchronisation for 100078 completed in 0.02 seconds.
+2025-07-03 07:59:29,591 - INFO - Synchronizing: Dog population in Basel by breed
+2025-07-03 07:59:30,015 - INFO - Starting import for 100444
+2025-07-03 07:59:30,015 - INFO - Synchronisation for 100444 completed in 0.00 seconds.
+2025-07-03 07:59:30,016 - INFO - Synchronizing: Dog Population since 1970
+2025-07-03 07:59:30,427 - INFO - Starting import for 100445
+2025-07-03 07:59:30,428 - INFO - Synchronisation for 100445 completed in 0.00 seconds.
+2025-07-03 07:59:30,428 - INFO - Synchronizing: Dognames in Basel-Stadt
+2025-07-03 07:59:30,815 - INFO - Starting import for 100446
+2025-07-03 07:59:30,815 - INFO - Synchronisation for 100446 completed in 0.00 seconds.
+2025-07-03 07:59:30,815 - INFO - Synchronizing: Land price by community in Baselland
+2025-07-03 07:59:31,168 - INFO - Starting import for 12070
+2025-07-03 07:59:31,169 - INFO - Synchronisation for 12070 completed in 0.00 seconds.
+2025-07-03 07:59:31,169 - INFO - Synchronizing: kGWR Baselland
+2025-07-03 07:59:31,439 - INFO - Starting import for 12160
+2025-07-03 07:59:31,439 - INFO - Synchronisation for 12160 completed in 0.00 seconds.
+2025-07-03 07:59:31,439 - INFO - Synchronizing: Population of Basel
+2025-07-03 07:59:31,734 - INFO - Starting import for 100059
+2025-07-03 07:59:31,734 - INFO - Synchronisation for 100059 completed in 0.00 seconds.
+2025-07-03 07:59:31,734 - INFO - Synchronizing: Daily overnight stays, available and occupied rooms in Basel
+2025-07-03 07:59:32,025 - INFO - Starting import for 100106
+2025-07-03 07:59:32,025 - INFO - Synchronisation for 100106 completed in 0.00 seconds.
+2025-07-03 07:59:32,025 - INFO - Synchronizing: Population of Baselland by age, gender and nationality
+2025-07-03 07:59:32,328 - INFO - Starting import for 10010
+2025-07-03 07:59:32,328 - INFO - Synchronisation for 10010 completed in 0.00 seconds.
+2025-07-03 07:59:32,329 - INFO - Synchronizing: Population of Basel-Stadt by residential district
+2025-07-03 07:59:32,639 - INFO - Starting import for 100060
+2025-07-03 07:59:32,640 - INFO - Synchronisation for 100060 completed in 0.00 seconds.
+2025-07-03 07:59:32,640 - INFO - Synchronizing: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-03 07:59:33,076 - INFO - Starting import for 100413
+2025-07-03 07:59:33,092 - INFO - No new data for dataset ds_100413 was found.
+2025-07-03 07:59:33,092 - INFO - Synchronisation for 100413 completed in 0.02 seconds.
+2025-07-03 07:59:33,093 - INFO - Synchronizing: Daily arrivals and overnight stays by origin in Basel
+2025-07-03 07:59:33,423 - INFO - Starting import for 100414
+2025-07-03 07:59:33,450 - INFO - No new data for dataset ds_100414 was found.
+2025-07-03 07:59:33,450 - INFO - Synchronisation for 100414 completed in 0.03 seconds.
+2025-07-03 07:59:33,450 - INFO - Synchronizing: Rent prices in the canton of Baselland/Switzerland
+2025-07-03 07:59:33,801 - INFO - Starting import for 13010
+2025-07-03 07:59:33,802 - INFO - Synchronisation for 13010 completed in 0.00 seconds.
+2025-07-03 07:59:33,802 - INFO - Synchronizing: Dwellings Basel-Stadt (GWR)
+2025-07-03 07:59:34,132 - INFO - Starting import for 100232
+2025-07-03 07:59:34,132 - INFO - Synchronisation for 100232 completed in 0.00 seconds.
+2025-07-03 07:59:34,132 - INFO - Synchronizing: Opendata Datasets Basel-Stadt
+2025-07-03 07:59:34,424 - INFO - Starting import for 100057
+2025-07-03 07:59:34,424 - INFO - Synchronisation for 100057 completed in 0.00 seconds.
+2025-07-03 07:59:34,424 - INFO - Synchronizing: Addresses in Basel
+2025-07-03 07:59:34,796 - INFO - Starting import for 100231
+2025-07-03 07:59:34,797 - INFO - Synchronisation for 100231 completed in 0.00 seconds.
+2025-07-03 07:59:34,797 - INFO - Synchronizing: Electricity consumption in Basel
+2025-07-03 07:59:35,128 - INFO - Starting import for 100233
+2025-07-03 07:59:35,144 - INFO - No new data for dataset ds_100233 was found.
+2025-07-03 07:59:35,144 - INFO - Synchronisation for 100233 completed in 0.02 seconds.
+2025-07-03 07:59:35,144 - INFO - Synchronisation was completed successfully.
+2025-07-03 07:59:35,153 - INFO - Generating data insights...
+2025-07-03 07:59:35,153 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-03 07:59:35,176 - INFO - Initializing story db record Rhine river water level and discharge daily report for 2025-07-03
+2025-07-03 07:59:35,189 - INFO - initializing comparisons
+2025-07-03 07:59:35,189 - INFO - sending prompt to OpenAI API
+2025-07-03 07:59:42,600 - INFO - response received from OpenAI API
+2025-07-03 07:59:42,601 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:59:42,602 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:59:42,602 - INFO - All data insights have been created.
+2025-07-03 07:59:42,602 - INFO - Generating data insight: Buildings in Baselland
+2025-07-03 07:59:42,746 - INFO - No data available or story 'Buildings in Baselland' is not due for generation on 2025-07-03.
+2025-07-03 07:59:42,746 - INFO - All data insights have been created.
+2025-07-03 07:59:42,746 - INFO - Generating data insight: Heat day report
+2025-07-03 07:59:42,833 - WARNING - No data found for context key: rank_this_year
+2025-07-03 07:59:42,848 - WARNING - No data found for context key: temperature_percentile_all_time
+2025-07-03 07:59:42,878 - INFO - Initializing story db record Heat day report for 2025-07-03
+2025-07-03 07:59:42,880 - INFO - initializing comparisons
+2025-07-03 07:59:42,880 - INFO - sending prompt to OpenAI API
+2025-07-03 07:59:52,055 - INFO - response received from OpenAI API
+2025-07-03 07:59:52,066 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:59:52,067 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:59:52,067 - INFO - All data insights have been created.
+2025-07-03 07:59:52,067 - INFO - Generating data insight: Seasonal weather report
+2025-07-03 07:59:52,143 - INFO - No data available or story 'Seasonal weather report' is not due for generation on 2025-07-03.
+2025-07-03 07:59:52,143 - INFO - All data insights have been created.
+2025-07-03 07:59:52,143 - INFO - Generating data insight: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-03 07:59:52,153 - INFO - Initializing story db record Wastewater Monitoring for Viral RNA – ARA Basel for 2025-07-03
+2025-07-03 07:59:52,156 - INFO - initializing comparisons
+2025-07-03 07:59:52,156 - INFO - sending prompt to OpenAI API
+2025-07-03 07:59:53,967 - INFO - response received from OpenAI API
+2025-07-03 07:59:53,977 - INFO - AI response was successfully saved to the database.
+2025-07-03 07:59:53,978 - INFO - Log record for story generation was successfully saved.
+2025-07-03 07:59:53,978 - INFO - All data insights have been created.
+2025-07-03 07:59:53,979 - INFO - Generating data insight: Dog population in Basel
+2025-07-03 07:59:54,053 - INFO - No data available or story 'Dog population in Basel' is not due for generation on 2025-07-03.
+2025-07-03 07:59:54,053 - INFO - All data insights have been created.
+2025-07-03 07:59:54,053 - INFO - Generating data insight: Monthly weather report
+2025-07-03 07:59:54,162 - INFO - No data available or story 'Monthly weather report' is not due for generation on 2025-07-03.
+2025-07-03 07:59:54,162 - INFO - All data insights have been created.
+2025-07-03 07:59:54,163 - INFO - Generating data insight: Monthly electricity consumption
+2025-07-03 07:59:54,177 - INFO - No data available or story 'Monthly electricity consumption' is not due for generation on 2025-07-03.
+2025-07-03 07:59:54,177 - INFO - All data insights have been created.
+2025-07-03 07:59:54,177 - INFO - Generating data insight: Monthly Tourism Insight – Basel, Switzerland
+2025-07-03 07:59:54,225 - INFO - No data available or story 'Monthly Tourism Insight – Basel, Switzerland' is not due for generation on 2025-07-03.
+2025-07-03 07:59:54,225 - INFO - All data insights have been created.
+2025-07-03 07:59:54,225 - INFO - Generating data insight: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-03 07:59:54,244 - WARNING - No data found for context key: rank_this_year
+2025-07-03 07:59:54,247 - INFO - No data available or story 'Daily Air Traffic at Airport Basel/Mulhouse' is not due for generation on 2025-07-03.
+2025-07-03 07:59:54,247 - INFO - All data insights have been created.
+2025-07-03 07:59:54,247 - INFO - Generating data insight: Rent price in the canton of Baselland
+2025-07-03 07:59:54,258 - INFO - No data available or story 'Rent price in the canton of Baselland' is not due for generation on 2025-07-03.
+2025-07-03 07:59:54,258 - INFO - All data insights have been created.
+2025-07-03 07:59:54,258 - INFO - Generating data insight: Daily Air Quality in Basel
+2025-07-03 07:59:54,272 - INFO - No data available or story 'Daily Air Quality in Basel' is not due for generation on 2025-07-03.
+2025-07-03 07:59:54,272 - INFO - All data insights have been created.
+2025-07-03 07:59:54,272 - INFO - Generating data insight: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-03 07:59:54,283 - INFO - No data available or story 'Metadata on Published OGD Datasets Basel-Stadt' is not due for generation on 2025-07-03.
+2025-07-03 07:59:54,283 - INFO - All data insights have been created.
+2025-07-04 05:02:11,412 - INFO - Starting data synchronisation...
+2025-07-04 05:02:11,413 - INFO - Synchronizing: Virus Wastewater Monitoring
+2025-07-04 05:02:11,918 - INFO - Starting import for 100302
+2025-07-04 05:02:11,960 - INFO - New data available in ODS. Last record date: 2025-06-30 00:00:00+00:00
+2025-07-04 05:02:13,043 - INFO - Downloaded 43 records from ODS.
+2025-07-04 05:02:13,051 - INFO - Deleting records with missing values in fields: ['sample_ba_nr']
+2025-07-04 05:02:13,051 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-04 05:02:13,079 - INFO - 0 records were read from files/100302_agg.parquet.
+2025-07-04 05:02:13,080 - INFO - data was uploaded to Table ds_100302 successfully.
+2025-07-04 05:02:13,080 - INFO - 0 records added to target database table ds_100302.
+2025-07-04 05:02:13,080 - INFO - Synchronisation for 100302 completed in 1.16 seconds.
+2025-07-04 05:02:13,081 - INFO - Synchronizing: Weather Data at NBCN Station Binningen
+2025-07-04 05:02:13,801 - INFO - Starting import for 100254
+2025-07-04 05:02:13,872 - INFO - No new data for dataset ds_100254 was found.
+2025-07-04 05:02:13,872 - INFO - Synchronisation for 100254 completed in 0.07 seconds.
+2025-07-04 05:02:13,872 - INFO - Synchronizing: Air Quality at NCBN station Binningen
+2025-07-04 05:02:14,445 - INFO - Starting import for 100051
+2025-07-04 05:02:14,464 - INFO - New data available in ODS. Last record date: 2025-07-04 23:00:00+00:00
+2025-07-04 05:02:14,951 - INFO - Downloaded 24 records from ODS.
+2025-07-04 05:02:14,953 - INFO - Numbr of records before time stamp coercion: 24
+2025-07-04 05:02:14,953 - INFO - Number of records after time stamp coercion: 24
+2025-07-04 05:02:14,959 - INFO - number of records: 1 after aggregation.
+2025-07-04 05:02:14,959 - INFO - Deleting records with missing values in fields: ['max_o3_ug_m3']
+2025-07-04 05:02:14,959 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-04 05:02:14,965 - INFO - 1 records were read from files/100051_agg.parquet.
+2025-07-04 05:02:14,971 - INFO - data was uploaded to Table ds_100051 successfully.
+2025-07-04 05:02:14,972 - INFO - 1 records added to target database table ds_100051.
+2025-07-04 05:02:14,972 - INFO - Synchronisation for 100051 completed in 0.53 seconds.
+2025-07-04 05:02:14,972 - INFO - Synchronizing: Rhine river discharge and water level
+2025-07-04 05:02:15,611 - INFO - Starting import for 100089
+2025-07-04 05:02:15,638 - INFO - New data available in ODS. Last record date: 2025-07-04 02:50:00+00:00
+2025-07-04 05:02:16,027 - INFO - Downloaded 288 records from ODS.
+2025-07-04 05:02:16,039 - INFO - Numbr of records before time stamp coercion: 288
+2025-07-04 05:02:16,040 - INFO - Number of records after time stamp coercion: 288
+2025-07-04 05:02:16,042 - INFO - number of records: 1 after aggregation.
+2025-07-04 05:02:16,042 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-04 05:02:16,046 - INFO - 1 records were read from files/100089_agg.parquet.
+2025-07-04 05:02:16,050 - INFO - data was uploaded to Table ds_100089 successfully.
+2025-07-04 05:02:16,050 - INFO - 1 records added to target database table ds_100089.
+2025-07-04 05:02:16,050 - INFO - Synchronisation for 100089 completed in 0.44 seconds.
+2025-07-04 05:02:16,050 - INFO - Synchronizing: Air traffic at airport Basel/Mulhouse
+2025-07-04 05:02:16,565 - INFO - Starting import for 100078
+2025-07-04 05:02:16,596 - INFO - No new data for dataset ds_100078 was found.
+2025-07-04 05:02:16,597 - INFO - Synchronisation for 100078 completed in 0.03 seconds.
+2025-07-04 05:02:16,597 - INFO - Synchronizing: Dog population in Basel by breed
+2025-07-04 05:02:17,234 - INFO - Starting import for 100444
+2025-07-04 05:02:17,234 - INFO - Synchronisation for 100444 completed in 0.00 seconds.
+2025-07-04 05:02:17,235 - INFO - Synchronizing: Dog Population since 1970
+2025-07-04 05:02:17,600 - INFO - Starting import for 100445
+2025-07-04 05:02:17,600 - INFO - Synchronisation for 100445 completed in 0.00 seconds.
+2025-07-04 05:02:17,600 - INFO - Synchronizing: Dognames in Basel-Stadt
+2025-07-04 05:02:18,231 - INFO - Starting import for 100446
+2025-07-04 05:02:18,231 - INFO - Synchronisation for 100446 completed in 0.00 seconds.
+2025-07-04 05:02:18,231 - INFO - Synchronizing: Land price by community in Baselland
+2025-07-04 05:02:18,757 - INFO - Starting import for 12070
+2025-07-04 05:02:18,757 - INFO - Synchronisation for 12070 completed in 0.00 seconds.
+2025-07-04 05:02:18,757 - INFO - Synchronizing: kGWR Baselland
+2025-07-04 05:02:19,595 - INFO - Starting import for 12160
+2025-07-04 05:02:19,595 - INFO - Synchronisation for 12160 completed in 0.00 seconds.
+2025-07-04 05:02:19,595 - INFO - Synchronizing: Population of Basel
+2025-07-04 05:02:20,046 - INFO - Starting import for 100059
+2025-07-04 05:02:20,046 - INFO - Synchronisation for 100059 completed in 0.00 seconds.
+2025-07-04 05:02:20,046 - INFO - Synchronizing: Daily overnight stays, available and occupied rooms in Basel
+2025-07-04 05:02:20,749 - INFO - Starting import for 100106
+2025-07-04 05:02:20,749 - INFO - Synchronisation for 100106 completed in 0.00 seconds.
+2025-07-04 05:02:20,750 - INFO - Synchronizing: Population of Baselland by age, gender and nationality
+2025-07-04 05:02:21,444 - INFO - Starting import for 10010
+2025-07-04 05:02:21,444 - INFO - Synchronisation for 10010 completed in 0.00 seconds.
+2025-07-04 05:02:21,444 - INFO - Synchronizing: Population of Basel-Stadt by residential district
+2025-07-04 05:02:21,960 - INFO - Starting import for 100060
+2025-07-04 05:02:21,961 - INFO - Synchronisation for 100060 completed in 0.00 seconds.
+2025-07-04 05:02:21,961 - INFO - Synchronizing: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-04 05:02:22,870 - INFO - Starting import for 100413
+2025-07-04 05:02:22,900 - INFO - No new data for dataset ds_100413 was found.
+2025-07-04 05:02:22,900 - INFO - Synchronisation for 100413 completed in 0.03 seconds.
+2025-07-04 05:02:22,900 - INFO - Synchronizing: Daily arrivals and overnight stays by origin in Basel
+2025-07-04 05:02:23,268 - INFO - Starting import for 100414
+2025-07-04 05:02:23,314 - INFO - No new data for dataset ds_100414 was found.
+2025-07-04 05:02:23,314 - INFO - Synchronisation for 100414 completed in 0.05 seconds.
+2025-07-04 05:02:23,315 - INFO - Synchronizing: Rent prices in the canton of Baselland/Switzerland
+2025-07-04 05:02:23,805 - INFO - Starting import for 13010
+2025-07-04 05:02:23,805 - INFO - Synchronisation for 13010 completed in 0.00 seconds.
+2025-07-04 05:02:23,805 - INFO - Synchronizing: Dwellings Basel-Stadt (GWR)
+2025-07-04 05:02:24,149 - INFO - Starting import for 100232
+2025-07-04 05:02:24,149 - INFO - Synchronisation for 100232 completed in 0.00 seconds.
+2025-07-04 05:02:24,149 - INFO - Synchronizing: Opendata Datasets Basel-Stadt
+2025-07-04 05:02:24,665 - INFO - Starting import for 100057
+2025-07-04 05:02:24,666 - INFO - Synchronisation for 100057 completed in 0.00 seconds.
+2025-07-04 05:02:24,666 - INFO - Synchronizing: Addresses in Basel
+2025-07-04 05:02:25,150 - INFO - Starting import for 100231
+2025-07-04 05:02:25,150 - INFO - Synchronisation for 100231 completed in 0.00 seconds.
+2025-07-04 05:02:25,150 - INFO - Synchronizing: Electricity consumption in Basel
+2025-07-04 05:02:25,719 - INFO - Starting import for 100233
+2025-07-04 05:02:25,736 - INFO - New data available in ODS. Last record date: 2025-06-30 21:45:00+00:00
+2025-07-04 05:02:26,143 - INFO - Downloaded 96 records from ODS.
+2025-07-04 05:02:26,144 - INFO - Numbr of records before time stamp coercion: 96
+2025-07-04 05:02:26,145 - INFO - Number of records after time stamp coercion: 96
+2025-07-04 05:02:26,157 - INFO - number of records: 1 after aggregation.
+2025-07-04 05:02:26,157 - INFO - Adding time aggregation fields (season, year, month etc.)
+2025-07-04 05:02:26,160 - INFO - 1 records were read from files/100233_agg.parquet.
+2025-07-04 05:02:26,164 - INFO - data was uploaded to Table ds_100233 successfully.
+2025-07-04 05:02:26,164 - INFO - 1 records added to target database table ds_100233.
+2025-07-04 05:02:26,164 - INFO - Synchronisation for 100233 completed in 0.44 seconds.
+2025-07-04 05:02:26,164 - INFO - Synchronisation was completed successfully.
+2025-07-04 05:02:26,177 - INFO - Generating data insights...
+2025-07-04 05:02:26,177 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 05:02:26,202 - INFO - Initializing story db record Rhine river water level and discharge daily report for 2025-07-04
+2025-07-04 05:02:26,207 - INFO - initializing comparisons
+2025-07-04 05:02:26,207 - INFO - sending prompt to OpenAI API
+2025-07-04 05:02:35,592 - INFO - response received from OpenAI API
+2025-07-04 05:02:35,616 - INFO - AI response was successfully saved to the database.
+2025-07-04 05:02:35,618 - INFO - Log record for story generation was successfully saved.
+2025-07-04 05:02:35,618 - INFO - All data insights have been created.
+2025-07-04 05:02:35,618 - INFO - Generating data insight: Buildings in Baselland
+2025-07-04 05:02:35,779 - INFO - No data available or story 'Buildings in Baselland' is not due for generation on 2025-07-04.
+2025-07-04 05:02:35,779 - INFO - All data insights have been created.
+2025-07-04 05:02:35,779 - INFO - Generating data insight: Heat day report
+2025-07-04 05:02:35,875 - WARNING - No data found for context key: rank_this_year
+2025-07-04 05:02:35,893 - WARNING - No data found for context key: temperature_percentile_all_time
+2025-07-04 05:02:35,926 - INFO - No data available or story 'Heat day report' is not due for generation on 2025-07-04.
+2025-07-04 05:02:35,926 - INFO - All data insights have been created.
+2025-07-04 05:02:35,926 - INFO - Generating data insight: Seasonal weather report
+2025-07-04 05:02:36,011 - INFO - No data available or story 'Seasonal weather report' is not due for generation on 2025-07-04.
+2025-07-04 05:02:36,011 - INFO - All data insights have been created.
+2025-07-04 05:02:36,011 - INFO - Generating data insight: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-04 05:02:36,021 - INFO - Initializing story db record Wastewater Monitoring for Viral RNA – ARA Basel for 2025-07-04
+2025-07-04 05:02:36,023 - INFO - initializing comparisons
+2025-07-04 05:02:36,023 - INFO - sending prompt to OpenAI API
+2025-07-04 05:02:38,733 - INFO - response received from OpenAI API
+2025-07-04 05:02:38,743 - INFO - AI response was successfully saved to the database.
+2025-07-04 05:02:38,744 - INFO - Log record for story generation was successfully saved.
+2025-07-04 05:02:38,744 - INFO - All data insights have been created.
+2025-07-04 05:02:38,745 - INFO - Generating data insight: Dog population in Basel
+2025-07-04 05:02:38,821 - INFO - No data available or story 'Dog population in Basel' is not due for generation on 2025-07-04.
+2025-07-04 05:02:38,821 - INFO - All data insights have been created.
+2025-07-04 05:02:38,821 - INFO - Generating data insight: Monthly weather report
+2025-07-04 05:02:38,960 - INFO - No data available or story 'Monthly weather report' is not due for generation on 2025-07-04.
+2025-07-04 05:02:38,960 - INFO - All data insights have been created.
+2025-07-04 05:02:38,960 - INFO - Generating data insight: Monthly electricity consumption
+2025-07-04 05:02:38,973 - INFO - No data available or story 'Monthly electricity consumption' is not due for generation on 2025-07-04.
+2025-07-04 05:02:38,973 - INFO - All data insights have been created.
+2025-07-04 05:02:38,973 - INFO - Generating data insight: Monthly Tourism Insight – Basel, Switzerland
+2025-07-04 05:02:39,023 - INFO - No data available or story 'Monthly Tourism Insight – Basel, Switzerland' is not due for generation on 2025-07-04.
+2025-07-04 05:02:39,023 - INFO - All data insights have been created.
+2025-07-04 05:02:39,023 - INFO - Generating data insight: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-04 05:02:39,041 - WARNING - No data found for context key: rank_this_year
+2025-07-04 05:02:39,044 - INFO - No data available or story 'Daily Air Traffic at Airport Basel/Mulhouse' is not due for generation on 2025-07-04.
+2025-07-04 05:02:39,044 - INFO - All data insights have been created.
+2025-07-04 05:02:39,045 - INFO - Generating data insight: Rent price in the canton of Baselland
+2025-07-04 05:02:39,055 - INFO - No data available or story 'Rent price in the canton of Baselland' is not due for generation on 2025-07-04.
+2025-07-04 05:02:39,055 - INFO - All data insights have been created.
+2025-07-04 05:02:39,055 - INFO - Generating data insight: Daily Air Quality in Basel
+2025-07-04 05:02:39,069 - INFO - No data available or story 'Daily Air Quality in Basel' is not due for generation on 2025-07-04.
+2025-07-04 05:02:39,069 - INFO - All data insights have been created.
+2025-07-04 05:02:39,069 - INFO - Generating data insight: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-04 05:02:39,083 - INFO - No data available or story 'Metadata on Published OGD Datasets Basel-Stadt' is not due for generation on 2025-07-04.
+2025-07-04 05:02:39,083 - INFO - All data insights have been created.
+2025-07-04 05:41:47,728 - INFO - Generating data insights...
+2025-07-04 05:41:47,729 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 06:19:36,039 - INFO - Generating data insights...
+2025-07-04 06:19:36,039 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 06:24:20,889 - INFO - Generating data insights...
+2025-07-04 06:24:20,890 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 06:25:30,028 - INFO - Generating data insights...
+2025-07-04 06:25:30,029 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 06:25:30,051 - INFO - Initializing story db record Rhine river water level and discharge daily report for 2025-07-04
+2025-07-04 06:25:30,054 - INFO - initializing comparisons
+2025-07-04 06:25:30,054 - INFO - sending prompt to OpenAI API
+2025-07-04 06:25:35,570 - INFO - response received from OpenAI API
+2025-07-04 06:25:35,580 - INFO - AI response was successfully saved to the database.
+2025-07-04 06:25:35,581 - INFO - Log record for story generation was successfully saved.
+2025-07-04 06:25:35,581 - INFO - All data insights have been created.
+2025-07-04 06:41:42,931 - INFO - Generating data insights...
+2025-07-04 06:41:42,932 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 06:41:42,954 - INFO - No data available or story 'Rhine river water level and discharge daily report' is not due for generation on 2025-07-04.
+2025-07-04 06:41:42,954 - INFO - All data insights have been created.
+2025-07-04 06:42:22,881 - INFO - Generating data insights...
+2025-07-04 06:42:22,882 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 06:43:09,799 - INFO - Generating data insights...
+2025-07-04 06:43:09,799 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 06:43:35,456 - INFO - Generating data insights...
+2025-07-04 06:43:35,456 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 06:43:54,408 - INFO - Generating data insights...
+2025-07-04 06:43:54,409 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 06:43:54,430 - INFO - Initializing story db record Rhine river water level and discharge daily report for 2025-07-04
+2025-07-04 06:43:54,432 - INFO - initializing comparisons
+2025-07-04 06:43:54,432 - INFO - sending prompt to OpenAI API
+2025-07-04 06:44:01,876 - INFO - response received from OpenAI API
+2025-07-04 06:44:01,878 - INFO - AI response was successfully saved to the database.
+2025-07-04 06:44:01,879 - INFO - Log record for story generation was successfully saved.
+2025-07-04 06:44:01,879 - INFO - All data insights have been created.
+2025-07-04 07:14:48,905 - INFO - Generating data insights...
+2025-07-04 07:14:48,906 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 07:14:48,928 - INFO - Initializing story db record Rhine river water level and discharge daily report for 2025-07-04
+2025-07-04 07:14:48,941 - INFO - initializing comparisons
+2025-07-04 07:14:48,941 - INFO - sending prompt to OpenAI API
+2025-07-04 07:14:50,444 - INFO - response received from OpenAI API
+2025-07-04 07:14:50,446 - INFO - AI response was successfully saved to the database.
+2025-07-04 07:14:50,447 - INFO - Log record for story generation was successfully saved.
+2025-07-04 07:14:50,447 - INFO - All data insights have been created.
+2025-07-04 07:18:54,297 - INFO - Generating data insights...
+2025-07-04 07:18:54,297 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 07:18:54,319 - INFO - Initializing story db record Rhine river water level and discharge daily report for 2025-07-04
+2025-07-04 07:18:54,331 - INFO - initializing comparisons
+2025-07-04 07:18:54,331 - INFO - sending prompt to OpenAI API
+2025-07-04 07:18:55,803 - INFO - response received from OpenAI API
+2025-07-04 07:18:55,805 - INFO - AI response was successfully saved to the database.
+2025-07-04 07:18:55,805 - INFO - Log record for story generation was successfully saved.
+2025-07-04 07:18:55,805 - INFO - All data insights have been created.
+2025-07-04 07:21:33,099 - INFO - Generating data insights...
+2025-07-04 07:21:33,099 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 07:21:33,123 - INFO - Initializing story db record Rhine river water level and discharge daily report for 2025-07-04
+2025-07-04 07:21:33,135 - INFO - initializing comparisons
+2025-07-04 07:21:33,135 - INFO - sending prompt to OpenAI API
+2025-07-04 07:21:52,636 - INFO - Generating data insights...
+2025-07-04 07:21:52,636 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 07:21:52,657 - INFO - Initializing story db record Rhine river water level and discharge daily report for 2025-07-04
+2025-07-04 07:21:52,669 - INFO - initializing comparisons
+2025-07-04 07:21:52,669 - INFO - sending prompt to OpenAI API
+2025-07-04 07:21:54,254 - INFO - response received from OpenAI API
+2025-07-04 07:21:54,265 - INFO - AI response was successfully saved to the database.
+2025-07-04 07:21:54,266 - INFO - Log record for story generation was successfully saved.
+2025-07-04 07:21:54,266 - INFO - All data insights have been created.
+2025-07-04 07:26:41,713 - INFO - Generating data insights...
+2025-07-04 07:26:41,714 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 07:26:41,734 - INFO - Initializing story db record Rhine river water level and discharge daily report for 2025-07-04
+2025-07-04 07:26:41,746 - INFO - initializing comparisons
+2025-07-04 07:26:41,746 - INFO - sending prompt to OpenAI API
+2025-07-04 07:26:42,725 - INFO - response received from OpenAI API
+2025-07-04 07:26:42,736 - INFO - AI response was successfully saved to the database.
+2025-07-04 07:26:42,737 - INFO - Log record for story generation was successfully saved.
+2025-07-04 07:26:42,737 - INFO - All data insights have been created.
+2025-07-04 07:28:16,763 - INFO - Generating data insights...
+2025-07-04 07:28:16,763 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 07:28:16,785 - INFO - Initializing story db record Rhine river water level and discharge daily report for 2025-07-04
+2025-07-04 07:28:16,788 - INFO - initializing comparisons
+2025-07-04 07:28:16,788 - INFO - sending prompt to OpenAI API
+2025-07-04 07:28:17,912 - INFO - response received from OpenAI API
+2025-07-04 07:28:17,924 - INFO - AI response was successfully saved to the database.
+2025-07-04 07:28:17,925 - INFO - Log record for story generation was successfully saved.
+2025-07-04 07:28:17,925 - INFO - All data insights have been created.
+2025-07-04 07:41:43,312 - INFO - Generating data insights...
+2025-07-04 07:41:43,312 - INFO - Generating data insight: Rhine river water level and discharge daily report
+2025-07-04 07:41:43,333 - INFO - Initializing story db record Rhine river water level and discharge daily report for 2025-07-04
+2025-07-04 07:41:43,345 - INFO - initializing comparisons
+2025-07-04 07:41:43,345 - INFO - sending prompt to OpenAI API
+2025-07-04 07:41:48,429 - INFO - response received from OpenAI API
+2025-07-04 07:41:48,440 - INFO - AI response was successfully saved to the database.
+2025-07-04 07:41:48,442 - INFO - Log record for story generation was successfully saved.
+2025-07-04 07:41:48,442 - INFO - All data insights have been created.

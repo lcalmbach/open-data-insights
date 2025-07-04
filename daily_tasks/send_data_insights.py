@@ -52,7 +52,12 @@ def run():
     logger.info(f"Starting sending mails...")
     today = date.today()
 
-    # 2. View in DataFrame laden
+    # remove empty stories
+    with conn.cursor() as cur:
+        cmd = "delete from report_generator.reports_story where content is null"
+        cur.execute(cmd)
+        conn.commit()
+
     cmd = "SELECT * FROM report_generator.v_insights2send"
     df = pd.read_sql_query(
         cmd,
@@ -64,25 +69,32 @@ def run():
     else:
         logger.info(f"Found {len(df)} stories to send.")
         for _, row in df.iterrows():
-            subject = f"Open Data Story: {row['title']}"
-            html_body = markdown.markdown(
-                row["story"], extensions=["markdown.extensions.tables"]
-            )
-            to_email = row["email"]
-            try:
-                send_mail(
-                    subject=subject,
-                    html_body=html_body,
-                    from_email="lcalmbach@gmail.com",
-                    to_email=to_email,
+            if row["story"]:
+                subject = f"Open Data Story: {row['title']}"
+                html_body = markdown.markdown(
+                    row["story"], extensions=["markdown.extensions.tables"]
                 )
-            except Exception as e:
-                logger.error(f"Error sending email to {to_email}: {e}")
-            time.sleep(2)
+                to_email = row["email"]
+                try:
+                    send_mail(
+                        subject=subject,
+                        html_body=html_body,
+                        from_email="lcalmbach@gmail.com",
+                        to_email=to_email,
+                    )
+                except Exception as e:
+                    logger.error(f"Error sending email to {to_email}: {e}")
+                time.sleep(2)
+                
+            else:
+                logger.info(
+                    f"Story for {row['title']} is empty, not sending email to {row['email']}"
+                )
         cmd = "update report_generator.reports_story set is_sent = true"
         with conn.cursor() as cur:
             cur.execute(cmd)
             conn.commit()
+        
         logger.info("Updated all records to is_sent = true.")
     conn.close()
 

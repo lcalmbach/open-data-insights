@@ -5,7 +5,7 @@ import numpy as np
 import requests
 import os
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 import calendar
 import urllib.parse
 from sqlalchemy import create_engine, text, MetaData, Table, select, desc
@@ -152,6 +152,7 @@ class PostgresClient:
 class Story:
     def __init__(self, template: dict, date: datetime, force_generation: bool = False):
         self.id = None  # is filled when record is created in the database
+        self.published_date_in_past = date < datetime.now(timezone.utc).date()
         self.force_generation = force_generation
         self.template = template
         self.published_date = date
@@ -172,23 +173,23 @@ class Story:
         self.reference_period_start, self.reference_period_end = (
             self.get_reference_period()
         )
-        self.data_is_published = self.is_published()
+        self.last_published_date  = self.get_last_published_date()
         self.measured_values = self.init_measured_values()
         self.context_values = {}
         self.context_values["context_data"] = self.get_context_data()
         self.title = self.get_title()
         self.post_publish_command = self.template.get("post_publish_command", None) 
 
-    def is_published(self) -> Optional[datetime]:
-        sql = """SELECT count(*) as result 
-            FROM report_generator.reports_storylog 
-            where reference_period_start = :date
-            and story_template_id = :template_id
+
+    def get_last_published_date(self) -> Optional[datetime]:
+        sql = """SELECT max(publish_date) as last_published_date
+            FROM report_generator.reports_storylog
+            WHERE story_template_id = :template_id
         """
 
-        params = {"template_id": self.template["id"], "date": self.reference_period_start}
+        params = {"template_id": self.template["id"]}
         df = self.dbclient.run_query(sql, params)
-        return df.iloc[0, 0]
+        return df.iloc[0, 0] if not df.empty else None
 
     def get_most_recent_day(self, sql: str) -> Optional[datetime]:
         """
@@ -411,21 +412,53 @@ class Story:
             - Returns True if all conditions are met and the story is due; otherwise, returns False.
         """
 
+        def get_publish_conditions_result()-> bool:
+            """
+            Checks whether all publish conditions defined in the story template are met.
+
+            Returns:
+                bool: True if all conditions are met, False otherwise.
+            """
+            if self.publish_conditions:
+                params = self.get_sql_command_params(self.publish_conditions)
+                df = self.dbclient.run_query(self.publish_conditions, params)
+                return (df.iloc[0, 0] == 1)
+            else:
+                return True # no conditions defined, so we assume they are met
+            
+        today = datetime.now(timezone.utc).date()
+
         if self.has_data_sql: 
             params = self.get_sql_command_params(self.has_data_sql)
             df = self.dbclient.run_query(self.has_data_sql, params)
             has_data = df.iloc[0]["cnt"] > 0
         else:
-            # if no has_data_sql is defined, we assume there is data 
             has_data = True
 
+        if self.template["reference_period_id"] == 36:  # monthly
+            regular_due_date = today.replace(day=1)
+        elif self.template["reference_period_id"] == 37:  # seasonal
+            season = month_to_season[today.month]
+            month, day = season_dates[season][0]
+            regular_due_date = date(today.year, month, day)  # ✅ use `date(...)`
+        elif self.template["reference_period_id"] == 38:  # yearly    
+            regular_due_date = today.replace(day=1, month=1)
+        else:
+            regular_due_date = today
+        
         if self.force_generation:
             is_due = has_data
+            date_is_due = True
+            publish_conditions_met = True
         else:
-            params = self.get_sql_command_params(self.publish_conditions)
-            df = self.dbclient.run_query(self.publish_conditions, params)
-            is_due = has_data and df.iloc[0, 0] == 1 and not(self.data_is_published)
-            is_due &= not self.data_is_published
+            # check if the regular due date has passed without publishing the story
+            date_is_due = (
+                True if self.last_published_date is None
+                else regular_due_date >= self.last_published_date
+            )
+            publish_conditions_met = get_publish_conditions_result()
+            is_due = has_data and date_is_due and publish_conditions_met
+        print(f"Story is due: {is_due}, has_data: {has_data}, date_is_due: {date_is_due}, publish_conditions_met: {publish_conditions_met}, regular_due_date: {regular_due_date}, last_published_date: {self.last_published_date}")
         return is_due
 
     def get_context_data(self) -> dict:
@@ -518,7 +551,6 @@ class Story:
             }
             self.dbclient.run_action_query(cmd, params)
             cmd = "insert into report_generator.reports_story (template_id, title, published_date, reference_period_start, reference_period_end, reference_values, ai_model) values (:template_id, :title, :published_date, :reference_period_start, :reference_period_end, :reference_values, :ai_model)"
-            print(self.measured_values)
             params = {
                 "template_id": int(self.template["id"]),
                 "published_date": self.published_date,
@@ -537,18 +569,23 @@ class Story:
             return new_id
 
         logger.info(
-            f"initializing story db record {self.template['title']} for {self.published_date.strftime('%Y-%m-%d')}"
+            f"Initializing story db record {self.template['title']} for {self.published_date.strftime('%Y-%m-%d')}"
         )
         self.id = insert_story_record()
         logger.info(f"initializing comparisons")
 
         logger.info(f"sending prompt to OpenAI API")
         self.content = self.generate_report_text()
-        logger.info(f"response received from OpenAI API")
-        save_story_record()
-        save_log_record()
-        if self.post_publish_command:
-            self.dbclient.run_action_query(self.post_publish_command)
+        if self.content is None or self.content == "":
+            logger.warning(
+                f"OpenAI API returned an empty response for story {self.template['title']} on {self.published_date.strftime('%Y-%m-%d')}"
+            )
+        else:
+            logger.info(f"response received from OpenAI API")
+            save_story_record()
+            save_log_record()
+            if self.post_publish_command:
+                self.dbclient.run_action_query(self.post_publish_command)
 
     def generate_report_text(self):
         """
@@ -567,18 +604,31 @@ class Story:
         client = OpenAI(api_key=api_key)
         disclaimer = """\nIf no reference data is available just return the text: no data was available for the period of interest.
         Format the output in markdown. Add a disclaimer that this content has been generated by an AI algorithm."""
+        
+        payload = {
+            "measured_values": self.measured_values,
+            "context_data": self.context_values
+        }
+        
+        messages = [
+            {
+                "role": "system",
+                "content": self.template["prompt_text"] + disclaimer,
+            },
+            {
+                "role": "user",
+                "content": (
+                    "Below is the statistical data in JSON format.\n\n"
+                    "```json\n" +
+                    json.dumps(payload, indent=2) +
+                    "\n```"
+                ),
+            }
+        ]
+          # print the messages for debugging           
         response = client.chat.completions.create(
             model=DEFAULT_AI_MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": self.template["prompt_text"] + disclaimer,
-                },
-                {
-                    "role": "user",
-                    "content": f"Measured data in reference period: \n\n {self.measured_values}. Historic comparison data:\n{self.context_values}",
-                },
-            ],
+            messages=messages,
             temperature=self.template["temperature"],
         )
         return response.choices[0].message.content

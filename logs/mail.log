@@ -73,3 +73,27 @@
 2025-07-01 06:56:01,303 - INFO - Updated all records to is_sent = true.
 2025-07-01 18:26:45,773 - INFO - Starting sending mails...
 2025-07-01 18:26:45,779 - INFO - no insights found for today. 2025-07-01
+2025-07-03 07:53:21,361 - INFO - Starting sending mails...
+2025-07-03 07:53:21,365 - INFO - Found 10 stories to send.
+2025-07-03 07:59:54,283 - INFO - Starting sending mails...
+2025-07-03 07:59:54,285 - INFO - Found 10 stories to send.
+2025-07-04 05:02:39,083 - INFO - Starting sending mails...
+2025-07-04 05:02:39,087 - INFO - Found 13 stories to send.
+2025-07-04 05:14:04,954 - INFO - Starting sending mails...
+2025-07-04 05:14:04,958 - INFO - Found 13 stories to send.
+2025-07-04 05:14:04,959 - INFO - Story for Rhine river water level and discharge daily report (2025-07-01) is empty, not sending email to lcalmbach@gmail.com
+2025-07-04 05:18:20,335 - INFO - Starting sending mails...
+2025-07-04 05:18:37,379 - INFO - Starting sending mails...
+2025-07-04 05:18:37,385 - INFO - Found 11 stories to send.
+2025-07-04 05:18:38,667 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-04 05:18:41,419 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-04 05:18:44,277 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-04 05:18:47,063 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-04 05:18:49,808 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-04 05:18:52,528 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-04 05:18:55,308 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-04 05:18:58,021 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-04 05:19:00,832 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-04 05:19:03,588 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-04 05:19:06,272 - INFO - Email sent to lcalmbach@gmail.com
+2025-07-04 05:19:08,282 - INFO - Updated all records to is_sent = true.
