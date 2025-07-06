@@ -8,7 +8,7 @@ from .models import (
     LookupValue,
     Dataset,
     StoryTemplateSubscription,
-    StoryLog
+    StoryLog,
 )
 
 
@@ -25,7 +25,10 @@ class StoryAdmin(admin.ModelAdmin):
         "published_date",
     )
     list_filter = ("template",)
-    search_fields = ("id", "title",)
+    search_fields = (
+        "id",
+        "title",
+    )
 
 
 @admin.register(StoryTemplate)
@@ -33,9 +36,10 @@ class StoryTemplateAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "title",
+        "reference_period",
     )
-    search_fields = ("title",)
-    list_filter = ["title"]  # shows a filter sidebar
+    search_fields = ("title","reference_period")
+    list_filter = ["title","reference_period"]  # shows a filter sidebar
 
 
 @admin.register(StoryTemplateContext)
@@ -87,30 +91,28 @@ class LookupValueAdmin(admin.ModelAdmin):
 @admin.register(Dataset)
 class DatasetAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "source_identifier")
-    sortable_by = (
-        "name",
-    )
-    sorted_by = (
-        "name",
-    )
+    sortable_by = ("name",)
+    sorted_by = ("name",)
     search_fields = ["name"]  # shows a filter sidebar
 
 
 @admin.register(StoryTemplateSubscription)
 class StoryTemplateSubscriptionAdmin(admin.ModelAdmin):
     list_display = ("story_template", "user", "create_date")
-    sortable_by = (
-        "user", "story_template"
-    )
-    sorted_by = (
-        "user",
-    )
+    sortable_by = ("user", "story_template")
+    sorted_by = ("user",)
     search_fields = ["user"]  # shows a filter sidebar
-    list_filter = ("user","story_template")
+    list_filter = ("user", "story_template")
+
 
 @admin.register(StoryLog)
 class StoryLogAdmin(admin.ModelAdmin):
-    list_display = ("story_template", "story", "publish_date", "reference_period_start", "reference_period_end")
+    list_display = (
+        "story_template",
+        "story",
+        "publish_date",
+        "reference_period_start",
+        "reference_period_end",
+    )
     sortable_by = ("story_template", "publish_date")
     search_fields = ("story_template__title", "story__title")
-

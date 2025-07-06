@@ -1,7 +1,6 @@
 import dj_database_url
 import os
 from pathlib import Path
-from decouple import config
 
 """
 Django settings for report_generator project.
@@ -24,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'your-default-secret-key-here')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -57,9 +56,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -96,7 +96,7 @@ WSGI_APPLICATION = "report_generator.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {}
-DATABASE_URL = config("DATABASE_URL", default=None)
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
     DATABASES = {
@@ -111,11 +111,11 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": config("DB_NAME"),
-            "USER": config("DB_USER"),
-            "PASSWORD": config("DB_PASSWORD"),
-            "HOST": config("DB_HOST"),
-            "PORT": config("DB_PORT", cast=int),
+            "NAME": os.environ.get("DB_NAME"),
+            "USER": os.environ.get("DB_USER"),
+            "PASSWORD": os.environ.get("DB_PASSWORD"),
+            "HOST": os.environ.get("DB_HOST"),
+            "PORT": int(os.environ.get("DB_PORT", "5432")),
             "OPTIONS": {
                 "options": "-c search_path=report_generator"
             }
@@ -183,3 +183,12 @@ APP_INFO = {
     "author_email": "lcalmbach@gmail.com",
     "repo_url": "https://github.com/lcalmbach/open-data-insights",
 }
+
+# ETL Configuration
+DB_DATA_SCHEMA = os.environ.get('DB_DATA_SCHEMA', 'opendata')
+ODS_BASE_URL = os.environ.get('ODS_BASE_URL', 'https://data.bs.ch/api/explore/v2.1/catalog/datasets')
+DATA_FILES_PATH = os.environ.get('DATA_FILES_PATH', str(BASE_DIR / 'files'))
+
+# OpenAI Configuration
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL', 'gpt-4o')

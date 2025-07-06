@@ -13,6 +13,7 @@ from django.conf import settings
 from django.views.generic import TemplateView
 from django.db.models import Q
 
+
 @never_cache
 def home_view(request):
     stories = list(Story.objects.order_by("-published_date"))
@@ -24,11 +25,15 @@ def home_view(request):
     next_story_id = stories[1].id if len(stories) > 1 else None
     story.content_html = markdown2.markdown(story.content, extras=["tables"])
 
-    return render(request, "home.html", {
-        "story": story,
-        "prev_story_id": None,
-        "next_story_id": next_story_id,
-    })
+    return render(
+        request,
+        "home.html",
+        {
+            "story": story,
+            "prev_story_id": None,
+            "next_story_id": next_story_id,
+        },
+    )
 
 
 def templates_view(request):
@@ -53,36 +58,42 @@ def templates_view(request):
 
 
 def stories_view(request):
-     # Fetch all templates
+    # Fetch all templates
     templates = StoryTemplate.objects.order_by("title")
 
     # Base queryset
-    stories = Story.objects.select_related('template').order_by("-published_date")
+    stories = Story.objects.select_related("template").order_by("-published_date")
 
     # Filter by selected template
-    template_id = request.GET.get('template')
+    template_id = request.GET.get("template")
     if template_id:
         stories = stories.filter(template_id=template_id)
 
     # Filter by search query
-    search = request.GET.get('search')
+    search = request.GET.get("search")
     if search:
         stories = stories.filter(
             Q(title__icontains=search) | Q(content__icontains=search)
         )
 
     # Selected story (for detail view)
-    story_id = request.GET.get('story')
+    story_id = request.GET.get("story")
     if not stories.filter(id=story_id).exists():
         story_id = stories.first().id if stories else None
     selected_story = stories.filter(id=story_id).first() if story_id else None
     if selected_story:
-        selected_story.content_html = markdown2.markdown(selected_story.content, extras=["tables"])
-    return render(request, 'reports/stories_list.html', {
-        'templates': templates,
-        'stories': stories,
-        'selected_story': selected_story,
-    })
+        selected_story.content_html = markdown2.markdown(
+            selected_story.content, extras=["tables"]
+        )
+    return render(
+        request,
+        "reports/stories_list.html",
+        {
+            "templates": templates,
+            "stories": stories,
+            "selected_story": selected_story,
+        },
+    )
 
 
 @login_required

@@ -50,7 +50,7 @@ class LookupValue(models.Model):
         verbose_name_plural = "Lookup Values"
 
     def __str__(self):
-        return f"{self.category.name}: {self.value}"
+        return self.value
 
 
 class ThemeManager(models.Manager):
@@ -204,7 +204,7 @@ class Dataset(models.Model):
     class Meta:
         verbose_name = "Dataset"
         verbose_name_plural = "Datasets"
-        ordering = ['name']  # or any other field
+        ordering = ["name"]  # or any other field
 
     def __str__(self):
         return self.name
@@ -216,7 +216,8 @@ class StoryTemplate(models.Model):
         help_text="Indicates if the story template is active. Only active templates will be used for generating stories.",
     )
     has_data_sql = models.TextField(
-        blank=True, null=True,
+        blank=True,
+        null=True,
         help_text="SQL command to check if there is data for a given date.",
     )
     publish_conditions = models.TextField(
@@ -253,7 +254,7 @@ class StoryTemplate(models.Model):
     class Meta:
         verbose_name = "Story Template"
         verbose_name_plural = "Story Templates"
-        ordering = ['title']  # or any other field
+        ordering = ["title"]  # or any other field
 
     def __str__(self):
         return self.title
@@ -357,11 +358,11 @@ class Story(models.Model):
         default=False,
         help_text="Indicates if the story has been sent to the user.",
     )
-    
+
     @property
     def reference_period(self):
         if self.reference_period_start == self.reference_period_end:
-            return self.reference_period_start.strftime('%Y-%m-%d')
+            return self.reference_period_start.strftime("%Y-%m-%d")
         else:
             return f"{ self.reference_period_start.strftime('%Y-%m-%d') } – { self.reference_period_end.strftime('%Y-%m-%d') }"
 
@@ -398,7 +399,7 @@ class StoryLog(models.Model):
     reference_period_end = models.DateField(
         default=default_yesterday,
         help_text="End date of the reference period for the log.",
-    )   
+    )
 
     class Meta:
         verbose_name = "Story Log"

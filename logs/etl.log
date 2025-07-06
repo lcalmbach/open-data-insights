@@ -1,0 +1,806 @@
+2025-07-05 09:30:52,273 - DatasetSync - INFO - Starting synchronization for dataset: Addresses in Basel
+2025-07-05 09:30:52,598 - DatasetSync - INFO - Successfully synchronized dataset: Addresses in Basel
+2025-07-05 09:30:52,608 - DatasetSync - INFO - Starting synchronization for dataset: Air Quality at NCBN station Binningen
+2025-07-05 09:30:53,402 - DatasetSync - ERROR - Failed to synchronize dataset: Air Quality at NCBN station Binningen
+2025-07-05 09:30:53,402 - DatasetSync - INFO - Starting synchronization for dataset: Air traffic at airport Basel/Mulhouse
+2025-07-05 09:30:53,801 - DatasetSync - INFO - Successfully synchronized dataset: Air traffic at airport Basel/Mulhouse
+2025-07-05 09:30:53,811 - DatasetSync - INFO - Starting synchronization for dataset: Daily arrivals and overnight stays by origin in Basel
+2025-07-05 09:30:54,170 - DatasetSync - INFO - Successfully synchronized dataset: Daily arrivals and overnight stays by origin in Basel
+2025-07-05 09:30:54,171 - DatasetSync - INFO - Starting synchronization for dataset: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-05 09:30:54,680 - DatasetSync - INFO - Successfully synchronized dataset: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-05 09:30:54,690 - DatasetSync - INFO - Starting synchronization for dataset: Daily overnight stays, available and occupied rooms in Basel
+2025-07-05 09:30:54,892 - DatasetSync - INFO - Successfully synchronized dataset: Daily overnight stays, available and occupied rooms in Basel
+2025-07-05 09:30:54,902 - DatasetSync - INFO - Starting synchronization for dataset: Dognames in Basel-Stadt
+2025-07-05 09:30:55,142 - DatasetSync - INFO - Successfully synchronized dataset: Dognames in Basel-Stadt
+2025-07-05 09:30:55,152 - DatasetSync - INFO - Starting synchronization for dataset: Dog population in Basel by breed
+2025-07-05 09:30:55,409 - DatasetSync - INFO - Successfully synchronized dataset: Dog population in Basel by breed
+2025-07-05 09:30:55,419 - DatasetSync - INFO - Starting synchronization for dataset: Dog Population since 1970
+2025-07-05 09:30:55,583 - DatasetSync - INFO - Successfully synchronized dataset: Dog Population since 1970
+2025-07-05 09:30:55,593 - DatasetSync - INFO - Starting synchronization for dataset: Dwellings Basel-Stadt (GWR)
+2025-07-05 09:30:55,834 - DatasetSync - INFO - Successfully synchronized dataset: Dwellings Basel-Stadt (GWR)
+2025-07-05 09:30:55,844 - DatasetSync - INFO - Starting synchronization for dataset: Electricity consumption in Basel
+2025-07-05 09:30:56,183 - DatasetSync - INFO - Successfully synchronized dataset: Electricity consumption in Basel
+2025-07-05 09:30:56,193 - DatasetSync - INFO - Starting synchronization for dataset: kGWR Baselland
+2025-07-05 09:30:56,386 - DatasetSync - INFO - Successfully synchronized dataset: kGWR Baselland
+2025-07-05 09:30:56,396 - DatasetSync - INFO - Starting synchronization for dataset: Land price by community in Baselland
+2025-07-05 09:30:56,687 - DatasetSync - INFO - Successfully synchronized dataset: Land price by community in Baselland
+2025-07-05 09:30:56,697 - DatasetSync - INFO - Starting synchronization for dataset: Opendata Datasets Basel-Stadt
+2025-07-05 09:30:56,908 - DatasetSync - INFO - Successfully synchronized dataset: Opendata Datasets Basel-Stadt
+2025-07-05 09:30:56,918 - DatasetSync - INFO - Starting synchronization for dataset: Population of Basel
+2025-07-05 09:30:57,098 - DatasetSync - INFO - Successfully synchronized dataset: Population of Basel
+2025-07-05 09:30:57,107 - DatasetSync - INFO - Starting synchronization for dataset: Population of Baselland by age, gender and nationality
+2025-07-05 09:30:57,257 - DatasetSync - INFO - Successfully synchronized dataset: Population of Baselland by age, gender and nationality
+2025-07-05 09:30:57,258 - DatasetSync - INFO - Starting synchronization for dataset: Population of Basel-Stadt by residential district
+2025-07-05 09:30:57,414 - DatasetSync - INFO - Successfully synchronized dataset: Population of Basel-Stadt by residential district
+2025-07-05 09:30:57,424 - DatasetSync - INFO - Starting synchronization for dataset: Rent prices in the canton of Baselland/Switzerland
+2025-07-05 09:30:57,661 - DatasetSync - INFO - Successfully synchronized dataset: Rent prices in the canton of Baselland/Switzerland
+2025-07-05 09:30:57,662 - DatasetSync - INFO - Starting synchronization for dataset: Rhine river discharge and water level
+2025-07-05 09:30:58,298 - DatasetSync - ERROR - Failed to synchronize dataset: Rhine river discharge and water level
+2025-07-05 09:30:58,299 - DatasetSync - INFO - Starting synchronization for dataset: Virus Wastewater Monitoring
+2025-07-05 09:30:59,040 - DatasetSync - INFO - Successfully synchronized dataset: Virus Wastewater Monitoring
+2025-07-05 09:30:59,040 - DatasetSync - INFO - Starting synchronization for dataset: Weather Data at NBCN Station Binningen
+2025-07-05 09:30:59,569 - DatasetSync - INFO - Successfully synchronized dataset: Weather Data at NBCN Station Binningen
+2025-07-05 09:30:59,580 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-05 09:30:59,580 - DatasetSync - INFO - Synchronization completed. Success: 19, Failed: 2
+2025-07-05 09:33:17,828 - DatasetSync - INFO - Starting synchronization for dataset: Addresses in Basel
+2025-07-05 09:33:18,178 - DatasetSync - INFO - Successfully synchronized dataset: Addresses in Basel
+2025-07-05 09:33:18,188 - DatasetSync - INFO - Starting synchronization for dataset: Air Quality at NCBN station Binningen
+2025-07-05 09:33:18,977 - DatasetSync - ERROR - Failed to synchronize dataset: Air Quality at NCBN station Binningen
+2025-07-05 09:33:18,977 - DatasetSync - INFO - Starting synchronization for dataset: Air traffic at airport Basel/Mulhouse
+2025-07-05 09:33:19,324 - DatasetSync - INFO - Successfully synchronized dataset: Air traffic at airport Basel/Mulhouse
+2025-07-05 09:33:19,324 - DatasetSync - INFO - Starting synchronization for dataset: Daily arrivals and overnight stays by origin in Basel
+2025-07-05 09:33:19,715 - DatasetSync - INFO - Successfully synchronized dataset: Daily arrivals and overnight stays by origin in Basel
+2025-07-05 09:33:19,725 - DatasetSync - INFO - Starting synchronization for dataset: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-05 09:33:20,184 - DatasetSync - INFO - Successfully synchronized dataset: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-05 09:33:20,194 - DatasetSync - INFO - Starting synchronization for dataset: Daily overnight stays, available and occupied rooms in Basel
+2025-07-05 09:33:20,392 - DatasetSync - INFO - Successfully synchronized dataset: Daily overnight stays, available and occupied rooms in Basel
+2025-07-05 09:33:20,402 - DatasetSync - INFO - Starting synchronization for dataset: Dognames in Basel-Stadt
+2025-07-05 09:33:20,833 - DatasetSync - INFO - Successfully synchronized dataset: Dognames in Basel-Stadt
+2025-07-05 09:33:20,834 - DatasetSync - INFO - Starting synchronization for dataset: Dog population in Basel by breed
+2025-07-05 09:33:21,025 - DatasetSync - INFO - Successfully synchronized dataset: Dog population in Basel by breed
+2025-07-05 09:33:21,035 - DatasetSync - INFO - Starting synchronization for dataset: Dog Population since 1970
+2025-07-05 09:33:21,310 - DatasetSync - INFO - Successfully synchronized dataset: Dog Population since 1970
+2025-07-05 09:33:21,320 - DatasetSync - INFO - Starting synchronization for dataset: Dwellings Basel-Stadt (GWR)
+2025-07-05 09:33:21,476 - DatasetSync - INFO - Successfully synchronized dataset: Dwellings Basel-Stadt (GWR)
+2025-07-05 09:33:21,486 - DatasetSync - INFO - Starting synchronization for dataset: Electricity consumption in Basel
+2025-07-05 09:33:21,829 - DatasetSync - INFO - Successfully synchronized dataset: Electricity consumption in Basel
+2025-07-05 09:33:21,839 - DatasetSync - INFO - Starting synchronization for dataset: kGWR Baselland
+2025-07-05 09:33:22,058 - DatasetSync - INFO - Successfully synchronized dataset: kGWR Baselland
+2025-07-05 09:33:22,068 - DatasetSync - INFO - Starting synchronization for dataset: Land price by community in Baselland
+2025-07-05 09:33:22,310 - DatasetSync - INFO - Successfully synchronized dataset: Land price by community in Baselland
+2025-07-05 09:33:22,320 - DatasetSync - INFO - Starting synchronization for dataset: Opendata Datasets Basel-Stadt
+2025-07-05 09:33:22,503 - DatasetSync - INFO - Successfully synchronized dataset: Opendata Datasets Basel-Stadt
+2025-07-05 09:33:22,513 - DatasetSync - INFO - Starting synchronization for dataset: Population of Basel
+2025-07-05 09:33:22,644 - DatasetSync - INFO - Successfully synchronized dataset: Population of Basel
+2025-07-05 09:33:22,645 - DatasetSync - INFO - Starting synchronization for dataset: Population of Baselland by age, gender and nationality
+2025-07-05 09:33:22,859 - DatasetSync - INFO - Successfully synchronized dataset: Population of Baselland by age, gender and nationality
+2025-07-05 09:33:22,869 - DatasetSync - INFO - Starting synchronization for dataset: Population of Basel-Stadt by residential district
+2025-07-05 09:33:23,094 - DatasetSync - INFO - Successfully synchronized dataset: Population of Basel-Stadt by residential district
+2025-07-05 09:33:23,104 - DatasetSync - INFO - Starting synchronization for dataset: Rent prices in the canton of Baselland/Switzerland
+2025-07-05 09:33:23,278 - DatasetSync - INFO - Successfully synchronized dataset: Rent prices in the canton of Baselland/Switzerland
+2025-07-05 09:33:23,288 - DatasetSync - INFO - Starting synchronization for dataset: Rhine river discharge and water level
+2025-07-05 09:33:24,446 - DatasetSync - ERROR - Failed to synchronize dataset: Rhine river discharge and water level
+2025-07-05 09:33:24,447 - DatasetSync - INFO - Starting synchronization for dataset: Virus Wastewater Monitoring
+2025-07-05 09:33:25,026 - DatasetSync - INFO - Successfully synchronized dataset: Virus Wastewater Monitoring
+2025-07-05 09:33:25,027 - DatasetSync - INFO - Starting synchronization for dataset: Weather Data at NBCN Station Binningen
+2025-07-05 09:33:25,485 - DatasetSync - INFO - Successfully synchronized dataset: Weather Data at NBCN Station Binningen
+2025-07-05 09:33:25,495 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-05 09:33:25,495 - DatasetSync - INFO - Synchronization completed. Success: 19, Failed: 2
+2025-07-05 09:36:07,797 - DatasetSync - INFO - Starting synchronization for dataset: Electricity consumption in Basel
+2025-07-05 09:36:08,283 - DatasetSync - INFO - Successfully synchronized dataset: Electricity consumption in Basel
+2025-07-05 09:36:08,293 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-05 09:36:08,293 - DatasetSync - INFO - Synchronization completed. Success: 1, Failed: 0
+2025-07-05 09:41:41,558 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-05 09:41:42,004 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-05 09:41:42,014 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-05 09:41:42,014 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2025-07-05 09:41:47,412 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-05 09:41:47,641 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-05 09:41:47,651 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-05 09:41:48,322 - DatasetSync - ERROR - Failed to synchronize dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-05 09:41:48,323 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-05 09:41:48,634 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-05 09:41:48,644 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-05 09:41:48,938 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-05 09:41:48,948 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-05 09:41:49,211 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-05 09:41:49,211 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-05 09:41:49,365 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-05 09:41:49,365 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-05 09:41:49,529 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-05 09:41:49,539 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-05 09:41:49,716 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-05 09:41:49,726 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-05 09:41:49,885 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-05 09:41:49,895 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-05 09:41:50,057 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-05 09:41:50,067 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-05 09:41:50,448 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-05 09:41:50,458 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-05 09:41:50,662 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-05 09:41:50,672 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-05 09:41:50,878 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-05 09:41:50,888 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-05 09:41:51,006 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-05 09:41:51,016 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-05 09:41:51,133 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-05 09:41:51,144 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-05 09:41:51,321 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-05 09:41:51,331 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-05 09:41:51,498 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-05 09:41:51,509 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-05 09:41:51,685 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-05 09:41:51,696 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-05 09:41:52,382 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-05 09:41:52,383 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-05 09:41:52,889 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-05 09:41:52,890 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-05 09:41:53,986 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-05 09:41:53,997 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-05 09:41:53,997 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 21, Failed: 2, Failed dataset IDs: [13, 4]
+2025-07-05 09:42:12,422 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-05 09:42:14,392 - DatasetSync - ERROR - Failed to synchronize dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-05 09:42:14,392 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-05 09:42:14,392 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [13]
+2025-07-05 10:26:18,568 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 10:26:18,613 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 10:26:18,613 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-05 11:00:31,863 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 11:07:34,385 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 11:07:34,386 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-05 11:08:01,745 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 11:08:01,774 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 11:08:01,775 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-05 11:08:36,518 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 11:08:36,559 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 11:08:36,559 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-05 11:11:13,393 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 11:12:26,019 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 11:54:09,714 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 11:55:14,797 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 12:06:49,996 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 12:06:50,197 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 12:06:50,197 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 12:06:50,201 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:06:50,201 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 12:06:50,202 - StoryGeneration - ERROR - Error generating story for template Daily Air Traffic at Airport Basel/Mulhouse: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:06:50,202 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 12:06:50,203 - StoryGeneration - INFO - Story generation skipped for template: Dog population in Basel
+2025-07-05 12:06:50,203 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-05 12:06:50,204 - StoryGeneration - ERROR - Error generating story for template Heat day report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:06:50,204 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 12:06:50,211 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 12:06:50,212 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-05 12:06:50,212 - StoryGeneration - ERROR - Error generating story for template Monthly electricity consumption: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:06:50,212 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 12:06:50,213 - StoryGeneration - ERROR - Error generating story for template Monthly Tourism Insight – Basel, Switzerland: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:06:50,213 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-05 12:06:50,213 - StoryGeneration - ERROR - Error generating story for template Monthly weather report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:06:50,213 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-05 12:06:50,217 - StoryGeneration - ERROR - Failed to generate story for template: Rent price in the canton of Baselland
+2025-07-05 12:06:50,217 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-05 12:06:50,217 - StoryGeneration - ERROR - Error generating story for template Rhine river water level and discharge daily report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:06:50,217 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-05 12:06:50,218 - StoryGeneration - ERROR - Error generating story for template Seasonal weather report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:06:50,218 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-05 12:06:50,218 - StoryGeneration - ERROR - Error generating story for template Wastewater Monitoring for Viral RNA – ARA Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:06:50,218 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 11, Skipped: 2
+2025-07-05 12:09:46,094 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 12:09:46,278 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 12:09:46,278 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 12:09:46,281 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:09:46,281 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 12:09:46,282 - StoryGeneration - ERROR - Error generating story for template Daily Air Traffic at Airport Basel/Mulhouse: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:09:46,282 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 12:09:46,283 - StoryGeneration - INFO - Story generation skipped for template: Dog population in Basel
+2025-07-05 12:09:46,283 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-05 12:09:46,284 - StoryGeneration - ERROR - Error generating story for template Heat day report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:09:46,284 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 12:09:46,288 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 12:09:46,288 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-05 12:09:46,289 - StoryGeneration - ERROR - Error generating story for template Monthly electricity consumption: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:09:46,289 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 12:09:46,290 - StoryGeneration - ERROR - Error generating story for template Monthly Tourism Insight – Basel, Switzerland: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:09:46,290 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-05 12:09:46,290 - StoryGeneration - ERROR - Error generating story for template Monthly weather report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:09:46,290 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-05 12:09:46,294 - StoryGeneration - ERROR - Failed to generate story for template: Rent price in the canton of Baselland
+2025-07-05 12:09:46,294 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-05 12:09:46,295 - StoryGeneration - ERROR - Error generating story for template Rhine river water level and discharge daily report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:09:46,295 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-05 12:09:46,295 - StoryGeneration - ERROR - Error generating story for template Seasonal weather report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:09:46,295 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-05 12:09:46,296 - StoryGeneration - ERROR - Error generating story for template Wastewater Monitoring for Viral RNA – ARA Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:09:46,296 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 11, Skipped: 2
+2025-07-05 12:37:26,428 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 12:37:26,617 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 12:37:26,618 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 12:37:26,620 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:37:26,620 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 12:37:26,622 - StoryGeneration - ERROR - Error generating story for template Daily Air Traffic at Airport Basel/Mulhouse: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:37:26,623 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 12:37:26,640 - StoryGeneration - ERROR - Failed to generate story for template: Dog population in Basel
+2025-07-05 12:37:26,641 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-05 12:37:26,643 - StoryGeneration - ERROR - Error generating story for template Heat day report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:37:26,643 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 12:37:26,647 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 12:37:26,647 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-05 12:37:26,648 - StoryGeneration - ERROR - Error generating story for template Monthly electricity consumption: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:37:26,648 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 12:37:26,661 - StoryGeneration - ERROR - Error generating story for template Monthly Tourism Insight – Basel, Switzerland: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:37:26,661 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-05 12:37:26,661 - StoryGeneration - ERROR - Error generating story for template Monthly weather report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:37:26,662 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-05 12:37:26,665 - StoryGeneration - ERROR - Failed to generate story for template: Rent price in the canton of Baselland
+2025-07-05 12:37:26,665 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-05 12:37:26,666 - StoryGeneration - ERROR - Error generating story for template Rhine river water level and discharge daily report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:37:26,666 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-05 12:37:26,667 - StoryGeneration - ERROR - Error generating story for template Seasonal weather report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:37:26,667 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-05 12:37:26,669 - StoryGeneration - ERROR - Error generating story for template Wastewater Monitoring for Viral RNA – ARA Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:37:26,669 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 12, Skipped: 1
+2025-07-05 12:37:46,019 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 12:37:46,058 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:37:46,058 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-05 12:40:11,983 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 12:40:12,172 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 12:40:12,172 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 12:40:12,174 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:40:12,174 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 12:40:12,175 - StoryGeneration - ERROR - Error generating story for template Daily Air Traffic at Airport Basel/Mulhouse: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:40:12,175 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 12:40:12,177 - StoryGeneration - ERROR - Failed to generate story for template: Dog population in Basel
+2025-07-05 12:40:12,178 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-05 12:40:12,179 - StoryGeneration - ERROR - Error generating story for template Heat day report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:40:12,179 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 12:40:12,182 - StoryGeneration - ERROR - Failed to generate story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 12:40:12,182 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-05 12:40:12,183 - StoryGeneration - ERROR - Error generating story for template Monthly electricity consumption: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:40:12,183 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 12:40:12,195 - StoryGeneration - ERROR - Error generating story for template Monthly Tourism Insight – Basel, Switzerland: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:40:12,195 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-05 12:40:12,196 - StoryGeneration - ERROR - Error generating story for template Monthly weather report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:40:12,196 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-05 12:40:12,199 - StoryGeneration - ERROR - Failed to generate story for template: Rent price in the canton of Baselland
+2025-07-05 12:40:12,199 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-05 12:40:12,201 - StoryGeneration - ERROR - Error generating story for template Rhine river water level and discharge daily report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:40:12,201 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-05 12:40:12,201 - StoryGeneration - ERROR - Error generating story for template Seasonal weather report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:40:12,201 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-05 12:40:12,203 - StoryGeneration - ERROR - Error generating story for template Wastewater Monitoring for Viral RNA – ARA Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:40:12,203 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 13, Skipped: 0
+2025-07-05 12:40:51,947 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 12:41:08,178 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 12:41:08,178 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 12:41:24,437 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:41:24,438 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 12:41:26,165 - StoryGeneration - ERROR - Error generating story for template Daily Air Traffic at Airport Basel/Mulhouse: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:41:26,166 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 12:42:56,101 - StoryGeneration - ERROR - Failed to generate story for template: Dog population in Basel
+2025-07-05 12:43:13,901 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-05 12:43:21,509 - StoryGeneration - ERROR - Error generating story for template Heat day report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:43:21,509 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 12:47:41,959 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 12:47:48,655 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 12:47:48,656 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 12:47:48,660 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:47:48,661 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 12:47:48,662 - StoryGeneration - ERROR - Error generating story for template Daily Air Traffic at Airport Basel/Mulhouse: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:47:48,662 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 12:58:50,018 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 12:58:50,056 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 12:58:50,056 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-05 15:34:20,637 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 15:34:20,688 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 15:34:20,688 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-05 15:34:45,054 - StoryGeneration - ERROR - Failed to generate story for template: Dog population in Basel
+2025-07-05 15:34:45,064 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-05 15:34:45,067 - StoryGeneration - ERROR - Error generating story for template Heat day report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 15:34:45,067 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 15:36:10,907 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 15:36:11,071 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 15:36:11,071 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 15:36:11,073 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 15:36:11,074 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 15:36:11,075 - StoryGeneration - ERROR - Error generating story for template Daily Air Traffic at Airport Basel/Mulhouse: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 15:36:11,075 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 15:38:20,932 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 15:38:20,933 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-05 15:38:20,936 - StoryGeneration - ERROR - Error generating story for template Heat day report: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 15:38:20,936 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 15:40:22,393 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 15:40:22,564 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 15:40:22,564 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 15:40:22,566 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 15:40:22,566 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 15:40:22,568 - StoryGeneration - ERROR - Error generating story for template Daily Air Traffic at Airport Basel/Mulhouse: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 15:40:22,568 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 15:42:12,762 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 15:44:07,431 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 15:44:19,348 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 15:45:23,427 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 15:47:20,570 - StoryGeneration - ERROR - Error generating story for template Daily Air Quality in Basel: 'StoryProcessor' object has no attribute 'month_to_season'
+2025-07-05 15:47:53,745 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 15:57:13,064 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 16:01:24,956 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 16:01:58,887 - StoryGeneration - ERROR - Failed to generate story for template: Daily Air Quality in Basel
+2025-07-05 16:01:58,897 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-05 16:02:48,869 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 16:18:29,462 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 16:23:10,917 - StoryGeneration - INFO - Successfully generated story for template: Daily Air Quality in Basel
+2025-07-05 16:24:57,842 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 16:27:29,545 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 16:27:29,749 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 16:27:29,749 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 16:27:29,752 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Quality in Basel
+2025-07-05 16:27:29,752 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 16:27:29,756 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 16:27:29,756 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 16:27:31,034 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 16:27:31,044 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-05 16:27:31,062 - StoryGeneration - INFO - Story generation skipped for template: Heat day report
+2025-07-05 16:27:31,062 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 16:27:31,066 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 16:27:31,066 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-05 16:27:33,947 - StoryGeneration - INFO - Successfully generated story for template: Monthly electricity consumption
+2025-07-05 16:27:33,957 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 16:27:35,496 - StoryGeneration - INFO - Successfully generated story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 16:27:35,506 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-05 16:27:36,710 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-05 16:27:36,720 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-05 16:27:36,724 - StoryGeneration - ERROR - Failed to generate story for template: Rent price in the canton of Baselland
+2025-07-05 16:27:36,724 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-05 16:27:36,726 - StoryGeneration - INFO - Story generation skipped for template: Rhine river water level and discharge daily report
+2025-07-05 16:27:36,726 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-05 16:27:36,729 - StoryGeneration - INFO - Story generation skipped for template: Seasonal weather report
+2025-07-05 16:27:36,730 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-05 16:27:40,700 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-05 16:27:40,710 - StoryGeneration - INFO - Story generation completed. Success: 5, Failed: 2, Skipped: 6
+2025-07-05 16:31:39,276 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 16:31:39,478 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 16:31:39,479 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 16:31:39,481 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Quality in Basel
+2025-07-05 16:31:39,481 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 16:31:39,485 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 16:31:39,485 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 16:31:40,387 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 16:31:40,397 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-05 16:31:40,413 - StoryGeneration - INFO - Story generation skipped for template: Heat day report
+2025-07-05 16:31:40,413 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 16:31:40,416 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 16:31:40,416 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-05 16:31:42,657 - StoryGeneration - INFO - Successfully generated story for template: Monthly electricity consumption
+2025-07-05 16:31:42,667 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 16:31:43,488 - StoryGeneration - INFO - Successfully generated story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 16:31:43,498 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-05 16:31:45,405 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-05 16:31:45,416 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-05 16:31:45,419 - StoryGeneration - ERROR - Failed to generate story for template: Rent price in the canton of Baselland
+2025-07-05 16:31:45,420 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-05 16:31:45,422 - StoryGeneration - INFO - Story generation skipped for template: Rhine river water level and discharge daily report
+2025-07-05 16:31:45,422 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-05 16:31:45,426 - StoryGeneration - INFO - Story generation skipped for template: Seasonal weather report
+2025-07-05 16:31:45,426 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-05 16:31:48,103 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-05 16:31:48,104 - StoryGeneration - INFO - Story generation completed. Success: 5, Failed: 2, Skipped: 6
+2025-07-05 16:32:32,887 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 16:32:33,068 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 16:32:33,068 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 16:32:33,070 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Quality in Basel
+2025-07-05 16:32:33,070 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 16:32:33,074 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 16:32:33,074 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 16:32:34,025 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 16:32:34,026 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-05 16:32:34,043 - StoryGeneration - INFO - Story generation skipped for template: Heat day report
+2025-07-05 16:32:34,043 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 16:32:34,046 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 16:32:34,046 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-05 16:32:37,137 - StoryGeneration - INFO - Successfully generated story for template: Monthly electricity consumption
+2025-07-05 16:32:37,148 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 16:32:38,251 - StoryGeneration - INFO - Successfully generated story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 16:32:38,252 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-05 16:34:28,504 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 16:34:28,691 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 16:34:28,691 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 16:34:28,694 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Quality in Basel
+2025-07-05 16:34:28,694 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 16:34:28,698 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 16:34:28,698 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 16:34:29,662 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 16:34:29,673 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-05 16:34:29,690 - StoryGeneration - INFO - Story generation skipped for template: Heat day report
+2025-07-05 16:34:29,690 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 16:34:29,694 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 16:34:29,694 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-05 16:34:32,052 - StoryGeneration - INFO - Successfully generated story for template: Monthly electricity consumption
+2025-07-05 16:34:32,052 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 16:34:32,894 - StoryGeneration - INFO - Successfully generated story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 16:34:32,904 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-05 16:34:33,847 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-05 16:34:33,857 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-05 16:34:33,860 - StoryGeneration - ERROR - Failed to generate story for template: Rent price in the canton of Baselland
+2025-07-05 16:34:33,860 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-05 16:34:33,862 - StoryGeneration - INFO - Story generation skipped for template: Rhine river water level and discharge daily report
+2025-07-05 16:34:33,862 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-05 16:34:33,866 - StoryGeneration - INFO - Story generation skipped for template: Seasonal weather report
+2025-07-05 16:34:33,866 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-05 16:34:36,212 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-05 16:34:36,222 - StoryGeneration - INFO - Story generation completed. Success: 5, Failed: 2, Skipped: 6
+2025-07-05 16:39:04,112 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 16:39:04,321 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 16:39:04,322 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 16:39:04,326 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Quality in Basel
+2025-07-05 16:39:04,326 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 16:39:04,331 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 16:39:04,331 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 16:39:05,403 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 16:39:05,413 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-05 16:39:05,430 - StoryGeneration - INFO - Story generation skipped for template: Heat day report
+2025-07-05 16:39:05,430 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 16:39:05,433 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-05 16:39:05,433 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-05 16:39:07,739 - StoryGeneration - INFO - Successfully generated story for template: Monthly electricity consumption
+2025-07-05 16:39:07,749 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 16:39:08,822 - StoryGeneration - INFO - Successfully generated story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-05 16:39:08,833 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-05 16:39:09,870 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-05 16:39:09,877 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-05 16:39:09,881 - StoryGeneration - ERROR - Failed to generate story for template: Rent price in the canton of Baselland
+2025-07-05 16:39:09,881 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-05 16:39:09,883 - StoryGeneration - INFO - Story generation skipped for template: Rhine river water level and discharge daily report
+2025-07-05 16:39:09,883 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-05 16:39:09,887 - StoryGeneration - INFO - Story generation skipped for template: Seasonal weather report
+2025-07-05 16:39:09,887 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-05 16:39:12,389 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-05 16:39:12,399 - StoryGeneration - INFO - Story generation completed. Success: 5, Failed: 2, Skipped: 6
+2025-07-05 17:04:46,570 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 17:04:46,742 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 17:04:46,742 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-05 17:08:59,304 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 17:08:59,504 - StoryGeneration - ERROR - Failed to generate story for template: Buildings in Baselland
+2025-07-05 17:08:59,504 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-05 17:11:03,998 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 17:11:13,659 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-05 17:11:13,660 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 17:12:01,152 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 17:12:11,359 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-05 17:12:11,360 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 17:16:28,122 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 17:16:28,163 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Quality in Basel
+2025-07-05 17:16:28,164 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 1
+2025-07-05 17:16:45,051 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-05 17:16:51,614 - StoryGeneration - INFO - Successfully generated story for template: Daily Air Quality in Basel
+2025-07-05 17:16:51,625 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 17:17:03,423 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 17:17:04,978 - StoryGeneration - INFO - Successfully generated story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-05 17:17:04,988 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 17:17:34,888 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 17:17:36,316 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 17:17:36,317 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 17:20:22,131 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 17:26:14,274 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 17:26:14,275 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 17:26:25,608 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 17:29:09,633 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 17:29:14,389 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 17:29:14,390 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 17:32:02,588 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 17:41:49,884 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 17:46:35,530 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 17:46:35,541 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 17:46:54,397 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 17:50:51,541 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 17:51:01,646 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-05 17:56:17,466 - StoryGeneration - ERROR - No active story template found with ID: 1
+2025-07-05 17:57:54,711 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 17:57:58,240 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 17:57:58,250 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 17:58:24,261 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 17:58:24,262 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 17:58:35,602 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 18:00:22,772 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 18:03:36,766 - StoryGeneration - ERROR - No active story template found with ID: 1
+2025-07-05 18:04:59,210 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 19:48:04,836 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 19:50:48,699 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 19:50:48,700 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 19:50:55,647 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 19:51:12,851 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 19:51:12,862 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 19:51:25,032 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 19:51:45,936 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 19:51:45,947 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 19:52:43,189 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 19:55:12,299 - StoryGeneration - ERROR - No active story template found with ID: 1
+2025-07-05 19:55:45,708 - StoryGeneration - ERROR - No active story template found with ID: 1
+2025-07-05 20:00:18,497 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 20:00:23,394 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 20:00:23,405 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 20:01:28,772 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 20:01:28,773 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 20:01:40,968 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 20:02:24,624 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 20:04:33,977 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 20:07:02,403 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 20:07:02,404 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 20:08:16,179 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 20:08:20,547 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 20:08:20,557 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 20:10:32,107 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 20:10:37,401 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 20:10:37,412 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 20:16:03,732 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 20:16:08,098 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 20:16:08,099 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-05 20:16:45,323 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-05 20:16:49,519 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-05 20:16:49,530 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 04:47:25,058 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-06 04:47:34,491 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-06 04:47:34,501 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-06 04:47:34,505 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Quality in Basel
+2025-07-06 04:47:34,505 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-06 04:47:34,510 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-06 04:47:34,510 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 04:47:37,889 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-06 04:47:37,899 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-06 04:47:37,916 - StoryGeneration - INFO - Story generation skipped for template: Heat day report
+2025-07-06 04:47:37,916 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-06 04:47:37,919 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-06 04:47:37,919 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-06 04:47:39,591 - StoryGeneration - INFO - Successfully generated story for template: Monthly electricity consumption
+2025-07-06 04:47:39,602 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 04:47:40,796 - StoryGeneration - INFO - Successfully generated story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 04:47:40,796 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-06 04:47:45,671 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-06 04:47:45,672 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-06 04:47:47,054 - StoryGeneration - INFO - Successfully generated story for template: Rent price in the canton of Baselland
+2025-07-06 04:47:47,065 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-06 04:47:47,067 - StoryGeneration - INFO - Story generation skipped for template: Rhine river water level and discharge daily report
+2025-07-06 04:47:47,068 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-06 04:47:47,069 - StoryGeneration - INFO - Story generation skipped for template: Seasonal weather report
+2025-07-06 04:47:47,070 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-06 04:47:48,887 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-06 04:47:48,898 - StoryGeneration - INFO - Story generation completed. Success: 7, Failed: 0, Skipped: 6
+2025-07-06 05:05:52,319 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-06 05:06:05,166 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-06 05:06:05,167 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-06 05:06:05,171 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Quality in Basel
+2025-07-06 05:06:05,171 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-06 05:06:05,175 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-06 05:06:05,175 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 05:06:08,843 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-06 05:06:08,854 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-06 05:06:08,871 - StoryGeneration - INFO - Story generation skipped for template: Heat day report
+2025-07-06 05:06:08,871 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-06 05:06:08,874 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-06 05:06:08,874 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-06 05:06:13,212 - StoryGeneration - INFO - Successfully generated story for template: Monthly electricity consumption
+2025-07-06 05:06:13,222 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 05:06:14,416 - StoryGeneration - INFO - Successfully generated story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 05:06:14,426 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-06 05:06:19,459 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-06 05:06:19,469 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-06 05:06:19,991 - StoryGeneration - INFO - Successfully generated story for template: Rent price in the canton of Baselland
+2025-07-06 05:06:20,002 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-06 05:06:20,005 - StoryGeneration - INFO - Story generation skipped for template: Rhine river water level and discharge daily report
+2025-07-06 05:06:20,005 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-06 05:06:20,006 - StoryGeneration - INFO - Story generation skipped for template: Seasonal weather report
+2025-07-06 05:06:20,006 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-06 05:06:21,724 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-06 05:06:21,734 - StoryGeneration - INFO - Story generation completed. Success: 7, Failed: 0, Skipped: 6
+2025-07-06 05:18:11,642 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-06 05:18:22,574 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-06 05:18:22,575 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-06 05:18:22,578 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Quality in Basel
+2025-07-06 05:18:22,579 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-06 05:18:22,584 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-06 05:18:22,584 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 05:18:23,478 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-06 05:18:23,489 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-06 05:18:23,505 - StoryGeneration - INFO - Story generation skipped for template: Heat day report
+2025-07-06 05:18:23,505 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-06 05:18:23,508 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-06 05:18:23,509 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-06 05:18:24,270 - StoryGeneration - INFO - Successfully generated story for template: Monthly electricity consumption
+2025-07-06 05:18:24,271 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 05:18:25,051 - StoryGeneration - INFO - Successfully generated story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 05:18:25,061 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-06 05:18:26,521 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-06 05:18:26,531 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-06 05:18:33,993 - StoryGeneration - INFO - Successfully generated story for template: Rent price in the canton of Baselland
+2025-07-06 05:18:34,003 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-06 05:18:34,006 - StoryGeneration - INFO - Story generation skipped for template: Rhine river water level and discharge daily report
+2025-07-06 05:18:34,006 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-06 05:18:34,008 - StoryGeneration - INFO - Story generation skipped for template: Seasonal weather report
+2025-07-06 05:18:34,008 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-06 05:18:35,604 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-06 05:18:35,614 - StoryGeneration - INFO - Story generation completed. Success: 7, Failed: 0, Skipped: 6
+2025-07-06 05:18:51,636 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-06 05:19:04,757 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-06 05:19:04,758 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-06 05:19:04,762 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Quality in Basel
+2025-07-06 05:19:04,762 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-06 05:19:04,768 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-06 05:19:04,768 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 05:19:05,512 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-06 05:19:05,522 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-06 05:19:05,539 - StoryGeneration - INFO - Story generation skipped for template: Heat day report
+2025-07-06 05:19:05,539 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-06 05:19:05,542 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-06 05:19:05,542 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-06 05:19:06,658 - StoryGeneration - INFO - Successfully generated story for template: Monthly electricity consumption
+2025-07-06 05:19:06,668 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 05:19:07,732 - StoryGeneration - INFO - Successfully generated story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 05:19:07,743 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-06 05:19:08,771 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-06 05:19:08,772 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-06 05:19:14,015 - StoryGeneration - INFO - Successfully generated story for template: Rent price in the canton of Baselland
+2025-07-06 05:19:14,025 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-06 05:19:14,028 - StoryGeneration - INFO - Story generation skipped for template: Rhine river water level and discharge daily report
+2025-07-06 05:19:14,028 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-06 05:19:16,362 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-06 05:19:16,363 - StoryGeneration - INFO - Story generation completed. Success: 7, Failed: 0, Skipped: 5
+2025-07-06 05:20:49,319 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-06 05:20:51,449 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-06 05:20:51,460 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 05:21:02,786 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-06 05:21:04,399 - StoryGeneration - INFO - Successfully generated story for template: Rhine river water level and discharge daily report
+2025-07-06 05:21:04,400 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 05:21:11,971 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-06 05:21:17,276 - StoryGeneration - INFO - Successfully generated story for template: Rent price in the canton of Baselland
+2025-07-06 05:21:17,287 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 05:21:28,002 - StoryGeneration - ERROR - No active story template found with ID: 19
+2025-07-06 05:21:48,219 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-06 05:21:48,285 - StoryGeneration - ERROR - Failed to generate story for template: Seasonal weather report
+2025-07-06 05:21:48,285 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 05:22:00,195 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-06 05:22:00,246 - StoryGeneration - ERROR - Failed to generate story for template: Seasonal weather report
+2025-07-06 05:22:00,246 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 05:23:47,873 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-06 05:23:47,926 - StoryGeneration - ERROR - Failed to generate story for template: Seasonal weather report
+2025-07-06 05:23:47,926 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 05:33:09,993 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-06 05:33:10,009 - StoryGeneration - ERROR - Failed to generate story for template: Seasonal weather report
+2025-07-06 05:33:10,009 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 05:37:04,142 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-06 05:37:04,197 - StoryGeneration - ERROR - Failed to generate story for template: Seasonal weather report
+2025-07-06 05:37:04,197 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 05:38:21,471 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-06 05:38:27,130 - StoryGeneration - INFO - Successfully generated story for template: Seasonal weather report
+2025-07-06 05:38:27,130 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 05:38:41,629 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-06 05:38:47,931 - StoryGeneration - INFO - Successfully generated story for template: Rent price in the canton of Baselland
+2025-07-06 05:38:47,942 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 05:39:03,273 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-06 05:39:04,454 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-06 05:39:04,464 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 05:53:32,815 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-06 05:53:34,873 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-06 05:53:34,884 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 05:54:25,578 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 05:54:44,890 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-06 05:56:21,116 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-06 05:56:21,117 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 05:56:46,503 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-06 05:56:47,717 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-06 05:56:47,718 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 05:57:32,528 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 05:57:33,387 - StoryGeneration - INFO - Successfully generated story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 05:57:33,397 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 06:00:18,380 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 06:00:19,477 - StoryGeneration - INFO - Successfully generated story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 06:00:19,488 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 06:00:25,997 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-06 06:00:31,010 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-06 06:00:31,021 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 06:00:45,609 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-06 06:00:51,313 - StoryGeneration - INFO - Successfully generated story for template: Monthly electricity consumption
+2025-07-06 06:00:51,324 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 06:00:57,089 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-06 06:00:58,389 - StoryGeneration - INFO - Successfully generated story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-06 06:00:58,391 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 06:01:06,860 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-06 06:01:10,196 - StoryGeneration - INFO - Successfully generated story for template: Heat day report
+2025-07-06 06:01:10,206 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 06:01:16,912 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 06:01:20,423 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-06 06:01:20,433 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 06:01:25,670 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-06 06:01:34,059 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-06 06:01:34,059 - StoryGeneration - INFO - Generating story for template: Daily Air Quality in Basel
+2025-07-06 06:01:34,063 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Quality in Basel
+2025-07-06 06:01:34,063 - StoryGeneration - INFO - Generating story for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-06 06:01:34,068 - StoryGeneration - INFO - Story generation skipped for template: Daily Air Traffic at Airport Basel/Mulhouse
+2025-07-06 06:01:34,068 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 06:01:38,347 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-06 06:01:38,348 - StoryGeneration - INFO - Generating story for template: Heat day report
+2025-07-06 06:01:38,365 - StoryGeneration - INFO - Story generation skipped for template: Heat day report
+2025-07-06 06:01:38,365 - StoryGeneration - INFO - Generating story for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-06 06:01:38,368 - StoryGeneration - INFO - Story generation skipped for template: Metadata on Published OGD Datasets Basel-Stadt
+2025-07-06 06:01:38,368 - StoryGeneration - INFO - Generating story for template: Monthly electricity consumption
+2025-07-06 06:01:43,683 - StoryGeneration - INFO - Successfully generated story for template: Monthly electricity consumption
+2025-07-06 06:01:43,693 - StoryGeneration - INFO - Generating story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 06:01:44,544 - StoryGeneration - INFO - Successfully generated story for template: Monthly Tourism Insight – Basel, Switzerland
+2025-07-06 06:01:44,545 - StoryGeneration - INFO - Generating story for template: Monthly weather report
+2025-07-06 06:01:48,157 - StoryGeneration - INFO - Successfully generated story for template: Monthly weather report
+2025-07-06 06:01:48,167 - StoryGeneration - INFO - Generating story for template: Rent price in the canton of Baselland
+2025-07-06 06:01:55,223 - StoryGeneration - INFO - Successfully generated story for template: Rent price in the canton of Baselland
+2025-07-06 06:01:55,234 - StoryGeneration - INFO - Generating story for template: Rhine river water level and discharge daily report
+2025-07-06 06:01:55,238 - StoryGeneration - INFO - Story generation skipped for template: Rhine river water level and discharge daily report
+2025-07-06 06:01:55,238 - StoryGeneration - INFO - Generating story for template: Seasonal weather report
+2025-07-06 06:01:59,363 - StoryGeneration - INFO - Successfully generated story for template: Seasonal weather report
+2025-07-06 06:01:59,363 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-06 06:02:01,052 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-06 06:02:01,062 - StoryGeneration - INFO - Story generation completed. Success: 8, Failed: 0, Skipped: 5
+2025-07-06 06:02:21,779 - EmailService - INFO - Starting sending mails for 2025-07-06...
+2025-07-06 06:02:21,795 - EmailService - INFO - Cleaned up empty stories
+2025-07-06 06:02:21,797 - EmailService - INFO - Found 17 stories to send.
+2025-07-06 06:02:22,718 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:25,414 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:28,113 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:30,873 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:33,607 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:36,368 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:39,053 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:41,785 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:44,460 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:47,217 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:49,921 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:52,618 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:55,306 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:02:58,021 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:03:00,716 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:03:03,401 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:03:06,229 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-06 06:03:08,240 - EmailService - INFO - Updated all records to is_sent = true
+2025-07-06 06:03:08,240 - EmailService - INFO - Email sending completed. Success: 17, Failed: 0
+2025-07-06 07:04:17,689 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 07:22:50,619 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 07:23:00,160 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-06 07:23:00,171 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 07:23:40,037 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 07:29:59,042 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 07:36:33,542 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 07:40:28,234 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 07:48:59,977 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 07:49:25,035 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-06 07:49:25,046 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 07:50:23,055 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 07:53:41,323 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 07:55:41,749 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-06 07:55:41,760 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 07:56:25,831 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 08:01:45,484 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 08:01:58,632 - StoryGeneration - ERROR - Error generating story for template Dog population in Basel: 'StoryProcessor' object has no attribute '_get_context_data'
+2025-07-06 08:01:58,632 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 08:02:19,934 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 08:02:19,970 - StoryGeneration - ERROR - Error generating story for template Dog population in Basel: 'StoryProcessor' object has no attribute '_get_context_data'
+2025-07-06 08:02:19,970 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 08:02:36,022 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 08:02:36,076 - StoryGeneration - ERROR - Error generating story for template Dog population in Basel: 'StoryProcessor' object has no attribute '_get_context_data'
+2025-07-06 08:02:36,077 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 08:02:53,124 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 14:02:00,694 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 14:03:40,135 - StoryGeneration - ERROR - Error generating story for template Dog population in Basel: 'StoryProcessor' object has no attribute 'get_sql_command_params'
+2025-07-06 14:04:11,308 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 14:05:02,702 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 14:05:45,511 - StoryGeneration - INFO - Generating story for template: Dog population in Basel
+2025-07-06 14:08:40,711 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel
+2025-07-06 14:08:40,722 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 15:18:31,189 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-06 15:18:31,202 - StoryGeneration - ERROR - Error generating story for template Rent prices in the canton of Baselland: 'StoryProcessor' object has no attribute 'year'
+2025-07-06 15:18:31,202 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 15:20:09,622 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-06 15:20:35,220 - StoryGeneration - ERROR - Error generating story for template Rent prices in the canton of Baselland: 'StoryProcessor' object has no attribute 'year'
+2025-07-06 15:20:35,220 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 15:20:55,120 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-06 15:21:55,659 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-06 15:22:40,800 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-06 15:22:50,424 - StoryGeneration - ERROR - Failed to generate story for template: Rent prices in the canton of Baselland
+2025-07-06 15:22:50,424 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 15:23:03,296 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-06 15:26:52,829 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-06 15:27:04,029 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
+2025-07-06 15:27:04,039 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
