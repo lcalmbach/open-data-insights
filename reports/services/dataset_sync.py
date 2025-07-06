@@ -25,7 +25,6 @@ from reports.services.database_client import DjangoPostgresClient
 from reports.services.utils import (
     get_parquet_row_count,
     make_utc,
-    delete_all_files_in_folder,
 )
 from reports.models import Dataset
 
