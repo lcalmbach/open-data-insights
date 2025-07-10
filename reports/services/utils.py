@@ -79,16 +79,7 @@ def normalize_sql_query(query: str) -> str:
     clean_query = re.sub(
         r"%\(([^)]+)\)f", r"%(\1)s", clean_query
     )  # %(param)f -> %(param)s
-
-    # Escape literal % characters in LIKE clauses for Django parameter compatibility
-    # This handles cases like: LIKE '%value%' -> LIKE '%%value%%'
-    # But preserves Django parameters like %(param)s
-    clean_query = re.sub(
-        r"'([^']*%)([^']*)'",
-        lambda m: f"'{m.group(1).replace('%', '%%')}{m.group(2).replace('%', '%%')}'",
-        clean_query,
-    )
-
+    
     return clean_query
 
 

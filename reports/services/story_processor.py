@@ -8,6 +8,7 @@ import logging
 import calendar
 import pandas as pd
 from datetime import datetime, timezone, date, timedelta
+from dateutil.relativedelta import relativedelta
 from typing import Optional, Dict, Any, Tuple
 from decimal import Decimal
 from enum import Enum
@@ -20,7 +21,6 @@ from reports.services.utils import SQL_TEMPLATES
 from reports.models import (
     StoryTemplatePeriodOfInterestValues,
     StoryTemplateContext,
-    StoryTemplate,
     StoryLog,
     Story,
 )
@@ -135,39 +135,69 @@ class StoryProcessor:
             return str(self.year)
         elif self.reference_period == ReferencePeriod.ALLTIME.value:
             return "All Time"
-        elif self.reference_period == ReferencePeriod.DECADEAL.value:
+        elif self.reference_period == ReferencePeriod.DECADAL.value:
             return f"Decadal {self.year // 10 * 10}s"
         return ""
     
     def _replace_reference_period_expression(self, expression: str) -> str:
         """Replace reference period expression in SQL command"""
-        return expression.replace(
-            ":reference_period", self.reference_period_expression
-        )
+        result = expression.replace(":reference_period_start", str(self.reference_period_start))
+        result = result.replace(":reference_period_end", str(self.reference_period_end))
+        result = result.replace(":reference_period_month", str(calendar.month_name[self.month]))
+        result = result.replace(":reference_period_year", str(self.year))
+        result = result.replace(":reference_period_season", self._season_name())
+        result = result.replace(":reference_period", self.reference_period_expression)
+        return result
 
     def story_is_due(self) -> bool:
         """Check if the story should be generated"""
         try:
-            # Check if data exists for the given date
-            if self.has_data_sql:
+            def get_publish_conditions_result()-> bool:
+                """
+                Checks whether all publish conditions defined in the story template are met.
+
+                Returns:
+                    bool: True if all conditions are met, False otherwise.
+                """
+                if self.publish_conditions:
+                    params = self._get_sql_command_params(self.publish_conditions)
+                    df = self.dbclient.run_query(self.publish_conditions, params)
+                    return (df.iloc[0, 0] == 1)
+                else:
+                    return True # no conditions defined, so we assume they are met
+
+            if self.has_data_sql: 
                 params = self._get_sql_command_params(self.has_data_sql)
-                data_check = self.dbclient.run_query(self.has_data_sql, params)
-                if data_check.empty:
-                    return False
+                df = self.dbclient.run_query(self.has_data_sql, params)
+                has_data = df.iloc[0]["cnt"] > 0
+            else:
+                has_data = True
 
-            # Check publish conditions
-            if self.publish_conditions:
-                params = self._get_sql_command_params(self.publish_conditions)
-                publish_check = self.dbclient.run_query(self.publish_conditions, params)
-                if publish_check.empty or publish_check.iloc[0, 0] != 1:
-                    return False
-
-            # Check if story was already published for this period
-            if not self.force_generation and self.last_published_date:
-                # Add logic to check if story was already published for this reference period
-                pass
-
-            return True
+            if self.template["reference_period_id"] == ReferencePeriod.MONTHLY.value:  # monthly
+                regular_due_date = (self.reference_period_start + relativedelta(months=1)).date()
+            elif self.template["reference_period_id"] == ReferencePeriod.SEASONAL.value:  # seasonal
+                season = month_to_season[self.month]
+                month, day = season_dates[season][0]
+                regular_due_date = date(self.reference_period_start.year, month, day)  # ✅ use `date(...)`
+            elif self.template["reference_period_id"] == ReferencePeriod.YEARLY.value:  # yearly    
+                regular_due_date = self.reference_period_start.replace(day=1, month=1)
+            else:
+                regular_due_date = self.reference_period_start
+            
+            if self.force_generation:
+                is_due = has_data
+                date_is_due = True
+                publish_conditions_met = True
+            else:
+                # check if the regular due date has passed without publishing the story
+                date_is_due = (
+                    True if self.last_published_date is None
+                    else regular_due_date >= self.last_published_date
+                )
+                publish_conditions_met = get_publish_conditions_result()
+                is_due = has_data and date_is_due and publish_conditions_met
+            # print(f"Story is due: {is_due}, has_data: {has_data}, date_is_due: {date_is_due}, publish_conditions_met: {publish_conditions_met}, regular_due_date: {regular_due_date}, last_published_date: {self.last_published_date}")
+            return is_due
 
         except Exception as e:
             self.logger.error(f"Error checking if story is due: {e}")
@@ -448,24 +478,14 @@ class StoryProcessor:
         if "%(published_date)s" in cmd:
             params["published_date"] = self.published_date.strftime("%Y-%m-%d")
         if "%(month)s" in cmd:
-            params["month"] = (
-                self.reference_period_start.month
-                if self.reference_period_start
-                else self.published_date.month
-            )
+            params["month"] = self.month
         if "%(season_year)s" in cmd:
-            params["season_year"] = (
-                self.reference_period_start.year
-                if self.reference_period_start
-                else self.published_date.year
-            )
+            params["season_year"] = self.year
         if "%(year)s" in cmd:
             params["year"] = self.year
         if "%(season)s" in cmd:
-            if self.reference_period_start:
-                params["season"] = month_to_season[self.reference_period_start.month]
-            else:
-                params["season"] = month_to_season[self.published_date.month]
+            params["season"] = month_to_season[self.month]
+    
 
         return params
 

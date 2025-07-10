@@ -9,8 +9,10 @@
             "args": [
                 "generate_stories",
                 "--id",
-                "22",
-                "--force",
+                "20",
+                "--date",
+                "2025-06-01",
+                "--force"
             ],
             "django": true,
             "justMyCode": true,
@@ -28,7 +30,7 @@
             "args": [
                 "synch_data",
                 "--id",
-                "1",
+                "28",
                 "-v",
                 "2"
             ],

@@ -14,7 +14,7 @@
 <hr class="mb-4">
 
 <!-- Headline and description -->
-<div class="text-center mb-4" style="max-width: 800px; margin: 0 auto;">
+<div class="text-center mb-4" style="max-width: 1000px; margin: 0 auto;">
     <h1 class="headline">
         <span class="strong-steelblue">O</span>pen
         <span class="strong-steelblue">D</span>ata
@@ -39,12 +39,15 @@
 <!-- Story block -->
 {% if story %}
 <div class="d-flex justify-content-center align-items-center">
-    <div style="max-width: 800px; width: 100%;">
+    <div style="max-width: 1000px; width: 100%;">
         <div class="text-end mb-2">
             <a href="{% url 'rate_story' story.id %}">Rate this insight ⭐️</a>
         </div>
 
         <div class="card mt-2 shadow-sm">
+            <div class="card-header bg-light">
+                <h2 class="card-title mb-0 text-primary">{{ story.title|safe }}</h2>
+            </div>
             <div class="card-body text-start">
                 <p class="card-text mt-3">{{ story.content_html|safe }}</p>
             </div>

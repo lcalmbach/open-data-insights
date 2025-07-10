@@ -61,7 +61,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"  Message: {result['message']}")
             if 'error' in result:
                 self.stdout.write(f"  Error: {result['error']}")
-            
+        
         # Show details if verbose
         if options.get('verbosity', 1) > 1:
             for detail in result.get('details', []):

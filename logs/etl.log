@@ -804,3 +804,1230 @@
 2025-07-06 15:26:52,829 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
 2025-07-06 15:27:04,029 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
 2025-07-06 15:27:04,039 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 18:53:09,857 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-06 18:53:09,912 - StoryGeneration - ERROR - Error generating story for template Electricity consumption in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-06 18:53:09,913 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 18:58:05,904 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-06 18:58:05,958 - StoryGeneration - ERROR - Error generating story for template Electricity consumption in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-06 18:58:05,958 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 18:58:15,494 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-06 18:58:15,550 - StoryGeneration - ERROR - Error generating story for template Electricity consumption in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-06 18:58:15,550 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 19:03:49,368 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-06 19:03:49,417 - StoryGeneration - ERROR - Error generating story for template Electricity consumption in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-06 19:03:49,417 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 19:04:07,642 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-06 19:04:07,699 - StoryGeneration - ERROR - Error generating story for template Electricity consumption in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-06 19:04:07,699 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 19:06:22,720 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-06 19:06:22,775 - StoryGeneration - ERROR - Error generating story for template Electricity consumption in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-06 19:06:22,775 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 19:06:30,350 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-06 19:06:30,391 - StoryGeneration - ERROR - Error generating story for template Electricity consumption in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-06 19:06:30,391 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-06 19:09:46,794 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-06 19:09:52,646 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-06 19:09:52,657 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-06 19:13:42,879 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-06 19:13:50,907 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-06 19:13:50,918 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-07 05:51:34,955 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-07 05:51:35,244 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-07 05:51:35,244 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-07 05:51:35,917 - DatasetSync - ERROR - Failed to synchronize dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-07 05:51:35,918 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-07 05:51:36,251 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-07 05:51:36,252 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-07 05:51:36,695 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-07 05:51:36,695 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-07 05:51:37,077 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-07 05:51:37,078 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-07 05:51:37,257 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-07 05:51:37,267 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-07 05:51:37,406 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-07 05:51:37,417 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-07 05:51:37,606 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-07 05:51:37,617 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-07 05:51:37,760 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-07 05:51:37,771 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-07 05:51:38,038 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-07 05:51:38,048 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-07 05:51:38,485 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-07 05:51:38,486 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-07 05:51:38,728 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-07 05:51:38,729 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-07 05:51:38,975 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-07 05:51:38,976 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-07 05:51:39,214 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-07 05:51:39,224 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-07 05:51:39,409 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-07 05:51:39,419 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-07 05:51:39,670 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-07 05:51:39,680 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-07 05:51:39,932 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-07 05:51:39,942 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-07 05:51:40,154 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-07 05:51:40,165 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 05:51:40,958 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 05:51:40,958 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-07 05:51:41,718 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-07 05:51:41,719 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-07 05:51:42,685 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-07 05:51:42,689 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 05:51:42,689 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 21, Failed: 2, Failed dataset IDs: [13, 4]
+2025-07-07 05:57:14,444 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 05:57:16,025 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 05:57:16,025 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 05:57:16,025 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 06:03:41,235 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:03:44,202 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:03:44,203 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 06:03:44,203 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 06:04:59,773 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:18:11,373 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:18:59,959 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:19:52,311 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:20:39,065 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:22:31,522 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:23:05,109 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:23:47,131 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:25:00,681 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:25:00,683 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 06:25:00,683 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2025-07-07 06:25:55,487 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-07 06:25:55,750 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-07 06:25:55,760 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-07 06:25:56,554 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-07 06:25:56,554 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-07 06:25:56,912 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-07 06:25:56,922 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-07 06:25:57,199 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-07 06:25:57,200 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-07 06:25:57,555 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-07 06:25:57,565 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-07 06:25:57,680 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-07 06:25:57,690 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-07 06:25:57,946 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-07 06:25:57,956 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-07 06:25:58,183 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-07 06:25:58,184 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-07 06:25:58,319 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-07 06:25:58,329 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-07 06:25:58,507 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-07 06:25:58,517 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-07 06:25:58,833 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-07 06:25:58,843 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-07 06:25:59,233 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-07 06:25:59,243 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-07 06:25:59,366 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-07 06:25:59,376 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-07 06:25:59,636 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-07 06:25:59,646 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-07 06:25:59,822 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-07 06:25:59,832 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-07 06:26:00,086 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-07 06:26:00,096 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-07 06:26:00,488 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-07 06:26:00,497 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-07 06:26:01,190 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-07 06:26:01,200 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:26:02,578 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:26:02,579 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-07 06:26:03,539 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-07 06:26:03,545 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-07 06:26:04,095 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-07 06:26:04,096 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 06:26:04,096 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 21, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 06:27:52,824 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:27:53,317 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:27:53,317 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 06:27:53,318 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 06:28:50,132 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:28:51,020 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:28:51,021 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 06:28:51,021 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 06:29:57,299 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:29:57,993 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:29:57,994 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 06:29:57,994 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 06:30:41,372 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:30:43,033 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:30:43,034 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 06:30:43,034 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 06:32:19,767 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:32:22,239 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:32:22,240 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 06:32:22,240 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 06:33:34,017 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:33:34,782 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:33:34,783 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 06:33:34,783 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 06:49:13,315 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:50:36,771 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:51:40,864 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:51:40,866 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 06:51:40,866 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 06:52:01,876 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 06:53:44,025 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:01:39,395 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:02:32,511 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:02:32,512 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 07:02:32,512 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 07:02:43,353 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:04:11,309 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:04:15,101 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:04:15,102 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 07:04:15,102 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 07:04:33,187 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:04:33,622 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:04:33,623 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 07:04:33,623 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [4]
+2025-07-07 07:04:49,860 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:07:03,186 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:07:50,487 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:09:15,950 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:10:21,045 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:10:45,796 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:10:46,286 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:10:46,297 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 07:10:46,297 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2025-07-07 07:11:10,847 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-07 07:11:11,229 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-07 07:11:11,229 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-07 07:11:11,698 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-07 07:11:11,708 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-07 07:11:12,112 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-07 07:11:12,122 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-07 07:11:13,760 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-07 07:11:13,770 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-07 07:11:14,237 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-07 07:11:14,247 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-07 07:11:14,526 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-07 07:11:14,536 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-07 07:11:14,807 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-07 07:11:14,808 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-07 07:11:15,087 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-07 07:11:15,098 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-07 07:11:15,338 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-07 07:11:15,340 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-07 07:11:15,568 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-07 07:11:15,578 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-07 07:11:16,037 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-07 07:11:16,047 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-07 07:11:16,205 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-07 07:11:16,214 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-07 07:11:16,360 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-07 07:11:16,361 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-07 07:11:16,505 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-07 07:11:16,515 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-07 07:11:16,672 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-07 07:11:16,682 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-07 07:11:16,822 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-07 07:11:16,832 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-07 07:11:16,992 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-07 07:11:17,002 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-07 07:11:17,257 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-07 07:11:17,267 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:11:18,738 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:11:18,748 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-07 07:11:19,561 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-07 07:11:19,562 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-07 07:11:19,849 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-07 07:11:19,859 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 07:11:19,859 - DatasetSync - INFO - Synchronization completed successfully. Processed: 21, All successful
+2025-07-07 07:11:19,863 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-07 07:11:19,873 - StoryGeneration - ERROR - Error generating story for template Air Quality in Basel :reference_period: trailing junk after numeric literal at or near "2_year"
+LINE 1: ...opendata.ds_100051 WHERE season = 2 AND season_year = 2_year
+                                                                 ^
+
+2025-07-07 07:11:19,873 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:11:19,887 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:11:19,887 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-07 07:11:28,195 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-07 07:11:28,196 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-07 07:11:33,288 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel :reference_period
+2025-07-07 07:11:33,288 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:11:41,799 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:11:41,810 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-07 07:11:41,831 - StoryGeneration - ERROR - Error generating story for template Heat day report in Basel for :reference_period: trailing junk after numeric literal at or near "2_year"
+LINE 1: ...opendata.ds_100254 WHERE season = 2 and season_year = 2_year
+                                                                 ^
+
+2025-07-07 07:11:41,831 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-07 07:11:41,834 - StoryGeneration - ERROR - Error generating story for template Metadata on published OGD Datasets Basel-Stadt: type object 'ReferencePeriod' has no attribute 'DECADEAL'
+2025-07-07 07:11:41,834 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-07 07:11:49,268 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
+2025-07-07 07:11:49,279 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:11:49,286 - StoryGeneration - ERROR - Error generating story for template Rhine discharge on :reference_period: syntax error at end of input
+LINE 1: ...scharge__min_rank FROM ranked_data WHERE date = '2025-07-05'
+                                                                       ^
+
+2025-07-07 07:11:49,286 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:11:50,722 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:11:50,733 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:11:53,935 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:11:53,935 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:11:53,989 - StoryGeneration - ERROR - Error generating story for template Weather report :reference_period: syntax error at end of input
+LINE 1: ...FROM max_per_month ) SELECT * FROM ranked ORDER BY temp_rank
+                                                                       ^
+
+2025-07-07 07:11:53,989 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:11:54,019 - StoryGeneration - ERROR - Error generating story for template Weather report :reference_period: syntax error at or near ")"
+LINE 1: ...son = 1 and season_year <= 2025 and season_year >=2025 - 20)
+                                                                      ^
+
+2025-07-07 07:11:54,019 - StoryGeneration - INFO - Story generation completed. Success: 6, Failed: 6, Skipped: 1
+2025-07-07 07:14:57,409 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-07 07:14:57,475 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-07 07:14:57,475 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 1
+2025-07-07 07:15:03,181 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-07 07:15:03,236 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-07 07:15:03,236 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:15:03,248 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:15:03,248 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-07 07:15:11,945 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-07 07:15:11,954 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-07 07:15:16,799 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel :reference_period
+2025-07-07 07:15:16,809 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:15:23,626 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:15:23,627 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-07 07:15:23,649 - StoryGeneration - ERROR - Error generating story for template Heat day report in Basel for :reference_period: trailing junk after numeric literal at or near "2_year"
+LINE 1: ...opendata.ds_100254 WHERE season = 2 and season_year = 2_year
+                                                                 ^
+
+2025-07-07 07:15:23,649 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-07 07:15:23,651 - StoryGeneration - ERROR - Error generating story for template Metadata on published OGD Datasets Basel-Stadt: type object 'ReferencePeriod' has no attribute 'DECADEAL'
+2025-07-07 07:15:23,651 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-07 07:15:31,239 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
+2025-07-07 07:15:31,250 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:15:31,258 - StoryGeneration - ERROR - Error generating story for template Rhine discharge on :reference_period: syntax error at end of input
+LINE 1: ...scharge__min_rank FROM ranked_data WHERE date = '2025-07-05'
+                                                                       ^
+
+2025-07-07 07:15:31,258 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:15:33,175 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:15:33,185 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:15:35,510 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:15:35,520 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:15:35,572 - StoryGeneration - ERROR - Error generating story for template Weather report :reference_period: syntax error at end of input
+LINE 1: ...FROM max_per_month ) SELECT * FROM ranked ORDER BY temp_rank
+                                                                       ^
+
+2025-07-07 07:15:35,572 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:15:35,600 - StoryGeneration - ERROR - Error generating story for template Weather report :reference_period: syntax error at or near ")"
+LINE 1: ...son = 1 and season_year <= 2025 and season_year >=2025 - 20)
+                                                                      ^
+
+2025-07-07 07:15:35,600 - StoryGeneration - INFO - Story generation completed. Success: 6, Failed: 5, Skipped: 2
+2025-07-07 07:18:50,854 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:18:58,913 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:18:58,923 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-07 07:19:06,560 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-07 07:19:06,614 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-07 07:19:06,615 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:19:06,627 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:19:06,627 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-07 07:19:14,738 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-07 07:19:14,738 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-07 07:19:19,950 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel :reference_period
+2025-07-07 07:19:19,960 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:19:26,825 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:19:26,835 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-07 07:19:26,858 - StoryGeneration - ERROR - Error generating story for template Heat day report in Basel for :reference_period: trailing junk after numeric literal at or near "2_year"
+LINE 1: ...opendata.ds_100254 WHERE season = 2 and season_year = 2_year
+                                                                 ^
+
+2025-07-07 07:19:26,858 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-07 07:19:26,859 - StoryGeneration - ERROR - Error generating story for template Metadata on published OGD Datasets Basel-Stadt: type object 'ReferencePeriod' has no attribute 'DECADEAL'
+2025-07-07 07:19:26,859 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-07 07:19:33,210 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
+2025-07-07 07:19:33,220 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:19:33,228 - StoryGeneration - ERROR - Error generating story for template Rhine discharge on :reference_period: syntax error at end of input
+LINE 1: ...scharge__min_rank FROM ranked_data WHERE date = '2025-07-05'
+                                                                       ^
+
+2025-07-07 07:19:33,228 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:19:34,355 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:19:34,365 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:19:36,911 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:19:36,922 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:19:36,974 - StoryGeneration - ERROR - Error generating story for template Weather report :reference_period: syntax error at end of input
+LINE 1: ...FROM max_per_month ) SELECT * FROM ranked ORDER BY temp_rank
+                                                                       ^
+
+2025-07-07 07:19:36,974 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:19:45,064 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:19:45,074 - StoryGeneration - INFO - Story generation completed. Success: 7, Failed: 4, Skipped: 2
+2025-07-07 07:20:58,919 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-07 07:20:58,979 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-07 07:20:58,979 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:20:58,991 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:20:58,991 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-07 07:21:08,655 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-07 07:21:08,666 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-07 07:21:12,431 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel :reference_period
+2025-07-07 07:21:12,441 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:21:19,505 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:21:19,505 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-07 07:21:19,550 - StoryGeneration - ERROR - Error generating story for template Heat day report in Basel for :reference_period: syntax error at end of input
+LINE 1: ..._temperature_rank FROM ranked_data WHERE date = '2025-07-05'
+                                                                       ^
+
+2025-07-07 07:21:19,550 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-07 07:21:19,552 - StoryGeneration - ERROR - Error generating story for template Metadata on published OGD Datasets Basel-Stadt: type object 'ReferencePeriod' has no attribute 'DECADEAL'
+2025-07-07 07:21:19,553 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-07 07:21:28,234 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
+2025-07-07 07:21:28,244 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:21:28,252 - StoryGeneration - ERROR - Error generating story for template Rhine discharge on :reference_period: syntax error at end of input
+LINE 1: ...scharge__min_rank FROM ranked_data WHERE date = '2025-07-05'
+                                                                       ^
+
+2025-07-07 07:21:28,252 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:21:29,361 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:21:29,361 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:21:31,464 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:21:31,474 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:21:31,526 - StoryGeneration - ERROR - Error generating story for template Weather report :reference_period: syntax error at end of input
+LINE 1: ...FROM max_per_month ) SELECT * FROM ranked ORDER BY temp_rank
+                                                                       ^
+
+2025-07-07 07:21:31,526 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:21:40,846 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:21:40,856 - StoryGeneration - INFO - Story generation completed. Success: 7, Failed: 4, Skipped: 2
+2025-07-07 07:30:55,050 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:31:06,089 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:31:06,099 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-07 07:31:09,825 - StoryGeneration - ERROR - No active story template found with ID: 4
+2025-07-07 07:31:33,654 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:31:33,700 - StoryGeneration - ERROR - Error generating story for template Rhine discharge on :reference_period: syntax error at end of input
+LINE 1: ...scharge__min_rank FROM ranked_data WHERE date = '2025-07-05'
+                                                                       ^
+
+2025-07-07 07:31:33,700 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-07 07:35:18,847 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:35:18,905 - StoryGeneration - ERROR - Error generating story for template Rhine discharge on :reference_period: syntax error at end of input
+LINE 1: ...scharge__min_rank FROM ranked_data WHERE date = '2025-07-05'
+                                                                       ^
+
+2025-07-07 07:35:18,905 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-07 07:39:05,324 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:39:05,382 - StoryGeneration - ERROR - Error generating story for template Rhine discharge on :reference_period: syntax error at end of input
+LINE 1: ...scharge__min_rank FROM ranked_data WHERE date = '2025-07-05'
+                                                                       ^
+
+2025-07-07 07:39:05,383 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-07 07:40:46,655 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:40:46,721 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-07 07:40:46,721 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 1
+2025-07-07 07:41:12,334 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-07 07:41:12,392 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-07 07:41:12,392 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:41:12,405 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:41:12,405 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-07 07:41:20,283 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-07 07:41:20,293 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-07 07:41:25,441 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel :reference_period
+2025-07-07 07:41:25,451 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:41:31,300 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:41:31,310 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-07 07:41:31,357 - StoryGeneration - ERROR - Error generating story for template Heat day report in Basel for :reference_period: syntax error at end of input
+LINE 1: ..._temperature_rank FROM ranked_data WHERE date = '2025-07-05'
+                                                                       ^
+
+2025-07-07 07:41:31,357 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-07 07:41:31,359 - StoryGeneration - ERROR - Error generating story for template Metadata on published OGD Datasets Basel-Stadt: type object 'ReferencePeriod' has no attribute 'DECADEAL'
+2025-07-07 07:41:31,359 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-07 07:41:40,615 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
+2025-07-07 07:41:40,625 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:41:40,635 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-07 07:41:40,636 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:41:42,274 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:41:42,284 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:41:44,113 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:41:44,123 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:41:44,177 - StoryGeneration - ERROR - Error generating story for template Weather report :reference_period: syntax error at end of input
+LINE 1: ...FROM max_per_month ) SELECT * FROM ranked ORDER BY temp_rank
+                                                                       ^
+
+2025-07-07 07:41:44,177 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:41:55,356 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:41:55,366 - StoryGeneration - INFO - Story generation completed. Success: 7, Failed: 3, Skipped: 3
+2025-07-07 07:43:36,732 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-07 07:43:36,789 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-07 07:43:36,789 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:43:36,801 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:43:36,802 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-07 07:43:45,142 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-07 07:43:45,153 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-07 07:43:48,715 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel :reference_period
+2025-07-07 07:43:48,725 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:43:55,498 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:43:55,507 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-07 07:43:55,605 - StoryGeneration - INFO - Story generation skipped for template: Heat day report in Basel for :reference_period
+2025-07-07 07:43:55,605 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-07 07:43:55,607 - StoryGeneration - ERROR - Error generating story for template Metadata on published OGD Datasets Basel-Stadt: type object 'ReferencePeriod' has no attribute 'DECADEAL'
+2025-07-07 07:43:55,607 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-07 07:44:04,784 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
+2025-07-07 07:44:04,794 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:44:04,806 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-07 07:44:04,806 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:44:06,011 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:44:06,021 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:44:08,431 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:44:08,442 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:44:13,017 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:44:13,027 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:44:26,050 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:44:26,060 - StoryGeneration - INFO - Story generation completed. Success: 8, Failed: 1, Skipped: 4
+2025-07-07 07:46:25,331 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-07 07:46:25,590 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-07 07:46:25,600 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-07 07:46:26,051 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-07 07:46:26,061 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-07 07:46:26,791 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-07 07:46:26,791 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-07 07:46:27,198 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-07 07:46:27,208 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-07 07:46:27,652 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-07 07:46:27,662 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-07 07:46:27,876 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-07 07:46:27,876 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-07 07:46:28,098 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-07 07:46:28,108 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-07 07:46:28,241 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-07 07:46:28,251 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-07 07:46:28,531 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-07 07:46:28,541 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-07 07:46:28,740 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-07 07:46:28,750 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-07 07:46:29,189 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-07 07:46:29,199 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-07 07:46:29,750 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-07 07:46:29,760 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-07 07:46:29,948 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-07 07:46:29,958 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-07 07:46:30,225 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-07 07:46:30,236 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-07 07:46:30,519 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-07 07:46:30,530 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-07 07:46:30,827 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-07 07:46:30,829 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-07 07:46:31,080 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-07 07:46:31,090 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-07 07:46:31,367 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-07 07:46:31,377 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:46:32,286 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-07-07 07:46:32,296 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-07 07:46:32,785 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-07 07:46:32,791 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-07 07:46:33,149 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-07 07:46:33,159 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-07 07:46:33,159 - DatasetSync - INFO - Synchronization completed successfully. Processed: 21, All successful
+2025-07-07 07:46:33,161 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-07 07:46:33,168 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-07 07:46:33,168 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:46:33,180 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:46:33,180 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-07 07:46:41,853 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-07 07:46:41,864 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-07 07:46:46,373 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel :reference_period
+2025-07-07 07:46:46,383 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:46:53,619 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:46:53,629 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-07 07:46:53,715 - StoryGeneration - INFO - Story generation skipped for template: Heat day report in Basel for :reference_period
+2025-07-07 07:46:53,715 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-07 07:46:53,717 - StoryGeneration - ERROR - Error generating story for template Metadata on published OGD Datasets Basel-Stadt: type object 'ReferencePeriod' has no attribute 'DECADEAL'
+2025-07-07 07:46:53,717 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-07 07:46:59,917 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
+2025-07-07 07:46:59,928 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:46:59,939 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-07 07:46:59,939 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:47:01,251 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:47:01,261 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:47:02,982 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:47:02,992 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:47:07,139 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:47:07,149 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:47:16,739 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:47:16,749 - StoryGeneration - INFO - Story generation completed. Success: 8, Failed: 1, Skipped: 4
+2025-07-07 07:49:39,418 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-07 07:49:39,473 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-07 07:49:39,474 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:49:39,486 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:49:39,486 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-07 07:49:48,549 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-07 07:49:48,550 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-07 07:49:52,384 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel :reference_period
+2025-07-07 07:49:52,394 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:49:58,999 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:49:59,009 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-07 07:49:59,104 - StoryGeneration - INFO - Story generation skipped for template: Heat day report in Basel for :reference_period
+2025-07-07 07:49:59,104 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-07 07:49:59,105 - StoryGeneration - ERROR - Error generating story for template Metadata on published OGD Datasets Basel-Stadt: type object 'ReferencePeriod' has no attribute 'DECADEAL'
+2025-07-07 07:49:59,106 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-07 07:50:06,042 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
+2025-07-07 07:50:06,052 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:50:06,063 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-07 07:50:06,063 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:50:07,580 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:50:07,590 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:50:09,817 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:50:09,827 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:50:14,092 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:50:14,102 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:50:23,902 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:50:23,902 - StoryGeneration - INFO - Story generation completed. Success: 8, Failed: 1, Skipped: 4
+2025-07-07 07:52:43,246 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-07 07:52:43,303 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-07 07:52:43,303 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:52:43,316 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:52:43,316 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-07 07:52:53,774 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-07 07:52:53,784 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-07 07:52:58,226 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel :reference_period
+2025-07-07 07:52:58,236 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:53:05,466 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:53:05,476 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-07 07:53:05,572 - StoryGeneration - INFO - Story generation skipped for template: Heat day report in Basel for :reference_period
+2025-07-07 07:53:05,573 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-07 07:53:05,574 - StoryGeneration - ERROR - Error generating story for template Metadata on published OGD Datasets Basel-Stadt: type object 'ReferencePeriod' has no attribute 'DECADEAL'
+2025-07-07 07:53:05,574 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-07 07:53:13,174 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
+2025-07-07 07:53:13,184 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:53:13,195 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-07 07:53:13,195 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:53:14,403 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:53:14,404 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:53:16,414 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:53:16,424 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:53:21,069 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:53:21,079 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:53:33,517 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:53:33,528 - StoryGeneration - INFO - Story generation completed. Success: 8, Failed: 1, Skipped: 4
+2025-07-07 07:56:52,009 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-07 07:56:52,069 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-07 07:56:52,069 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:56:52,082 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:56:52,082 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-07 07:57:03,306 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-07 07:57:03,316 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-07 07:57:07,395 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel :reference_period
+2025-07-07 07:57:07,405 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:57:13,976 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-07 07:57:13,986 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-07 07:57:14,080 - StoryGeneration - INFO - Story generation skipped for template: Heat day report in Basel for :reference_period
+2025-07-07 07:57:14,080 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-07 07:57:14,082 - StoryGeneration - ERROR - Error generating story for template Metadata on published OGD Datasets Basel-Stadt: type object 'ReferencePeriod' has no attribute 'DECADEAL'
+2025-07-07 07:57:14,082 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-07 07:57:21,406 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
+2025-07-07 07:57:21,416 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 07:57:21,427 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-07 07:57:21,428 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:57:22,943 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 07:57:22,953 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:57:24,766 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 07:57:24,777 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:57:28,454 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:57:28,464 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 07:57:40,985 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 07:57:40,995 - StoryGeneration - INFO - Story generation completed. Success: 8, Failed: 1, Skipped: 4
+2025-07-07 07:59:45,982 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-07 07:59:46,042 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-07 07:59:46,042 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:59:46,055 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-07 07:59:46,055 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-07 07:59:56,592 - StoryGeneration - INFO - Successfully generated story for template: Buildings in Baselland
+2025-07-07 07:59:56,602 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-07 08:00:02,698 - StoryGeneration - INFO - Successfully generated story for template: Dog population in Basel :reference_period
+2025-07-07 08:00:02,708 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-07 08:00:11,319 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-07 08:00:11,330 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-07 08:00:11,428 - StoryGeneration - INFO - Story generation skipped for template: Heat day report in Basel for :reference_period
+2025-07-07 08:00:11,428 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-07 08:00:11,435 - StoryGeneration - INFO - Story generation skipped for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-07 08:00:11,435 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-07 08:00:20,805 - StoryGeneration - INFO - Successfully generated story for template: Rent prices in the canton of Baselland
+2025-07-07 08:00:20,815 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-07 08:00:20,827 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-07 08:00:20,827 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 08:00:22,201 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-07 08:00:22,211 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 08:00:24,686 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-07 08:00:24,697 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 08:00:31,130 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 08:00:31,130 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 08:00:44,171 - StoryGeneration - INFO - Successfully generated story for template: Weather report :reference_period
+2025-07-07 08:00:44,181 - StoryGeneration - INFO - Story generation completed. Success: 8, Failed: 0, Skipped: 5
+2025-07-07 18:06:37,359 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-07 18:07:27,743 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 18:07:42,005 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 18:14:40,393 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 18:15:17,671 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 19:02:47,976 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-07 19:02:50,611 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 1
+2025-07-07 19:03:03,191 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 19:03:18,169 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 19:04:07,912 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 19:11:37,666 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-07 19:11:37,667 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 1
+2025-07-07 19:14:06,499 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 19:14:06,586 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-07 19:14:06,586 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 1
+2025-07-07 19:14:20,761 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-07 19:14:20,944 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-07 19:14:20,944 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 1
+2025-07-08 05:20:54,766 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-08 05:20:55,090 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-08 05:20:55,091 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-08 05:20:55,414 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-08 05:20:55,415 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-08 05:20:55,794 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-08 05:20:55,795 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-08 05:20:56,165 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-08 05:20:56,165 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-08 05:20:56,648 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-08 05:20:56,648 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-08 05:20:56,832 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-08 05:20:56,842 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-08 05:20:56,984 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-08 05:20:56,994 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-08 05:20:57,225 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-08 05:20:57,234 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-08 05:20:57,369 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-08 05:20:57,379 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-08 05:20:57,610 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-08 05:20:57,620 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-08 05:20:58,471 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-08 05:20:58,472 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-08 05:20:58,688 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-08 05:20:58,698 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-08 05:20:59,268 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-08 05:20:59,278 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-08 05:20:59,531 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-08 05:20:59,541 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-08 05:20:59,794 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-08 05:20:59,804 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-08 05:20:59,984 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-08 05:20:59,994 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-08 05:21:00,274 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-08 05:21:00,284 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-08 05:21:00,614 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-08 05:21:00,624 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-08 05:21:02,732 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-07-08 05:21:02,732 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-08 05:21:03,868 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-08 05:21:03,869 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-08 05:21:04,549 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-08 05:21:04,549 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-08 05:21:04,549 - DatasetSync - INFO - Synchronization completed successfully. Processed: 21, All successful
+2025-07-08 05:21:04,554 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-08 05:21:04,566 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-08 05:21:04,567 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 05:21:04,578 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 05:21:04,578 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-08 05:21:04,720 - StoryGeneration - INFO - Story generation skipped for template: Buildings in Baselland
+2025-07-08 05:21:04,720 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-08 05:21:04,789 - StoryGeneration - INFO - Story generation skipped for template: Dog population in Basel :reference_period
+2025-07-08 05:21:04,789 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-08 05:21:04,795 - StoryGeneration - INFO - Story generation skipped for template: Electricity consumption in Basel :reference_period
+2025-07-08 05:21:04,795 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-08 05:21:04,935 - StoryGeneration - INFO - Story generation skipped for template: Heat day report in Basel for :reference_period
+2025-07-08 05:21:04,935 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-08 05:21:04,953 - StoryGeneration - INFO - Story generation skipped for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-08 05:21:04,953 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-08 05:21:04,957 - StoryGeneration - INFO - Story generation skipped for template: Rent prices in the canton of Baselland
+2025-07-08 05:21:04,957 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-08 05:21:04,968 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-08 05:21:04,968 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 05:21:05,010 - StoryGeneration - INFO - Story generation skipped for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 05:21:05,010 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-08 05:21:07,894 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-08 05:21:07,895 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-08 05:21:08,018 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-08 05:21:08,018 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-08 05:21:08,089 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-08 05:21:08,090 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 12
+2025-07-08 05:21:08,090 - EmailService - INFO - Starting sending mails for 2025-07-08...
+2025-07-08 05:21:08,101 - EmailService - INFO - Cleaned up empty stories
+2025-07-08 05:21:08,107 - EmailService - INFO - Found 52 stories to send.
+2025-07-08 05:21:09,189 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:21:11,945 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:21:14,821 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:21:17,531 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:21:20,246 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:21:22,975 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:21:25,764 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:22:26,948 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-08 05:22:27,218 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-08 05:22:27,218 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-08 05:22:27,932 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-08 05:22:27,933 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-08 05:22:28,251 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-08 05:22:28,261 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-08 05:22:28,595 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-08 05:22:28,596 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-08 05:22:28,923 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-08 05:22:28,933 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-08 05:22:29,136 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-08 05:22:29,146 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-08 05:22:29,365 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-08 05:22:29,375 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-08 05:22:29,548 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-08 05:22:29,558 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-08 05:22:29,726 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-08 05:22:29,736 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-08 05:22:29,906 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-08 05:22:29,916 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-08 05:22:30,343 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-08 05:22:30,352 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-08 05:22:30,638 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-08 05:22:30,638 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-08 05:22:30,869 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-08 05:22:30,879 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-08 05:22:31,013 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-08 05:22:31,023 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-08 05:22:31,223 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-08 05:22:31,233 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-08 05:22:31,473 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-08 05:22:31,483 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-08 05:22:31,637 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-08 05:22:31,647 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-08 05:22:31,796 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-08 05:22:31,806 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-08 05:22:32,162 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-07-08 05:22:32,162 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-08 05:22:32,981 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-08 05:22:32,988 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-08 05:22:33,425 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-08 05:22:33,436 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-08 05:22:33,436 - DatasetSync - INFO - Synchronization completed successfully. Processed: 21, All successful
+2025-07-08 05:22:33,438 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-08 05:22:33,445 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-08 05:22:33,445 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 05:22:36,509 - StoryGeneration - INFO - Successfully generated story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 05:22:36,509 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-08 05:22:36,637 - StoryGeneration - INFO - Story generation skipped for template: Buildings in Baselland
+2025-07-08 05:22:36,637 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-08 05:22:36,695 - StoryGeneration - INFO - Story generation skipped for template: Dog population in Basel :reference_period
+2025-07-08 05:22:36,695 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-08 05:22:36,701 - StoryGeneration - INFO - Story generation skipped for template: Electricity consumption in Basel :reference_period
+2025-07-08 05:22:36,701 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-08 05:22:36,835 - StoryGeneration - INFO - Story generation skipped for template: Heat day report in Basel for :reference_period
+2025-07-08 05:22:36,835 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-08 05:22:36,848 - StoryGeneration - INFO - Story generation skipped for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-08 05:22:36,848 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-08 05:22:36,853 - StoryGeneration - INFO - Story generation skipped for template: Rent prices in the canton of Baselland
+2025-07-08 05:22:36,853 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-08 05:22:36,863 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-08 05:22:36,863 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 05:22:36,900 - StoryGeneration - INFO - Story generation skipped for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 05:22:36,900 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-08 05:22:39,331 - StoryGeneration - INFO - Successfully generated story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-08 05:22:39,342 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-08 05:22:39,460 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-08 05:22:39,460 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-08 05:22:39,527 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-08 05:22:39,527 - StoryGeneration - INFO - Story generation completed. Success: 2, Failed: 0, Skipped: 11
+2025-07-08 05:22:39,528 - EmailService - INFO - Starting sending mails for 2025-07-08...
+2025-07-08 05:22:39,528 - EmailService - INFO - Cleaned up empty stories
+2025-07-08 05:22:39,529 - EmailService - INFO - Found 54 stories to send.
+2025-07-08 05:22:40,228 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:22:43,079 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:22:45,812 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:22:48,529 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:22:51,278 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:22:54,024 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:22:56,733 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:22:59,446 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:02,226 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:04,970 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:07,626 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:10,330 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:12,979 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:15,685 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:18,434 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:21,127 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:23,901 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:26,552 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:29,303 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:31,981 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:34,721 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:37,422 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:40,264 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:42,976 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:45,642 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:48,384 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:51,097 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:53,773 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:56,458 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:23:59,217 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:01,924 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:04,626 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:07,389 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:10,113 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:12,876 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:15,600 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:18,330 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:21,024 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:23,706 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:26,391 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:29,132 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:31,867 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:34,598 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:37,389 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:40,137 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:42,802 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:45,640 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:48,324 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:51,035 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:53,720 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:56,455 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:24:59,124 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:25:01,862 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:25:04,570 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-08 05:25:06,573 - EmailService - INFO - Updated all records to is_sent = true
+2025-07-08 05:25:06,573 - EmailService - INFO - Email sending completed. Success: 54, Failed: 0
+2025-07-08 06:53:23,512 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-08 06:53:23,803 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-08 06:53:23,813 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-08 06:53:24,992 - DatasetSync - ERROR - Failed to synchronize dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-08 06:53:24,992 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-08 06:53:26,484 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-08 06:53:26,485 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-08 06:53:26,870 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-08 06:53:26,879 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-08 06:53:28,102 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-08 06:53:28,112 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-08 06:53:28,684 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-08 06:53:28,684 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-08 06:53:29,848 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-08 06:53:29,858 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-08 06:53:30,020 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-08 06:53:30,030 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-08 06:53:30,261 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-08 06:53:30,271 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-08 06:53:30,488 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-08 06:53:30,498 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-08 06:53:31,024 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-08 06:53:31,034 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-08 06:53:32,389 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-08 06:53:32,398 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-08 06:53:32,650 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-08 06:53:32,660 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-08 06:53:32,900 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-08 06:53:32,910 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-08 06:53:33,112 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-08 06:53:33,122 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-08 06:53:33,254 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-08 06:53:33,257 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-08 06:53:33,452 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-08 06:53:33,462 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-08 06:53:33,658 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-08 06:53:33,659 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-08 06:53:35,421 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-08 06:53:35,421 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-08 06:53:35,990 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-08 06:53:35,996 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-08 06:53:37,339 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-08 06:53:37,343 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-08 06:53:37,343 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 21, Failed: 2, Failed dataset IDs: [13, 4]
+2025-07-08 06:58:40,577 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-08 06:58:41,020 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-08 06:58:41,030 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-08 06:58:41,030 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2025-07-08 07:01:36,907 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-08 07:09:09,740 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-08 07:09:15,857 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-08 07:09:15,857 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2025-07-08 07:19:21,025 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 07:19:25,892 - StoryGeneration - INFO - Successfully generated story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 07:19:25,902 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-08 07:40:32,016 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 07:40:32,043 - StoryGeneration - ERROR - Error generating story for template Air Traffic at Airport Basel/Mulhouse on :reference_period: 'StoryProcessor' object has no attribute 'replace'
+2025-07-08 07:40:32,044 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-08 07:43:21,880 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 07:43:21,926 - StoryGeneration - ERROR - Error generating story for template Air Traffic at Airport Basel/Mulhouse on :reference_period: 'StoryProcessor' object has no attribute 'replace'
+2025-07-08 07:43:21,926 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-08 07:45:08,011 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 07:49:28,294 - StoryGeneration - ERROR - Error generating story for template Air Traffic at Airport Basel/Mulhouse on :reference_period: 'StoryProcessor' object has no attribute 'replace'
+2025-07-08 07:49:28,294 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-08 07:49:54,846 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 07:49:54,913 - StoryGeneration - ERROR - Error generating story for template Air Traffic at Airport Basel/Mulhouse on :reference_period: 'StoryProcessor' object has no attribute 'replace'
+2025-07-08 07:49:54,913 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-08 07:51:38,409 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 07:51:38,433 - StoryGeneration - ERROR - Error generating story for template Air Traffic at Airport Basel/Mulhouse on :reference_period: 'str' object cannot be interpreted as an integer
+2025-07-08 07:51:38,433 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-08 07:52:23,311 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 07:53:13,142 - StoryGeneration - ERROR - Error generating story for template Air Traffic at Airport Basel/Mulhouse on :reference_period: 'str' object cannot be interpreted as an integer
+2025-07-08 07:53:34,018 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 07:56:15,858 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 07:56:56,540 - StoryGeneration - ERROR - Error generating story for template Air Traffic at Airport Basel/Mulhouse on :reference_period: 'str' object cannot be interpreted as an integer
+2025-07-08 07:57:07,008 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 07:58:39,787 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 08:00:08,656 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 08:00:19,683 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 08:01:30,924 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 08:03:25,782 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 08:03:40,569 - StoryGeneration - INFO - Successfully generated story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-08 08:03:40,579 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-08 20:55:52,955 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 20:55:53,061 - StoryGeneration - INFO - Story generation skipped for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 20:55:53,061 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 1
+2025-07-08 20:58:45,233 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:07:32,934 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:09:44,761 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:14:42,849 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:17:02,646 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:20:43,170 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:22:58,025 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:24:29,196 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:24:40,401 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:24:40,401 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-08 21:38:38,186 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:38:51,150 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:38:51,151 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-08 21:51:44,491 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:51:56,551 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 21:51:56,552 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-08 22:07:45,256 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 22:07:53,288 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 22:07:53,299 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-08 22:09:18,701 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 22:09:26,933 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-08 22:09:26,934 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-09 05:19:47,808 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-09 05:19:48,386 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-09 05:19:48,396 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-09 05:19:49,024 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-09 05:19:49,024 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-09 05:19:49,847 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-09 05:19:49,848 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-09 05:19:50,788 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-09 05:19:50,788 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-09 05:19:51,565 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-09 05:19:51,565 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-09 05:19:51,821 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-09 05:19:51,821 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-09 05:19:52,206 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-09 05:19:52,206 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-09 05:19:52,376 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-09 05:19:52,377 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-09 05:19:52,522 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-09 05:19:52,532 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-09 05:19:52,744 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-09 05:19:52,754 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-09 05:19:56,209 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-09 05:19:56,209 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-09 05:19:56,379 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-09 05:19:56,379 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-09 05:19:56,605 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-09 05:19:56,614 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-09 05:19:57,722 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-09 05:19:57,732 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-09 05:19:57,963 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-09 05:19:57,963 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-09 05:19:58,128 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-09 05:19:58,138 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-09 05:19:58,340 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-09 05:19:58,350 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-09 05:19:58,681 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-09 05:19:58,691 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-09 05:19:59,419 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-07-09 05:19:59,419 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-09 05:20:00,758 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-09 05:20:00,759 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-09 05:20:03,375 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-09 05:20:03,381 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-09 05:20:03,381 - DatasetSync - INFO - Synchronization completed successfully. Processed: 21, All successful
+2025-07-09 05:20:03,383 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-09 05:20:03,395 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-09 05:20:03,395 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-09 05:20:03,408 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-09 05:20:03,409 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-09 05:20:03,552 - StoryGeneration - INFO - Story generation skipped for template: Buildings in Baselland
+2025-07-09 05:20:03,552 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-09 05:20:03,624 - StoryGeneration - INFO - Story generation skipped for template: Dog population in Basel :reference_period
+2025-07-09 05:20:03,624 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-09 05:20:03,631 - StoryGeneration - INFO - Story generation skipped for template: Electricity consumption in Basel :reference_period
+2025-07-09 05:20:03,631 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-09 05:20:03,734 - StoryGeneration - INFO - Story generation skipped for template: Heat day report in Basel for :reference_period
+2025-07-09 05:20:03,734 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-09 05:20:03,744 - StoryGeneration - INFO - Story generation skipped for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-09 05:20:03,745 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-09 05:20:03,749 - StoryGeneration - INFO - Story generation skipped for template: Rent prices in the canton of Baselland
+2025-07-09 05:20:03,749 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-09 05:20:03,760 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-09 05:20:03,760 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-09 05:20:03,801 - StoryGeneration - INFO - Story generation skipped for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-09 05:20:03,801 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-09 05:20:03,804 - StoryGeneration - INFO - Story generation skipped for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-09 05:20:03,804 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-09 05:20:03,890 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-09 05:20:03,890 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-09 05:20:03,936 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-09 05:20:03,936 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 13
+2025-07-09 05:20:03,937 - EmailService - INFO - Starting sending mails for 2025-07-09...
+2025-07-09 05:20:03,937 - EmailService - INFO - Cleaned up empty stories
+2025-07-09 05:20:03,940 - EmailService - INFO - Found 1 stories to send.
+2025-07-09 05:20:05,166 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-07-09 05:20:07,169 - EmailService - INFO - Updated all records to is_sent = true
+2025-07-09 05:20:07,169 - EmailService - INFO - Email sending completed. Success: 1, Failed: 0
+2025-07-09 05:21:16,103 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-09 05:21:16,303 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-09 05:21:16,313 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-09 05:21:16,963 - DatasetSync - ERROR - Failed to synchronize dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-09 05:21:16,963 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-09 05:21:17,390 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-09 05:21:17,400 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-09 05:21:17,770 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-09 05:21:17,780 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-09 05:21:18,197 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-09 05:21:18,207 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-09 05:21:18,395 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-09 05:21:18,405 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-09 05:21:18,587 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-09 05:21:18,597 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-09 05:21:18,784 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-09 05:21:18,794 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-09 05:21:18,957 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-09 05:21:18,966 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-09 05:21:19,092 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-09 05:21:19,102 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-09 05:21:19,516 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-09 05:21:19,526 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-09 05:21:19,768 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-09 05:21:19,778 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-09 05:21:20,022 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-09 05:21:20,032 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-09 05:21:20,234 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-09 05:21:20,244 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-09 05:21:20,497 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-09 05:21:20,507 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-09 05:21:20,655 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-09 05:21:20,665 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-09 05:21:20,819 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-09 05:21:20,828 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-09 05:21:21,983 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-09 05:21:21,983 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-09 05:21:22,810 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-09 05:21:22,810 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-09 05:21:23,442 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-09 05:21:23,444 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-09 05:21:23,842 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-09 05:21:23,853 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-09 05:21:23,853 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 21, Failed: 2, Failed dataset IDs: [13, 4]
+2025-07-09 05:45:25,046 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-09 05:45:38,039 - StoryGeneration - INFO - Successfully generated story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-09 05:45:38,039 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-09 05:46:20,086 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-09 05:51:07,722 - DatasetSync - ERROR - Failed to synchronize dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-09 05:54:26,291 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-09 05:54:26,341 - StoryGeneration - INFO - Story generation skipped for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-09 05:54:26,341 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 1
+2025-07-09 06:01:28,824 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-09 06:01:38,116 - StoryGeneration - INFO - Successfully generated story for template: Electricity consumption in Basel :reference_period
+2025-07-09 06:01:38,127 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-09 06:31:46,467 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-09 06:31:46,727 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-09 06:31:46,727 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-09 06:31:46,727 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2025-07-09 06:32:48,467 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-07-09 06:44:11,151 - DatasetSync - ERROR - Failed to synchronize dataset ID 28: Noise Monitoring in Basel
+2025-07-09 06:44:11,178 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-09 06:44:11,178 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [28]
+2025-07-09 06:59:04,351 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-07-09 07:04:01,778 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-07-09 07:04:55,942 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-07-09 07:06:15,184 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-07-09 07:08:04,913 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-07-09 07:11:29,493 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-07-09 07:11:55,164 - DatasetSync - INFO - Successfully synchronized dataset ID 28: Noise Monitoring in Basel
+2025-07-09 07:11:55,168 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-09 07:11:55,168 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2025-07-10 06:12:53,614 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-10 06:12:53,887 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-10 06:12:53,888 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-10 06:12:54,590 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-10 06:12:54,591 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-10 06:12:55,242 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-10 06:12:55,242 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-10 06:12:55,651 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-10 06:12:55,652 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-10 06:12:55,956 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-10 06:12:55,957 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-10 06:12:56,187 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-10 06:12:56,197 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-10 06:12:56,403 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-10 06:12:56,412 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-10 06:12:56,614 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-10 06:12:56,624 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-10 06:12:56,746 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-10 06:12:56,756 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-10 06:12:56,959 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-10 06:12:56,969 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-10 06:12:58,298 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-10 06:12:58,298 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-10 06:12:58,470 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-10 06:12:58,471 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-10 06:12:58,661 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-10 06:12:58,671 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-07-10 06:12:59,553 - DatasetSync - ERROR - Failed to synchronize dataset ID 28: Noise Monitoring in Basel
+2025-07-10 06:12:59,554 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2025-07-10 06:12:59,927 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2025-07-10 06:12:59,927 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-10 06:13:00,086 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-10 06:13:00,096 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-10 06:13:00,404 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-10 06:13:00,414 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-10 06:13:00,731 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-10 06:13:00,732 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-10 06:13:02,308 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-10 06:13:02,318 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-10 06:13:02,869 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-10 06:13:02,878 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-10 06:13:04,095 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-07-10 06:13:04,095 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-10 06:13:05,012 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-10 06:13:05,012 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-10 06:13:06,153 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-10 06:13:06,158 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-10 06:13:06,158 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 23, Failed: 1, Failed dataset IDs: [28]
+2025-07-10 06:20:00,672 - DatasetSync - INFO - Starting synchronization for dataset ID 30: traffic accidents
+2025-07-10 06:20:06,560 - DatasetSync - INFO - Successfully synchronized dataset ID 30: traffic accidents
+2025-07-10 06:20:06,561 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-10 06:20:06,561 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2025-07-10 07:24:21,626 - StoryGeneration - ERROR - No active story template found with ID: 30
+2025-07-10 07:24:41,530 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-10 07:24:41,530 - StoryGeneration - ERROR - Error generating story for template Traffic accidents: 'StoryTemplate' object has no attribute 'post_publish_command'
+2025-07-10 07:24:41,531 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-10 07:24:52,370 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-10 07:24:52,371 - StoryGeneration - ERROR - Error generating story for template Traffic accidents: 'StoryTemplate' object has no attribute 'post_publish_command'
+2025-07-10 07:24:52,371 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-10 07:26:48,954 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-10 07:27:03,567 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
+2025-07-10 07:27:03,568 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-10 07:48:33,316 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-10 07:48:42,193 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
+2025-07-10 07:48:42,194 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-10 07:56:11,391 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-10 07:56:17,759 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
+2025-07-10 07:56:17,769 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-10 07:57:40,783 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-10 07:57:49,294 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
+2025-07-10 07:57:49,304 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-10 08:05:52,719 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-10 08:06:00,100 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
+2025-07-10 08:06:00,110 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-10 08:12:39,645 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-10 08:12:47,542 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
+2025-07-10 08:12:47,552 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-10 08:17:19,095 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-10 08:17:26,174 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
+2025-07-10 08:17:26,184 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0

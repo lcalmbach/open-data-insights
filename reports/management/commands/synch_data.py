@@ -11,6 +11,11 @@ class Command(BaseCommand):
             type=int, 
             help='ID of the specific dataset to synchronize'
         )
+        parser.add_argument(
+            '--keep-files', 
+            type=int, 
+            help='Dont delete files after run'
+        )
 
     def handle(self, *args, **options):
         dataset_id = options.get('id')
@@ -45,3 +50,5 @@ class Command(BaseCommand):
                 self.stdout.write(status_text)
                 if not detail['success'] and 'error' in detail:
                     self.stdout.write(f"    Error: {detail['error']}")
+        
+       

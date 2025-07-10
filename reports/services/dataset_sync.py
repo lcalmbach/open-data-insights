@@ -74,7 +74,7 @@ class DatasetSyncService(ETLBaseService):
         if dataset_id:
             datasets = Dataset.objects.filter(id=dataset_id)
         else:
-            datasets = Dataset.objects.filter(is_active=True)
+            datasets = Dataset.objects.filter(active=True)
 
         if not datasets.exists():
             if dataset_id:
@@ -274,7 +274,7 @@ class DatasetProcessor:
         """Synchronize when target table already exists"""
         try:
             if self.has_timestamp and self.ods_last_record_date:
-                ods_date = make_utc(self.ods_last_record_date)
+                ods_date = make_utc(self.ods_last_record_date).date()
                 last_db_record = self.dbclient.get_target_last_record(
                     self.dataset.target_table_name, self.dataset.db_timestamp_field
                 )
@@ -282,7 +282,7 @@ class DatasetProcessor:
                 if last_db_record:
                     target_db_date = make_utc(
                         last_db_record[self.dataset.db_timestamp_field]
-                    )
+                    ).date()
 
                     # Check if new data is available
                     if ods_date - target_db_date >= timedelta(days=1):
@@ -403,22 +403,26 @@ class DatasetProcessor:
             query_string = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
             full_url = f"{base_url}?{query_string}"
             local_csv_file = str(filename).replace(".parquet", ".csv")
+            if os.path.exists(local_csv_file):
+                self.logger.info(
+                    f"File {local_csv_file} already exists. Using existing csv file."
+                )
+            else:
+                # Download with progress bar
+                with requests.get(full_url, stream=True, timeout=(10, 60)) as r:
+                    r.raise_for_status()
+                    total = int(r.headers.get("content-length", 0))
 
-            # Download with progress bar
-            with requests.get(full_url, stream=True, timeout=(10, 60)) as r:
-                r.raise_for_status()
-                total = int(r.headers.get("content-length", 0))
-
-                with open(local_csv_file, "wb") as f, tqdm(
-                    desc="Downloading CSV",
-                    total=total,
-                    unit="B",
-                    unit_scale=True,
-                    unit_divisor=1024,
-                ) as bar:
-                    for chunk in r.iter_content(chunk_size=8192):
-                        f.write(chunk)
-                        bar.update(len(chunk))
+                    with open(local_csv_file, "wb") as f, tqdm(
+                        desc="Downloading CSV",
+                        total=total,
+                        unit="B",
+                        unit_scale=True,
+                        unit_divisor=1024,
+                    ) as bar:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                            bar.update(len(chunk))
 
             # Read the downloaded file
             df = pd.read_csv(local_csv_file, sep=";", low_memory=False)
@@ -535,15 +539,15 @@ class DatasetProcessor:
 
             # Create aggregation dictionary
             agg_dict = {}
-            if "parameters" in agg_config:
-                for field, functions in agg_config["parameters"].items():
-                    for func in functions:
+            if "agg_functions" in agg_config:
+                for field in agg_config["value_fields"]:
+                    for func in agg_config["agg_functions"]:
                         agg_dict[f"{func}_{field}"] = (field, func)
 
             # Apply aggregation
-            if "group_by_field" in agg_config:
+            if "group_fields" in agg_config:
                 df = (
-                    df.groupby(agg_config["group_by_field"], as_index=False)
+                    df.groupby(agg_config["group_fields"], as_index=False)
                     .agg(**agg_dict)
                     .sort_values(self.dataset.db_timestamp_field, ascending=False)
                 )

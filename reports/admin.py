@@ -38,8 +38,8 @@ class StoryTemplateAdmin(admin.ModelAdmin):
         "title",
         "reference_period",
     )
-    search_fields = ("title","reference_period")
-    list_filter = ["title","reference_period"]  # shows a filter sidebar
+    search_fields = ("title", "reference_period")
+    list_filter = ["title", "reference_period"]  # shows a filter sidebar
 
 
 @admin.register(StoryTemplateContext)
@@ -69,9 +69,10 @@ class StoryTemplatePeriodOfInterestValuesAdmin(admin.ModelAdmin):
 
 @admin.register(LookupCategory)
 class LookupCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "description")
+    list_display = ("id", "name", "description")
     sortable_by = ("name",)
     sorted_by = ("name",)
+    search_fields = ["name"]  # shows a filter sidebar
 
 
 @admin.register(LookupValue)
@@ -91,9 +92,9 @@ class LookupValueAdmin(admin.ModelAdmin):
 @admin.register(Dataset)
 class DatasetAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "source_identifier")
-    sortable_by = ("name",)
+    sortable_by = ("name", "source_identifier")
     sorted_by = ("name",)
-    search_fields = ["name"]  # shows a filter sidebar
+    search_fields = ["name", "source_identifier"]  # shows a filter sidebar
 
 
 @admin.register(StoryTemplateSubscription)

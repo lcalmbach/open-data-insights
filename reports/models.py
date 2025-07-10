@@ -8,7 +8,6 @@ def default_yesterday():
 
 
 class LookupCategory(models.Model):
-    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=255, help_text="Name of the lookup category.")
     description = models.TextField(
         blank=True, help_text="Description of the lookup category."
@@ -23,7 +22,6 @@ class LookupCategory(models.Model):
 
 
 class LookupValue(models.Model):
-    id = models.IntegerField(primary_key=True)
     category = models.ForeignKey(
         LookupCategory,
         on_delete=models.CASCADE,
@@ -33,6 +31,12 @@ class LookupValue(models.Model):
     value = models.CharField(max_length=255, help_text="The actual lookup value.")
     description = models.TextField(
         blank=True, help_text="Description of the lookup value."
+    )
+    key = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text="Optional key for the lookup value, e.g., 'temperature', 'precipitation'. This can be used for quick access or filtering.",
     )
     predecessor = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.SET_NULL
@@ -248,9 +252,10 @@ class StoryTemplate(models.Model):
     post_publish_command = models.TextField(
         blank=True,
         null=True,
-        help_text="SQL command to be executed after the story is published. This can be used to update the story template or perform other actions.",
+        help_text="SQL command to be executed after the story is published. This can be used to update other tables or perform additional actions.",
     )
 
+    
     class Meta:
         verbose_name = "Story Template"
         verbose_name_plural = "Story Templates"
@@ -288,11 +293,6 @@ class StoryTemplateContext(models.Model):
         on_delete=models.CASCADE,
         related_name="context_periods",
         help_text="The context period for this context, e.g., 'day', 'month', 'season', 'year'.",
-    )
-    create_condition = models.TextField(
-        null=True,
-        blank=True,
-        help_text="command holding the condition on whether this context is created. e.g. if reference day is a heat day, check on how many heat days there were in the current month or season.",
     )
 
 
