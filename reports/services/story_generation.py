@@ -5,12 +5,12 @@ Handles generating data insights and stories from templates
 
 import logging
 import pandas as pd
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from typing import Optional, Dict, Any, List
-from django.db import transaction
 from django.utils import timezone
+import json
 
-from reports.models import StoryTemplate, Dataset
+from reports.models import StoryTemplate, Dataset, Story
 from reports.services.base import ETLBaseService
 from reports.services.story_processor import StoryProcessor
 from reports.models import StoryTemplate
@@ -23,10 +23,10 @@ class StoryGenerationService(ETLBaseService):
         super().__init__("StoryGeneration")
 
     def generate_story(
-        self,
-        template: StoryTemplate,
-        run_date: Optional[date] = None,
-        force: bool = False,
+        self,  # This is the first argument (self)
+        template: StoryTemplate,  # Second argument
+        run_date: Optional[date] = None,  # Third argument with default
+        force: bool = False,  # Fourth argument with default
     ) -> Dict[str, Any]:
         """Generate a single story from a template"""
         try:
@@ -36,22 +36,11 @@ class StoryGenerationService(ETLBaseService):
             if not run_date:
                 run_date = date.today() - timedelta(days=1)
 
-            # Convert template to dict format expected by StoryProcessor
-            template_dict = {
-                "id": template.id,
-                "title": template.title,
-                "description": template.description,
-                "reference_period_id": template.reference_period.id,
-                "prompt_text": template.prompt_text,
-                "temperature": template.temperature,
-                "has_data_sql": template.has_data_sql,
-                "publish_conditions": template.publish_conditions,
-                "most_recent_day_sql": template.most_recent_day_sql,
-                "post_publish_command": template.post_publish_command,
-            }
+            # Ensure run_date is a date object, not a datetime
+            if isinstance(run_date, datetime):
+                run_date = run_date.date()
 
-            # Create story processor
-            story_processor = StoryProcessor(template_dict, run_date, force)
+            story_processor = StoryProcessor(template, run_date, force)
 
             # Check if story should be generated
             if not force and not story_processor.story_is_due():
@@ -124,46 +113,30 @@ class StoryGenerationService(ETLBaseService):
         }
 
         for template in templates:
+            service = StoryProcessor(template, run_date, force)
             try:
-                with transaction.atomic():
-                    result = self.generate_story(template, run_date, force)
+                result = service.generate_story()
 
-                    if result["success"]:
-                        if result.get("skipped"):
-                            results["skipped"] += 1
-                        else:
-                            results["successful"] += 1
-                    else:
-                        results["failed"] += 1
-                        results["success"] = False
-
-                    results["details"].append(
-                        {
-                            "template_id": template.id,
-                            "template_title": template.title,
-                            "success": result["success"],
-                            "skipped": result.get("skipped", False),
-                            "error": result.get("error"),
-                            "story_id": result.get("story_id"),
-                        }
-                    )
-
-            except Exception as e:
-                self.logger.error(
-                    f"Transaction failed for template {template.title}: {str(e)}"
-                )
-                results["failed"] += 1
-                results["success"] = False
-                results["details"].append(
-                    {
+                if result:
+                    results["successful"] += 1
+                    results["details"].append({
                         "template_id": template.id,
-                        "template_title": template.title,
-                        "success": False,
-                        "error": str(e),
-                    }
-                )
-
-        self.logger.info(
-            f"Story generation completed. Success: {results['successful']}, Failed: {results['failed']}, Skipped: {results['skipped']}"
-        )
+                        "status": "success",
+                        "story_id": result.get("story_id"),
+                    })
+                else:
+                    results["failed"] += 1
+                    results["details"].append({
+                        "template_id": template.id,
+                        "status": "failed",
+                        "error": result.get("error", "Unknown error"),
+                    })
+            except Exception as e:
+                self.logger.error(f"Error processing template {template.id}: {str(e)}")
+                results["failed"] += 1
+                results["details"].append({
+                    "template_id": template.id,
+                    "status": "error",
+                    "error": str(e),
+                })
         return results

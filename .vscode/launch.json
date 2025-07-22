@@ -2,6 +2,23 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Django: Runserver",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "runserver",
+                "0.0.0.0:8000"
+            ],
+            "django": true,
+            "justMyCode": false,
+            "env": {
+                "PYTHONUNBUFFERED": "1",
+                "DEBUG": "True"
+            },
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Django: Generate Stories",
             "type": "debugpy",
             "request": "launch",
@@ -9,10 +26,12 @@
             "args": [
                 "generate_stories",
                 "--id",
-                "20",
+                "24",
                 "--date",
-                "2025-06-01",
-                "--force"
+                "2023-01-01",
+                "--force",
+                "-v",
+                "2"
             ],
             "django": true,
             "justMyCode": true,
@@ -30,7 +49,7 @@
             "args": [
                 "synch_data",
                 "--id",
-                "28",
+                "24",
                 "-v",
                 "2"
             ],

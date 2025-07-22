@@ -32,6 +32,11 @@ class Command(BaseCommand):
             action='store_true',
             help='Force story generation even if conditions are not met'
         )
+        parser.add_argument(
+            '--continue-on-error',
+            action='store_true',
+            help='Continue pipeline execution even if there are errors in previous steps'
+        )
 
     def handle(self, *args, **options):
         # Parse the date if provided
@@ -48,6 +53,7 @@ class Command(BaseCommand):
                 return
         
         force = options.get('force', False)
+        continue_on_error = options.get('continue_on_error', False)
         
         self.stdout.write(
             self.style.SUCCESS(
@@ -77,8 +83,8 @@ class Command(BaseCommand):
                         f"Failed dataset IDs: {failed_datasets}"
                     )
                 )
-                if not force:
-                    self.stdout.write("Stopping pipeline due to sync failures. Use --force to continue.")
+                if not force and not continue_on_error:
+                    self.stdout.write("Stopping pipeline due to sync failures. Use --force or --continue-on-error to proceed.")
                     return
         else:
             self.stdout.write("Skipping dataset synchronization...")
@@ -103,8 +109,8 @@ class Command(BaseCommand):
                         f"Generated: {story_result['successful']}, Failed: {story_result['failed']}, Skipped: {story_result['skipped']}"
                     )
                 )
-                if not force:
-                    self.stdout.write("Stopping pipeline due to story generation failures. Use --force to continue.")
+                if not force and not continue_on_error:
+                    self.stdout.write("Stopping pipeline due to story generation failures. Use --force or --continue-on-error to proceed.")
                     return
         else:
             self.stdout.write("Skipping story generation...")
@@ -129,6 +135,9 @@ class Command(BaseCommand):
                         f"Sent: {email_result.get('successful', 0)}, Failed: {email_result.get('failed', 0)}"
                     )
                 )
+                if not continue_on_error:
+                    self.stdout.write("Stopping pipeline due to email sending failures. Use --continue-on-error to proceed.")
+                    return
         else:
             self.stdout.write("Skipping email sending...")
         

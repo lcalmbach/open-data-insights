@@ -79,7 +79,7 @@ def normalize_sql_query(query: str) -> str:
     clean_query = re.sub(
         r"%\(([^)]+)\)f", r"%(\1)s", clean_query
     )  # %(param)f -> %(param)s
-    
+
     return clean_query
 
 

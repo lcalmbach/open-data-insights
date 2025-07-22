@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load custom_filters %}
 {% block title %}Explore Stories{% endblock %}
 
 {% block content %}
@@ -7,18 +8,18 @@
   <div class="col-md-4">
     <label for="template" class="form-label">Search</label>
     <select class="form-select" id="template" name="template">
-      <option value="">All templates</option>
-      {% for template in templates %}
-        <option value="{{ template.id }}" {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
-          {{ template.title }}
-        </option>
-      {% endfor %}
-    </select>
+  <option value="">All templates</option>
+  {% for template in templates %}
+    <option value="{{ template.id }}" {% if request.GET.template == template.id|add:"" %}selected{% endif %}>
+      {{ template.title }}
+    </option>
+  {% endfor %}
+</select>
   </div>
   <div class="col-md-6">
     <label for="search" class="form-label">&nbsp;</label>
-    <input type="text" class="form-control" id="search" name="search"
-           value="{{ request.GET.search }}" placeholder="Title or description...">
+    <input type="text" class="form-control" id="search" name="search" value="{{ request.GET.search }}"
+      placeholder="Title or description...">
   </div>
   <div class="col-md-2 d-flex align-items-end">
     <button type="submit" class="btn btn-primary w-100">Filter</button>
@@ -32,13 +33,13 @@
     <h4>Available Insights</h4>
     <ul class="list-group">
       {% for story in stories %}
-        <a href="?story={{ story.id }}&template={{ request.GET.template }}&search={{ request.GET.search }}"
-           class="list-group-item list-group-item-action {% if story.id == selected_story.id %}active{% endif %}">
-          {{ story.title }}<br>
-          <small class="text-muted">{{ story.published_date|date:"Y-m-d" }}</small>
-        </a>
+      <a href="?story={{ story.id }}&template={{ request.GET.template }}&search={{ request.GET.search }}"
+        class="list-group-item list-group-item-action {% if story.id == selected_story.id %}active{% endif %}">
+        {{ story.title }}<br>
+        <small class="text-muted">{{ story.published_date|date:"Y-m-d" }}</small>
+      </a>
       {% empty %}
-        <li class="list-group-item">No stories found.</li>
+      <li class="list-group-item">No stories found.</li>
       {% endfor %}
     </ul>
   </div>
@@ -46,14 +47,73 @@
   <!-- Right: Story Details -->
   <div class="col-md-8">
     {% if selected_story %}
-      <h3>{{ selected_story.title }}</h3>
-      <p><strong>Published:</strong> {{ selected_story.published_date|date:"F j, Y" }}</p>
-      <p><strong>Reference period:</strong> {{ selected_story.reference_period }}</p>
+    <p><strong>Published:</strong> {{ selected_story.published_date|date:"F j, Y" }}</p>
+    <p><strong>Reference period:</strong> {{ selected_story.reference_period }}</p>
+    <hr>
+    <div class="card mt-2 shadow-sm">
+      <div class="card-header bg-light">
+        <h2 class="card-title mb-0 text-primary">{{ selected_story.title|safe }}</h2>
+      </div>
+      <div class="card-body text-start">
+        <b>
+          <p class="card-text mt-3">{{ selected_story.summary|safe }}</p>
+        </b>
+        <p class="card-text mt-3">{{ selected_story.content_html | safe }}</p>
+      </div>
       <hr>
-      <div>{{ selected_story.content_html|safe }}</div>
-    {% else %}
-      <p>Select a story on the left to view its details here.</p>
-    {% endif %}
+      {% for table in tables %}
+      <h4>{{ table.title }}</h4>
+      <table class="table table-striped" id="{{ table.table_id }}">
+        <thead>
+          <tr>
+            {% for column in table.columns %}
+            <th>{{ column }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in table.rows %}
+          <tr>
+            {% for col in table.columns %}
+            <td>{{ row|get_item:col }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <br>
+      {% endfor %}
+      <hr>
+      
+      {% if graphics %}
+        {% for graphic in graphics %}
+          <h4>{{ graphic.title }}</h4>
+          {{ graphic.content_html|safe }}
+        {% endfor %}
+        <hr>
+      {% endif %}
+
+      {% if data_source %}
+      <p>
+        Data source:
+        {% for source in data_source %}
+        <a href="{{ source.url }}">{{ source.text }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+      {% endif %}
+
+      {% if other_ressources %}
+      <p>
+        Additional ressources:
+        {% for source in other_ressources %}
+        <a href="{{ source.url }}">{{ source.text }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+      {% endif %}
+      <p class="text-muted mt-3" style="font-size: 0.9em;">{{ AI_DISCLAIMER }}</p>
+      </div>
+      {% endif %}
+    </div>
   </div>
 </div>
 {% endblock %}

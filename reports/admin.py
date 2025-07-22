@@ -9,6 +9,11 @@ from .models import (
     Dataset,
     StoryTemplateSubscription,
     StoryLog,
+    StoryTable,
+    Graphic,
+    StoryRating,
+    StoryTemplateTable,
+    StoryTemplateGraphic,
 )
 
 
@@ -38,31 +43,31 @@ class StoryTemplateAdmin(admin.ModelAdmin):
         "title",
         "reference_period",
     )
-    search_fields = ("title", "reference_period")
+    search_fields = ("title", "reference_period__value")
     list_filter = ["title", "reference_period"]  # shows a filter sidebar
 
 
 @admin.register(StoryTemplateContext)
 class StoryTemplateContextAdmin(admin.ModelAdmin):
-    list_display = ("story_template", "key", "sort_key")
+    list_display = ("story_template", "key", "sort_order")
     sortable_by = (
         "story_template",
-        "sort_key",
+        "sort_order",
     )
-    sorted_by = ("sort_key",)
+    sorted_by = ("sort_order",)
     list_filter = ("story_template",)
 
 
 @admin.register(StoryTemplatePeriodOfInterestValues)
 class StoryTemplatePeriodOfInterestValuesAdmin(admin.ModelAdmin):
-    list_display = ("story_template", "title", "sort_key")
+    list_display = ("story_template", "title", "sort_order")
     sortable_by = (
         "story_template",
-        "sort_key",
+        "sort_order",
     )
     sorted_by = (
         "story_template",
-        "sort_key",
+        "sort_order",
     )
     list_filter = ("story_template",)
 
@@ -71,7 +76,7 @@ class StoryTemplatePeriodOfInterestValuesAdmin(admin.ModelAdmin):
 class LookupCategoryAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "description")
     sortable_by = ("name",)
-    sorted_by = ("name",)
+    ordering = ("name",)
     search_fields = ["name"]  # shows a filter sidebar
 
 
@@ -109,11 +114,60 @@ class StoryTemplateSubscriptionAdmin(admin.ModelAdmin):
 @admin.register(StoryLog)
 class StoryLogAdmin(admin.ModelAdmin):
     list_display = (
-        "story_template",
         "story",
         "publish_date",
         "reference_period_start",
         "reference_period_end",
     )
-    sortable_by = ("story_template", "publish_date")
-    search_fields = ("story_template__title", "story__title")
+    sortable_by = ("story", "publish_date")
+    search_fields = ("story__title",)
+
+
+
+@admin.register(StoryTemplateTable)
+class StoryTemplateTableAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "story_template",
+        "title",
+    )
+    sortable_by = ("id", "title")
+    search_fields = ("title",)
+
+
+@admin.register(StoryTable)
+class StoryTableAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "story",
+        "table_template",
+    )
+    sortable_by = ("id", "story")
+    search_fields = ("story__title", "table_template__title")
+    list_filter = ("story",)
+
+
+@admin.register(StoryTemplateGraphic)
+class StoryTemplateGraphicAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "story_template",
+        "title",
+    )
+    sortable_by = ("id", "title")
+    search_fields = ("title",)
+    list_filter = ("story_template",)
+
+
+@admin.register(Graphic)
+class StoryGraphiAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "story",
+        "title",
+        "story_id"
+    )
+
+    sortable_by = ("id", "title")
+    search_fields = ("title",)
+    list_filter = ("story",)

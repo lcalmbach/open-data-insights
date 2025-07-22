@@ -2031,3 +2031,595 @@ LINE 1: ...FROM max_per_month ) SELECT * FROM ranked ORDER BY temp_rank
 2025-07-10 08:17:19,095 - StoryGeneration - INFO - Generating story for template: Traffic accidents
 2025-07-10 08:17:26,174 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
 2025-07-10 08:17:26,184 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-10 21:16:08,152 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-10 21:16:32,376 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
+2025-07-10 21:16:32,376 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-11 06:20:12,616 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-11 06:20:13,182 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-11 06:20:13,182 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-11 06:20:14,633 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-11 06:20:14,634 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-11 06:20:15,652 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-11 06:20:15,652 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-11 06:20:16,170 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-11 06:20:16,170 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-11 06:20:16,874 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-11 06:20:16,875 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-11 06:20:17,103 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-11 06:20:17,113 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-11 06:20:17,426 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-11 06:20:17,436 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-11 06:20:17,814 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-11 06:20:17,824 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-11 06:20:18,015 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-11 06:20:18,025 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-11 06:20:18,266 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-11 06:20:18,275 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-11 06:20:19,205 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-11 06:20:19,205 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-11 06:20:19,474 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-11 06:20:19,484 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-11 06:20:19,969 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-11 06:20:19,979 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-07-11 06:20:23,235 - DatasetSync - INFO - Successfully synchronized dataset ID 28: Noise Monitoring in Basel
+2025-07-11 06:20:23,236 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2025-07-11 06:20:23,476 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2025-07-11 06:20:23,486 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-11 06:20:23,774 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-11 06:20:23,784 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-11 06:20:24,049 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-11 06:20:24,059 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-11 06:20:24,300 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-11 06:20:24,310 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-11 06:20:24,672 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-11 06:20:24,683 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-11 06:20:24,923 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-11 06:20:24,924 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-11 06:20:26,001 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-07-11 06:20:26,001 - DatasetSync - INFO - Starting synchronization for dataset ID 30: traffic accidents
+2025-07-11 06:20:26,336 - DatasetSync - INFO - Successfully synchronized dataset ID 30: traffic accidents
+2025-07-11 06:20:26,346 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-11 06:20:27,259 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-11 06:20:27,259 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-11 06:20:28,592 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-11 06:20:28,597 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-11 06:20:28,597 - DatasetSync - INFO - Synchronization completed successfully. Processed: 24, All successful
+2025-07-11 06:20:28,601 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-11 06:20:28,613 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-11 06:20:28,614 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-11 06:20:28,626 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-11 06:20:28,626 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-11 06:20:28,774 - StoryGeneration - INFO - Story generation skipped for template: Buildings in Baselland
+2025-07-11 06:20:28,774 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-11 06:20:28,846 - StoryGeneration - INFO - Story generation skipped for template: Dog population in Basel :reference_period
+2025-07-11 06:20:28,846 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-11 06:20:28,853 - StoryGeneration - INFO - Story generation skipped for template: Electricity consumption in Basel :reference_period
+2025-07-11 06:20:28,853 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-11 06:20:28,951 - StoryGeneration - INFO - Story generation skipped for template: Heat day report in Basel for :reference_period
+2025-07-11 06:20:28,951 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-11 06:20:28,959 - StoryGeneration - INFO - Story generation skipped for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-11 06:20:28,959 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-11 06:20:28,964 - StoryGeneration - INFO - Story generation skipped for template: Rent prices in the canton of Baselland
+2025-07-11 06:20:28,964 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-11 06:20:28,974 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-11 06:20:28,975 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-11 06:20:29,020 - StoryGeneration - INFO - Story generation skipped for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-11 06:20:29,020 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-11 06:20:29,032 - StoryGeneration - INFO - Story generation skipped for template: Traffic accidents
+2025-07-11 06:20:29,032 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-11 06:20:29,035 - StoryGeneration - INFO - Story generation skipped for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-11 06:20:29,036 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-11 06:20:29,125 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-11 06:20:29,125 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-11 06:20:29,171 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-11 06:20:29,171 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 14
+2025-07-11 06:20:29,172 - EmailService - INFO - Starting sending mails for 2025-07-11...
+2025-07-11 06:20:29,175 - EmailService - INFO - Cleaned up empty stories
+2025-07-11 06:20:29,178 - EmailService - INFO - No insights found for 2025-07-11
+2025-07-11 06:32:59,474 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-11 06:33:20,852 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-11 06:43:41,926 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-11 06:43:50,541 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
+2025-07-11 06:43:50,541 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-11 06:45:50,417 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-11 06:45:58,705 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
+2025-07-11 06:45:58,716 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-11 06:46:11,585 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-11 06:46:20,633 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
+2025-07-11 06:46:20,644 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-11 06:48:53,524 - StoryGeneration - INFO - Generating story for template: Traffic accidents
+2025-07-11 06:49:04,878 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents
+2025-07-11 06:49:04,889 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-11 06:56:42,728 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-11 06:56:42,781 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: syntax error at or near "where"
+LINE 1: ...Fatalities" FROM opendata.ds_100120 group by jahr where jahr...
+                                                             ^
+
+2025-07-11 06:56:42,781 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-11 06:58:06,531 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-11 06:58:18,095 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents :reference_period
+2025-07-11 06:58:18,104 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-11 06:58:49,620 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-11 06:58:58,669 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents :reference_period
+2025-07-11 06:58:58,679 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-11 06:59:43,440 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-11 06:59:50,834 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents :reference_period
+2025-07-11 06:59:50,844 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-12 08:29:53,522 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-12 08:29:53,709 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-12 08:29:53,710 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-12 08:29:54,331 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-12 08:29:54,331 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-12 08:29:55,123 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-12 08:29:55,123 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-12 08:29:55,401 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-12 08:29:55,401 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-12 08:29:55,765 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-12 08:29:55,765 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-12 08:29:55,961 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-12 08:29:55,962 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-12 08:29:56,182 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-12 08:29:56,182 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-12 08:29:56,392 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-12 08:29:56,392 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-12 08:29:56,542 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-12 08:29:56,552 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-12 08:29:56,729 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-12 08:29:56,729 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-12 08:29:57,134 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-12 08:29:57,135 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-12 08:29:57,357 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-12 08:29:57,358 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-12 08:29:58,516 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-12 08:29:58,526 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-07-12 08:29:59,002 - DatasetSync - ERROR - Failed to synchronize dataset ID 28: Noise Monitoring in Basel
+2025-07-12 08:29:59,002 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2025-07-12 08:29:59,195 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2025-07-12 08:29:59,195 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-12 08:29:59,341 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-12 08:29:59,351 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-12 08:29:59,583 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-12 08:29:59,593 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-12 08:29:59,786 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-12 08:29:59,787 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-12 08:29:59,968 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-12 08:29:59,978 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-12 08:30:00,361 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-12 08:30:00,371 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-12 08:30:01,782 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-07-12 08:30:01,782 - DatasetSync - INFO - Starting synchronization for dataset ID 30: traffic accidents
+2025-07-12 08:30:02,499 - DatasetSync - INFO - Successfully synchronized dataset ID 30: traffic accidents
+2025-07-12 08:30:02,509 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-12 08:30:07,886 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-12 08:30:07,886 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-12 08:30:11,331 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-12 08:30:11,360 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-12 08:30:11,360 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 24, Failed: 1, Failed dataset IDs: [28]
+2025-07-12 10:43:21,322 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 10:43:21,386 - StoryGeneration - ERROR - Error generating story for template Noise monitoring in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-12 10:43:21,386 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 10:49:02,939 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 10:49:03,021 - StoryGeneration - ERROR - Error generating story for template Noise monitoring in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-12 10:49:03,021 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 10:50:29,176 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 10:50:29,230 - StoryGeneration - ERROR - Error generating story for template Noise monitoring in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-12 10:50:29,230 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 10:50:55,811 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 10:50:55,864 - StoryGeneration - ERROR - Error generating story for template Noise monitoring in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-12 10:50:55,864 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 10:53:54,986 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 10:53:55,063 - StoryGeneration - ERROR - Error generating story for template Noise monitoring in Basel :reference_period: syntax error at or near "IN"
+LINE 1: ..._lin_to_db FROM opendata.ds_100087_agg station_id IN ( SELEC...
+                                                             ^
+
+2025-07-12 10:53:55,063 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 10:55:09,512 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 10:55:09,592 - StoryGeneration - ERROR - Error generating story for template Noise monitoring in Basel :reference_period: syntax error at or near "IN"
+LINE 1: ..._lin_to_db FROM opendata.ds_100087_agg station_id IN ( SELEC...
+                                                             ^
+
+2025-07-12 10:55:09,592 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 10:57:23,436 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 10:57:23,514 - StoryGeneration - ERROR - Error generating story for template Noise monitoring in Basel :reference_period: syntax error at or near "IN"
+LINE 1: ..._lin_to_db FROM opendata.ds_100087_agg station_id IN ( SELEC...
+                                                             ^
+
+2025-07-12 10:57:23,514 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 11:00:21,226 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 11:00:21,305 - StoryGeneration - ERROR - Error generating story for template Noise monitoring in Basel :reference_period: syntax error at or near "IN"
+LINE 1: ..._lin_to_db FROM opendata.ds_100087_agg station_id IN ( SELEC...
+                                                             ^
+
+2025-07-12 11:00:21,305 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 19:24:46,875 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 19:24:46,955 - StoryGeneration - ERROR - Error generating story for template Noise monitoring in Basel :reference_period: syntax error at or near "IN"
+LINE 1: ..._lin_to_db FROM opendata.ds_100087_agg station_id IN ( SELEC...
+                                                             ^
+
+2025-07-12 19:24:46,956 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 19:26:23,819 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 19:26:23,902 - StoryGeneration - ERROR - Error generating story for template Noise monitoring in Basel :reference_period: syntax error at or near "station_id"
+LINE 1: ...AS p95_noise_db FROM opendata.ds_100087_agg SHERE station_id...
+                                                             ^
+
+2025-07-12 19:26:23,903 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 19:26:38,033 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 19:26:38,151 - StoryGeneration - ERROR - Failed to generate story for template: Noise monitoring in Basel :reference_period
+2025-07-12 19:26:38,151 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 19:32:06,496 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 19:32:06,558 - StoryGeneration - ERROR - Error generating story for template Noise monitoring in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-12 19:32:06,558 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 19:32:27,501 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 19:32:27,571 - StoryGeneration - ERROR - Error generating story for template Noise monitoring in Basel :reference_period: current transaction is aborted, commands ignored until end of transaction block
+
+2025-07-12 19:32:27,571 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-12 19:34:45,309 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 19:34:51,617 - StoryGeneration - INFO - Successfully generated story for template: Noise monitoring in Basel :reference_period
+2025-07-12 19:34:51,618 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-12 20:05:11,869 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 20:05:11,995 - StoryGeneration - INFO - Story generation skipped for template: Noise monitoring in Basel :reference_period
+2025-07-12 20:05:11,995 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 1
+2025-07-12 20:05:26,771 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 20:05:35,665 - StoryGeneration - INFO - Successfully generated story for template: Noise monitoring in Basel :reference_period
+2025-07-12 20:05:35,676 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-12 20:17:04,789 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-12 20:17:05,774 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-12 20:17:05,784 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-12 20:17:07,090 - DatasetSync - ERROR - Failed to synchronize dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-12 20:17:07,090 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-12 20:17:08,550 - DatasetSync - ERROR - Failed to synchronize dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-12 20:17:08,550 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-12 20:17:09,335 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-12 20:17:09,344 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-12 20:17:10,192 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-12 20:17:10,202 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-12 20:17:10,596 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-12 20:17:10,606 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-12 20:17:11,100 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-12 20:17:11,110 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-12 20:17:11,428 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-12 20:17:11,438 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-12 20:17:11,929 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-12 20:17:11,939 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-12 20:17:12,190 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-12 20:17:12,200 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-12 20:17:12,625 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-12 20:17:12,635 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-12 20:17:12,920 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-12 20:17:12,930 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-12 20:17:13,137 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-12 20:17:13,147 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-07-12 20:17:13,627 - DatasetSync - ERROR - Failed to synchronize dataset ID 28: Noise Monitoring in Basel
+2025-07-12 20:17:13,627 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2025-07-12 20:17:13,809 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2025-07-12 20:17:13,819 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-12 20:17:14,005 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-12 20:17:14,016 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-12 20:17:15,097 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-12 20:17:15,106 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-12 20:17:15,277 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-12 20:17:15,287 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-12 20:17:15,499 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-12 20:17:15,509 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-12 20:17:15,730 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-12 20:17:15,740 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-12 20:17:16,318 - DatasetSync - ERROR - Failed to synchronize dataset ID 4: Rhine river discharge and water level
+2025-07-12 20:17:16,326 - DatasetSync - INFO - Starting synchronization for dataset ID 30: traffic accidents
+2025-07-12 20:17:16,463 - DatasetSync - INFO - Successfully synchronized dataset ID 30: traffic accidents
+2025-07-12 20:17:16,473 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-12 20:17:17,222 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-12 20:17:17,224 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-12 20:17:18,189 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-12 20:17:18,190 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-12 20:17:18,190 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 24, Failed: 4, Failed dataset IDs: [13, 14, 28, 4]
+2025-07-12 20:17:18,191 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel :reference_period
+2025-07-12 20:17:18,199 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel :reference_period
+2025-07-12 20:17:18,199 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-12 20:17:18,211 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse on :reference_period
+2025-07-12 20:17:18,212 - StoryGeneration - INFO - Generating story for template: Buildings in Baselland
+2025-07-12 20:17:18,378 - StoryGeneration - INFO - Story generation skipped for template: Buildings in Baselland
+2025-07-12 20:17:18,378 - StoryGeneration - INFO - Generating story for template: Dog population in Basel :reference_period
+2025-07-12 20:17:18,454 - StoryGeneration - INFO - Story generation skipped for template: Dog population in Basel :reference_period
+2025-07-12 20:17:18,454 - StoryGeneration - INFO - Generating story for template: Electricity consumption in Basel :reference_period
+2025-07-12 20:17:18,461 - StoryGeneration - INFO - Story generation skipped for template: Electricity consumption in Basel :reference_period
+2025-07-12 20:17:18,461 - StoryGeneration - INFO - Generating story for template: Heat day report in Basel for :reference_period
+2025-07-12 20:17:18,559 - StoryGeneration - INFO - Story generation skipped for template: Heat day report in Basel for :reference_period
+2025-07-12 20:17:18,560 - StoryGeneration - INFO - Generating story for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-12 20:17:18,576 - StoryGeneration - INFO - Story generation skipped for template: Metadata on published OGD Datasets Basel-Stadt
+2025-07-12 20:17:18,576 - StoryGeneration - INFO - Generating story for template: Noise monitoring in Basel :reference_period
+2025-07-12 20:17:18,653 - StoryGeneration - INFO - Story generation skipped for template: Noise monitoring in Basel :reference_period
+2025-07-12 20:17:18,653 - StoryGeneration - INFO - Generating story for template: Rent prices in the canton of Baselland
+2025-07-12 20:17:18,658 - StoryGeneration - INFO - Story generation skipped for template: Rent prices in the canton of Baselland
+2025-07-12 20:17:18,658 - StoryGeneration - INFO - Generating story for template: Rhine discharge on :reference_period
+2025-07-12 20:17:18,668 - StoryGeneration - INFO - Story generation skipped for template: Rhine discharge on :reference_period
+2025-07-12 20:17:18,668 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-12 20:17:18,715 - StoryGeneration - INFO - Story generation skipped for template: Tourism Insights – Basel, Switzerland :reference_period
+2025-07-12 20:17:18,715 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-12 20:17:18,734 - StoryGeneration - INFO - Story generation skipped for template: Traffic accidents :reference_period
+2025-07-12 20:17:18,734 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-12 20:17:18,737 - StoryGeneration - INFO - Story generation skipped for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2025-07-12 20:17:18,737 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-12 20:17:18,817 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-12 20:17:18,817 - StoryGeneration - INFO - Generating story for template: Weather report :reference_period
+2025-07-12 20:17:18,857 - StoryGeneration - INFO - Story generation skipped for template: Weather report :reference_period
+2025-07-12 20:17:18,858 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 0, Skipped: 15
+2025-07-12 20:17:18,858 - EmailService - INFO - Starting sending mails for 2025-07-12...
+2025-07-12 20:17:18,858 - EmailService - INFO - Cleaned up empty stories
+2025-07-12 20:17:18,870 - EmailService - INFO - No insights found for 2025-07-12
+2025-07-13 09:07:25,567 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-13 09:07:52,097 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents :reference_period
+2025-07-13 09:07:52,098 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-13 09:09:09,189 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-13 09:09:23,202 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents :reference_period
+2025-07-13 09:09:23,213 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-15 07:22:04,127 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-15 07:22:31,871 - StoryGeneration - ERROR - Failed to generate story for template: Traffic accidents :reference_period
+2025-07-15 07:22:31,871 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-15 07:24:03,381 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-15 07:25:06,029 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-15 07:26:35,368 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-15 07:27:36,587 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-15 07:28:13,582 - StoryGeneration - ERROR - Failed to generate story for template: Traffic accidents :reference_period
+2025-07-15 07:28:13,582 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-15 07:28:46,172 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-15 07:30:04,342 - StoryGeneration - ERROR - Failed to generate story for template: Traffic accidents :reference_period
+2025-07-15 07:30:04,342 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-15 07:31:02,616 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-15 07:42:13,245 - StoryGeneration - ERROR - Failed to generate story for template: Traffic accidents :reference_period
+2025-07-15 07:42:13,245 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-15 07:43:04,483 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-15 07:46:44,546 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-15 07:48:19,252 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-15 07:50:37,721 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-15 07:52:10,564 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents :reference_period
+2025-07-15 07:52:10,575 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-15 08:06:04,626 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-15 08:07:31,757 - StoryGeneration - INFO - Successfully generated story for template: Traffic accidents :reference_period
+2025-07-15 08:07:31,767 - StoryGeneration - INFO - Story generation completed. Success: 1, Failed: 0, Skipped: 0
+2025-07-18 07:14:35,248 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:14:45,799 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object is not subscriptable
+2025-07-18 07:14:45,799 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-18 07:15:19,031 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:16:18,925 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:16:54,709 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object is not subscriptable
+2025-07-18 07:16:54,710 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-18 07:17:19,052 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:17:25,469 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object is not subscriptable
+2025-07-18 07:17:25,469 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-18 07:17:41,747 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:19:04,876 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object is not subscriptable
+2025-07-18 07:19:04,877 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-18 07:19:23,212 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:21:52,986 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryProcessor' object has no attribute 'published_date'
+2025-07-18 07:21:52,987 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-18 07:24:14,045 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:24:21,624 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryProcessor' object has no attribute 'self'
+2025-07-18 07:24:21,624 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-18 07:24:32,028 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:26:44,442 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryProcessor' object has no attribute 'self'
+2025-07-18 07:26:44,442 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-18 07:27:21,679 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:29:00,612 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:33:17,887 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:34:53,865 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object has no attribute 'get'
+2025-07-18 07:34:53,865 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-18 07:35:07,432 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:36:04,848 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object has no attribute 'get'
+2025-07-18 07:36:29,728 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:36:42,496 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object has no attribute 'get'
+2025-07-18 07:36:42,497 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-18 07:36:56,698 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:38:04,350 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object has no attribute 'get'
+2025-07-18 07:38:04,351 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-18 07:38:15,770 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:41:04,662 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:43:53,036 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:47:07,647 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryProcessor' object has no attribute 'reference_period_start'
+2025-07-18 07:47:07,648 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-18 07:47:26,879 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:49:26,450 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:51:55,662 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:53:27,889 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:56:31,215 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 07:58:22,435 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-18 08:03:11,469 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 05:44:05,153 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object is not subscriptable
+2025-07-19 05:44:05,154 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 05:44:15,406 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 05:45:09,832 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 05:45:58,449 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 05:50:16,765 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 05:54:18,473 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 05:56:32,150 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 05:58:12,975 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:07:48,281 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:11:34,532 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:15:11,114 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryProcessor' object has no attribute 'reference_period_end'
+2025-07-19 06:15:11,114 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 06:18:26,104 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:19:57,102 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryProcessor' object has no attribute 'reference_period_end'
+2025-07-19 06:19:57,103 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 06:20:59,941 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:21:08,526 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryProcessor' object has no attribute 'reference_period_end'
+2025-07-19 06:21:08,526 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 06:21:24,873 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:21:24,906 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryProcessor' object has no attribute 'reference_period_end'
+2025-07-19 06:21:24,906 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 06:21:38,595 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:22:22,803 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:27:08,032 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:27:28,156 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:28:03,698 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:29:03,594 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:30:29,847 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:30:37,561 - StoryGeneration - ERROR - Failed to generate story for template: Traffic accidents :reference_period
+2025-07-19 06:30:37,562 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 06:30:47,692 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:31:23,965 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:32:09,236 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:33:18,439 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:33:46,886 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:34:51,244 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:35:51,504 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:36:01,192 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:36:08,637 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:36:55,078 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:37:23,263 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:38:08,889 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:47:39,214 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:47:39,214 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object is not subscriptable
+2025-07-19 06:47:39,214 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 06:48:59,507 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:48:59,508 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object is not subscriptable
+2025-07-19 06:48:59,508 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 06:50:09,670 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:50:09,671 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object is not subscriptable
+2025-07-19 06:50:09,671 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 06:50:29,712 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:50:29,712 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object is not subscriptable
+2025-07-19 06:50:29,712 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 06:56:40,061 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:56:40,061 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object is not subscriptable
+2025-07-19 06:56:40,061 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 06:57:05,024 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 06:57:05,024 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object is not subscriptable
+2025-07-19 06:57:05,024 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 07:03:26,750 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 07:03:38,273 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'StoryTemplate' object is not subscriptable
+2025-07-19 07:03:38,274 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 07:04:03,185 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 07:04:22,440 - StoryGeneration - ERROR - Failed to generate story for template: Traffic accidents :reference_period
+2025-07-19 07:04:22,441 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 07:04:35,681 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 07:07:30,387 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 07:07:58,248 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 07:08:25,403 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 07:10:15,672 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 07:14:36,635 - StoryGeneration - ERROR - Failed to generate story for template: Traffic accidents :reference_period
+2025-07-19 07:14:36,636 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 07:15:44,609 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 08:04:08,934 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 08:12:36,117 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 08:15:37,685 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 08:16:53,094 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 08:26:31,395 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 08:27:46,470 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 08:29:22,896 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 08:34:27,983 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 08:40:08,953 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 08:44:03,057 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 09:08:46,516 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 09:19:49,341 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 09:25:38,793 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 10:20:04,302 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 10:22:26,831 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 10:23:48,976 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 10:26:49,374 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 10:30:23,663 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 10:31:16,230 - StoryGeneration - ERROR - Failed to generate story for template: Traffic accidents :reference_period
+2025-07-19 10:31:16,231 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 10:38:35,188 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 10:47:04,110 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 10:47:04,110 - StoryGeneration - ERROR - Error generating story for template Traffic accidents :reference_period: 'datetime.date' object has no attribute 'date'
+2025-07-19 10:47:04,110 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-19 10:48:26,420 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 10:52:46,508 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 10:57:02,483 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 10:59:03,409 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 14:22:21,261 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 14:46:06,717 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 15:06:26,754 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-19 15:32:05,635 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-20 07:37:13,715 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-20 07:56:12,449 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-20 08:02:40,838 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-20 08:03:14,168 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-20 08:06:29,825 - StoryGeneration - INFO - Generating story for template: Traffic accidents :reference_period
+2025-07-20 08:27:46,817 - StoryGeneration - ERROR - Transaction failed for template Traffic accidents :reference_period: StoryGenerationService.generate_story() takes 1 positional argument but 4 were given
+2025-07-20 08:27:46,817 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-20 08:28:25,861 - StoryGeneration - ERROR - Transaction failed for template Traffic accidents :reference_period: StoryGenerationService.generate_story() takes 1 positional argument but 4 were given
+2025-07-20 08:28:25,861 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-20 08:28:56,338 - StoryGeneration - ERROR - Transaction failed for template Traffic accidents :reference_period: StoryGenerationService.generate_story() takes 1 positional argument but 4 were given
+2025-07-20 08:28:56,338 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-20 08:39:09,588 - StoryGeneration - ERROR - Transaction failed for template Traffic accidents :reference_period: StoryGenerationService.generate_story() takes 1 positional argument but 4 were given
+2025-07-20 08:39:09,588 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-20 08:41:18,139 - StoryGeneration - ERROR - Transaction failed for template Traffic accidents :reference_period: StoryGenerationService.generate_story() takes 1 positional argument but 4 were given
+2025-07-20 08:41:18,139 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-20 08:44:59,023 - StoryGeneration - ERROR - Transaction failed for template Traffic accidents :reference_period: StoryGenerationService.generate_story() takes 1 positional argument but 4 were given
+2025-07-20 08:44:59,023 - StoryGeneration - INFO - Story generation completed. Success: 0, Failed: 1, Skipped: 0
+2025-07-20 09:17:00,779 - StoryGeneration - ERROR - Error generating story: 'StoryGenerationService' object has no attribute 'template'
+2025-07-20 16:23:58,150 - StoryGeneration - ERROR - Error processing template 24: 'bool' object is not subscriptable
+2025-07-20 16:43:56,728 - StoryGeneration - ERROR - Error processing template 24: 'bool' object is not subscriptable
+2025-07-20 16:49:06,899 - StoryGeneration - ERROR - Error processing template 24: 'bool' object is not subscriptable
+2025-07-20 17:05:36,396 - StoryGeneration - ERROR - Error processing template 24: 'bool' object has no attribute 'get'
+2025-07-20 17:12:03,038 - StoryGeneration - ERROR - Error processing template 24: 'bool' object has no attribute 'get'
+2025-07-20 17:20:23,405 - StoryGeneration - ERROR - Error processing template 24: 'bool' object has no attribute 'get'
+2025-07-21 05:51:58,798 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-07-21 05:51:59,044 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-07-21 05:51:59,045 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-21 05:51:59,759 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-07-21 05:51:59,760 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-21 05:52:00,488 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-07-21 05:52:00,488 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-21 05:52:02,585 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-07-21 05:52:02,586 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-21 05:52:02,951 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-07-21 05:52:02,951 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-21 05:52:03,174 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-07-21 05:52:03,184 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-07-21 05:52:03,374 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-07-21 05:52:03,384 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-07-21 05:52:03,537 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-07-21 05:52:03,547 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-07-21 05:52:03,822 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-07-21 05:52:03,832 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-21 05:52:04,058 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-07-21 05:52:04,067 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-07-21 05:52:04,583 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-07-21 05:52:04,584 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-07-21 05:52:04,835 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-07-21 05:52:04,845 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-07-21 05:52:05,153 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-07-21 05:52:05,163 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-07-21 05:52:06,978 - DatasetSync - ERROR - Failed to synchronize dataset ID 28: Noise Monitoring in Basel
+2025-07-21 05:52:06,978 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2025-07-21 05:52:07,254 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2025-07-21 05:52:07,264 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-21 05:52:07,479 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-07-21 05:52:07,489 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-07-21 05:52:07,677 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-07-21 05:52:07,687 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-21 05:52:07,951 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-07-21 05:52:07,961 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-21 05:52:08,145 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-07-21 05:52:08,155 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-21 05:52:08,400 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-07-21 05:52:08,409 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-07-21 05:52:09,317 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-07-21 05:52:09,317 - DatasetSync - INFO - Starting synchronization for dataset ID 30: traffic accidents
+2025-07-21 05:52:09,510 - DatasetSync - INFO - Successfully synchronized dataset ID 30: traffic accidents
+2025-07-21 05:52:09,520 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-07-21 05:52:10,243 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-07-21 05:52:10,243 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-21 05:52:11,332 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-07-21 05:52:11,337 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-07-21 05:52:11,337 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 24, Failed: 1, Failed dataset IDs: [28]
+2025-07-21 06:11:13,878 - StoryGeneration - ERROR - Error processing template 16: 'bool' object has no attribute 'get'
+2025-07-21 06:11:21,333 - StoryGeneration - ERROR - Error processing template 17: 'bool' object has no attribute 'get'
+2025-07-21 06:11:29,958 - StoryGeneration - ERROR - Error processing template 18: 'bool' object has no attribute 'get'
+2025-07-21 06:11:41,469 - StoryGeneration - ERROR - Error processing template 11: 'bool' object has no attribute 'get'
+2025-07-21 06:11:48,001 - StoryGeneration - ERROR - Error processing template 21: 'bool' object has no attribute 'get'
+2025-07-21 06:11:54,908 - StoryGeneration - ERROR - Error processing template 12: 'bool' object has no attribute 'get'
+2025-07-21 06:16:34,766 - StoryGeneration - ERROR - Error processing template 16: 'bool' object has no attribute 'get'
+2025-07-21 06:16:41,604 - StoryGeneration - ERROR - Error processing template 17: 'bool' object has no attribute 'get'
+2025-07-21 06:16:50,740 - StoryGeneration - ERROR - Error processing template 18: 'bool' object has no attribute 'get'
+2025-07-21 06:17:00,828 - StoryGeneration - ERROR - Error processing template 11: 'bool' object has no attribute 'get'
+2025-07-21 06:17:06,852 - StoryGeneration - ERROR - Error processing template 21: 'bool' object has no attribute 'get'
+2025-07-21 06:17:11,769 - StoryGeneration - ERROR - Error processing template 12: 'bool' object has no attribute 'get'
+2025-07-21 06:52:52,904 - StoryGeneration - ERROR - Error processing template 11: 'bool' object has no attribute 'get'
+2025-07-21 07:24:12,705 - StoryGeneration - ERROR - Error processing template 11: 'bool' object has no attribute 'get'

@@ -85,6 +85,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "reports.context_processors.ai_disclaimer",
             ],
         },
     },
@@ -192,3 +193,16 @@ DATA_FILES_PATH = os.environ.get('DATA_FILES_PATH', str(BASE_DIR / 'files'))
 # OpenAI Configuration
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL', 'gpt-4o')
+
+#LOGGING = {
+#    'version': 1,
+#    'handlers': {
+#        'console': {'class': 'logging.StreamHandler'},
+#    },
+#    'loggers': {
+#        'django.db.backends': {
+#            'level': 'DEBUG',
+#            'handlers': ['console'],
+#        },
+#    }
+#}

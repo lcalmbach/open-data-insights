@@ -1,17 +1,61 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .models import StoryTemplate, Story
+from .models import Graphic, StoryTemplate, Story, Graphic, StoryTable
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render, get_object_or_404
 from account.forms import SubscriptionForm
 import markdown2
+import json
 from .models import Story, StoryRating
 from .forms import StoryRatingForm
 from django.conf import settings
 from django.views.generic import TemplateView
 from django.db.models import Q
+import altair as alt
+import pandas as pd
+import random
+
+
+def generate_fake_graphic(chart_id):
+    """Generate a fake graphic as HTML."""
+    # Fake DataFrame simulating data retrieved from the database
+    data = {
+        "date": pd.date_range(start="2025-07-01", periods=5, freq="D"),
+        "value": [
+            random.randint(5, 25) for _ in range(5)
+        ],  # Random values between 5 and 25
+    }
+    df = pd.DataFrame(data)
+
+    # Fake settings simulating settings stored in the database
+    settings = {
+        "x": "date",
+        "y": "value",
+        "x_title": "Date",
+        "y_title": "Value",
+        "type": "line",  # Graphic type (e.g., bar, line, scatter)
+    }
+
+    # Generate the graphic using Altair
+    chart = (
+        alt.Chart(df)
+        .mark_line()
+        .encode(
+            x=alt.X(settings["x"], title=settings["x_title"]),
+            y=alt.Y(settings["y"], title=settings["y_title"]),
+        )
+    )
+
+    # Convert the chart to HTML
+    chart_html = chart.to_html(embed_options={"actions": False, "renderer": "canvas"})
+
+    # Wrap the chart HTML in a div with a unique ID
+    container_html = f'<div id="{chart_id}"></div>'
+    script_html = chart_html.replace('vegaEmbed("#vis"', f'vegaEmbed("#{chart_id}"')
+
+    return f"{container_html}{script_html}"
 
 
 @never_cache
@@ -81,10 +125,35 @@ def stories_view(request):
     if not stories.filter(id=story_id).exists():
         story_id = stories.first().id if stories else None
     selected_story = stories.filter(id=story_id).first() if story_id else None
+    
+    # Get graphics
+    graphics = Graphic.objects.filter(story=selected_story) if selected_story else []
+    data_source = selected_story.template.data_source if selected_story else None
+    other_ressources = selected_story.template.other_ressources if selected_story else None
+    # Get tables and convert directly to DataFrames
+    tables = []
+    if selected_story:
+        for t in StoryTable.objects.filter(story=selected_story):
+            try:
+                if t.data:  # t.data ist direkt ein Python-Objekt (z. B. Liste von Dicts)
+                    data = json.loads(t.data)
+                    columns = list(data[0].keys()) if data else []
+
+                    tables.append({
+                        'table_id': f"table-{t.id}",
+                        'rows': data,
+                        'columns': columns,
+                        'title':  t.table_template.title or f"Table {t.id}"
+                    })
+            except Exception as e:
+                print(f"Error processing table {t.id}: {e}")
+
+    # Process story content
     if selected_story:
         selected_story.content_html = markdown2.markdown(
             selected_story.content, extras=["tables"]
         )
+    
     return render(
         request,
         "reports/stories_list.html",
@@ -92,6 +161,10 @@ def stories_view(request):
             "templates": templates,
             "stories": stories,
             "selected_story": selected_story,
+            "graphics": graphics,
+            "tables": tables,
+            "other_ressources": other_ressources,
+            "data_source": data_source,
         },
     )
 

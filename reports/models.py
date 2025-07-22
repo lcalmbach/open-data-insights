@@ -1,6 +1,8 @@
 from django.db import models
 from account.models import CustomUser
 from datetime import date, timedelta
+from django.core.exceptions import ValidationError
+import json
 
 
 def default_yesterday():
@@ -52,23 +54,24 @@ class LookupValue(models.Model):
     class Meta:
         verbose_name = "Lookup Value"
         verbose_name_plural = "Lookup Values"
+        ordering = ["sort_order", "value"]  # or any other field
 
     def __str__(self):
         return self.value
 
 
-class ThemeManager(models.Manager):
+class GraphTypeManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(category_id=1)
+        return super().get_queryset().filter(category_id=6)
 
 
-class Theme(LookupValue):
-    objects = ThemeManager()
+class GraphType(LookupValue):
+    objects = GraphTypeManager()
 
     class Meta:
         proxy = True
-        verbose_name = "Theme"
-        verbose_name_plural = "Themes"
+        verbose_name = "GraphType"
+        verbose_name_plural = "GraphTypes"
 
 
 class PeriodManager(models.Manager):
@@ -83,6 +86,20 @@ class Period(LookupValue):
         proxy = True
         verbose_name = "Period"
         verbose_name_plural = "Periods"
+
+
+class ThemeManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(category_id=1)
+
+
+class Theme(LookupValue):
+    objects = ThemeManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Theme"
+        verbose_name_plural = "Themes"
 
 
 class AggregationFunctionManager(models.Manager):
@@ -109,8 +126,8 @@ class ContextPeriod(LookupValue):
 
     class Meta:
         proxy = True
-        verbose_name = "ContextPeriod"
-        verbose_name_plural = "ContextPeriods"
+        verbose_name = "Context Period"
+        verbose_name_plural = "Context Periods"
 
 
 class Dataset(models.Model):
@@ -244,6 +261,16 @@ class StoryTemplate(models.Model):
         related_name="story_templates",
         help_text="Reference period for the story template: day, month, season, year, etc.",
     )
+    data_source = models.JSONField(
+        default=dict,
+        help_text="Data source for the story template, e.g., [{'text': 'data.bs', 'url': 'https://data.bs.ch/explore/dataset/100051']",
+    )
+    other_ressources = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        help_text="Additional ressource, e.g., [{'text': 'meteoblue', 'url': 'https://meteoblue.ch/station_346353']",
+    )
     prompt_text = models.TextField(help_text="The prompt used to generate the story.")
     temperature = models.FloatField(
         default=0.3,
@@ -255,11 +282,73 @@ class StoryTemplate(models.Model):
         help_text="SQL command to be executed after the story is published. This can be used to update other tables or perform additional actions.",
     )
 
-    
     class Meta:
         verbose_name = "Story Template"
         verbose_name_plural = "Story Templates"
         ordering = ["title"]  # or any other field
+
+    def __str__(self):
+        return self.title
+
+
+class StoryTemplateGraphic(models.Model):
+    story_template = models.ForeignKey(
+        StoryTemplate,
+        on_delete=models.CASCADE,
+        related_name="graphics",
+        help_text="The story template this graphic belongs to.",
+    )
+    title = models.CharField(max_length=255, help_text="Title of the graphic.")
+    settings = models.JSONField(
+        default=dict,
+        help_text="Settings for the graphic, e.g., {'type': 'bar', 'x': 'date', 'y': 'value'}. This can include any settings required by the graphic library used.",
+    )
+    sql_command = models.TextField(
+        max_length=4000,
+        help_text="SQL command to get the data for the graphic, e.g., 'SELECT date, value FROM weather_data WHERE date >= %s AND date <= %s'. This command should return the data in a format suitable for the graphic library used.",
+    )
+    graphic_type = models.CharField(
+        max_length=50,
+        choices=[
+            ("bar", "Bar Chart"),
+            ("line", "Line Chart"),
+            ("scatter", "Scatter Plot"),
+        ],
+    )
+    sort_order = models.IntegerField(
+        default=0, help_text="Sort order of the graphic within the story template."
+    )
+
+    class Meta:
+        verbose_name = "Graphic Template"
+        verbose_name_plural = "Graphics Templates"
+        ordering = ["sort_order"]  # or any other field
+
+    def __str__(self):
+        return self.title
+
+
+class StoryTemplateTable(models.Model):
+    story_template = models.ForeignKey(
+        StoryTemplate,
+        on_delete=models.CASCADE,
+        related_name="tables",  # Changed from "graphics" to "tables"
+        help_text="The story template this table belongs to.",
+    )
+    title = models.CharField(max_length=255, help_text="Title of the table.")
+
+    sql_command = models.TextField(
+        max_length=4000,
+        help_text="SQL command to get the data for the graphic, e.g., 'SELECT date, value FROM weather_data WHERE date >= %s AND date <= %s'. This command should return the data in a format suitable for the graphic library used.",
+    )
+    sort_order = models.IntegerField(
+        default=0, help_text="Sort order of the graphic within the story template."
+    )
+
+    class Meta:
+        verbose_name = "Table Template"
+        verbose_name_plural = "Table Templates"
+        ordering = ["sort_order"]  # or any other field
 
     def __str__(self):
         return self.title
@@ -284,7 +373,7 @@ class StoryTemplateContext(models.Model):
         max_length=4000,
         help_text="SQL command to get the value for the context, e.g., 'SELECT AVG(temperature) FROM weather_data WHERE date >= %s AND date <= %s'.",
     )
-    sort_key = models.IntegerField(
+    sort_order = models.IntegerField(
         default=0,
         help_text="Sort order of the context within the story template.",
     )
@@ -294,6 +383,12 @@ class StoryTemplateContext(models.Model):
         related_name="context_periods",
         help_text="The context period for this context, e.g., 'day', 'month', 'season', 'year'.",
     )
+
+    class Meta:
+        verbose_name = "Story Template Context"
+        verbose_name_plural = "Story Template Contexts"
+        ordering = ["sort_order"]  # or any other field
+
 
 
 class StoryTemplatePeriodOfInterestValues(models.Model):
@@ -311,10 +406,15 @@ class StoryTemplatePeriodOfInterestValues(models.Model):
         max_length=4000,
         help_text="Sql command to get the value for the period of interest, e.g., 'SELECT AVG(temperature) FROM weather_data WHERE date >= %s AND date <= %s'.",
     )
-    sort_key = models.IntegerField(
+    sort_order = models.IntegerField(
         default=0,
         help_text="Sort order of the period of interest value within the story template.",
     )
+
+    class Meta:
+        verbose_name = "Story Template Period of Interest Values"
+        verbose_name_plural = "Story Template Period of Interest Values"
+        ordering = ["sort_order"]  # or any other field
 
 
 class Story(models.Model):
@@ -324,28 +424,39 @@ class Story(models.Model):
         related_name="stories",
         help_text="The template used to generate the story.",
     )
-    title = models.CharField(max_length=255, help_text="Title of the story.")
-    published_date = models.DateTimeField(
-        auto_now_add=True, help_text="Timestamp when the story was published."
+    title = models.CharField(max_length=255, help_text="Title of the story.",
+                             blank=True, null=True)
+    summary = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Summary of the story template. This is used to provide a brief overview of the story.",
+    )
+    published_date = models.DateField(
+        auto_now_add=True, help_text="Date when the story was published.",
+        blank=True, null=True
     )
     prompt_text = models.TextField(
         help_text="The prompt used to generate the story.", blank=True, null=True
     )
-    json_payload = models.JSONField(
+    context_values = models.JSONField(
         help_text="The JSON data used for the data story generation.",
         blank=True,
         null=True,
     )
     ai_model = models.CharField(
-        max_length=50, help_text="AI model used for generating the story."
+        max_length=50, help_text="AI model used for generating the story.", blank=True, null=True   
     )
     reference_period_start = models.DateField(
         default=default_yesterday,
         help_text="Start date of the reference period for the story.",
+        blank=True,
+        null=True,
     )
     reference_period_end = models.DateField(
         default=default_yesterday,
         help_text="End date of the reference period for the story.",
+        blank=True,
+        null=True,
     )
     reference_values = models.JSONField(
         help_text="Reference values for the story, e.g., {'max_temperature_degc': 30, 'precipitation_mm': 14}",
@@ -353,11 +464,6 @@ class Story(models.Model):
         null=True,
     )
     content = models.TextField(help_text="Content of the story.", blank=True, null=True)
-
-    is_sent = models.BooleanField(
-        default=False,
-        help_text="Indicates if the story has been sent to the user.",
-    )
 
     @property
     def reference_period(self):
@@ -375,14 +481,70 @@ class Story(models.Model):
     def __str__(self):
         return f"Report {self.title} - {self.published_date}"
 
+    def clean(self):
+        """Validate all model fields to prevent silent failures"""
+        super().clean()
+        
+        # Check required fields
+        if not self.title:
+            raise ValidationError({'title': 'Title is required'})
+        
+        if self.template is None:
+            raise ValidationError({'template': 'Story template is required'})
+        
+        if not self.content:
+            raise ValidationError({'content': 'Content is required'})
+        
+        # Validate date fields
+        if self.reference_period_start and self.reference_period_end:
+            if self.reference_period_start > self.reference_period_end:
+                raise ValidationError({'reference_period_start': 'Reference period start date cannot be after end date'})
+        
+        # Validate JSON fields
+        # Validate reference_values field
+        if self.reference_values:
+            try:
+                if isinstance(self.reference_values, str):
+                    json_obj = json.loads(self.reference_values)
+                    # Additional structure validation if needed
+                    if not isinstance(json_obj, dict):
+                        raise ValidationError({'reference_values': 'Must be a valid JSON object'})
+                    
+                    # Check for required structure in reference_values
+                    if 'period_of_interest' not in json_obj:
+                        raise ValidationError({'reference_values': 'Missing "period_of_interest" in reference values'})
+                    
+                    if 'measured_values' not in json_obj:
+                        raise ValidationError({'reference_values': 'Missing "measured_values" in reference values'})
+                    
+            except json.JSONDecodeError:
+                raise ValidationError({'reference_values': 'Invalid JSON format'})
+        
+        # Validate context_values field
+        if self.context_values:
+            try:
+                if isinstance(self.context_values, str):
+                    json_obj = json.loads(self.context_values)
+                    # Validate structure - check if it has expected keys
+                    if not isinstance(json_obj, dict):
+                        raise ValidationError({'context_values': 'Must be a valid JSON object'})
+                    
+                    if 'context_data' not in json_obj:
+                        raise ValidationError({'context_values': 'Missing "context_data" key in context values'})
+                    
+                    # Verify context_data is a dictionary
+                    if not isinstance(json_obj['context_data'], dict):
+                        raise ValidationError({'context_values': '"context_data" must be a JSON object'})
+                    
+            except json.JSONDecodeError:
+                raise ValidationError({'context_values': 'Invalid JSON format'})
+        
+        # Validate AI model field
+        valid_ai_models = ['gpt-4o', 'gpt-4', 'gpt-3.5-turbo']  # Update with your valid models
+        if self.ai_model and self.ai_model not in valid_ai_models:
+            raise ValidationError({'ai_model': f'Invalid AI model. Choose from: {", ".join(valid_ai_models)}'})
 
 class StoryLog(models.Model):
-    story_template = models.ForeignKey(
-        StoryTemplate,
-        on_delete=models.CASCADE,
-        related_name="story_logs",
-        help_text="The story template this log belongs to.",
-    )
     story = models.ForeignKey(
         Story,
         on_delete=models.CASCADE,
@@ -406,7 +568,7 @@ class StoryLog(models.Model):
         verbose_name_plural = "Story Logs"
 
     def __str__(self):
-        return f"Report {self.story_template.title} - {self.reference_period_start}"
+        return f"Report {self.story.title} - {self.reference_period_start}"
 
 
 class StoryRating(models.Model):
@@ -491,5 +653,77 @@ class StoryTemplateSubscription(models.Model):
         help_text="Optional text explaining why the subscription was revoked.",
     )
 
+    class Meta:
+        verbose_name = "Story Template Subscription"
+        verbose_name_plural = "Story Template Subscriptions"
+        ordering = ["-create_date"]
+
     def __str__(self):
         return f"{self.story_template.title} > {self.user.last_name}"
+
+
+class Graphic(models.Model):
+    story = models.ForeignKey(
+        Story,
+        on_delete=models.CASCADE,
+        related_name="storygraphcis",
+        help_text="The story this graph belongs to.",
+    )
+    graphic_template = models.ForeignKey(
+        StoryTemplateGraphic,
+        on_delete=models.CASCADE,
+        related_name="storygraphics",
+        help_text="The story template this graphic belongs to.",
+    )
+    title = models.CharField(max_length=255, help_text="Title of the graphic.")
+    content_html = models.TextField(
+        blank=True,
+        null=True,
+        help_text="HTML content of the graphic. This is used to render the graphic in the story view.",
+    )
+    data = models.JSONField(
+        default=dict,
+        help_text="Data for the graphic, e.g., {'date': ['2023-01-01', '2023-01-02'], 'value': [10, 20]}. This should match the settings defined in the graphic.",
+    )
+    sort_order = models.IntegerField(
+        default=0, help_text="Sort order of the graphic within the story."
+    )
+
+    class Meta:
+        verbose_name = "Graphic"
+        verbose_name_plural = "Graphics"
+        ordering = ["sort_order"]  # or any other field
+
+    def __str__(self):
+        return str(self.title)
+    
+
+class StoryTable(models.Model):
+    story = models.ForeignKey(
+        Story,
+        on_delete=models.CASCADE,
+        related_name="storytables",
+        help_text="The story this table belongs to.",
+    )
+    table_template = models.ForeignKey(
+        StoryTemplateTable,
+        on_delete=models.CASCADE,
+        related_name="storytables",
+        help_text="The story template this table belongs to.",
+    )
+    title = models.CharField(max_length=255, help_text="Title of the table.")
+    data = models.JSONField(
+        default=dict,
+        help_text="Data for the table, e.g., {'date': ['2023-01-01', '2023-01-02'], 'value': [10, 20]}. This should match the settings defined in the table.",
+    )
+    sort_order = models.IntegerField(
+        default=0, help_text="Sort order of the table within the story."
+    )
+
+    class Meta:
+        verbose_name = "Table"
+        verbose_name_plural = "Tables"
+        ordering = ["sort_order"]  # or any other field
+
+    def __str__(self):
+        return str(self.table_template.title)

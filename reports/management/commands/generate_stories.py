@@ -39,7 +39,8 @@ class Command(BaseCommand):
                     )
                 )
                 return
-        
+        else:
+            run_date = date.today() 
         service = StoryGenerationService()
         result = service.generate_stories(template_id=template_id, run_date=run_date, force=force)
         
@@ -68,7 +69,7 @@ class Command(BaseCommand):
                 if detail.get('skipped'):
                     status = "⊘"
                     action = "skipped"
-                elif detail['success']:
+                elif detail.get('success'):
                     status = "✓"
                     action = "generated"
                 else:
