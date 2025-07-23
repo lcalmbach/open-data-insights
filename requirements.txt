@@ -19,3 +19,4 @@ requests
 openai
 sqlalchemy
 pillow
+altair
