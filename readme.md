@@ -5,7 +5,7 @@
 ## 🌐 Live Demo
 
 Hosted on Heroku:  
-👉 [https://ogd-data-insights.herokuapp.com](https://ogd-data-insights.herokuapp.com)
+👉 [https://ogd-data-insights-d6c65d72da95.herokuapp.com/](https://ogd-data-insights-d6c65d72da95.herokuapp.com/)
 
 ## 📦 Features
 
