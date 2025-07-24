@@ -128,8 +128,8 @@ class StoryLogAdmin(admin.ModelAdmin):
 class StoryTemplateTableAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "story_template",
         "title",
+        "story_template",
     )
     sortable_by = ("id", "title")
     search_fields = ("title",)
@@ -151,8 +151,8 @@ class StoryTableAdmin(admin.ModelAdmin):
 class StoryTemplateGraphicAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "story_template",
         "title",
+        "story_template",
     )
     sortable_by = ("id", "title")
     search_fields = ("title",)

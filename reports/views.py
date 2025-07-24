@@ -60,11 +60,11 @@ def generate_fake_graphic(chart_id):
 
 @never_cache
 def home_view(request):
-    stories = list(Story.objects.order_by("-published_date"))
+    stories = list(Story.objects.order_by("-reference_period_start"))
     if not stories:
         return render(request, "home.html", {"story": None})
 
-    story = stories[0]  # Älteste zuerst; ggf. umdrehen je nach Sortierung
+    story = stories[0] 
     index = 0
     next_story_id = stories[1].id if len(stories) > 1 else None
     story.content_html = markdown2.markdown(story.content, extras=["tables"])
@@ -143,7 +143,7 @@ def stories_view(request):
                         'table_id': f"table-{t.id}",
                         'rows': data,
                         'columns': columns,
-                        'title':  t.table_template.title or f"Table {t.id}"
+                        'title':  t.title or f"Table {t.id}"
                     })
             except Exception as e:
                 print(f"Error processing table {t.id}: {e}")

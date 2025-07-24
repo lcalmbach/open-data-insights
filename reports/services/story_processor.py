@@ -245,7 +245,7 @@ class StoryProcessor:
             self.logger.error(f"Error checking if story is due: {e}")
             return False
 
-    def _generate_tables(self) -> list:
+    def generate_tables(self) -> list:
         """Generate tables for the story"""
         tables = StoryTemplateTable.objects.filter(story_template=self.template)  # Use StoryTemplateTable
         for table in tables:
@@ -265,7 +265,7 @@ class StoryProcessor:
                 self.logger.error(f"Error generating table {table.id}: {e}")
                 continue
 
-    def _generate_graphics(self) -> list:
+    def generate_graphics(self) -> list:
         """Generate graphics for the story template and save them directly to database"""
         try:
             graphic_templates = StoryTemplateGraphic.objects.filter(
@@ -340,7 +340,7 @@ class StoryProcessor:
                     self.logger.error(traceback.format_exc())
             
         except Exception as e:
-            self.logger.error(f"Error in _generate_graphics: {str(e)}")
+            self.logger.error(f"Error in generate_graphics: {str(e)}")
             import traceback
             self.logger.error(traceback.format_exc())
             return []
@@ -377,9 +377,9 @@ class StoryProcessor:
         
             self.story.save()
             self.logger.info("Generating tables...")
-            self._generate_tables()                
+            self.generate_tables()                
             self.logger.info("Generating graphics...")
-            self.graphics = self._generate_graphics()
+            self.graphics = self.generate_graphics()
             self._save_log_record()
 
             # Execute post-publish commands
