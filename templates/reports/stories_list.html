@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load custom_filters %}
 {% block title %}Explore Stories{% endblock %}
-
 {% block content %}
 <!-- Filter Form -->
 <form method="get" class="row g-3 mb-4">
@@ -47,71 +46,7 @@
   <!-- Right: Story Details -->
   <div class="col-md-8">
     {% if selected_story %}
-    <p><strong>Published:</strong> {{ selected_story.published_date|date:"F j, Y" }}</p>
-    <p><strong>Reference period:</strong> {{ selected_story.reference_period }}</p>
-    <hr>
-    <div class="card mt-2 shadow-sm">
-      <div class="card-header bg-light">
-        <h2 class="card-title mb-0 text-primary">{{ selected_story.title|safe }}</h2>
-      </div>
-      <div class="card-body text-start">
-        <b>
-          <p class="card-text mt-3">{{ selected_story.summary|safe }}</p>
-        </b>
-        <p class="card-text mt-3">{{ selected_story.content_html | safe }}</p>
-      </div>
-      <hr>
-      {% for table in tables %}
-      <h4>{{ table.title }}</h4>
-      <table class="table table-striped" id="{{ table.table_id }}">
-        <thead>
-          <tr>
-            {% for column in table.columns %}
-            <th>{{ column }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in table.rows %}
-          <tr>
-            {% for col in table.columns %}
-            <td>{{ row|get_item:col }}</td>
-            {% endfor %}
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <br>
-      {% endfor %}
-      <hr>
-      
-      {% if graphics %}
-        {% for graphic in graphics %}
-          <h4>{{ graphic.title }}</h4>
-          {{ graphic.content_html|safe }}
-        {% endfor %}
-        <hr>
-      {% endif %}
-
-      {% if data_source %}
-      <p>
-        Data source:
-        {% for source in data_source %}
-        <a href="{{ source.url }}">{{ source.text }}</a>{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-      </p>
-      {% endif %}
-
-      {% if other_ressources %}
-      <p>
-        Additional ressources:
-        {% for source in other_ressources %}
-        <a href="{{ source.url }}">{{ source.text }}</a>{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-      </p>
-      {% endif %}
-      <p class="text-muted mt-3" style="font-size: 0.9em;">{{ AI_DISCLAIMER }}</p>
-      </div>
+    {% include "includes/story_detail_block.html" %}
       {% endif %}
     </div>
   </div>

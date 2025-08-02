@@ -77,5 +77,5 @@ class Command(BaseCommand):
                     action = "failed"
                 
                 self.stdout.write(f"  {status} {detail['template_id']} ({action})")
-                if not detail['success'] and 'error' in detail:
+                if not detail['status'] == 'success' and 'error' in detail:
                     self.stdout.write(f"    Error: {detail['error']}")

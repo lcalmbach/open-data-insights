@@ -122,7 +122,6 @@ class StoryGenerationService(ETLBaseService):
                     results["details"].append({
                         "template_id": template.id,
                         "status": "success",
-                        "story_id": result.get("story_id"),
                     })
                 else:
                     results["failed"] += 1

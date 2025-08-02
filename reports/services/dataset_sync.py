@@ -255,13 +255,21 @@ class DatasetProcessor:
                 )
             else:
                 success = self._sync_new_table(filename, agg_filename, remote_table)
-
+            
             if success:
+                if self.dataset.post_import_sql_commands:
+                    self.logger.info(
+                        f"Executing post-import SQL commands for dataset {identifier}"
+                    )
+                    for command in self.dataset.post_import_sql_commands.split(";"):
+                        command = command.strip()
+                        if command:
+                            self.dbclient.run_action_query(command)
+                            
                 elapsed = time.time() - start_time
                 self.logger.info(
                     f"Synchronization for {identifier} completed in {elapsed:.2f} seconds."
                 )
-
             return success
 
         except Exception as e:
@@ -322,7 +330,7 @@ class DatasetProcessor:
                             return True
                         else:
                             self.logger.warning(
-                                "Failed to download data or no data available"
+                                "Failed to download data new data available"
                             )
                             return False
                     else:

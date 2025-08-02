@@ -18,6 +18,7 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from openai import OpenAI
+from sqlalchemy import column
 from ..visualizations.altair_charts import generate_chart
 
 from django.db import transaction
@@ -108,17 +109,29 @@ class StoryProcessor:
         self.logger = logging.getLogger(
             f"StoryProcessor.{template.title}"
         )
-        self.story = Story()
-        self.template = template  # Now a StoryTemplate model instance
-        self.story.published_date = published_date
-        self.most_recent_day = self._get_most_recent_day()
-        self.story.template = template
-        self.story.prompt_text = self.template.prompt_text
-        self.story.reference_period_start, self.story.reference_period_end = (
-            self._get_reference_period()
-        )
-        self.force_generation = force_generation
         self.dbclient = DjangoPostgresClient()
+        self.most_recent_day = self._get_most_recent_day(published_date, template)
+        reference_period_start, reference_period_end = (
+            self._get_reference_period(published_date, template)
+        )
+        
+        self.story = (
+            Story.objects
+            .filter(template=template, reference_period_start=reference_period_start)
+            .first()
+            or Story()  # creates a new, empty instance if no match
+        )
+        if self.story.id is None:
+            self.story.template = template
+            self.story.published_date = published_date
+            self.story.reference_period_start, self.story.reference_period_end = (
+                self._get_reference_period(published_date, template)
+            )
+        
+        self.story.prompt_text = self.story.template.prompt_text
+        
+        self.force_generation = force_generation
+        
         self.season, self.season_year = self._get_season()
         self.reference_period = template.reference_period.id
         self.year = self.story.reference_period_start.year
@@ -130,11 +143,6 @@ class StoryProcessor:
         
         self.story.title = self._replace_reference_period_expression(template.title)
         self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
-        
-        self.story.content = None  # Will be filled when story is generated
-        self.story.summary = None  # Will be filled when story is generated
-        self.tables = []
-        self.graphics = []
         
     def _get_reference_period_expression(self) -> str:
         """
@@ -205,13 +213,13 @@ class StoryProcessor:
                 has_data = True
 
             if (
-                self.template.reference_period_id == ReferencePeriod.MONTHLY.value
+                self.story.template.reference_period_id == ReferencePeriod.MONTHLY.value
             ):  # monthly
                 regular_due_date = (
                     self.story.reference_period_start + relativedelta(months=1)
                 ).date()
             elif (
-                self.template.reference_period_id == ReferencePeriod.SEASONAL.value
+                self.story.template.reference_period_id == ReferencePeriod.SEASONAL.value
             ):  # seasonal
                 season = month_to_season[self.month]
                 month, day = season_dates[season][0]
@@ -219,7 +227,7 @@ class StoryProcessor:
                     self.story.reference_period_start.year, month, day
                 )  # ✅ use `date(...)`
             elif (
-                self.template.reference_period_id == ReferencePeriod.YEARLY.value
+                self.story.template.reference_period_id == ReferencePeriod.YEARLY.value
             ):  # yearly
                 regular_due_date = self.story.reference_period_start.replace(day=1, month=1)
             else:
@@ -247,29 +255,32 @@ class StoryProcessor:
 
     def generate_tables(self) -> list:
         """Generate tables for the story"""
-        tables = StoryTemplateTable.objects.filter(story_template=self.template)  # Use StoryTemplateTable
+        tables = StoryTemplateTable.objects.filter(story_template=self.story.template)  # Use StoryTemplateTable
         for table in tables:
             sql_cmd = table.sql_command
             params = self._get_sql_command_params(sql_cmd)
             try:
                 df = self.dbclient.run_query(sql_cmd, params)
                 data = df.to_dict(orient="records")
-                story_table = StoryTable.objects.create(
-                    story=self.story,
-                    title = self._replace_reference_period_expression(table.title),
-                    table_template=table,
-                    data=json.dumps(data, indent=2, ensure_ascii=False, cls=DecimalEncoder),
-                    sort_order=table.sort_order,
-                )
+                story_table = StoryTable.objects.filter(
+                    story=self.story, table_template=table
+                ).first() or StoryTable(story=self.story, table_template=table)
+                story_table.title = self._replace_reference_period_expression(table.title)
+                story_table.data = json.dumps(data, indent=2, ensure_ascii=False, cls=DecimalEncoder)
+                story_table.sort_order = table.sort_order
+                story_table.save()  
+
             except Exception as e:
                 self.logger.error(f"Error generating table {table.id}: {e}")
                 continue
 
     def generate_graphics(self) -> list:
         """Generate graphics for the story template and save them directly to database"""
+        
+        
         try:
             graphic_templates = StoryTemplateGraphic.objects.filter(
-                story_template_id=self.template.id
+                story_template_id=self.story.template.id
             ).order_by('sort_order')
             
             self.logger.info(f"Found {graphic_templates.count()} graphic templates to process")
@@ -298,22 +309,6 @@ class StoryProcessor:
                     
                     # Use settings from template
                     settings = template.settings
-                    
-                    # If settings are empty or invalid, create default settings
-                    if not settings or not isinstance(settings, dict):
-                        settings = {
-                            'type': template.graphic_type.lower(),
-                            'title': template.title
-                        }
-                        
-                        # Generate default x/y settings from data columns
-                        if isinstance(data, pd.DataFrame) and not data.empty:
-                            columns = data.columns.tolist()
-                            if len(columns) >= 2:
-                                settings['x'] = columns[0]
-                                settings['y'] = columns[1]
-                                if len(columns) >= 3 and template.graphic_type.lower() in ['bar_stacked', 'area', 'scatter']:
-                                    settings['color'] = columns[2]
                 
                     # Generate chart HTML
                     self.logger.info(f"Generating chart for: {template.title}")
@@ -322,16 +317,22 @@ class StoryProcessor:
                         settings=settings,
                         chart_id=chart_id
                     )
-                    
+                    data = data.map(str)
                     # Create and save Graphic object directly to database
-                    story_graphic = Graphic.objects.create(
-                        story=self.story,
-                        title=self._replace_reference_period_expression(template.title),
-                        content_html=chart_html,
-                        data=json.dumps(data.to_dict(orient="records"), indent=2, ensure_ascii=False, cls=DecimalEncoder),
-                        sort_order=template.sort_order,
-                        graphic_template=template
+                    story_graphic = (
+                        Graphic.objects
+                        .filter(story=self.story, graphic_template=template)
+                        .first()
+                        or Graphic(
+                            story=self.story,
+                            graphic_template=template
+                        )
                     )
+                    story_graphic.title=self._replace_reference_period_expression(template.title)
+                    story_graphic.content_html=chart_html
+                    story_graphic.data=json.dumps(data.to_dict(orient="records"), indent=2, ensure_ascii=False, cls=DecimalEncoder)
+                    story_graphic.sort_order=template.sort_order
+                    story_graphic.save()
                     self.logger.info(f"Successfully generated and saved graphic: {template.title} {story_graphic.id}")
                     
                 except Exception as e:
@@ -349,7 +350,7 @@ class StoryProcessor:
         """Generate the complete story"""
         try:
             self.logger.info(
-                f"Initializing story generation for {self.template.title} ({self.story.published_date.strftime('%Y-%m-%d')})"
+                f"Initializing story generation for {self.story.template.title} ({self.story.published_date.strftime('%Y-%m-%d')})"
             )
             
             # Generate content
@@ -357,7 +358,7 @@ class StoryProcessor:
             self.story.content = self._generate_report_text()
             
             if not self.story.content:
-                self.logger.warning(f"Empty content generated for story {self.template.title}")
+                self.logger.warning(f"Empty content generated for story {self.story.template.title}")
                 return False
             
             self.logger.info("Generating summary...")
@@ -372,18 +373,15 @@ class StoryProcessor:
                     self.logger.info(f"Field '{field.name}': {getattr(self.story, field.name, None)}")
                 return False
                 
-            # Save with transaction
-            # with transaction.atomic():
-        
             self.story.save()
             self.logger.info("Generating tables...")
             self.generate_tables()                
             self.logger.info("Generating graphics...")
-            self.graphics = self.generate_graphics()
+            self.story.graphics = self.generate_graphics()
             self._save_log_record()
 
             # Execute post-publish commands
-            if self.template.post_publish_command:
+            if self.story.template.post_publish_command:
                 self.logger.info("Executing post-publish command...")
                 self.dbclient.run_action_query(self.post_publish_command)
 
@@ -395,9 +393,7 @@ class StoryProcessor:
             self.logger.error(traceback.format_exc())
             return False
 
-    
-
-    def _get_most_recent_day(self) -> Optional[datetime]:
+    def _get_most_recent_day(self, published_date, template) -> Optional[datetime]:
         """
         Retrieves the most recent day related to the current story from the database.
         Executes a SQL query defined in the template to fetch the most recent date,
@@ -408,10 +404,10 @@ class StoryProcessor:
             not found or if an error occurs during the query.
         """
         
-        most_recent_day_sql = self.template.most_recent_day_sql
+        most_recent_day_sql = template.most_recent_day_sql
         if most_recent_day_sql:
             try:
-                params = {"published_date": self.story.published_date}
+                params = {"published_date": published_date}
                 df = self.dbclient.run_query(most_recent_day_sql, params)
                 return (
                     pd.to_datetime(df.iloc[0, 0])
@@ -428,7 +424,7 @@ class StoryProcessor:
         try:
             # Use Django ORM to get the maximum publish_date for this template
             last_log = StoryLog.objects.filter(
-                story__template=self.template  # Use 'story_template' instead of 'story_template_id'
+                story__template=self.story.template  # Use 'story_template' instead of 'story_template_id'
             ).aggregate(last_published_date=models.Max("publish_date"))
 
             return last_log["last_published_date"]
@@ -443,15 +439,15 @@ class StoryProcessor:
         else:
             day = self.story.published_date - timedelta(days=1)
 
-        if self.template.reference_period_id == ReferencePeriod.DAILY.value:  # daily
+        if self.story.template.reference_period_id == ReferencePeriod.DAILY.value:  # daily
             season = month_to_season[day.month]
         elif (
-            self.template.reference_period_id == ReferencePeriod.MONTHLY.value
+            self.story.template.reference_period_id == ReferencePeriod.MONTHLY.value
         ):  # monthly
             month = day.month - 1 if day.month > 1 else 12
             season = month_to_season[month]
         elif (
-            self.template.reference_period_id == ReferencePeriod.SEASONAL.value
+            self.story.template.reference_period_id == ReferencePeriod.SEASONAL.value
         ):  # seasonal
             season = month_to_season[self.story.published_date.month] - 1
             if season < 1:
@@ -462,9 +458,9 @@ class StoryProcessor:
         season_year = self.story.published_date.year
         return season, season_year
 
-    def _get_reference_period(self) -> Tuple[datetime, datetime]:
+    def _get_reference_period(self, published_date: datetime, template: StoryTemplate) -> Tuple[datetime, datetime]:
         """Get the reference period start and end dates"""
-        if self.template.reference_period_id in (
+        if template.reference_period_id in (
             ReferencePeriod.DAILY.value,
             ReferencePeriod.IRREGULAR.value,
         ):  # daily, irregular
@@ -473,45 +469,45 @@ class StoryProcessor:
                 period_start = self.most_recent_day
                 period_end = self.most_recent_day
             else:
-                fallback_date = self.story.published_date - timedelta(days=1)
+                fallback_date = published_date - timedelta(days=1)
                 period_start = datetime.combine(fallback_date, datetime.min.time())
                 period_end = datetime.combine(fallback_date, datetime.min.time())
         elif (
-            self.template.reference_period_id == ReferencePeriod.MONTHLY.value
+            template.reference_period_id == ReferencePeriod.MONTHLY.value
         ):  # monthly
-            if self.story.published_date.month > 1:
-                month = self.story.published_date.month - 1
-                year = self.story.published_date.year
+            if published_date.month > 1:
+                month = published_date.month - 1
+                year = published_date.year
             else:
                 month = 12
-                year = self.story.published_date.year - 1
+                year = published_date.year - 1
             period_start = datetime(year, month, 1)
             period_end = datetime(year, month, calendar.monthrange(year, month)[1])
         elif (
-            self.template.reference_period_id == ReferencePeriod.SEASONAL.value
+            template.reference_period_id == ReferencePeriod.SEASONAL.value
         ):  # seasonal
             start_month, start_day = season_dates[self.season][0]
             end_month, end_day = season_dates[self.season][1]
             start_year = (
-                self.story.published_date.year - 1
+                published_date.year - 1
                 if self.season == 4
-                else self.story.published_date.year
+                else published_date.year
             )
             period_start = datetime(start_year, start_month, start_day)
-            end_year = self.story.published_date.year
+            end_year = published_date.year
             period_end = datetime(end_year, end_month, end_day)
             period_end += pd.DateOffset(days=1)
         elif (
-            self.template.reference_period_id == ReferencePeriod.YEARLY.value
+            template.reference_period_id == ReferencePeriod.YEARLY.value
         ):  # yearly
-            year = self.story.published_date.year - 1
+            year = published_date.year - 1
             period_start = datetime(year, 1, 1)
             period_end = period_start + pd.DateOffset(years=1)
         else:
             period_start = None
             period_end = None
             self.logger.warning(
-                f"Unknown reference period: {self.template['reference_period_id']}"
+                f"Unknown reference period: {template['reference_period_id']}"
             )
 
         return period_start, period_end
@@ -547,14 +543,14 @@ class StoryProcessor:
             )
             my_dict["period_of_interest"]["type"] = "daily"
         elif (
-            self.template.reference_period_id == ReferencePeriod.MONTHLY.value
+            self.story.template.reference_period_id == ReferencePeriod.MONTHLY.value
         ):  # monthly
             my_dict["period_of_interest"][
                 "label"
             ] = f'{self.story.reference_period_start.strftime("%B")} {self.story.reference_period_start.strftime("%Y")}'
             my_dict["period_of_interest"]["type"] = "monthly"
         elif (
-            self.template.reference_period_id == ReferencePeriod.SEASONAL.value
+            self.story.template.reference_period_id == ReferencePeriod.SEASONAL.value
         ):  # seasonal
             my_dict["period_of_interest"][
                 "label"
@@ -572,7 +568,7 @@ class StoryProcessor:
             # Use Django ORM to fetch the period of interest values
             period_values = (
                 StoryTemplatePeriodOfInterestValues.objects.filter(
-                    story_template=self.template
+                    story_template=self.story.template
                 )
                 .order_by("sort_order")
             )
@@ -619,7 +615,7 @@ class StoryProcessor:
         result = {}
         # Use Django ORM to fetch the context data
         context_data = (
-            StoryTemplateContext.objects.filter(story_template_id=self.template.id)
+            StoryTemplateContext.objects.filter(story_template_id=self.story.template.id)
             .order_by("key")
         )
 
@@ -706,7 +702,7 @@ class StoryProcessor:
             messages = [
                 {
                     "role": "system",
-                    "content": f"{self.template.prompt_text}\n\n{LLM_FORMATTING_INSTRUCTIONS}",
+                    "content": f"{self.story.template.prompt_text}\n\n{LLM_FORMATTING_INSTRUCTIONS}",
                 },
                 {
                     "role": "user",
@@ -725,7 +721,7 @@ class StoryProcessor:
             response = client.chat.completions.create(
                 model=self.story.ai_model,
                 messages=messages,
-                temperature=self.template.temperature,
+                temperature=self.story.template.temperature,
                 max_tokens=2000,
             )
 
@@ -766,7 +762,7 @@ class StoryProcessor:
             response = client.chat.completions.create(
                 model=self.story.ai_model,
                 messages=messages,
-                temperature=self.template.temperature,
+                temperature=self.story.template.temperature,
                 max_tokens=2000,
             )
 

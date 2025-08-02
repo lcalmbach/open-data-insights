@@ -221,6 +221,11 @@ class Dataset(models.Model):
         blank=True,
         help_text="List of fields to be calculated by the commnds defined in post_import_commands.",
     )
+    post_import_sql_commands = models.TextField(
+        blank=True,
+        null=True,
+        help_text="SQL commands to be executed after the import process."
+    )
 
     class Meta:
         verbose_name = "Dataset"

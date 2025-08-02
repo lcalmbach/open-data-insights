@@ -26,9 +26,7 @@
             "args": [
                 "generate_stories",
                 "--id",
-                "12",
-                "--date",
-                "2003-08-10",
+                "26",
                 "--force",
                 "-v",
                 "2"
@@ -49,7 +47,7 @@
             "args": [
                 "synch_data",
                 "--id",
-                "24",
+                "28",
                 "-v",
                 "2"
             ],
@@ -90,6 +88,27 @@
             "args": [
                 "send_stories",
                 "--test",
+                "-v",
+                "2"
+            ],
+            "django": true,
+            "justMyCode": true,
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "report_generator.settings"
+            },
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Django: generate appendices",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "generate_appendices",
+                "--id",
+                "16",
+                "--tables",
                 "-v",
                 "2"
             ],
