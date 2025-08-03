@@ -37,8 +37,42 @@
 </div>
 
 <!-- Story block -->
-{% if selected_story %}
-    {% include "includes/story_detail_block.html" %}
+{% if story %}
+<div class="d-flex justify-content-center align-items-center">
+    <div style="max-width: 1000px; width: 100%;">
+        <div class="text-end mb-2">
+            <a href="{% url 'rate_story' story.id %}">Rate this insight ⭐️</a>
+        </div>
+
+        <div class="card mt-2 shadow-sm">
+            <div class="card-header bg-light">
+                <h2 class="card-title mb-0 text-primary">{{ story.title|safe }}</h2>
+            </div>
+            <div class="card-body text-start">
+                <b class="card-text mt-3">{{ story.summary|safe }}</b>
+                <p class="card-text mt-3">{{ story.content_html|safe }}</p>
+            </div>
+        </div>
+
+        {% if not user.is_authenticated %}
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    Want daily insights like this?
+                    <a href="{% url 'account:register' %}">Register now</a>.
+                </p>
+            </div>
+        {% else %}
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    Want to receive data insights by mail?
+                    <a href="{% url 'account:profile' %}">Subscribe</a>.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
 {% endif %}
 
 {% endblock %}

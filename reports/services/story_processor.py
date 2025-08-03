@@ -3,6 +3,7 @@ Story Processing Classes
 Contains the migrated Story class and related functionality from data_news.py
 """
 
+import numpy as np
 import uuid
 import altair as alt
 import json
@@ -188,7 +189,16 @@ class StoryProcessor:
         return result
 
     def story_is_due(self) -> bool:
-        """Check if the story should be generated"""
+        """
+        Check if the story should be generated
+        is_due is determined by:
+        has _sql_data: if the required data exists, for example a yearly report for 2024 cann only be generated if there is data for 2024 in the data source. 
+                       if not has_sql_data conditions are set , the data is assumed to exist
+        date_is_due:   the day and month for 
+        publish_conditions_met:  some insights may be created daily, but the insigth is only generated if a condition is met, e.g. the temperature is above the 95th percentile 
+                                 for all days for this month.
+        force                 :  overrides all other conditions and forces the story to be generated.
+        """
         try:
 
             def get_publish_conditions_result() -> bool:
@@ -198,17 +208,17 @@ class StoryProcessor:
                 Returns:
                     bool: True if all conditions are met, False otherwise.
                 """
-                if self.publish_conditions:
-                    params = self._get_sql_command_params(self.publish_conditions)
-                    df = self.dbclient.run_query(self.publish_conditions, params)
+                if self.story.template.publish_conditions:
+                    params = self._get_sql_command_params(self.story.template.publish_conditions)
+                    df = self.dbclient.run_query(self.story.template.publish_conditions, params)
                     return df.iloc[0, 0] == 1
                 else:
                     return True  # no conditions defined, so we assume they are met
 
-            if self.has_data_sql:
-                params = self._get_sql_command_params(self.has_data_sql)
-                df = self.dbclient.run_query(self.has_data_sql, params)
-                has_data = df.iloc[0]["cnt"] > 0
+            if self.story.template.has_data_sql:
+                params = self._get_sql_command_params(self.story.template.has_data_sql)
+                df = self.dbclient.run_query(self.story.template.has_data_sql, params)
+                has_data = df.iloc[0, 0] > 0
             else:
                 has_data = True
 
@@ -312,12 +322,17 @@ class StoryProcessor:
                 
                     # Generate chart HTML
                     self.logger.info(f"Generating chart for: {template.title}")
+                    col = settings['y']
+                    if not pd.api.types.is_float_dtype(data[col]):
+                        data[col] = data[col].apply(
+                            lambda x: float(x) if isinstance(x, (int, float, Decimal, np.number)) else np.nan
+                        )
                     chart_html = generate_chart(
                         data=data,
                         settings=settings,
                         chart_id=chart_id
                     )
-                    data = data.map(str)
+                    
                     # Create and save Graphic object directly to database
                     story_graphic = (
                         Graphic.objects
@@ -330,6 +345,7 @@ class StoryProcessor:
                     )
                     story_graphic.title=self._replace_reference_period_expression(template.title)
                     story_graphic.content_html=chart_html
+                    data = data.map(str)
                     story_graphic.data=json.dumps(data.to_dict(orient="records"), indent=2, ensure_ascii=False, cls=DecimalEncoder)
                     story_graphic.sort_order=template.sort_order
                     story_graphic.save()
@@ -509,7 +525,10 @@ class StoryProcessor:
             self.logger.warning(
                 f"Unknown reference period: {template['reference_period_id']}"
             )
-
+        if isinstance(period_start, datetime):
+            period_start = period_start.date()
+        if isinstance(period_end, datetime):
+            period_end = period_end.date()
         return period_start, period_end
 
     def _season_name(self) -> str:

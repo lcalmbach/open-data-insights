@@ -7,13 +7,13 @@
   <div class="col-md-4">
     <label for="template" class="form-label">Search</label>
     <select class="form-select" id="template" name="template">
-  <option value="">All templates</option>
-  {% for template in templates %}
-    <option value="{{ template.id }}" {% if request.GET.template == template.id|add:"" %}selected{% endif %}>
-      {{ template.title }}
-    </option>
-  {% endfor %}
-</select>
+      <option value="">All templates</option>
+      {% for template in templates %}
+      <option value="{{ template.id }}" {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
+        {{ template.title }}
+      </option>
+      {% endfor %}
+    </select>
   </div>
   <div class="col-md-6">
     <label for="search" class="form-label">&nbsp;</label>
@@ -47,8 +47,8 @@
   <div class="col-md-8">
     {% if selected_story %}
     {% include "includes/story_detail_block.html" %}
-      {% endif %}
-    </div>
+    {% endif %}
   </div>
+</div>
 </div>
 {% endblock %}

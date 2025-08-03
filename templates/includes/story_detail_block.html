@@ -14,57 +14,61 @@
     </b>
     <p class="card-text mt-3">{{ selected_story.content_html|safe }}</p>
   </div>
-  <hr>
 
+  {% if tables %}
+  <div class="mb-3 p-3 bg-light rounded">
   {% for table in tables %}
-    <h4>{{ table.title }}</h4>
-    <table class="table table-striped" id="{{ table.table_id }}">
-      <thead>
-        <tr>
-          {% for column in table.columns %}
-            <th>{{ column }}</th>
-          {% endfor %}
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in table.rows %}
-          <tr>
-            {% for col in table.columns %}
-              <td>{{ row|get_item:col }}</td>
-            {% endfor %}
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <br>
-  {% endfor %}
   <hr>
+  <h5>{{ table.title }}</h4>
+  <table class="table table-striped" id="{{ table.table_id }}">
+    <thead>
+      <tr>
+        {% for column in table.columns %}
+        <th>{{ column }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in table.rows %}
+      <tr>
+        {% for col in table.columns %}
+        <td>{{ row|get_item:col }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <br>
+  {% endfor %}
+  </div>
+  {% endif %}
+
 
   {% if graphics %}
     {% for graphic in graphics %}
-      <h4>{{ graphic.title }}</h4>
-      {{ graphic.content_html|safe }}
+    <h5>{{ graphic.title }}</h5>
+    {{ graphic.content_html|safe }}
     {% endfor %}
-    <hr>
   {% endif %}
-
+  
+  <div class="mb-3 p-3 bg-light rounded">
   {% if data_source %}
-  <p>
     Data source:
     {% for source in data_source %}
-      <a href="{{ source.url }}">{{ source.text }}</a>{% if not forloop.last %}, {% endif %}
+    <a href="{{ source.url }}" target="_blank" rel="noopener noreferrer">{{ source.text }}</a>{% if not forloop.last %},
+    {% endif %}
     {% endfor %}
-  </p>
   {% endif %}
 
   {% if other_ressources %}
-  <p>
+  <br>
     Additional resources:
     {% for source in other_ressources %}
-      <a href="{{ source.url }}">{{ source.text }}</a>{% if not forloop.last %}, {% endif %}
+    <a href="{{ source.url }}" target="_blank" rel="noopener noreferrer">{{ source.text }}</a>{% if not forloop.last %},
+    {% endif %}
     {% endfor %}
-  </p>
   {% endif %}
-
-  <p class="text-muted mt-3" style="font-size: 0.9em;">{{ AI_DISCLAIMER }}</p>
+  <br><br>
+  <p style="font-size: 0.9em;">{{ AI_DISCLAIMER }}</p>
+  </div>
 </div>

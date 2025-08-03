@@ -18,10 +18,6 @@ def generate_chart(data, settings, chart_id):
         str: HTML representation of the chart
     """
     try:
-        # Convert to DataFrame if needed
-        if not isinstance(data, pd.DataFrame):
-            data = pd.DataFrame(data)
-        
         # Process date columns
         for col in data.columns:
             if data[col].dtype == 'object' and pd.to_datetime(data[col], errors='coerce').notna().all():
@@ -334,42 +330,49 @@ def create_histogram(data, settings):
 
 def apply_common_settings(chart, settings):
     """Apply common chart settings like axes, title, and encodings"""
+    import altair as alt
+
     # Configure encodings
     encodings = {}
-    
+
     # X-axis
     x_field = settings.get('x')
     if x_field:
         encodings['x'] = alt.X(
-            x_field, 
+            x_field,
             title=settings.get('x_title', x_field),
             scale=alt.Scale(zero=settings.get('x_zero', False))
         )
-        
+
     # Y-axis
     y_field = settings.get('y')
     if y_field:
         encodings['y'] = alt.Y(
-            y_field, 
+            y_field,
             title=settings.get('y_title', y_field),
             scale=alt.Scale(zero=settings.get('y_zero', True))
         )
-    
+
     # Color encoding (optional)
     color_field = settings.get('color')
     if color_field:
         encodings['color'] = color_field
-    
+
+    # Tooltip (optional)
+    tooltip_fields = settings.get('tooltips')
+    if tooltip_fields:
+        encodings['tooltip'] = tooltip_fields  # can be list of strings or alt.Tooltip instances
+
     # Apply encodings
     chart = chart.encode(**encodings)
-    
+
     # Set properties
     props = {}
     if 'title' in settings:
         props['title'] = settings['title']
     props['height'] = settings.get('height', 300)
     props['width'] = settings.get('width', 'container')
-    
+
     chart = chart.properties(**props)
-    
+
     return chart

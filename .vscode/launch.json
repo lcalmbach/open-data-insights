@@ -26,8 +26,7 @@
             "args": [
                 "generate_stories",
                 "--id",
-                "26",
-                "--force",
+                "17",
                 "-v",
                 "2"
             ],
@@ -47,7 +46,7 @@
             "args": [
                 "synch_data",
                 "--id",
-                "28",
+                "14",
                 "-v",
                 "2"
             ],
@@ -107,8 +106,27 @@
             "args": [
                 "generate_appendices",
                 "--id",
-                "16",
-                "--tables",
+                "14",
+                "--graphics",
+                "-v",
+                "2"
+            ],
+            "django": true,
+            "justMyCode": true,
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "report_generator.settings"
+            },
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+
+        {
+            "name": "Django: ETL Pipeline",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "run_etl_pipeline",
                 "-v",
                 "2"
             ],

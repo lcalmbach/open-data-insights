@@ -64,18 +64,25 @@ def home_view(request):
     if not stories:
         return render(request, "home.html", {"story": None})
 
-    story = stories[0] 
+    selected_story = stories[0] 
     index = 0
     next_story_id = stories[1].id if len(stories) > 1 else None
-    story.content_html = markdown2.markdown(story.content, extras=["tables"])
-
+    selected_story.content_html = markdown2.markdown(selected_story.content, extras=["tables"])
+    tables = get_tables(selected_story) if selected_story else []
+    graphics = selected_story.storygraphcis.all() if selected_story else []
+    data_source = selected_story.template.data_source if selected_story else None
+    other_ressources = selected_story.template.other_ressources if selected_story else None
     return render(
         request,
         "home.html",
         {
-            "story": story,
+            "selected_story": selected_story,
             "prev_story_id": None,
             "next_story_id": next_story_id,
+            "tables": tables,
+            "graphics": graphics,
+            "data_source": data_source,
+            "other_ressources": other_ressources
         },
     )
 
@@ -125,31 +132,13 @@ def stories_view(request):
     if not stories.filter(id=story_id).exists():
         story_id = stories.first().id if stories else None
     selected_story = stories.filter(id=story_id).first() if story_id else None
-    
-    # Get graphics
-    graphics = Graphic.objects.filter(story=selected_story) if selected_story else []
-    data_source = selected_story.template.data_source if selected_story else None
-    other_ressources = selected_story.template.other_ressources if selected_story else None
-    # Get tables and convert directly to DataFrames
-    tables = []
-    if selected_story:
-        for t in StoryTable.objects.filter(story=selected_story):
-            try:
-                if t.data:  # t.data ist direkt ein Python-Objekt (z. B. Liste von Dicts)
-                    data = json.loads(t.data)
-                    columns = list(data[0].keys()) if data else []
-
-                    tables.append({
-                        'table_id': f"table-{t.id}",
-                        'rows': data,
-                        'columns': columns,
-                        'title':  t.title or f"Table {t.id}"
-                    })
-            except Exception as e:
-                print(f"Error processing table {t.id}: {e}")
-
     # Process story content
     if selected_story:
+        graphics = selected_story.storygraphcis.all() if selected_story else []
+        data_source = selected_story.template.data_source if selected_story else None
+        other_ressources = selected_story.template.other_ressources if selected_story else None
+        # Get tables and convert directly to DataFrames
+        tables = get_tables(selected_story) if selected_story else []
         selected_story.content_html = markdown2.markdown(
             selected_story.content, extras=["tables"]
         )
@@ -219,20 +208,50 @@ def view_story(request, story_id=None):
         return render(request, "home.html", {"story": None})
 
     if story_id is None:
-        story = stories[0]  # Default to the first story
+        selected_story = stories[0]  # Default to the first story
     else:
-        story = get_object_or_404(Story, id=story_id)
-    index = stories.index(story)
+        selected_story = get_object_or_404(Story, id=story_id)
+    index = stories.index(selected_story)
     prev_story_id = stories[index - 1].id if index > 0 else None
     next_story_id = stories[index + 1].id if index < len(stories) - 1 else None
+    tables = get_tables(selected_story) if selected_story else []
+    graphics = selected_story.storygraphcis.all() if selected_story else []
+    data_source = selected_story.template.data_source if selected_story else None
+    other_ressources = selected_story.template.other_ressources if selected_story else None
 
-    story.content_html = markdown2.markdown(story.content, extras=["tables"])
+    selected_story.content_html = markdown2.markdown(selected_story.content, extras=["tables"])
     return render(
         request,
         "home.html",
         {
-            "story": story,
+            "selected_story": selected_story,
             "prev_story_id": prev_story_id,
             "next_story_id": next_story_id,
+            "graphics": graphics,
+            "tables": tables,
+            "other_ressources": other_ressources,
+            "data_source": data_source,
         },
     )
+
+
+def get_tables(selected_story):
+    """
+    Returns a list of table dicts for the given story, each with table_id, rows, columns, and title.
+    """
+    tables = []
+    if selected_story:
+        for t in StoryTable.objects.filter(story=selected_story):
+            try:
+                if t.data:
+                    data = json.loads(t.data)
+                    columns = list(data[0].keys()) if data else []
+                    tables.append({
+                        'table_id': f"table-{t.id}",
+                        'rows': data,
+                        'columns': columns,
+                        'title': t.title or f"Table {t.id}"
+                    })
+            except Exception as e:
+                print(f"Error processing table {t.id}: {e}")
+    return tables

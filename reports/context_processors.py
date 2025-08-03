@@ -1,7 +1,7 @@
 def ai_disclaimer(request):
     return {
         "AI_DISCLAIMER": (
-            "🤖 This text was generated using AI. All quantitative information is based on the dataset referenced in the data source."
+            "🤖 This text was generated with the assistance of AI. All quantitative statements are derived directly from the dataset listed under “Data Source."
         )
     }
 

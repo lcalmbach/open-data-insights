@@ -114,28 +114,37 @@ class StoryGenerationService(ETLBaseService):
 
         for template in templates:
             service = StoryProcessor(template, run_date, force)
-            try:
-                result = service.generate_story()
+            if service.story_is_due():
+                try:
+                    result = service.generate_story()
 
-                if result:
-                    results["successful"] += 1
-                    results["details"].append({
-                        "template_id": template.id,
-                        "status": "success",
-                    })
-                else:
+                    if result:
+                        results["successful"] += 1
+                        results["details"].append({
+                            "template_id": template.id,
+                            "status": "success",
+                        })
+                    else:
+                        results["failed"] += 1
+                        results["details"].append({
+                            "template_id": template.id,
+                            "status": "failed",
+                            "error": result.get("error", "Unknown error"),
+                        })
+                except Exception as e:
+                    self.logger.error(f"Error processing template {template.id}: {str(e)}")
                     results["failed"] += 1
                     results["details"].append({
                         "template_id": template.id,
-                        "status": "failed",
-                        "error": result.get("error", "Unknown error"),
+                        "status": "error",
+                        "error": str(e),
                     })
-            except Exception as e:
-                self.logger.error(f"Error processing template {template.id}: {str(e)}")
-                results["failed"] += 1
+            else:
+                self.logger.info(f"Skipping template {template.id} - not due")
+                results["skipped"] += 1
                 results["details"].append({
                     "template_id": template.id,
-                    "status": "error",
-                    "error": str(e),
+                    "status": "skipped",
+                    "message": "Story generation conditions not met",
                 })
         return results

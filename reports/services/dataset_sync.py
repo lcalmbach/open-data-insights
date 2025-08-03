@@ -328,6 +328,11 @@ class DatasetProcessor:
 
                             self.post_process_data()
                             return True
+                        if df.empty:
+                            self.logger.info(
+                                f"No new data found for dataset {remote_table}."
+                            )
+                            return True
                         else:
                             self.logger.warning(
                                 "Failed to download data new data available"
@@ -581,12 +586,9 @@ class DatasetProcessor:
 
     def get_time_limit_where_clause(self) -> Optional[str]:
         """Construct WHERE clause for time limits"""
-        if not self.dataset.aggregations:
-            return None
-
-        agg_config = self.dataset.aggregations
-        if isinstance(agg_config, dict) and agg_config.get("grouping_period") == "day":
+        
+        if self.dataset.source_timestamp_field:
             today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
             return f"{self.dataset.source_timestamp_field} < '{today}'"
-
-        return None
+        else:
+            return None
