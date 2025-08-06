@@ -3,6 +3,7 @@ Story Processing Classes
 Contains the migrated Story class and related functionality from data_news.py
 """
 
+from email import utils
 import numpy as np
 import uuid
 import altair as alt
@@ -24,7 +25,7 @@ from ..visualizations.altair_charts import generate_chart
 
 from django.db import transaction
 from reports.services.database_client import DjangoPostgresClient
-from reports.services.utils import SQL_TEMPLATES
+from reports.services.utils import SQL_TEMPLATES, ensure_date
 from reports.models import (
     StoryTemplatePeriodOfInterestValues,
     StoryTemplateContext,
@@ -87,7 +88,7 @@ class ReferencePeriod(Enum):
     YEARLY = 38
     ALLTIME = 39
     DECADAL = 44  # For backward compatibility
-    IRREGULAR = 57  # For backward compatibility
+    IRREGULAR = 56  # For backward compatibility
 
     @classmethod
     def get_name(cls, value: int) -> str:
@@ -107,33 +108,38 @@ class StoryProcessor:
     def __init__(
         self, template: StoryTemplate, published_date: date, force_generation: bool = False
     ):
+        print(f"{template.id} {template.title}")
         self.logger = logging.getLogger(
             f"StoryProcessor.{template.title}"
         )
         self.dbclient = DjangoPostgresClient()
         self.most_recent_day = self._get_most_recent_day(published_date, template)
+        self.season, self.season_year = self._get_season(published_date, template)
         reference_period_start, reference_period_end = (
             self._get_reference_period(published_date, template)
         )
         
         self.story = (
             Story.objects
-            .filter(template=template, reference_period_start=reference_period_start)
+            .filter(
+                template=template,
+                reference_period_start=reference_period_start,
+                reference_period_end=reference_period_end
+            )
             .first()
             or Story()  # creates a new, empty instance if no match
         )
         if self.story.id is None:
             self.story.template = template
-            self.story.published_date = published_date
+            
             self.story.reference_period_start, self.story.reference_period_end = (
                 self._get_reference_period(published_date, template)
             )
         
+        self.story.published_date = published_date
         self.story.prompt_text = self.story.template.prompt_text
-        
         self.force_generation = force_generation
         
-        self.season, self.season_year = self._get_season()
         self.reference_period = template.reference_period.id
         self.year = self.story.reference_period_start.year
         self.month = self.story.reference_period_start.month
@@ -225,9 +231,7 @@ class StoryProcessor:
             if (
                 self.story.template.reference_period_id == ReferencePeriod.MONTHLY.value
             ):  # monthly
-                regular_due_date = (
-                    self.story.reference_period_start + relativedelta(months=1)
-                ).date()
+                regular_due_date = ensure_date(self.story.reference_period_start + relativedelta(months=1))
             elif (
                 self.story.template.reference_period_id == ReferencePeriod.SEASONAL.value
             ):  # seasonal
@@ -251,7 +255,7 @@ class StoryProcessor:
                 # check if the regular due date has passed without publishing the story
                 date_is_due = (
                     True
-                    if self.last_published_date is None
+                    if (self.last_published_date is None or self.story.template.reference_period_id == self.story.template.reference_period_id == ReferencePeriod.IRREGULAR.value)
                     else regular_due_date >= self.last_published_date
                 )
                 publish_conditions_met = get_publish_conditions_result()
@@ -399,7 +403,7 @@ class StoryProcessor:
             # Execute post-publish commands
             if self.story.template.post_publish_command:
                 self.logger.info("Executing post-publish command...")
-                self.dbclient.run_action_query(self.post_publish_command)
+                self.dbclient.run_action_query(self.story.template.post_publish_command)
 
             self.logger.info("Story generation completed successfully")
             return True
@@ -413,7 +417,7 @@ class StoryProcessor:
         """
         Retrieves the most recent day related to the current story from the database.
         Executes a SQL query defined in the template to fetch the most recent date,
-        using the story's published date as a parameter. Returns the date as a
+        using the story's published_date as a parameter. Returns the date as a
         pandas.Timestamp if available, otherwise returns None.
         Returns:
             Optional[datetime]: The most recent day as a datetime object, or None if
@@ -448,30 +452,30 @@ class StoryProcessor:
             self.logger.error(f"Error getting last published date: {e}")
             return None
 
-    def _get_season(self) -> Tuple[int, int]:
+    def _get_season(self, published_date: datetime, template: StoryTemplate) -> Tuple[int, int]:
         """Get season and season year based on reference period"""
         if self.most_recent_day:
             day = self.most_recent_day
         else:
-            day = self.story.published_date - timedelta(days=1)
+            day = published_date - timedelta(days=1)
 
-        if self.story.template.reference_period_id == ReferencePeriod.DAILY.value:  # daily
+        if template.reference_period_id == ReferencePeriod.DAILY.value:  # daily
             season = month_to_season[day.month]
         elif (
-            self.story.template.reference_period_id == ReferencePeriod.MONTHLY.value
+            template.reference_period_id == ReferencePeriod.MONTHLY.value
         ):  # monthly
             month = day.month - 1 if day.month > 1 else 12
             season = month_to_season[month]
         elif (
-            self.story.template.reference_period_id == ReferencePeriod.SEASONAL.value
+            template.reference_period_id == ReferencePeriod.SEASONAL.value
         ):  # seasonal
-            season = month_to_season[self.story.published_date.month] - 1
+            season = month_to_season[published_date.month] - 1
             if season < 1:
                 season = 4
         else:
             season = None
 
-        season_year = self.story.published_date.year
+        season_year = published_date.year if published_date.month >= 3 else published_date.year - 1
         return season, season_year
 
     def _get_reference_period(self, published_date: datetime, template: StoryTemplate) -> Tuple[datetime, datetime]:
@@ -502,6 +506,7 @@ class StoryProcessor:
         elif (
             template.reference_period_id == ReferencePeriod.SEASONAL.value
         ):  # seasonal
+            
             start_month, start_day = season_dates[self.season][0]
             end_month, end_day = season_dates[self.season][1]
             start_year = (
@@ -519,9 +524,14 @@ class StoryProcessor:
             year = published_date.year - 1
             period_start = datetime(year, 1, 1)
             period_end = period_start + pd.DateOffset(years=1)
+        elif (
+            template.reference_period_id == ReferencePeriod.IRREGULAR.value
+        ):  # yearly
+            period_start = published_date - pd.DateOffset(years=1)
+            period_end = published_date - pd.DateOffset(days=1)
         else:
-            period_start = None
-            period_end = None
+            period_start = published_date
+            period_end = published_date
             self.logger.warning(
                 f"Unknown reference period: {template['reference_period_id']}"
             )

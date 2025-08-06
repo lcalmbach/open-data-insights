@@ -88,7 +88,7 @@ class StoryGenerationService(ETLBaseService):
         if template_id:
             templates = StoryTemplate.objects.filter(id=template_id)
         else:
-            templates = StoryTemplate.objects.filter(active=True)
+            templates = StoryTemplate.objects.filter(active=True).order_by('id')
 
         if not templates.exists():
             if template_id:

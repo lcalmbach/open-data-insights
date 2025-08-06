@@ -19,14 +19,32 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Django: Generate Stories",
+            "name": "Django: Generate Stories id=13",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
                 "generate_stories",
                 "--id",
-                "17",
+                "13",
+                "-v",
+                "2"
+            ],
+            "django": true,
+            "justMyCode": true,
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "report_generator.settings"
+            },
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Django: Generate Stories",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "generate_stories",
                 "-v",
                 "2"
             ],

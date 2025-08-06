@@ -9,6 +9,7 @@ import re
 from pathlib import Path
 from datetime import timezone, date, datetime
 from typing import Optional
+from dateutil.relativedelta import relativedelta
 
 
 def get_parquet_row_count(file_path: str) -> int:
@@ -97,3 +98,7 @@ SQL_TEMPLATES = {
     FROM opendata.{1}
     WHERE {0} IS NOT NULL {2};"""
 }
+
+def ensure_date(dt):
+    return dt.date() if isinstance(dt, datetime) else dt
+
