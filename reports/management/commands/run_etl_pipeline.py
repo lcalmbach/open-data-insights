@@ -51,7 +51,9 @@ class Command(BaseCommand):
                     )
                 )
                 return
-        
+        else:
+            run_date = date.today() 
+            
         force = options.get('force', False)
         continue_on_error = options.get('continue_on_error', False)
         

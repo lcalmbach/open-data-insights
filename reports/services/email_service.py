@@ -80,8 +80,9 @@ class EmailService(ETLBaseService):
             self._cleanup_empty_stories()
 
             # Get stories to send using the view from the original code
-            cmd = "SELECT * FROM report_generator.v_insights2send"
-            df = self.dbclient.run_query(cmd, [send_date])
+            cmd = "SELECT * FROM report_generator.v_insights2send where published_date = %(send_date)s"
+            params = {"send_date": send_date}
+            df = self.dbclient.run_query(cmd, params)
 
             if df.empty:
                 self.logger.info(f"No insights found for {send_date}")

@@ -133,6 +133,7 @@ class StoryTemplateTableAdmin(admin.ModelAdmin):
     )
     sortable_by = ("id", "title")
     search_fields = ("title",)
+    list_filter = ("story_template",)
 
 
 @admin.register(StoryTable)
@@ -144,7 +145,7 @@ class StoryTableAdmin(admin.ModelAdmin):
     )
     sortable_by = ("id", "story")
     search_fields = ("story__title", "table_template__title")
-    list_filter = ("story",)
+
 
 
 @admin.register(StoryTemplateGraphic)

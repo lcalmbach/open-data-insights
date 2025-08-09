@@ -35,7 +35,7 @@ class Command(BaseCommand):
             return
         
         # Parse the date if provided
-        send_date = None
+        send_date = today = date.today()
         if options.get('date'):
             try:
                 send_date = datetime.strptime(options['date'], '%Y-%m-%d').date()

@@ -27,18 +27,23 @@
     </p>
     <br>
     {% if prev_story_id %}
-    <a href="{% url 'view_story' prev_story_id %}" title="Previous Insight" class="btn btn-outline-secondary btn-sm">←
-        Previous</a>
+    <a href="{% url 'view_story' prev_story_id %}" title="Previous Insight"
+        class="btn btn-primary btn-lg rounded-pill d-inline-flex align-items-center">
+        <i class="fas fa-arrow-left fa-lg me-2"></i> Previous
+    </a>
     {% endif %}
     {% if next_story_id %}
     <a href="{% url 'view_story' next_story_id %}" title="Next Insight"
-        class="btn btn-outline-secondary btn-sm ms-2">Next →</a>
+        class="btn btn-primary btn-lg rounded-pill d-inline-flex align-items-center ms-2">
+        Next <i class="fas fa-arrow-right fa-lg ms-2"></i>
+    </a>
     {% endif %}
+
 </div>
 
 <!-- Story block -->
 {% if selected_story %}
-    {% include "includes/story_detail_block.html" %}
+{% include "includes/story_detail_block.html" %}
 {% endif %}
 
 {% endblock %}
