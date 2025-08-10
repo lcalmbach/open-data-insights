@@ -13,6 +13,9 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 import markdown
 import pandas as pd
+from django.contrib.auth import get_user_model
+from reports.models import Story, StoryTemplateSubscription, StoryTemplate, CustomUser
+from django.urls import reverse
 
 from reports.services.base import ETLBaseService
 from reports.services.database_client import DjangoPostgresClient
@@ -69,113 +72,83 @@ class EmailService(ETLBaseService):
             return {"success": False, "error": str(e)}
 
     def send_stories_for_date(self, send_date: date = None) -> Dict[str, Any]:
-        """Send all stories for a specific date"""
+        """Send all stories for a specific date using Django ORM and new template"""
         try:
             if not send_date:
                 send_date = date.today()
 
             self.logger.info(f"Starting sending mails for {send_date}...")
 
-            # Clean up empty stories first
-            self._cleanup_empty_stories()
+            User = get_user_model()
+            users = User.objects.filter(is_active=True)
+            total_sent = 0
+            details = []
 
-            # Get stories to send using the view from the original code
-            cmd = "SELECT * FROM report_generator.v_insights2send where published_date = %(send_date)s"
-            params = {"send_date": send_date}
-            df = self.dbclient.run_query(cmd, params)
+            for user in users:
+                # Find subscriptions for this user
+                subscriptions = StoryTemplateSubscription.objects.filter(user=user)
+                # Get all templates the user is subscribed to
+                template_ids = subscriptions.values_list('story_template_id', flat=True)
+                # Find stories published on send_date for these templates
+                stories = Story.objects.filter(
+                    template_id__in=template_ids,
+                    published_date=send_date
+                ).select_related('template')
 
-            if df.empty:
-                self.logger.info(f"No insights found for {send_date}")
-                return {
-                    "success": True,
-                    "message": f"No stories to send for {send_date}",
-                    "total_stories": 0,
-                    "successful": 0,
-                    "failed": 0,
-                }
+                if not stories.exists():
+                    continue
 
-            self.logger.info(f"Found {len(df)} stories to send.")
+                # Build insights list for email
+                insights = []
+                for story in stories:
+                    insight_html = f"{story.title} + <>"
+                    insights.append({
+                        "summary": story.get_email_list_entry(),
+                        "url": story.get_absolute_url(),
+                        "title": story.title
+                    })
 
-            results = {
+                # Render email body
+                email_body = self._render_insights_email(user, insights)
+                subject = f"Open Data Insights for {send_date.strftime('%Y-%m-%d')}"
+                result = self.send_story_email(
+                    story_content=email_body,
+                    recipients=[user.email],
+                    subject=subject,
+                    send_date=send_date
+                )
+                details.append({
+                    "user": user.first_name,
+                    "email": user.email,
+                    "success": result.get("success"),
+                    "error": result.get("error"),
+                })
+                if result.get("success"):
+                    total_sent += 1
+
+            return {
                 "success": True,
-                "total_stories": len(df),
-                "successful": 0,
-                "failed": 0,
-                "details": [],
+                "total_sent": total_sent,
+                "details": details,
             }
-
-            for _, row in df.iterrows():
-                try:
-                    if row["story"]:  # Check if story content exists
-                        subject = f"Open Data Story: {row['title']}"
-                        html_body = markdown.markdown(
-                            row["story"], extensions=["markdown.extensions.tables"]
-                        )
-
-                        # Send email
-                        email_result = self._send_single_email(
-                            subject=subject, html_body=html_body, to_email=row["email"]
-                        )
-
-                        if email_result["success"]:
-                            results["successful"] += 1
-                        else:
-                            results["failed"] += 1
-                            results["success"] = False
-
-                        results["details"].append(
-                            {
-                                "story_title": row["title"],
-                                "recipient": row["email"],
-                                "success": email_result["success"],
-                                "error": email_result.get("error"),
-                            }
-                        )
-
-                        # Small delay between emails to avoid overwhelming the SMTP server
-                        time.sleep(2)
-
-                    else:
-                        self.logger.info(
-                            f"Story for {row['title']} is empty, not sending email to {row['email']}"
-                        )
-                        results["details"].append(
-                            {
-                                "story_title": row["title"],
-                                "recipient": row["email"],
-                                "success": False,
-                                "error": "Story content is empty",
-                            }
-                        )
-                        results["failed"] += 1
-
-                except Exception as e:
-                    self.logger.error(
-                        f"Error processing story for {row.get('email', 'unknown')}: {e}"
-                    )
-                    results["failed"] += 1
-                    results["success"] = False
-                    results["details"].append(
-                        {
-                            "story_title": row.get("title", "Unknown"),
-                            "recipient": row.get("email", "Unknown"),
-                            "success": False,
-                            "error": str(e),
-                        }
-                    )
-
-            # Mark all stories as sent
-            if results["successful"] > 0:
-                self._mark_stories_as_sent()
-
-            self.logger.info(
-                f"Email sending completed. Success: {results['successful']}, Failed: {results['failed']}"
-            )
-            return results
 
         except Exception as e:
             self.logger.error(f"Error sending stories for date {send_date}: {str(e)}")
             return {"success": False, "error": str(e)}
+
+    def _render_insights_email(self, user, insights):
+        """Render the email body for a user and their insights"""
+        lines = [
+            f"Hello {user.first_name},",
+            "",
+            "We’ve just published new insights from your subscribed topics:",
+            "",
+        ]
+        for insight in insights:
+            lines.append(f"- {insight['summary']}\n  [View the full story with tables and graphs]({insight['url']})")
+        lines.append("")
+        lines.append("Best regards,\nThe Open Data Insights Team")
+        return "\n".join(lines)
 
     def _cleanup_empty_stories(self):
         """Remove stories with empty content"""

@@ -3,7 +3,8 @@ from account.models import CustomUser
 from datetime import date, timedelta
 from django.core.exceptions import ValidationError
 import json
-
+from django.conf import settings
+from django.urls import reverse
 
 def default_yesterday():
     return date.today() - timedelta(days=1)
@@ -549,6 +550,12 @@ class Story(models.Model):
         if self.ai_model and self.ai_model not in valid_ai_models:
             raise ValidationError({'ai_model': f'Invalid AI model. Choose from: {", ".join(valid_ai_models)}'})
 
+    def get_absolute_url(self):
+        return settings.APP_ROOT.rstrip('/') + reverse('story_detail', args=[self.id])
+
+    def get_email_list_entry(self):
+        return f"<b>{self.title}:</b></br><p>{self.summary}<p>"
+
 class StoryLog(models.Model):
     story = models.ForeignKey(
         Story,
@@ -671,13 +678,13 @@ class Graphic(models.Model):
     story = models.ForeignKey(
         Story,
         on_delete=models.CASCADE,
-        related_name="storygraphcis",
+        related_name="story_graphics",
         help_text="The story this graph belongs to.",
     )
     graphic_template = models.ForeignKey(
         StoryTemplateGraphic,
         on_delete=models.CASCADE,
-        related_name="storygraphics",
+        related_name="story_template_graphics",
         help_text="The story template this graphic belongs to.",
     )
     title = models.CharField(max_length=255, help_text="Title of the graphic.")

@@ -177,8 +177,8 @@ MARKDOWNIFY = {
 }
 
 APP_INFO = {
-    "version": "0.0.10",
-    "version_date": "2025-08-02",
+    "version": "0.0.11",
+    "version_date": "2025-08-10",
     "author_name": "Lukas Calmbach",
     "author_email": "lcalmbach@gmail.com",
     "repo_url": "https://github.com/lcalmbach/open-data-insights",
@@ -192,6 +192,8 @@ DATA_FILES_PATH = os.environ.get('DATA_FILES_PATH', str(BASE_DIR / 'files'))
 # OpenAI Configuration
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL', 'gpt-4o')
+
+APP_ROOT = "https://ogd-data-insights-d6c65d72da95.herokuapp.com/"
 
 #LOGGING = {
 #    'version': 1,

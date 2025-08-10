@@ -3792,3 +3792,115 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2025-08-09 13:06:36,020 - StoryGeneration - INFO - Skipping template 13 - not due
 2025-08-09 13:07:17,094 - StoryGeneration - INFO - Skipping template 13 - not due
 2025-08-09 13:07:38,257 - StoryGeneration - INFO - Skipping template 16 - not due
+2025-08-10 08:03:26,412 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-08-10 08:03:26,698 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-08-10 08:03:26,699 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-08-10 08:03:27,628 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-08-10 08:03:27,629 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-08-10 08:03:29,124 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-08-10 08:03:29,125 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-08-10 08:03:29,808 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-08-10 08:03:29,808 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-08-10 08:03:30,473 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-08-10 08:03:30,474 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-08-10 08:03:31,082 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-08-10 08:03:31,092 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-08-10 08:03:31,502 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-08-10 08:03:31,502 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-08-10 08:03:31,874 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-08-10 08:03:31,884 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-08-10 08:03:32,260 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-08-10 08:03:32,270 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-08-10 08:03:32,631 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-08-10 08:03:32,631 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-08-10 08:03:33,531 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-08-10 08:03:33,532 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-08-10 08:03:34,269 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-08-10 08:03:34,279 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-08-10 08:03:34,506 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-08-10 08:03:34,516 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-08-10 08:03:35,654 - DatasetSync - INFO - Successfully synchronized dataset ID 28: Noise Monitoring in Basel
+2025-08-10 08:03:35,655 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2025-08-10 08:03:35,868 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2025-08-10 08:03:35,878 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-08-10 08:03:36,047 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-08-10 08:03:36,057 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-08-10 08:03:36,291 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-08-10 08:03:36,301 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-08-10 08:03:36,534 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-08-10 08:03:36,544 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-08-10 08:03:36,772 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-08-10 08:03:36,773 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-08-10 08:03:37,189 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-08-10 08:03:37,199 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-08-10 08:03:38,661 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-08-10 08:03:38,661 - DatasetSync - INFO - Starting synchronization for dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2025-08-10 08:03:39,261 - DatasetSync - INFO - Successfully synchronized dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2025-08-10 08:03:39,262 - DatasetSync - INFO - Starting synchronization for dataset ID 30: traffic accidents
+2025-08-10 08:03:39,774 - DatasetSync - INFO - Successfully synchronized dataset ID 30: traffic accidents
+2025-08-10 08:03:39,784 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-08-10 08:03:40,762 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-08-10 08:03:40,763 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-08-10 08:03:42,093 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-08-10 08:03:42,097 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-08-10 08:03:42,097 - DatasetSync - INFO - Synchronization completed successfully. Processed: 25, All successful
+2025-08-10 08:03:42,180 - StoryGeneration - INFO - Skipping template 11 - not due
+2025-08-10 08:03:50,734 - StoryGeneration - INFO - Skipping template 13 - not due
+2025-08-10 08:03:50,747 - StoryGeneration - INFO - Skipping template 14 - not due
+2025-08-10 08:03:50,750 - StoryGeneration - INFO - Skipping template 15 - not due
+2025-08-10 08:03:50,755 - StoryGeneration - INFO - Skipping template 16 - not due
+2025-08-10 08:03:57,918 - StoryGeneration - INFO - Skipping template 18 - not due
+2025-08-10 08:03:58,035 - StoryGeneration - INFO - Skipping template 19 - not due
+2025-08-10 08:03:58,094 - StoryGeneration - INFO - Skipping template 20 - not due
+2025-08-10 08:03:58,101 - StoryGeneration - INFO - Skipping template 21 - not due
+2025-08-10 08:03:58,107 - StoryGeneration - INFO - Skipping template 22 - not due
+2025-08-10 08:03:58,114 - StoryGeneration - INFO - Skipping template 23 - not due
+2025-08-10 08:03:58,131 - StoryGeneration - INFO - Skipping template 24 - not due
+2025-08-10 08:03:58,208 - StoryGeneration - INFO - Skipping template 25 - not due
+2025-08-10 08:03:58,214 - StoryGeneration - INFO - Skipping template 26 - not due
+2025-08-10 08:03:58,214 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 08:03:58,214 - EmailService - INFO - Cleaned up empty stories
+2025-08-10 08:03:58,217 - EmailService - INFO - Found 2 stories to send.
+2025-08-10 08:03:59,291 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-08-10 08:04:02,001 - EmailService - INFO - Email sent to lcalmbach@gmail.com
+2025-08-10 08:04:04,003 - EmailService - ERROR - Error marking stories as sent: column "is_sent" of relation "reports_story" does not exist
+LINE 1: UPDATE report_generator.reports_story SET is_sent = true
+                                                  ^
+
+2025-08-10 08:04:04,003 - EmailService - INFO - Email sending completed. Success: 2, Failed: 0
+2025-08-10 08:26:11,299 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 08:27:21,454 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 08:27:45,799 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 08:29:47,317 - EmailService - ERROR - Error sending stories for date 2025-08-10: 'CustomUser' object has no attribute 'get_full_name'
+2025-08-10 14:15:12,488 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:17:06,610 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:17:47,616 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:18:14,504 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:18:50,864 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:18:50,879 - EmailService - ERROR - Error sending stories for date 2025-08-10: 'str' object is not callable
+2025-08-10 14:19:05,743 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:19:05,759 - EmailService - ERROR - Error sending stories for date 2025-08-10: 'str' object is not callable
+2025-08-10 14:19:37,770 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:20:04,584 - EmailService - ERROR - Error sending stories for date 2025-08-10: 'str' object is not callable
+2025-08-10 14:20:13,334 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:21:42,246 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-08-10 14:22:39,651 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:22:56,288 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-08-10 14:39:23,252 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:39:41,633 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-08-10 14:50:18,021 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:53:14,891 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:53:20,553 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-08-10 14:54:14,323 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:56:19,513 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 14:56:36,172 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-08-10 15:05:06,746 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 15:05:06,768 - EmailService - ERROR - Error sending stories for date 2025-08-10: Reverse for 'story_detail' not found. 'story_detail' is not a valid view function or pattern name.
+2025-08-10 15:05:21,519 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 15:05:26,082 - EmailService - ERROR - Error sending stories for date 2025-08-10: Reverse for 'story_detail' not found. 'story_detail' is not a valid view function or pattern name.
+2025-08-10 15:05:48,073 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 15:06:20,103 - EmailService - ERROR - Error sending stories for date 2025-08-10: Reverse for 'story_detail' not found. 'story_detail' is not a valid view function or pattern name.
+2025-08-10 15:06:33,172 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 15:07:25,080 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 15:07:38,575 - EmailService - INFO - Starting sending mails for 2025-08-10...
+2025-08-10 15:07:49,679 - EmailService - INFO - Email sent successfully to 1 recipients

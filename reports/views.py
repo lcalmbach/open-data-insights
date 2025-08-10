@@ -1,21 +1,23 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .models import Graphic, StoryTemplate, Story, Graphic, StoryTable
+from .models import Graphic, StoryTemplate, Story, StoryTable
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render, get_object_or_404
-from account.forms import SubscriptionForm
 import markdown2
 import json
-from .models import Story, StoryRating
-from .forms import StoryRatingForm
+import random
+
+import altair as alt
+import pandas as pd
+
 from django.conf import settings
 from django.views.generic import TemplateView
 from django.db.models import Q
-import altair as alt
-import pandas as pd
-import random
+
+from .forms import StoryRatingForm
+from .models import Graphic, Story, StoryRating, StoryTable, StoryTemplate
 
 
 def generate_fake_graphic(chart_id):
@@ -69,7 +71,7 @@ def home_view(request):
     next_story_id = stories[1].id if len(stories) > 1 else None
     selected_story.content_html = markdown2.markdown(selected_story.content, extras=["tables"])
     tables = get_tables(selected_story) if selected_story else []
-    graphics = selected_story.storygraphcis.all() if selected_story else []
+    graphics = selected_story.story_graphics.all() if selected_story else []
     data_source = selected_story.template.data_source if selected_story else None
     other_ressources = selected_story.template.other_ressources if selected_story else None
     return render(
@@ -134,7 +136,7 @@ def stories_view(request):
     selected_story = stories.filter(id=story_id).first() if story_id else None
     # Process story content
     if selected_story:
-        graphics = selected_story.storygraphcis.all() if selected_story else []
+        graphics = selected_story.story_graphics.all() if selected_story else []
         data_source = selected_story.template.data_source if selected_story else None
         other_ressources = selected_story.template.other_ressources if selected_story else None
         # Get tables and convert directly to DataFrames
@@ -215,7 +217,7 @@ def view_story(request, story_id=None):
     prev_story_id = stories[index - 1].id if index > 0 else None
     next_story_id = stories[index + 1].id if index < len(stories) - 1 else None
     tables = get_tables(selected_story) if selected_story else []
-    graphics = selected_story.storygraphcis.all() if selected_story else []
+    graphics = selected_story.story_graphics.all() if selected_story else []
     data_source = selected_story.template.data_source if selected_story else None
     other_ressources = selected_story.template.other_ressources if selected_story else None
 
@@ -227,6 +229,26 @@ def view_story(request, story_id=None):
             "selected_story": selected_story,
             "prev_story_id": prev_story_id,
             "next_story_id": next_story_id,
+            "graphics": graphics,
+            "tables": tables,
+            "other_ressources": other_ressources,
+            "data_source": data_source,
+        },
+    )
+
+def story_detail(request, story_id=None):
+    selected_story = get_object_or_404(Story, id=story_id)
+    tables = get_tables(selected_story) if selected_story else []
+    graphics = selected_story.story_graphics.all() if selected_story else []
+    data_source = selected_story.template.data_source if selected_story else None
+    other_ressources = selected_story.template.other_ressources if selected_story else None
+
+    selected_story.content_html = markdown2.markdown(selected_story.content, extras=["tables"])
+    return render(
+        request,
+        "reports/story_detail.html",
+        {
+            "selected_story": selected_story,
             "graphics": graphics,
             "tables": tables,
             "other_ressources": other_ressources,
