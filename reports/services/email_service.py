@@ -41,6 +41,10 @@ class EmailService(ETLBaseService):
             if not recipients:
                 return {"success": False, "message": "No recipients specified"}
 
+            # Redirect all emails to developer in development/local
+            if hasattr(settings, "EMAIL_REDIRECT_TO"):
+                recipients = settings.EMAIL_REDIRECT_TO
+
             # Default subject if not provided
             if not subject:
                 subject = f"Data Insights - {send_date or date.today()}"

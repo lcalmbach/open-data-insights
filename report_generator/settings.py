@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-default-secret-key-here')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = ['*']
 
@@ -85,6 +85,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "reports.context_processors.ai_disclaimer",
+                "reports.context_processors.show_dev_banner",
             ],
         },
     },
@@ -194,6 +195,12 @@ OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL', 'gpt-4o')
 
 APP_ROOT = "https://ogd-data-insights-d6c65d72da95.herokuapp.com/"
+DEVELOPER_EMAIL = DEFAULT_FROM_EMAIL
+
+# In development/local only:
+if DEBUG:  # or use a custom flag for your environment
+    EMAIL_REDIRECT_TO = [DEVELOPER_EMAIL]
+
 
 #LOGGING = {
 #    'version': 1,
@@ -207,3 +214,5 @@ APP_ROOT = "https://ogd-data-insights-d6c65d72da95.herokuapp.com/"
 #        },
 #    }
 #}
+
+SHOW_DEV_BANNER = DEBUG
