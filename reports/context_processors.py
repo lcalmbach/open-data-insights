@@ -3,7 +3,7 @@ from django.conf import settings
 def ai_disclaimer(request):
     return {
         "AI_DISCLAIMER": (
-            "🤖 This text was generated with the assistance of AI. All quantitative statements are derived directly from the dataset listed under “Data Source."
+            """🤖 This text was generated with the assistance of AI. All quantitative statements are derived directly from the dataset listed under <i>Data Source</i>."""
         )
     }
 

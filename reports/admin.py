@@ -24,6 +24,8 @@ class StoryAdmin(admin.ModelAdmin):
         "title",
         "template",
         "published_date",
+        "reference_period_start",
+        "reference_period_end",
     )
     sorted_by = (
         "template",

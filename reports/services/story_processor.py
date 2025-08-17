@@ -327,10 +327,7 @@ class StoryProcessor:
                     # Generate chart HTML
                     self.logger.info(f"Generating chart for: {template.title}")
                     col = settings['y']
-                    if not pd.api.types.is_float_dtype(data[col]):
-                        data[col] = data[col].apply(
-                            lambda x: float(x) if isinstance(x, (int, float, Decimal, np.number)) else np.nan
-                        )
+                    data[col] = pd.to_numeric(data[col], errors='coerce')
                     chart_html = generate_chart(
                         data=data,
                         settings=settings,

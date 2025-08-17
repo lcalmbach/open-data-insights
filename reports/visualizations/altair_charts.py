@@ -330,7 +330,6 @@ def create_histogram(data, settings):
 
 def apply_common_settings(chart, settings):
     """Apply common chart settings like axes, title, and encodings"""
-    import altair as alt
 
     # Configure encodings
     encodings = {}
