@@ -288,9 +288,38 @@ class DatasetProcessor:
                 )
 
                 if last_db_record:
-                    target_db_date = make_utc(
-                        last_db_record[self.dataset.db_timestamp_field]
-                    ).date()
+                    raw_ts = (
+                        last_db_record.get(self.dataset.db_timestamp_field)
+                        if isinstance(last_db_record, dict)
+                        else last_db_record[self.dataset.db_timestamp_field]
+                    )
+
+                    parsed_ts = None
+                    # Already a datetime
+                    if isinstance(raw_ts, datetime):
+                        parsed_ts = raw_ts
+                    # pandas Timestamp
+                    elif isinstance(raw_ts, pd.Timestamp):
+                        parsed_ts = raw_ts.to_pydatetime()
+                    # date only -> convert to datetime at midnight
+                    elif isinstance(raw_ts, date):
+                        parsed_ts = datetime(raw_ts.year, raw_ts.month, raw_ts.day)
+                    # string -> try ISO parse then pandas fallback
+                    elif isinstance(raw_ts, str):
+                        try:
+                            parsed_ts = datetime.fromisoformat(raw_ts)
+                        except Exception:
+                            parsed = pd.to_datetime(raw_ts, errors="coerce")
+                            if not pd.isna(parsed):
+                                parsed_ts = parsed.to_pydatetime()
+
+                    if parsed_ts is None:
+                        self.logger.warning(
+                            f"Could not parse last DB record timestamp for {remote_table}: {raw_ts!r}"
+                        )
+                        return False
+
+                    target_db_date = make_utc(parsed_ts).date()
 
                     # Check if new data is available
                     if ods_date - target_db_date >= timedelta(days=1):
@@ -378,11 +407,14 @@ class DatasetProcessor:
                     else None
                 ),
             )
-
+    
             if df is not False and not df.empty:
                 df = self.transform_ods_data(df)
                 df.to_parquet(agg_filename)
                 self.dbclient.upload_to_db(str(agg_filename), remote_table)
+                # check if data-time column is of type date, if not force it
+                if not pd.api.types.is_datetime64_any_dtype(df[self.dataset.db_timestamp_field]):
+                    df[self.dataset.db_timestamp_field] = pd.to_datetime(df[self.dataset.db_timestamp_field], errors="coerce")
                 self.post_process_data()
                 return True
             else:
@@ -527,6 +559,14 @@ class DatasetProcessor:
                 df["month"].isin([1, 2]),
                 df[self.dataset.db_timestamp_field].dt.year - 1,
                 df[self.dataset.db_timestamp_field].dt.year,
+            )
+
+        # ensure df is a real copy before mutating to avoid SettingWithCopyWarning
+        df = df.copy()
+
+        if self.dataset.source_timestamp_field in df.columns:
+            df.loc[:, self.dataset.source_timestamp_field] = pd.to_datetime(
+                df[self.dataset.source_timestamp_field], errors="coerce"
             )
 
         return df

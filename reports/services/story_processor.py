@@ -190,6 +190,7 @@ class StoryProcessor:
             ":reference_period_month", str(calendar.month_name[self.month])
         )
         result = result.replace(":reference_period_year", str(self.year))
+        result = result.replace(":reference_period_previous_year", str(self.year - 1))
         result = result.replace(":reference_period_season", self._season_name())
         result = result.replace(":reference_period", self.reference_period_expression)
         return result
@@ -686,6 +687,8 @@ class StoryProcessor:
             params["season_year"] = self.year
         if "%(year)s" in cmd:
             params["year"] = self.year
+        if "%(previous_year)s" in cmd:
+            params["previous_year"] = self.year - 1
         if "%(season)s" in cmd:
             params["season"] = month_to_season[self.month]
 

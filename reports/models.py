@@ -287,6 +287,14 @@ class StoryTemplate(models.Model):
         null=True,
         help_text="SQL command to be executed after the story is published. This can be used to update other tables or perform additional actions.",
     )
+    created_date = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Timestamp of when the story template was created.",
+    )
+    creation_is_published = models.BooleanField(
+        default=False,
+        help_text="Indicates if the story has been made public to the users.",
+    )
 
     class Meta:
         verbose_name = "Story Template"

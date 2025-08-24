@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from reports.models import StoryTemplate
+from reports.models import StoryTemplate, Story
 from reports.services.story_processor import StoryProcessor
 from datetime import datetime, date
 
