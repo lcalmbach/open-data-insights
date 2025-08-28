@@ -77,7 +77,7 @@ class GraphType(LookupValue):
 
 class PeriodManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(category_id=2)
+        return super().get_queryset().filter(category_id=6)
 
 
 class Period(LookupValue):
@@ -321,13 +321,7 @@ class StoryTemplateGraphic(models.Model):
         max_length=4000,
         help_text="SQL command to get the data for the graphic, e.g., 'SELECT date, value FROM weather_data WHERE date >= %s AND date <= %s'. This command should return the data in a format suitable for the graphic library used.",
     )
-    graphic_type = models.CharField(
-        max_length=50,
-        choices=[
-            ("bar", "Bar Chart"),
-            ("line", "Line Chart"),
-            ("scatter", "Scatter Plot"),
-        ],
+    graphic_type = models.ForeignKey(GraphType, on_delete=models.CASCADE, help_text="Type of the graphic, e.g., 'line', 'bar', 'pie'."  
     )
     sort_order = models.IntegerField(
         default=0, help_text="Sort order of the graphic within the story template."

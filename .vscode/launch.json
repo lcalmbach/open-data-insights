@@ -123,10 +123,8 @@
             "args": [
                 "generate_appendices",
                 "--id",
-                "28",
-                "--date",
-                "2025-07-01",
-                "--tables",
+                "31",
+                "--graphics",
                 "-v",
                 "2"
             ],

@@ -321,10 +321,10 @@ class StoryProcessor:
                     
                     # Generate unique chart ID
                     chart_id = f"chart-{template.id}-{uuid.uuid4().hex[:8]}"
-                    
                     # Use settings from template
                     settings = template.settings
-                
+                    settings['type'] = template.graphic_type
+
                     # Generate chart HTML
                     self.logger.info(f"Generating chart for: {template.title}")
                     col = settings['y']

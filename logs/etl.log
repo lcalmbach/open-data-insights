@@ -5107,3 +5107,155 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2025-08-24 10:53:59,362 - EmailService - INFO - Email sent successfully to 1 recipients
 2025-08-24 10:54:00,359 - EmailService - INFO - Email sent successfully to 1 recipients
 2025-08-24 10:54:00,361 - EmailService - INFO - Marked 3 new templates as creation_is_published=True
+2025-08-25 05:59:32,407 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-08-25 05:59:32,662 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-08-25 05:59:32,662 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-08-25 05:59:33,291 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-08-25 05:59:33,291 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-08-25 05:59:33,845 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-08-25 05:59:33,846 - DatasetSync - INFO - Starting synchronization for dataset ID 33: Crude and Standardized Mortality Rates of the Canton of Basel-Stadt by Sex and Age Group since 2012
+2025-08-25 05:59:34,105 - DatasetSync - INFO - Successfully synchronized dataset ID 33: Crude and Standardized Mortality Rates of the Canton of Basel-Stadt by Sex and Age Group since 2012
+2025-08-25 05:59:34,105 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-08-25 05:59:34,382 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-08-25 05:59:34,383 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-08-25 05:59:35,010 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-08-25 05:59:35,010 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-08-25 05:59:35,228 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-08-25 05:59:35,238 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-08-25 05:59:35,417 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-08-25 05:59:35,428 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-08-25 05:59:35,579 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-08-25 05:59:35,589 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-08-25 05:59:36,405 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-08-25 05:59:36,415 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-08-25 05:59:36,596 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-08-25 05:59:36,606 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-08-25 05:59:37,108 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-08-25 05:59:37,108 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-08-25 05:59:37,270 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-08-25 05:59:37,280 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-08-25 05:59:37,448 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-08-25 05:59:37,449 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-08-25 05:59:38,050 - DatasetSync - INFO - Successfully synchronized dataset ID 28: Noise Monitoring in Basel
+2025-08-25 05:59:38,051 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2025-08-25 05:59:39,092 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2025-08-25 05:59:39,093 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-08-25 05:59:39,286 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-08-25 05:59:39,296 - DatasetSync - INFO - Starting synchronization for dataset ID 32: Population Baselland
+2025-08-25 05:59:39,591 - DatasetSync - INFO - Successfully synchronized dataset ID 32: Population Baselland
+2025-08-25 05:59:39,601 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-08-25 05:59:39,787 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-08-25 05:59:39,797 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-08-25 05:59:40,054 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-08-25 05:59:40,064 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-08-25 05:59:40,276 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-08-25 05:59:40,286 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-08-25 05:59:40,516 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-08-25 05:59:40,517 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-08-25 05:59:41,242 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-08-25 05:59:41,242 - DatasetSync - INFO - Starting synchronization for dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2025-08-25 05:59:42,076 - DatasetSync - INFO - Successfully synchronized dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2025-08-25 05:59:42,076 - DatasetSync - INFO - Starting synchronization for dataset ID 30: traffic accidents
+2025-08-25 05:59:42,284 - DatasetSync - INFO - Successfully synchronized dataset ID 30: traffic accidents
+2025-08-25 05:59:42,294 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-08-25 05:59:42,968 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-08-25 05:59:42,968 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-08-25 05:59:43,779 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-08-25 05:59:43,786 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-08-25 05:59:43,786 - DatasetSync - INFO - Synchronization completed successfully. Processed: 27, All successful
+2025-08-25 05:59:43,874 - StoryGeneration - INFO - Skipping template 11 - not due
+2025-08-25 05:59:43,971 - StoryGeneration - INFO - Skipping template 12 - not due
+2025-08-25 05:59:44,022 - StoryGeneration - INFO - Skipping template 13 - not due
+2025-08-25 05:59:44,035 - StoryGeneration - INFO - Skipping template 14 - not due
+2025-08-25 05:59:44,039 - StoryGeneration - INFO - Skipping template 15 - not due
+2025-08-25 05:59:44,061 - StoryGeneration - INFO - Skipping template 16 - not due
+2025-08-25 05:59:44,076 - StoryGeneration - INFO - Skipping template 17 - not due
+2025-08-25 05:59:44,219 - StoryGeneration - INFO - Skipping template 18 - not due
+2025-08-25 05:59:44,254 - StoryGeneration - INFO - Skipping template 19 - not due
+2025-08-25 05:59:44,301 - StoryGeneration - INFO - Skipping template 20 - not due
+2025-08-25 05:59:44,309 - StoryGeneration - INFO - Skipping template 21 - not due
+2025-08-25 05:59:44,315 - StoryGeneration - INFO - Skipping template 22 - not due
+2025-08-25 05:59:44,323 - StoryGeneration - INFO - Skipping template 23 - not due
+2025-08-25 05:59:44,341 - StoryGeneration - INFO - Skipping template 24 - not due
+2025-08-25 05:59:44,425 - StoryGeneration - INFO - Skipping template 25 - not due
+2025-08-25 05:59:44,431 - StoryGeneration - INFO - Skipping template 26 - not due
+2025-08-25 05:59:44,623 - StoryGeneration - INFO - Skipping template 27 - not due
+2025-08-25 05:59:44,628 - StoryGeneration - INFO - Skipping template 28 - not due
+2025-08-25 05:59:44,713 - StoryGeneration - INFO - Skipping template 29 - not due
+2025-08-25 05:59:44,714 - EmailService - INFO - Starting sending mails for 2025-08-25...
+2025-08-25 07:39:40,693 - StoryGeneration - INFO - Skipping template 30 - not due
+2025-08-27 06:01:43,902 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-08-27 06:01:44,104 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-08-27 06:01:44,105 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-08-27 06:01:44,965 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-08-27 06:01:44,965 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-08-27 06:01:45,624 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-08-27 06:01:45,624 - DatasetSync - INFO - Starting synchronization for dataset ID 33: Crude and Standardized Mortality Rates of the Canton of Basel-Stadt by Sex and Age Group since 2012
+2025-08-27 06:01:46,275 - DatasetSync - INFO - Successfully synchronized dataset ID 33: Crude and Standardized Mortality Rates of the Canton of Basel-Stadt by Sex and Age Group since 2012
+2025-08-27 06:01:46,275 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-08-27 06:01:46,718 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-08-27 06:01:46,719 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-08-27 06:01:47,361 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-08-27 06:01:47,361 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-08-27 06:01:47,566 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-08-27 06:01:47,576 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-08-27 06:01:47,707 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-08-27 06:01:47,717 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-08-27 06:01:47,992 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-08-27 06:01:47,993 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-08-27 06:01:48,157 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-08-27 06:01:48,158 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-08-27 06:01:48,328 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-08-27 06:01:48,338 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-08-27 06:01:49,872 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-08-27 06:01:49,873 - DatasetSync - INFO - Starting synchronization for dataset ID 34: First names of Newborns in Basel
+2025-08-27 06:01:56,001 - DatasetSync - ERROR - Failed to synchronize dataset ID 34: First names of Newborns in Basel
+2025-08-27 06:01:56,001 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-08-27 06:01:56,154 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-08-27 06:01:56,164 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-08-27 06:01:56,509 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-08-27 06:01:56,509 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-08-27 06:01:57,563 - DatasetSync - INFO - Successfully synchronized dataset ID 28: Noise Monitoring in Basel
+2025-08-27 06:01:57,564 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2025-08-27 06:01:57,750 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2025-08-27 06:01:57,760 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-08-27 06:01:58,624 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-08-27 06:01:58,635 - DatasetSync - INFO - Starting synchronization for dataset ID 32: Population Baselland
+2025-08-27 06:01:58,784 - DatasetSync - INFO - Successfully synchronized dataset ID 32: Population Baselland
+2025-08-27 06:01:58,794 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-08-27 06:01:58,964 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-08-27 06:01:58,974 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-08-27 06:01:59,111 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-08-27 06:01:59,121 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-08-27 06:01:59,287 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-08-27 06:01:59,297 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-08-27 06:01:59,426 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-08-27 06:01:59,436 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-08-27 06:02:00,863 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-08-27 06:02:00,863 - DatasetSync - INFO - Starting synchronization for dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2025-08-27 06:02:02,617 - DatasetSync - INFO - Successfully synchronized dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2025-08-27 06:02:02,617 - DatasetSync - INFO - Starting synchronization for dataset ID 30: traffic accidents
+2025-08-27 06:02:02,784 - DatasetSync - INFO - Successfully synchronized dataset ID 30: traffic accidents
+2025-08-27 06:02:02,794 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-08-27 06:02:03,705 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-08-27 06:02:03,711 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-08-27 06:02:04,815 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-08-27 06:02:04,820 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-08-27 06:02:04,821 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 28, Failed: 1, Failed dataset IDs: [34]
+2025-08-27 06:37:08,378 - DatasetSync - INFO - Starting synchronization for dataset ID 32: Population Baselland
+2025-08-27 06:37:08,636 - DatasetSync - INFO - Successfully synchronized dataset ID 32: Population Baselland
+2025-08-27 06:37:08,646 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-08-27 06:37:08,646 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2025-08-27 06:37:24,344 - DatasetSync - INFO - Starting synchronization for dataset ID 35: Newborns in the canton of basel-Stadt by sex and origin
+2025-08-27 06:37:44,236 - DatasetSync - ERROR - Failed to synchronize dataset ID 35: Newborns in the canton of basel-Stadt by sex and origin
+2025-08-27 06:37:44,237 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-08-27 06:37:44,237 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [35]
+2025-08-27 06:45:34,183 - DatasetSync - INFO - Starting synchronization for dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2025-08-27 06:45:43,446 - DatasetSync - ERROR - Failed to synchronize dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2025-08-27 06:45:43,447 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-08-27 06:45:43,447 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [36]
+2025-08-27 07:07:08,322 - StoryGeneration - INFO - Skipping template 31 - not due
+2025-08-28 06:41:49,419 - DatasetSync - INFO - Starting synchronization for dataset ID 37: Population by Country of origin
+2025-08-28 06:42:16,863 - DatasetSync - ERROR - Failed to synchronize dataset ID 37: Population by Country of origin
+2025-08-28 06:42:16,865 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-08-28 06:42:16,865 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [37]

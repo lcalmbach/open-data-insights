@@ -2,6 +2,7 @@ import pandas as pd
 import altair as alt
 import json
 import logging
+from reports.models import GraphType
 
 logger = logging.getLogger(__name__)
 
@@ -23,22 +24,23 @@ def generate_chart(data, settings, chart_id):
             if data[col].dtype == 'object' and pd.to_datetime(data[col], errors='coerce').notna().all():
                 data[col] = pd.to_datetime(data[col])
         
-        # Determine chart type and call appropriate function
-        chart_type = settings.get('type', 'line')
+        # Determine chart type and call appropriate function.
+        # Accept either a plain string in settings['type'] or a GraphType model/PK.
+    
         
         chart_functions = {
             'line': create_line_chart,
             'bar': create_bar_chart,
-            'bar_stacked': create_bar_stacked_chart,  # Add this line
+            'bar_stacked': create_bar_stacked_chart,
             'area': create_area_chart,
             'point': create_point_chart,
-            'scatter': create_point_chart,  # Scatter is an alias for point
+            'scatter': create_point_chart,
             'pie': create_pie_chart,
             'heatmap': create_heatmap,
-            'histogram': create_histogram
+            'histogram': create_histogram,
         }
         
-        # Get the chart creation function, default to line chart
+        chart_type = settings.get('type').value.lower()
         chart_func = chart_functions.get(chart_type, create_line_chart)
         
         # Create the chart
@@ -260,24 +262,52 @@ def create_heatmap(data, settings):
     # Heatmap requires x, y, and color
     x_field = settings.get('x')
     y_field = settings.get('y')
-    color_field = settings.get('color', settings.get('z'))
+    color_field = settings.get('color')
     
     if not x_field or not y_field or not color_field:
         logger.error("Heatmap requires 'x', 'y', and 'color' (or 'z') fields")
         return alt.Chart(data).mark_point()  # Return empty chart
     
-    # Encode x, y and color
-    chart = chart.encode(
-        x=x_field,
-        y=y_field,
-        color=alt.Color(
-            color_field,
-            scale=alt.Scale(
-                scheme=settings.get('color_scheme', 'viridis'),
-                domain=settings.get('color_domain', None)
-            )
+    # build x encoding
+    x_enc = alt.X(f'{x_field}:O', title=settings.get('x_title', x_field))
+    # allow y domain from settings: prefer explicit y_domain, fallback to generic domain
+    domain = settings.get('y_domain', settings.get('domain'))
+    if domain is not None:
+        y_enc = alt.Y(
+            f'{y_field}:O',
+            title=settings.get('y_title', y_field),
+            sort='descending'
         )
+    else:
+        y_enc = alt.Y(y_field, title=settings.get('y_title', y_field))
+    
+    # Encode color
+    # Only include domain in the scale when it is provided (Altair/vega rejects None)
+    color_scale_kwargs = {"scheme": settings.get("color_scheme", "viridis")}
+    color_domain = settings.get("color_domain")
+    if color_domain is not None:
+        color_scale_kwargs["domain"] = color_domain
+    
+    color_enc = alt.Color(
+        f'{color_field}:Q',
+
     )
+    
+    chart = (
+        alt.Chart(data)
+        .mark_rect()
+        .encode(
+            x=x_enc,
+            y=alt.Y('year_of_birth:O', title='Year', sort='descending'),
+            color=color_enc,
+            tooltip=['year_of_birth:O','month_of_birth:O','number_of_births:Q']
+        )
+        .properties(width=700, height={'step': 18}, title='Heatmap of Newborns per Month since 2005')
+    )
+    
+    # optional tooltip
+    if settings.get('show_tooltip', True):
+        chart = chart.encode(tooltip=[x_field, y_field, color_field])
     
     # Set properties
     props = {}
