@@ -110,14 +110,32 @@ def create_bar_chart(data, settings):
 
 def create_bar_stacked_chart(data, settings):
     """Create a stacked bar chart with the given data and settings"""
-    # Create base chart
+    # Decide bar pixel size based on number of distinct bars (x values)
+    x_field = settings.get('x')
+    # sensible defaults
+    total_plot_width = settings.get('plot_width') or settings.get('width') or 700
+    min_bar_width = settings.get('bar_min_width', 6)
+    max_bar_width = settings.get('bar_max_width', 60)
+
+    try:
+        n_bars = int(data[x_field].nunique())
+    except Exception:
+        n_bars = 1
+
+    # compute ideal bar width: fraction of available width per bar, clamped
+    # the factor 0.8 leaves small gaps between bars
+    if n_bars > 0:
+        computed_size = int(max(min_bar_width, min(max_bar_width, (int(total_plot_width) / n_bars) * 0.8)))
+    else:
+        computed_size = int(max(min_bar_width, min(max_bar_width, 20)))
+
     chart = alt.Chart(data).mark_bar(
+        size=computed_size,
         cornerRadiusTopLeft=settings.get('corner_radius', 0),
         cornerRadiusTopRight=settings.get('corner_radius', 0)
     )
     
     # Get fields
-    x_field = settings.get('x')
     y_field = settings.get('y')
     color_field = settings.get('color')
     

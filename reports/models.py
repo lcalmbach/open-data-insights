@@ -77,7 +77,7 @@ class GraphType(LookupValue):
 
 class PeriodManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(category_id=6)
+        return super().get_queryset().filter(category_id=2)
 
 
 class Period(LookupValue):

@@ -21,8 +21,12 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
+        # Ensure required superuser flags
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
+        if extra_fields.get("is_staff") is not True or extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_staff=True and is_superuser=True.")
         return self.create_user(email, password, **extra_fields)
 
 
@@ -39,9 +43,26 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)  # ✅ required for admin access
     
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["first_name", "last_name", "country", "password"]
+    # Do NOT include 'password' here; Django handles password separately
+    REQUIRED_FIELDS = ["first_name", "last_name", "country"]
 
     objects = CustomUserManager()
 
     def __str__(self):
         return self.email
+
+    # Compatibility for code expecting .username attribute
+    @property
+    def username(self):
+        return getattr(self, self.USERNAME_FIELD)
+
+    @username.setter
+    def username(self, value):
+        """Allow assigning to `.username` by writing to the actual USERNAME_FIELD (email)."""
+        setattr(self, self.USERNAME_FIELD, value)
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}".strip()
+
+    def get_short_name(self):
+        return self.first_name or self.email

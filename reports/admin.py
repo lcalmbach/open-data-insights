@@ -80,6 +80,9 @@ class LookupCategoryAdmin(admin.ModelAdmin):
     sortable_by = ("name",)
     ordering = ("name",)
     search_fields = ["name"]  # shows a filter sidebar
+    sortable_by = (
+        "id"
+    )
 
 
 @admin.register(LookupValue)

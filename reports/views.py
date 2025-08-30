@@ -62,7 +62,7 @@ def generate_fake_graphic(chart_id):
 
 @never_cache
 def home_view(request):
-    stories = list(Story.objects.order_by("-reference_period_start"))
+    stories = list(Story.objects.order_by("-published_date"))
     if not stories:
         return render(request, "home.html", {"story": None})
 

@@ -15,18 +15,40 @@ from .forms import RegistrationForm
 from .forms import SubscriptionForm
 from reports.models import StoryTemplateSubscription, StoryTemplate
 from django.utils import timezone
+from django.contrib.auth import authenticate, login
+from django.contrib.auth import get_user_model
+from django.contrib.auth.base_user import BaseUserManager
+from django.core.exceptions import MultipleObjectsReturned
+import logging
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
 
 def login_view(request):
     if request.method == "POST":
-        form = AuthenticationForm(data=request.POST)
+        form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            login(request, form.get_user())
-            return redirect("home")  # Adjust as needed
+            # AuthenticationForm already authenticated the user
+            user = form.get_user()
+            login(request, user)
+            return redirect("home")
+
+        # keep a concise debug log for failed attempts
+        logger.warning(
+            "Login form invalid. errors=%s non_field_errors=%s cleaned_data=%s",
+            form.errors.as_json(),
+            form.non_field_errors(),
+            form.cleaned_data,
+        )
+        messages.error(
+            request,
+            "Please enter a correct email and password. Note that both fields may be case-sensitive.",
+        )
     else:
-        form = AuthenticationForm()
+        form = AuthenticationForm(request)
+
     return render(request, "account/login.html", {"form": form})
 
 
