@@ -74,6 +74,7 @@ def home_view(request):
     graphics = selected_story.story_graphics.all() if selected_story else []
     data_source = selected_story.template.data_source if selected_story else None
     other_ressources = selected_story.template.other_ressources if selected_story else None
+    available_subscriptions = StoryTemplate.objects.count()
     return render(
         request,
         "home.html",
@@ -84,7 +85,8 @@ def home_view(request):
             "tables": tables,
             "graphics": graphics,
             "data_source": data_source,
-            "other_ressources": other_ressources
+            "other_ressources": other_ressources,
+            "available_subscriptions": available_subscriptions
         },
     )
 
@@ -163,6 +165,9 @@ def stories_view(request):
 @login_required
 def storytemplate_detail_view(request, pk):
     template = get_object_or_404(StoryTemplate, pk=pk)
+    template.description_html = markdown2.markdown(
+            template.description, extras=["tables"]
+        )
     back_url = request.META.get("HTTP_REFERER", "/")  # fallback: Startseite
     return render(
         request,

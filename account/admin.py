@@ -6,7 +6,7 @@ from .models import CustomUser
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ["email", "first_name", "last_name", "is_staff", "is_confirmed"]
+    list_display = ["email", "first_name", "last_name", "is_staff", "is_confirmed", "is_active"]
     list_filter = ["is_staff", "is_superuser", "is_active", "is_confirmed"]
     search_fields = ["email"]
     ordering = ["email"]

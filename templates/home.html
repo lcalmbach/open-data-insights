@@ -20,10 +20,15 @@
         <span class="strong-steelblue">D</span>ata
         <span class="strong-steelblue">I</span>nsight of the Day
     </h1>
-    <p class="lead text-muted" style="font-size: 1.05rem;">
+    <p class="lead text-muted" style="font-size: 1.05rem;"></p>
+    {% if user.is_authenticated %}
+        Welcome back {{ user.first_name }}!
+        You have subscribed to {{ user.story_template_subscriptions.count }} of {{ available_subscriptions }} available insights.
+        <a href="{% url 'account:profile' %}">Click here to manage subscriptions</a>
+    {% else %}
         Data Insights are generated daily from a wide range of open-data sources—on monthly and yearly schedules or whenever defined conditions are met (e.g., pollutant limits exceeded or values above the historical 95th percentile). Subscribe to your preferred datasets and get notified so you never miss a noteworthy change.
-    </p>
-    <br>
+    {% endif %}
+    </p><br>
     {% if prev_story_id %}
     <a href="{% url 'view_story' prev_story_id %}" title="Previous Insight"
         class="btn btn-primary btn-lg rounded-pill d-inline-flex align-items-center">
@@ -38,6 +43,7 @@
     {% endif %}
 
 </div>
+
 
 <!-- Story block -->
 {% if selected_story %}

@@ -64,7 +64,15 @@ class DjangoPostgresClient:
         clean_query = normalize_sql_query(query)
 
         with connection.cursor() as cursor:
-            cursor.execute(clean_query, params or {})
+            # Only pass params when provided; passing an empty mapping causes
+            # psycopg2 to attempt formatting and breaks on literal '%' in SQL.
+            if params is None:
+                cursor.execute(clean_query)
+            else:
+                # If a dict is provided, drop None values to avoid accidental NULL param bindings
+                if isinstance(params, dict):
+                    params = {k: v for k, v in params.items() if v is not None}
+                cursor.execute(clean_query, params)
 
     def table_exists(self, table_name: str, schema: str = None) -> bool:
         """Check if a table exists in the database"""

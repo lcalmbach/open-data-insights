@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.safestring import mark_safe
 from .models import CustomUser
@@ -7,9 +8,15 @@ from reports.models import StoryTemplate
 
 class RegistrationForm(UserCreationForm):
     class Meta:
-        model = CustomUser
+        model = get_user_model()
         fields = ("email", "first_name", "last_name", "country")
 
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.is_active = True    # ensure active on registration
+        if commit:
+            user.save()
+        return user
 
 class SubscriptionForm(forms.Form):
     subscriptions = forms.ModelMultipleChoiceField(
@@ -26,3 +33,31 @@ class SubscriptionForm(forms.Form):
     def custom_label(self, obj):
         url = f"/templates/{obj.pk}/"
         return mark_safe(f'{obj.title} – <a href="{url}" target="_blank">Details</a>')
+
+    @property
+    def toggle_control(self):
+        """HTML button to toggle all subscription checkboxes (render in the template)."""
+        return mark_safe(
+            '<button type="button" id="toggle-subscriptions" class="btn btn-outline-secondary mb-2">Toggle all</button>'
+        )
+
+    @property
+    def toggle_script(self):
+        """Inline JS to wire the toggle button. Render once (e.g. right after the form)."""
+        return mark_safe(
+            """
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const btn = document.getElementById('toggle-subscriptions');
+  if (!btn) return;
+  btn.addEventListener('click', function () {
+    // select inputs with the form field name; CheckboxSelectMultiple uses name="subscriptions"
+    const boxes = Array.from(document.querySelectorAll('input[name="subscriptions"]'));
+    if (!boxes.length) return;
+    const allChecked = boxes.every(b => b.checked);
+    boxes.forEach(b => b.checked = !allChecked);
+  });
+});
+</script>
+            """
+        )

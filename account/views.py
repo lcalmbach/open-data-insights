@@ -75,7 +75,6 @@ def register(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = False  # Wait for confirmation
             user.username = form.cleaned_data["email"]  # optional, if username required
             user.save()
 

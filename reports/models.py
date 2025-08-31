@@ -225,7 +225,13 @@ class Dataset(models.Model):
     post_import_sql_commands = models.TextField(
         blank=True,
         null=True,
-        help_text="SQL commands to be executed after the import process."
+        help_text="SQL commands to be executed after each import process."
+    )
+
+    post_create_sql_commands = models.TextField(
+        blank=True,
+        null=True,
+        help_text="SQL commands to be executed after the initial table has been created."
     )
 
     class Meta:
@@ -302,7 +308,7 @@ class StoryTemplate(models.Model):
         ordering = ["title"]  # or any other field
 
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.reference_period})"
 
 
 class StoryTemplateGraphic(models.Model):

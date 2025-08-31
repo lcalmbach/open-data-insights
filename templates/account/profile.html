@@ -16,13 +16,31 @@
   <hr>
   <h3>Data Insights Subscriptions</h3>
   <form method="post">
-  {% csrf_token %}
-  {{ form.subscriptions }}
-  <hr>
-  <div class="d-flex mt-3">
-    <button type="submit" class="btn btn-primary">Save Subscriptions</button>
-    <a href="{% url 'password_change' %}" class="btn btn-secondary ms-2">Reset Password</a>
-  </div>
-</form>
+    {% csrf_token %}
+    {# Toggle control provided by the form (added in SubscriptionForm) #}
+    {% if form.toggle_control %}
+      <div class="mb-2">
+        {{ form.toggle_control }}
+      </div>
+    {% endif %}
 
+    {# render any form-level errors #}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {{ form.subscriptions }}
+     <hr>
+     <div class="d-flex mt-3">
+       <button type="submit" class="btn btn-primary">Save Subscriptions</button>
+       <a href="{% url 'password_change' %}" class="btn btn-secondary ms-2">Reset Password</a>
+     </div>
+   </form>
+
+  {# include the toggle JS once per page (provided by the form) #}
+  {% if form.toggle_script %}
+    {{ form.toggle_script }}
+  {% endif %}
 {% endblock %}
