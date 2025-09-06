@@ -324,7 +324,6 @@ class StoryTemplateGraphic(models.Model):
         help_text="Settings for the graphic, e.g., {'type': 'bar', 'x': 'date', 'y': 'value'}. This can include any settings required by the graphic library used.",
     )
     sql_command = models.TextField(
-        max_length=4000,
         help_text="SQL command to get the data for the graphic, e.g., 'SELECT date, value FROM weather_data WHERE date >= %s AND date <= %s'. This command should return the data in a format suitable for the graphic library used.",
     )
     graphic_type = models.ForeignKey(GraphType, on_delete=models.CASCADE, help_text="Type of the graphic, e.g., 'line', 'bar', 'pie'."  
@@ -352,7 +351,6 @@ class StoryTemplateTable(models.Model):
     title = models.CharField(max_length=255, help_text="Title of the table.")
 
     sql_command = models.TextField(
-        max_length=4000,
         help_text="SQL command to get the data for the graphic, e.g., 'SELECT date, value FROM weather_data WHERE date >= %s AND date <= %s'. This command should return the data in a format suitable for the graphic library used.",
     )
     sort_order = models.IntegerField(
@@ -384,7 +382,6 @@ class StoryTemplateContext(models.Model):
         help_text="Key for the context, e.g., 'monthly_average_all_previous_years'. This key is used to identify the context in the story template.",
     )
     sql_command = models.TextField(
-        max_length=4000,
         help_text="SQL command to get the value for the context, e.g., 'SELECT AVG(temperature) FROM weather_data WHERE date >= %s AND date <= %s'.",
     )
     sort_order = models.IntegerField(
@@ -404,7 +401,6 @@ class StoryTemplateContext(models.Model):
         ordering = ["sort_order"]  # or any other field
 
 
-
 class StoryTemplatePeriodOfInterestValues(models.Model):
     story_template = models.ForeignKey(
         StoryTemplate,
@@ -417,7 +413,6 @@ class StoryTemplatePeriodOfInterestValues(models.Model):
         help_text="Title of the period of interest value, e.g., 'Monthly Average Temperature'.",
     )
     sql_command = models.TextField(
-        max_length=4000,
         help_text="Sql command to get the value for the period of interest, e.g., 'SELECT AVG(temperature) FROM weather_data WHERE date >= %s AND date <= %s'.",
     )
     sort_order = models.IntegerField(

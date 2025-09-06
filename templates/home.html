@@ -21,6 +21,12 @@
         <span class="strong-steelblue">I</span>nsight of the Day
     </h1>
     <p class="lead text-muted" style="font-size: 1.05rem;"></p>
+
+    <!-- Under construction badge -->
+    <div class="text-center mb-3">
+      <span class="badge bg-warning text-dark">🚧 Under construction — work in progress</span>
+    </div>
+
     {% if user.is_authenticated %}
         Welcome back {{ user.first_name }}!
         You have subscribed to {{ user.story_template_subscriptions.count }} of {{ available_subscriptions }} available insights.

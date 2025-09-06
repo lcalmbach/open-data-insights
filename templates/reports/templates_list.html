@@ -1,37 +1,164 @@
 {% extends "base.html" %}
-{% block title %}Explore Story Definitions{% endblock %}
+{% block title %}Explore Insight Templates{% endblock %}
 
 {% block content %}
-<div class="row">
-  <!-- Linke Seite: Template-Liste -->
-  <div class="col-md-4">
-    <h4>Available Story Definitions</h4>
-    <ul class="list-group">
-      {% for template in templates %}
-      <a href="?template={{ template.id }}"
-        class="list-group-item list-group-item-action {% if template.id == selected_template.id %}active{% endif %}">
-        {{ template.title }}
-      </a>
-      {% empty %}
-      <li class="list-group-item">No templates found.</li>
-      {% endfor %}
-    </ul>
+<div class="container">
+  <h2 class="mb-3">Explore Insight Templates</h2>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="template-filter" class="form-label">Filter (title)</label>
+      <input id="template-filter" class="form-control" placeholder="Type to filter insights..." />
+    </div>
+    <div class="col-md-6">
+      <label for="period-filter" class="form-label">Period</label>
+      <select id="period-filter" class="form-select">
+        <option value="all">All periods</option>
+        {% for period in periods %}
+          <option value="{{ period.id }}">{{ period.value }}</option>
+        {% endfor %}
+      </select>
+    </div>
   </div>
 
-  <!-- Rechte Seite: Details -->
-  <div class="col-md-8">
+  <div class="row mb-3">
+    <div class="col-12">
+      <label for="template-select" class="form-label">Choose an insight template</label>
+      <select id="template-select" class="form-select">
+        {# removed placeholder option; auto-select first when no selected_template #}
+        {% for template in templates %}
+          <option value="{{ template.id }}" data-period="{{ template.reference_period.id|default:'' }}"
+            {% if selected_template and template.id == selected_template.id %}
+              selected
+            {% elif not selected_template and forloop.first %}
+              selected
+            {% endif %}>
+            {{ template.title }} ({{ template.reference_period }})
+          </option>
+        {% empty %}
+          <option disabled>No templates available</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <br><br>
+  <div id="template-details">
     {% if selected_template %}
-      <h3>{{ selected_template.title }}</h3>
+      <h3 id="details-title">{{ selected_template.title }} ({{ selected_template.reference_period }})</h3>
       <hr>
-      <div>{{ selected_template.description_html|safe }}</div>
+      <div id="details-body">{{ selected_template.description_html|safe }}</div>
       <hr>
-      <a href="{% url 'stories' %}?template={{ selected_template.id }}">
+      <a id="details-link" href="{% url 'stories' %}?template={{ selected_template.id }}">
         View all insights created with this template
       </a>
     {% else %}
-      <p>Select a template on the left to view its details here.</p>
+      <p id="details-placeholder">Select a template to view details here.</p>
     {% endif %}
   </div>
-
+  
+  <div id="templates-storage" style="display:none;">
+    {% for template in templates %}
+      <div id="tmpl-{{ template.id }}">
+        <h3 class="tmpl-title">{{ template.title }}</h3>
+        <div class="tmpl-description">{{ template.description_html|safe }}</div>
+        <p><a class="tmpl-link" href="{% url 'stories' %}?template={{ template.id }}">View all insights created with this template</a></p>
+      </div>
+    {% endfor %}
+  </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const titleFilter = document.getElementById('template-filter');
+  const periodFilter = document.getElementById('period-filter');
+  const select = document.getElementById('template-select');
+  const details = document.getElementById('template-details');
+  const storage = document.getElementById('templates-storage');
+
+  if (!select) { console.error("template-select not found"); return; }
+  if (!details) console.warn("template-details not found; script will not update details area");
+  if (!storage) console.warn("templates-storage not found; script will not show client-side details");
+
+  function showDetailsFor(id) {
+    if (!details) return;
+    const src = id ? document.getElementById('tmpl-' + id) : null;
+    if (!id || !src) {
+      if (details.dataset.injected === '1') {
+        details.innerHTML = '<p id="details-placeholder">Select a template to view details here.</p>';
+        delete details.dataset.injected;
+      }
+      return;
+    }
+    const title = src.querySelector('.tmpl-title')?.innerText || '';
+    const descNode = src.querySelector('.tmpl-description');
+    const linkHref = src.querySelector('.tmpl-link')?.getAttribute('href') || '';
+    if (!descNode || !descNode.innerHTML.trim()) return;
+    details.innerHTML = '';
+    const h = document.createElement('h3');
+    h.id = 'details-title';
+    h.textContent = title;
+    details.appendChild(h);
+    details.appendChild(document.createElement('hr'));
+    const descClone = descNode.cloneNode(true);
+    descClone.id = 'details-body';
+    details.appendChild(descClone);
+    details.appendChild(document.createElement('hr'));
+    const a = document.createElement('a');
+    a.id = 'details-link';
+    a.href = linkHref;
+    a.textContent = 'View all insights created with this template';
+    details.appendChild(a);
+    details.dataset.injected = '1';
+  }
+
+  // selection change -> reload so server re-renders full details
+  select.addEventListener('change', function () {
+    const val = this.value || '';
+    const params = new URLSearchParams(window.location.search);
+    if (val) params.set('template', val); else params.delete('template');
+    window.location.href = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+  });
+ 
+  // combined filtering: title + period
+  function applyFilters() {
+    const q = (titleFilter && titleFilter.value || '').trim().toLowerCase();
+    const period = (periodFilter && periodFilter.value || 'all').toLowerCase();
+    let visibleFound = false;
+    for (const opt of select.options) {
+      if (!opt.value) { opt.hidden = false; continue; } // keep placeholder (none now)
+      const txt = (opt.text || '').toLowerCase();
+      const optPeriod = (opt.getAttribute('data-period') || '').toLowerCase();
+      const matchesTitle = q === '' || txt.includes(q);
+      const matchesPeriod = period === 'all' || (optPeriod && optPeriod === period);
+      const shouldHide = !(matchesTitle && matchesPeriod);
+      opt.hidden = shouldHide;
+      if (!shouldHide) visibleFound = true;
+      if (opt.selected && shouldHide) {
+        select.value = '';
+        if (details && details.dataset.injected === '1') showDetailsFor(null);
+      }
+    }
+    if (!visibleFound && q !== '') {
+      for (const opt of select.options) opt.hidden = false;
+    }
+  }
+
+  if (titleFilter) titleFilter.addEventListener('input', applyFilters);
+  if (periodFilter) periodFilter.addEventListener('change', applyFilters);
+  applyFilters();
+
+  // If the server did not provide selected_template, auto-load first visible template by reloading with ?template=ID
+  {% if not selected_template %}
+  (function autoLoadFirst() {
+    // run after filters applied
+    const firstOpt = Array.from(select.options).find(o => o.value && !o.hidden);
+    if (firstOpt) {
+      const params = new URLSearchParams(window.location.search);
+      params.set('template', firstOpt.value);
+      window.location.href = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    }
+  })();
+  {% endif %}
+});
+</script>
 {% endblock %}

@@ -3,6 +3,8 @@ import altair as alt
 import json
 import logging
 from reports.models import GraphType
+from typing import List
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -86,25 +88,108 @@ def create_line_chart(data, settings):
 
 def create_bar_chart(data, settings):
     """Create a bar chart with the given data and settings"""
-    # Create base chart
+    # Determine fields
+    x_field = settings.get('x')
+    y_field = settings.get('y')
+    color_field = settings.get('color')
+
+    # sensible defaults for bar sizing
+    total_plot_width = settings.get('plot_width') or settings.get('width') or 700
+    min_bar_width = settings.get('bar_min_width', 8)
+    max_bar_width = settings.get('bar_max_width', 120)
+
+    # compute number of distinct bars and size (wider when fewer bars, narrower when many)
+    try:
+        n_bars = int(data[x_field].nunique()) if x_field else 1
+    except Exception:
+        n_bars = 1
+    if n_bars > 0:
+        computed_size = int(max(min_bar_width, min(max_bar_width, (int(total_plot_width) / max(1, n_bars)) * 0.9)))
+    else:
+        computed_size = int(max(min_bar_width, min(max_bar_width, 20)))
+
+    # Build base chart with explicit size
     chart = alt.Chart(data).mark_bar(
+        size=computed_size,
         cornerRadiusTopLeft=settings.get('corner_radius', 0),
         cornerRadiusTopRight=settings.get('corner_radius', 0)
     )
-    
-    # Apply encodings and properties
-    chart = apply_common_settings(chart, settings)
-    
-    # Bar-specific settings
+
+    # helper to build an ordered category list so Altair treats x as ordinal (no fractional ticks)
+    def _sorted_category_list(values):
+        vals = list(values)
+        try:
+            ints = [int(v) for v in vals]
+            if all(float(i) == float(v) for i, v in zip(ints, vals)):
+                return [str(i) for i in sorted(set(ints))]
+        except Exception:
+            pass
+        return [str(v) for v in sorted(set(vals), key=lambda x: str(x))]
+
+    x_sort = None
+    if x_field:
+        try:
+            unique_vals = data[x_field].dropna().unique()
+            x_sort = _sorted_category_list(unique_vals)
+        except Exception:
+            x_sort = None
+
+    # Build encodings, force x to ordinal categories to avoid numeric fractional ticks for years
+    encodings = {}
+    if x_field:
+        if x_sort:
+            encodings['x'] = alt.X(f"{x_field}:O", title=settings.get('x_title', x_field), sort=x_sort, axis=alt.Axis(labelAngle=0))
+        else:
+            encodings['x'] = alt.X(f"{x_field}:O", title=settings.get('x_title', x_field), axis=alt.Axis(labelAngle=0))
+    # y: use provided y or count()
+    if y_field:
+        encodings['y'] = alt.Y(y_field, title=settings.get('y_title', y_field))
+    else:
+        encodings['y'] = alt.Y('count()', title=settings.get('y_title', 'count'))
+
+    if color_field:
+        encodings['color'] = alt.Color(color_field, scale=alt.Scale(scheme=settings.get('color_scheme', 'category10')))
+
+    # Tooltip support
+    tooltip = settings.get('tooltip')
+    if tooltip:
+        encodings['tooltip'] = tooltip
+    else:
+        # include sensible defaults
+        tt = []
+        if x_field:
+            tt.append(x_field)
+        if y_field:
+            tt.append(y_field)
+        if color_field:
+            tt.append(color_field)
+        if tt:
+            encodings['tooltip'] = tt
+
+    chart = chart.encode(**encodings)
+
+    # Horizontal bars: swap axes encoding
     if settings.get('horizontal', False):
-        # Swap x and y for horizontal bars
-        encodings = chart.encoding.copy()
-        if hasattr(encodings, 'x') and hasattr(encodings, 'y'):
-            temp_x = encodings.x
-            encodings.x = encodings.y
-            encodings.y = temp_x
-            chart = chart.encode(**encodings)
-    
+        # swap x and y encoding by re-encoding
+        swapped = {}
+        if 'x' in encodings:
+            swapped['y'] = encodings['x']
+        if 'y' in encodings:
+            swapped['x'] = encodings['y']
+        if 'color' in encodings:
+            swapped['color'] = encodings['color']
+        if 'tooltip' in encodings:
+            swapped['tooltip'] = encodings['tooltip']
+        chart = chart.encode(**swapped)
+
+    # Apply chart properties (title/height/width)
+    props = {}
+    if 'title' in settings:
+        props['title'] = settings['title']
+    props['height'] = settings.get('height', 300)
+    props['width'] = settings.get('width', 'container')
+    chart = chart.properties(**props)
+
     return chart
 
 
@@ -286,8 +371,33 @@ def create_heatmap(data, settings):
         logger.error("Heatmap requires 'x', 'y', and 'color' (or 'z') fields")
         return alt.Chart(data).mark_point()  # Return empty chart
     
-    # build x encoding
-    x_enc = alt.X(f'{x_field}:O', title=settings.get('x_title', x_field))
+    # build x encoding as ORDINAL with an explicit sort/domain so Altair won't render
+    # numeric axis ticks like 2020, 2020.5, 2021. Convert categories to ints when
+    # all values are integer-like, otherwise keep string categories.
+    x_unique = []
+    try:
+        x_unique = list(data[x_field].dropna().unique())
+    except Exception:
+        x_unique = []
+
+    def _sorted_category_list(values: List) -> List:
+        # try integer sort first
+        try:
+            ints = [int(v) for v in values]
+            # ensure roundtrip preserves ordering (guard against floats like 2021.5)
+            if all(float(i) == float(v) for i, v in zip(ints, values)):
+                return [str(i) for i in sorted(set(ints))]
+        except Exception:
+            pass
+        # fallback: string sort stable
+        return [str(v) for v in sorted(set(values), key=lambda x: (str(x)))]
+
+    x_sort = _sorted_category_list(x_unique) if x_unique else None
+    if x_sort:
+        x_enc = alt.X(f"{x_field}:O", title=settings.get("x_title", x_field), sort=x_sort, axis=alt.Axis(labelAngle=0))
+    else:
+        x_enc = alt.X(f"{x_field}:O", title=settings.get("x_title", x_field), axis=alt.Axis(labelAngle=0))
+
     # allow y domain from settings: prefer explicit y_domain, fallback to generic domain
     domain = settings.get('y_domain', settings.get('domain'))
     if domain is not None:
@@ -297,8 +407,8 @@ def create_heatmap(data, settings):
             sort='descending'
         )
     else:
-        y_enc = alt.Y(y_field, title=settings.get('y_title', y_field))
-    
+        y_enc = alt.Y(f"{y_field}:O", title=settings.get("y_title", y_field), sort='descending')
+
     # Encode color
     # Only include domain in the scale when it is provided (Altair/vega rejects None)
     color_scale_kwargs = {"scheme": settings.get("color_scheme", "viridis")}
@@ -316,11 +426,11 @@ def create_heatmap(data, settings):
         .mark_rect()
         .encode(
             x=x_enc,
-            y=alt.Y('year_of_birth:O', title='Year', sort='descending'),
+            y=y_enc,
             color=color_enc,
-            tooltip=['year_of_birth:O','month_of_birth:O','number_of_births:Q']
+            tooltip=[f"{x_field}:O", f"{y_field}:O", f"{color_field}:Q"]
         )
-        .properties(width=700, height={'step': 18}, title='Heatmap of Newborns per Month since 2005')
+        .properties(width=settings.get("width", 700), height=settings.get("height", {'step': 18}), title=settings.get("title", "Heatmap"))
     )
     
     # optional tooltip

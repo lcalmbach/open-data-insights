@@ -46,7 +46,7 @@ class StoryTemplateAdmin(admin.ModelAdmin):
         "reference_period",
     )
     search_fields = ("title", "reference_period__value")
-    list_filter = ["title", "reference_period"]  # shows a filter sidebar
+    list_filter = ["reference_period"]  # shows a filter sidebar
 
 
 @admin.register(StoryTemplateContext)

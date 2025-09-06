@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .models import Graphic, StoryTemplate, Story, StoryTable
+from .models import Graphic, StoryTemplate, Story, StoryTable, Period
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
@@ -65,7 +65,7 @@ def home_view(request):
     stories = list(Story.objects.order_by("-published_date"))
     if not stories:
         return render(request, "home.html", {"story": None})
-
+    print('test')
     selected_story = stories[0] 
     index = 0
     next_story_id = stories[1].id if len(stories) > 1 else None
@@ -75,6 +75,8 @@ def home_view(request):
     data_source = selected_story.template.data_source if selected_story else None
     other_ressources = selected_story.template.other_ressources if selected_story else None
     available_subscriptions = StoryTemplate.objects.count()
+    print("Available subscriptions:", available_subscriptions)
+    print('test')
     return render(
         request,
         "home.html",
@@ -93,6 +95,8 @@ def home_view(request):
 
 def templates_view(request):
     templates = StoryTemplate.objects.all()
+    # provide period lookup values for the template filter (Period model contains code/name)
+    periods = Period.objects.order_by("value")
     selected_template_id = request.GET.get("template")
     selected_template = None
 
@@ -108,6 +112,7 @@ def templates_view(request):
         {
             "templates": templates,
             "selected_template": selected_template,
+            "periods": periods,
         },
     )
 
@@ -225,7 +230,7 @@ def view_story(request, story_id=None):
     graphics = selected_story.story_graphics.all() if selected_story else []
     data_source = selected_story.template.data_source if selected_story else None
     other_ressources = selected_story.template.other_ressources if selected_story else None
-
+    available_subscriptions = StoryTemplate.objects.count()
     selected_story.content_html = markdown2.markdown(selected_story.content, extras=["tables"])
     return render(
         request,
@@ -238,6 +243,7 @@ def view_story(request, story_id=None):
             "tables": tables,
             "other_ressources": other_ressources,
             "data_source": data_source,
+            "available_subscriptions": available_subscriptions
         },
     )
 

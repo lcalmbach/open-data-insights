@@ -19,6 +19,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import BaseUserManager
 from django.core.exceptions import MultipleObjectsReturned
+from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -109,18 +110,49 @@ def confirm_email(request, uidb64, token):
         user = None
 
     if user is not None and default_token_generator.check_token(user, token):
-        if not user.is_active:
-            user.is_active = True
+        if not user.is_confirmed:
+            user.is_confirmed = True
             user.save()
+
+            # Send welcome email with list of available templates to subscribe to
+            try:
+                domain = get_current_site(request).domain
+                protocol = "https" if request.is_secure() else "http"
+                templates = StoryTemplate.objects.all()
+                if templates.exists():
+                    # build absolute profile URL at runtime (no hardcoded host)
+                    profile_url = request.build_absolute_uri(reverse("account:profile"))
+                    lines = [
+                        f"Hello {user.get_full_name() or user.email},",
+                        "",
+                        "Welcome and congratulations! Your email has been confirmed.",
+                        "",
+                        "Would you like me to take you to your profile so you can subscribe to some of the following insights and be notified when they are published?",
+                        "",
+                        "You can manage your subscriptions here:",
+                        profile_url,
+                        "",
+                        "The following insights are available for subscription:",
+                        "",
+                    ]
+                    root = f"{protocol}://{domain}".rstrip("/")
+                    for t in templates:
+                        lines.append(f"- {t.title}: {root}/templates/?template={t.id}")
+
+                    subject = "Welcome to Open Data Insights"
+                    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", f"no-reply@{domain}")
+                    send_mail(subject, "\n".join(lines), from_email, [user.email])
+            except Exception as e:
+                logger.exception("Failed to send welcome email to user %s: %s", user.pk, e)
+
             messages.success(request, "Deine E-Mail-Adresse wurde bestätigt. Du kannst dich jetzt einloggen.")
+            
         else:
             messages.info(request, "Deine E-Mail-Adresse war bereits bestätigt.")
         return redirect("login")  # oder dein home-View
     else:
         messages.error(request, "Dieser Bestätigungslink ist ungültig oder abgelaufen.")
         return render(request, "account/email_confirmation_invalid.html")
-
-
 
 @login_required
 def profile_view(request):

@@ -380,7 +380,9 @@ class StoryProcessor:
                 return False
             
             self.logger.info("Generating summary...")
-            self.story.summary = self._generate_lead(self.story.content)
+            # Generate lead (summary) and an engaging title using the unified LLM helper
+            self.story.summary = self.generate_summary(self.story.content, kind="lead")
+            self.story.title = self.generate_summary(self.story.content, kind="title")
             self.logger.info("Saving story to database...")
             try:
                 self.story.full_clean()  # This validates the model
@@ -760,44 +762,64 @@ class StoryProcessor:
             self.logger.error(f"Error generating report text with OpenAI: {e}")
             return None
 
-    def _generate_lead(self, insight_text: str) -> Optional[str]:
-        """Generate lead (summary) using OpenAI API based on insight text"""
+    def generate_summary(self, insight_text: str, kind: str = "lead") -> Optional[str]:
+        """
+        Generic LLM helper to produce different short outputs.
+        kind: "lead" -> one- or two-sentence summary
+              "title" -> single-line engaging analytical title
+        """
         try:
-            # Get OpenAI API key from settings
             api_key = getattr(settings, "OPENAI_API_KEY", None)
             if not api_key:
                 self.logger.error("OpenAI API key not configured")
                 return None
 
-            # Initialize OpenAI client
             client = OpenAI(api_key=api_key)
-            # Prepare the prompt for summary generation
-            summary_prompt = (
-                "Summarize the following insight text in one or two sentences:\n\n"
-                + insight_text
-            ).strip()
+
+            # Kind-specific instructions
+            if kind == "title":
+                system = "You are a concise editorial assistant producing sharp, data-driven titles"
+                user_instruction = (
+                    f""".Write a single-line analytical headline (max 10–12 words). 
+                    Prefer compact forms over wordiness. 
+                    Keep neutral, factual tone. 
+                    Return only the title."""
+                )
+                max_tokens = 60
+                temperature = min(max(getattr(self.story.template, "temperature", 0.7), 0.2), 1.0)
+            else:  # lead (default)
+                system = "Generate a concise one- or two-sentence summary of the provided insight text."
+                user_instruction = (
+                    "Summarize the following insight text in one or two clear sentences."
+                )
+                max_tokens = 200
+                temperature = getattr(self.story.template, "temperature", 0.2)
+
+            # Construct messages
             messages = [
-                {
-                    "role": "system",
-                    "content": "Generate a concise summary of the provided insight text.",
-                },
-                {
-                    "role": "user",
-                    "content": summary_prompt,
-                },
+                {"role": "system", "content": f"{system}\n\n{LLM_FORMATTING_INSTRUCTIONS}"},
+                {"role": "user", "content": f"{user_instruction}\n\nInsight text:\n\n{insight_text}"},
             ]
 
-            # Generate response
             response = client.chat.completions.create(
                 model=self.story.ai_model,
                 messages=messages,
-                temperature=self.story.template.temperature,
-                max_tokens=2000,
+                temperature=temperature,
+                max_tokens=max_tokens,
             )
 
-            return response.choices[0].message.content
+            raw = response.choices[0].message.content.strip()
+            # For title return first non-empty line trimmed
+            if kind == "title":
+                title_line = next((ln.strip() for ln in raw.splitlines() if ln.strip()), "")
+                if not title_line:
+                    return None
+                return title_line if len(title_line) <= 140 else title_line[:137].rstrip() + "..."
+
+            # For lead return the first paragraph/line(s)
+            return next((p.strip() for p in raw.split("\n\n") if p.strip()), raw)
 
         except Exception as e:
-            self.logger.error(f"Error generating lead with OpenAI: {e}")
+            self.logger.error(f"Error generating {kind} with OpenAI: {e}")
             return None
 
