@@ -22,9 +22,9 @@ def generate_chart(data, settings, chart_id):
     """
     try:
         # Process date columns
-        for col in data.columns:
-            if data[col].dtype == 'object' and pd.to_datetime(data[col], errors='coerce').notna().all():
-                data[col] = pd.to_datetime(data[col])
+        #for col in data.columns:
+        #    if data[col].dtype == 'object' and pd.to_datetime(data[col], errors='coerce').notna().all():
+        #        data[col] = pd.to_datetime(data[col])
         
         # Determine chart type and call appropriate function.
         # Accept either a plain string in settings['type'] or a GraphType model/PK.

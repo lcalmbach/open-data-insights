@@ -388,41 +388,10 @@ class StoryTemplateContext(models.Model):
         default=0,
         help_text="Sort order of the context within the story template.",
     )
-    context_period = models.ForeignKey(
-        ContextPeriod,
-        on_delete=models.CASCADE,
-        related_name="context_periods",
-        help_text="The context period for this context, e.g., 'day', 'month', 'season', 'year'.",
-    )
 
     class Meta:
         verbose_name = "Story Template Context"
         verbose_name_plural = "Story Template Contexts"
-        ordering = ["sort_order"]  # or any other field
-
-
-class StoryTemplatePeriodOfInterestValues(models.Model):
-    story_template = models.ForeignKey(
-        StoryTemplate,
-        on_delete=models.CASCADE,
-        related_name="period_of_interest_values",
-        help_text="The story template this period of interest values belong to.",
-    )
-    title = models.CharField(
-        max_length=255,
-        help_text="Title of the period of interest value, e.g., 'Monthly Average Temperature'.",
-    )
-    sql_command = models.TextField(
-        help_text="Sql command to get the value for the period of interest, e.g., 'SELECT AVG(temperature) FROM weather_data WHERE date >= %s AND date <= %s'.",
-    )
-    sort_order = models.IntegerField(
-        default=0,
-        help_text="Sort order of the period of interest value within the story template.",
-    )
-
-    class Meta:
-        verbose_name = "Story Template Period of Interest Values"
-        verbose_name_plural = "Story Template Period of Interest Values"
         ordering = ["sort_order"]  # or any other field
 
 

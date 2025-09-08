@@ -2,53 +2,122 @@
 {% load custom_filters %}
 {% block title %}Explore Stories{% endblock %}
 {% block content %}
+
+<h2 class="mb-3">Explore Insights</h2>
 <!-- Filter Form -->
-<form method="get" class="row g-3 mb-4">
+<form id="filter-form" method="get" class="row g-3 mb-4" autocomplete="off">
   <div class="col-md-4">
-    <label for="template" class="form-label">Search</label>
+    <label for="template" class="form-label">Template</label>
     <select class="form-select" id="template" name="template">
       <option value="">All templates</option>
       {% for template in templates %}
-      <option value="{{ template.id }}" {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
-        {{ template.title }}
-      </option>
+        <option value="{{ template.id }}" {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
+          {{ template.title }}
+        </option>
       {% endfor %}
     </select>
   </div>
   <div class="col-md-6">
-    <label for="search" class="form-label">&nbsp;</label>
-    <input type="text" class="form-control" id="search" name="search" value="{{ request.GET.search }}"
-      placeholder="Title or description...">
+    <label for="search" class="form-label">Title contains...</label>
+    <input type="text" class="form-control" id="search" name="search" value="{{ request.GET.search }}" placeholder="Title or description...">
   </div>
   <div class="col-md-2 d-flex align-items-end">
-    <button type="submit" class="btn btn-primary w-100">Filter</button>
+    <!-- Hidden submit kept for keyboard accessibility; JS will auto-submit -->
+    <button type="submit" class="btn btn-primary w-100 visually-hidden">Filter</button>
   </div>
 </form>
-<hr>
-<!-- Main Content -->
-<div class="row">
-  <!-- Left: Story List -->
-  <div class="col-md-4">
-    <h4>Available Insights</h4>
-    <ul class="list-group">
-      {% for story in stories %}
-      <a href="?story={{ story.id }}&template={{ request.GET.template }}&search={{ request.GET.search }}"
-        class="list-group-item list-group-item-action {% if story.id == selected_story.id %}active{% endif %}">
-        {{ story.title }}<br>
-        <small class="text-muted">{{ story.published_date|date:"Y-m-d" }}</small>
-      </a>
-      {% empty %}
-      <li class="list-group-item">No stories found.</li>
-      {% endfor %}
-    </ul>
-  </div>
 
-  <!-- Right: Story Details -->
-  <div class="col-md-8">
+
+<div class="row">
+  <div class="col-12">
+    <div class="mb-3">
+      <label for="story-select" class="form-label">
+        Select insight
+        <small class="text-muted">({{ stories|length }} found)</small>
+      </label>
+      <select id="story-select" class="form-select">
+        {% for story in stories %}
+          <option value="{{ story.id }}" {% if selected_story and story.id == selected_story.id %}selected{% endif %}>
+            {{ story.title }} — published on {{ story.published_date|date:"Y-m-d" }}
+          </option>
+        {% empty %}
+          <option disabled>No stories found.</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <!-- Details appear below the dropdown -->
     {% if selected_story %}
-    {% include "includes/story_detail_block.html" %}
+      {% include "includes/story_detail_block.html" %}
+    {% else %}
+      <div class="card p-3 text-muted">
+        Select an insight from the dropdown above to view details here.
+      </div>
     {% endif %}
   </div>
 </div>
-</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const templateSelect = document.getElementById('template');
+  const searchInput = document.getElementById('search');
+  const storySelect = document.getElementById('story-select');
+
+  // build and navigate to URL with current filter values
+  function applyFilters() {
+    const params = new URLSearchParams();
+    const tpl = templateSelect ? templateSelect.value.trim() : '';
+    const q = searchInput ? searchInput.value.trim() : '';
+    if (tpl) params.set('template', tpl);
+    if (q) params.set('search', q);
+    // remove any selected story when changing filters
+    const url = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    window.location.href = url;
+  }
+
+  // simple debounce
+  function debounce(fn, wait) {
+    let t = null;
+    return function (...args) {
+      if (t) clearTimeout(t);
+      t = setTimeout(() => { fn.apply(this, args); }, wait);
+    };
+  }
+
+  // auto-apply when template changes immediately
+  if (templateSelect) {
+    templateSelect.addEventListener('change', function () {
+      applyFilters();
+    });
+  }
+
+  // auto-apply when typing in search (debounced)
+  if (searchInput) {
+    const debounced = debounce(applyFilters, 450);
+    searchInput.addEventListener('input', debounced);
+    // also submit on Enter immediately
+    searchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyFilters();
+      }
+    });
+  }
+
+  // story select still navigates to story details (keeps existing behavior)
+  if (storySelect) {
+    storySelect.addEventListener('change', function () {
+      const storyId = this.value || '';
+      const params = new URLSearchParams(window.location.search);
+      if (storyId) params.set('story', storyId); else params.delete('story');
+      const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.location.href = newUrl;
+    });
+  }
+});
+</script>
 {% endblock %}

@@ -3,7 +3,6 @@ from .models import (
     Story,
     StoryTemplate,
     StoryTemplateContext,
-    StoryTemplatePeriodOfInterestValues,
     LookupCategory,
     LookupValue,
     Dataset,
@@ -56,21 +55,8 @@ class StoryTemplateContextAdmin(admin.ModelAdmin):
         "story_template",
         "sort_order",
     )
+    search_fields = ["key"]  # shows a filter sidebar
     sorted_by = ("sort_order",)
-    list_filter = ("story_template",)
-
-
-@admin.register(StoryTemplatePeriodOfInterestValues)
-class StoryTemplatePeriodOfInterestValuesAdmin(admin.ModelAdmin):
-    list_display = ("story_template", "title", "sort_order")
-    sortable_by = (
-        "story_template",
-        "sort_order",
-    )
-    sorted_by = (
-        "story_template",
-        "sort_order",
-    )
     list_filter = ("story_template",)
 
 
@@ -166,14 +152,13 @@ class StoryTemplateGraphicAdmin(admin.ModelAdmin):
 
 
 @admin.register(Graphic)
-class StoryGraphiAdmin(admin.ModelAdmin):
+class StoryGraphicAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "story",
         "title",
-        "story_id"
     )
 
     sortable_by = ("id", "title")
     search_fields = ("title",)
-    list_filter = ("story",)
+    list_filter = ("story__template",)

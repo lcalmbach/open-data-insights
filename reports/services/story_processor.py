@@ -27,7 +27,6 @@ from django.db import transaction
 from reports.services.database_client import DjangoPostgresClient
 from reports.services.utils import SQL_TEMPLATES, ensure_date
 from reports.models import (
-    StoryTemplatePeriodOfInterestValues,
     StoryTemplateContext,
     StoryLog,
     StoryTemplate,
@@ -145,7 +144,6 @@ class StoryProcessor:
         self.month = self.story.reference_period_start.month
         self.reference_period_expression = self._get_reference_period_expression()
         self.last_published_date = self._get_last_published_date()
-        self.story.reference_values = self._init_reference_values()
         self.story.context_values = self._get_context_data()
         
         self.story.title = self._replace_reference_period_expression(template.title)
@@ -545,94 +543,7 @@ class StoryProcessor:
         """Get season name from season number"""
         season_names = {1: "Spring", 2: "Summer", 3: "Fall", 4: "Winter"}
         return season_names.get(self.season, "Unknown Season")
-
-    def _init_reference_values(self) -> Dict[str, Any]:
-        """Initialize measured values dictionary"""
-        my_dict = {
-            "period_of_interest": {
-                "start": (
-                    self.story.reference_period_start.strftime("%Y-%m-%d")
-                    if self.story.reference_period_start
-                    else None
-                ),
-                "end": (
-                    self.story.reference_period_end.strftime("%Y-%m-%d")
-                    if self.story.reference_period_end
-                    else None
-                ),
-                "label": None,
-                "type": None,
-            }
-        }
-
-        # Set period label based on reference period type
-        if self.story.template.reference_period_id == ReferencePeriod.DAILY.value:  # daily
-            my_dict["period_of_interest"]["label"] = (
-                self.story.reference_period_start.strftime("%Y-%m-%d")
-            )
-            my_dict["period_of_interest"]["type"] = "daily"
-        elif (
-            self.story.template.reference_period_id == ReferencePeriod.MONTHLY.value
-        ):  # monthly
-            my_dict["period_of_interest"][
-                "label"
-            ] = f'{self.story.reference_period_start.strftime("%B")} {self.story.reference_period_start.strftime("%Y")}'
-            my_dict["period_of_interest"]["type"] = "monthly"
-        elif (
-            self.story.template.reference_period_id == ReferencePeriod.SEASONAL.value
-        ):  # seasonal
-            my_dict["period_of_interest"][
-                "label"
-            ] = f"{self._season_name()} {self.season_year}"
-            my_dict["period_of_interest"]["type"] = "seasonally"
-
-        my_dict["measured_values"] = self._get_period_of_interest_values()
-        result = json.dumps(my_dict, indent=2, ensure_ascii=False, cls=DecimalEncoder)
-        return result
-
-    def _get_period_of_interest_values(self) -> Dict[str, Any]:
-        """Get reference values for the story"""
-        result = {}
-        try:
-            # Use Django ORM to fetch the period of interest values
-            period_values = (
-                StoryTemplatePeriodOfInterestValues.objects.filter(
-                    story_template=self.story.template
-                )
-                .order_by("sort_order")
-            )
-
-            for period_value in period_values:
-                cmd = period_value.sql_command
-                params = self._get_sql_command_params(cmd)
-
-                try:
-                    value_df = self.dbclient.run_query(cmd, params)
-                    if len(value_df) == 0:
-                        result[period_value.title] = (
-                            "No data available for this period."
-                        )
-                    elif len(value_df) > 1:
-                        result[period_value.title] = value_df.to_dict(
-                            orient="records"
-                        )
-                    else:
-                        result[period_value.title] = value_df.iloc[0].to_dict()
-                except Exception as sql_error:
-                    self.logger.error(
-                        f"SQL execution error for '{period_value.title}': {sql_error}"
-                    )
-                    self.logger.error(f"SQL command: {repr(cmd)}")
-                    self.logger.error(f"Parameters: {params}")
-                    result[period_value.title] = (
-                        f"Error executing query: {sql_error}"
-                    )
-
-        except Exception as e:
-            self.logger.error(f"Error getting reference values: {e}")
-
-        return result
-
+    
     def _get_context_data(self) -> dict:
         """File "/home/lcalm/Work/Dev/data_news_agent/src/data_news.py", line 329, in get_context_data
         Retrieves the comparisons for the story from the database.
@@ -642,17 +553,17 @@ class StoryProcessor:
             dict: A dictionary containing the comparisons for the story.
         """
         result = {}
-        # Use Django ORM to fetch the context data
         context_data = (
             StoryTemplateContext.objects.filter(story_template_id=self.story.template.id)
-            .order_by("key")
+            .order_by("sort_order")
         )
 
         for context_item in context_data:
-            if context_item.key not in result:
-                result[context_item.key] = {}
-            node = result[context_item.key]
-
+            key = self._replace_reference_period_expression(context_item.key)
+            key = key.replace(" ",   "_").lower()
+            result[key] = {}
+            result[key]['description'] = context_item.description
+            
             cmd = context_item.sql_command
             params = self._get_sql_command_params(cmd)
             df = self.dbclient.run_query(cmd, params)
@@ -661,10 +572,10 @@ class StoryProcessor:
                     f"No data found for context key: {context_item.key}"
                 )
             elif len(df) > 1:
-                node[context_item.description] = df.to_dict(orient="records")
+                result[key]['data'] = df.to_dict(orient="records")
             else:
                 df = df.iloc[0].to_frame().T
-                node[context_item.description] = df.to_dict(orient="records")
+                result[key]['data'] = df.to_dict(orient="records")
 
         result = json.dumps({"context_data": result}, indent=2, ensure_ascii=False, cls=DecimalEncoder)
         return result
@@ -724,12 +635,6 @@ class StoryProcessor:
             # Initialize OpenAI client
             client = OpenAI(api_key=api_key)
 
-            # Prepare the payload with both measured_values and context_data (matching original implementation)
-            payload = {
-                "measured_values": self.story.reference_values,
-                "context_data": self.story.context_values,
-            }
-
             messages = [
                 {
                     "role": "system",
@@ -740,9 +645,7 @@ class StoryProcessor:
                     "content": (
                         "Below is the statistical data in JSON format.\n\n"
                         "```json\n"
-                        + json.dumps(
-                            payload, indent=2, ensure_ascii=False, cls=DecimalEncoder
-                        )
+                        + self.story.context_values
                         + "\n```"
                     ),
                 },

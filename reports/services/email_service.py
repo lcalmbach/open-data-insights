@@ -174,7 +174,8 @@ class EmailService(ETLBaseService):
             "",
         ]
         for insight in insights:
-            lines.append(f"- {insight['summary']}\n  [View the full story with tables and graphs]({insight['url']})")
+            text = f"<b>{insight['title']}<b>\n- {insight['summary']}\n  [View the full story with tables and graphs]({insight['url']})"
+            lines.append(text)
         # New templates / subscription prompt
         if new_templates:
             root = settings.APP_ROOT.rstrip('/')
@@ -187,7 +188,7 @@ class EmailService(ETLBaseService):
             # subscription prompt linking to account/profile
             lines.append(f"Interested? Subscribe to new insights [here]({root}/account/profile/)")
         lines.append("\n")
-        lines.append("Best regards,\nThe Open Data Insights Team")
+        lines.append("Best regards,\nThe <b>O</b>pen <b>D</b>ata <b>I</b>nsights Team")
         return "\n".join(lines)
 
     def _cleanup_empty_stories(self):

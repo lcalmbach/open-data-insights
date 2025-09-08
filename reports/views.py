@@ -65,9 +65,7 @@ def home_view(request):
     stories = list(Story.objects.order_by("-published_date"))
     if not stories:
         return render(request, "home.html", {"story": None})
-    print('test')
     selected_story = stories[0] 
-    index = 0
     next_story_id = stories[1].id if len(stories) > 1 else None
     selected_story.content_html = markdown2.markdown(selected_story.content, extras=["tables"])
     tables = get_tables(selected_story) if selected_story else []
@@ -75,8 +73,6 @@ def home_view(request):
     data_source = selected_story.template.data_source if selected_story else None
     other_ressources = selected_story.template.other_ressources if selected_story else None
     available_subscriptions = StoryTemplate.objects.count()
-    print("Available subscriptions:", available_subscriptions)
-    print('test')
     return render(
         request,
         "home.html",
