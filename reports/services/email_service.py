@@ -114,6 +114,7 @@ class EmailService(ETLBaseService):
                 insights = []
                 for story in stories:
                     insights.append({
+                        "title": story.title,
                         "summary": story.summary,
                         "url": story.get_absolute_url() if hasattr(story, "get_absolute_url") else f"{settings.APP_ROOT.rstrip('/')}/story/{story.id}/"
                     })
@@ -169,17 +170,17 @@ class EmailService(ETLBaseService):
         """Render the email body for a user, their insights and optional new-template section."""
         lines = [
             f"Hello {user.first_name},",
-            "",
+            "", "",
             "We’ve just published new insights from your subscribed topics:",
-            "",
+            "", "",
         ]
         for insight in insights:
-            text = f"<b>{insight['title']}<b>\n- {insight['summary']}\n  [View the full story with tables and graphs]({insight['url']})"
-            lines.append(text)
+            lines.append(f"**{insight['title']}**: {insight['summary']} ")
+            lines.append(f"[View the full story with tables and graphs]({insight['url']})")
+            lines += ["", ""]  # spacer# spacer
         # New templates / subscription prompt
         if new_templates:
             root = settings.APP_ROOT.rstrip('/')
-            lines.append("")
             lines.append("🔥We’ve uncovered new insights — discover them now:")
             lines.append("")
             for t in new_templates:
@@ -187,8 +188,8 @@ class EmailService(ETLBaseService):
             lines.append("")  # spacer
             # subscription prompt linking to account/profile
             lines.append(f"Interested? Subscribe to new insights [here]({root}/account/profile/)")
-        lines.append("\n")
-        lines.append("Best regards,\nThe <b>O</b>pen <b>D</b>ata <b>I</b>nsights Team")
+        lines += ["", "", "Best regards,","your **O**pen **D**ata **I**nsights Team"]
+                     
         return "\n".join(lines)
 
     def _cleanup_empty_stories(self):

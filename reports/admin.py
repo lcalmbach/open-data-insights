@@ -66,9 +66,7 @@ class LookupCategoryAdmin(admin.ModelAdmin):
     sortable_by = ("name",)
     ordering = ("name",)
     search_fields = ["name"]  # shows a filter sidebar
-    sortable_by = (
-        "id"
-    )
+    sortable_by = "id"
 
 
 @admin.register(LookupValue)
@@ -114,7 +112,6 @@ class StoryLogAdmin(admin.ModelAdmin):
     search_fields = ("story__title",)
 
 
-
 @admin.register(StoryTemplateTable)
 class StoryTemplateTableAdmin(admin.ModelAdmin):
     list_display = (
@@ -136,7 +133,6 @@ class StoryTableAdmin(admin.ModelAdmin):
     )
     sortable_by = ("id", "story")
     search_fields = ("story__title", "table_template__title")
-
 
 
 @admin.register(StoryTemplateGraphic)

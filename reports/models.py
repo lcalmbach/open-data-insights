@@ -6,6 +6,7 @@ import json
 from django.conf import settings
 from django.urls import reverse
 
+
 def default_yesterday():
     return date.today() - timedelta(days=1)
 
@@ -225,13 +226,13 @@ class Dataset(models.Model):
     post_import_sql_commands = models.TextField(
         blank=True,
         null=True,
-        help_text="SQL commands to be executed after each import process."
+        help_text="SQL commands to be executed after each import process.",
     )
 
     post_create_sql_commands = models.TextField(
         blank=True,
         null=True,
-        help_text="SQL commands to be executed after the initial table has been created."
+        help_text="SQL commands to be executed after the initial table has been created.",
     )
 
     class Meta:
@@ -264,6 +265,9 @@ class StoryTemplate(models.Model):
         help_text="SQL command to get the most recent day for which data is available. This is used to determine the reference period for the story.",
     )
     title = models.CharField(max_length=255, help_text="Title of the story template.")
+    summmary = models.TextField(
+        blank=True, null=True, help_text="Lead paragraph of the story template."
+    )
     description = models.TextField(
         blank=True, help_text="Description of the story template."
     )
@@ -275,6 +279,8 @@ class StoryTemplate(models.Model):
     )
     data_source = models.JSONField(
         default=dict,
+        blank=True,
+        null=True,
         help_text="Data source for the story template, e.g., [{'text': 'data.bs', 'url': 'https://data.bs.ch/explore/dataset/100051']",
     )
     other_ressources = models.JSONField(
@@ -288,10 +294,20 @@ class StoryTemplate(models.Model):
         default=0.3,
         help_text="Temperature parameter for the AI model. Controls the randomness of the output.",
     )
+    system_prompt = models.TextField(
+        blank=True, null=True, help_text="System prompt for the AI model."
+    )
     post_publish_command = models.TextField(
         blank=True,
         null=True,
         help_text="SQL command to be executed after the story is published. This can be used to update other tables or perform additional actions.",
+    )
+    create_title = models.BooleanField(
+        default=True,
+        help_text="Indicates if a title should be created for the story, if false, the tempalte taitle will be used for all stories.",
+    )
+    create_lead = models.BooleanField(
+        default=True, help_text="Indicates if a lead should be created for the story."
     )
     created_date = models.DateTimeField(
         auto_now_add=True,
@@ -326,7 +342,10 @@ class StoryTemplateGraphic(models.Model):
     sql_command = models.TextField(
         help_text="SQL command to get the data for the graphic, e.g., 'SELECT date, value FROM weather_data WHERE date >= %s AND date <= %s'. This command should return the data in a format suitable for the graphic library used.",
     )
-    graphic_type = models.ForeignKey(GraphType, on_delete=models.CASCADE, help_text="Type of the graphic, e.g., 'line', 'bar', 'pie'."  
+    graphic_type = models.ForeignKey(
+        GraphType,
+        on_delete=models.CASCADE,
+        help_text="Type of the graphic, e.g., 'line', 'bar', 'pie'.",
     )
     sort_order = models.IntegerField(
         default=0, help_text="Sort order of the graphic within the story template."
@@ -402,16 +421,19 @@ class Story(models.Model):
         related_name="stories",
         help_text="The template used to generate the story.",
     )
-    title = models.CharField(max_length=255, help_text="Title of the story.",
-                             blank=True, null=True)
+    title = models.CharField(
+        max_length=255, help_text="Title of the story.", blank=True, null=True
+    )
     summary = models.TextField(
         blank=True,
         null=True,
         help_text="Summary of the story template. This is used to provide a brief overview of the story.",
     )
     published_date = models.DateField(
-        auto_now_add=True, help_text="Date when the story was published.",
-        blank=True, null=True
+        auto_now_add=True,
+        help_text="Date when the story was published.",
+        blank=True,
+        null=True,
     )
     prompt_text = models.TextField(
         help_text="The prompt used to generate the story.", blank=True, null=True
@@ -422,7 +444,10 @@ class Story(models.Model):
         null=True,
     )
     ai_model = models.CharField(
-        max_length=50, help_text="AI model used for generating the story.", blank=True, null=True   
+        max_length=50,
+        help_text="AI model used for generating the story.",
+        blank=True,
+        null=True,
     )
     reference_period_start = models.DateField(
         default=default_yesterday,
@@ -462,22 +487,26 @@ class Story(models.Model):
     def clean(self):
         """Validate all model fields to prevent silent failures"""
         super().clean()
-        
+
         # Check required fields
         if not self.title:
-            raise ValidationError({'title': 'Title is required'})
-        
+            raise ValidationError({"title": "Title is required"})
+
         if self.template is None:
-            raise ValidationError({'template': 'Story template is required'})
-        
+            raise ValidationError({"template": "Story template is required"})
+
         if not self.content:
-            raise ValidationError({'content': 'Content is required'})
-        
+            raise ValidationError({"content": "Content is required"})
+
         # Validate date fields
         if self.reference_period_start and self.reference_period_end:
             if self.reference_period_start > self.reference_period_end:
-                raise ValidationError({'reference_period_start': 'Reference period start date cannot be after end date'})
-        
+                raise ValidationError(
+                    {
+                        "reference_period_start": "Reference period start date cannot be after end date"
+                    }
+                )
+
         # Validate JSON fields
         # Validate reference_values field
         if self.reference_values:
@@ -486,18 +515,28 @@ class Story(models.Model):
                     json_obj = json.loads(self.reference_values)
                     # Additional structure validation if needed
                     if not isinstance(json_obj, dict):
-                        raise ValidationError({'reference_values': 'Must be a valid JSON object'})
-                    
+                        raise ValidationError(
+                            {"reference_values": "Must be a valid JSON object"}
+                        )
+
                     # Check for required structure in reference_values
-                    if 'period_of_interest' not in json_obj:
-                        raise ValidationError({'reference_values': 'Missing "period_of_interest" in reference values'})
-                    
-                    if 'measured_values' not in json_obj:
-                        raise ValidationError({'reference_values': 'Missing "measured_values" in reference values'})
-                    
+                    if "period_of_interest" not in json_obj:
+                        raise ValidationError(
+                            {
+                                "reference_values": 'Missing "period_of_interest" in reference values'
+                            }
+                        )
+
+                    if "measured_values" not in json_obj:
+                        raise ValidationError(
+                            {
+                                "reference_values": 'Missing "measured_values" in reference values'
+                            }
+                        )
+
             except json.JSONDecodeError:
-                raise ValidationError({'reference_values': 'Invalid JSON format'})
-        
+                raise ValidationError({"reference_values": "Invalid JSON format"})
+
         # Validate context_values field
         if self.context_values:
             try:
@@ -505,28 +544,45 @@ class Story(models.Model):
                     json_obj = json.loads(self.context_values)
                     # Validate structure - check if it has expected keys
                     if not isinstance(json_obj, dict):
-                        raise ValidationError({'context_values': 'Must be a valid JSON object'})
-                    
-                    if 'context_data' not in json_obj:
-                        raise ValidationError({'context_values': 'Missing "context_data" key in context values'})
-                    
+                        raise ValidationError(
+                            {"context_values": "Must be a valid JSON object"}
+                        )
+
+                    if "context_data" not in json_obj:
+                        raise ValidationError(
+                            {
+                                "context_values": 'Missing "context_data" key in context values'
+                            }
+                        )
+
                     # Verify context_data is a dictionary
-                    if not isinstance(json_obj['context_data'], dict):
-                        raise ValidationError({'context_values': '"context_data" must be a JSON object'})
-                    
+                    if not isinstance(json_obj["context_data"], dict):
+                        raise ValidationError(
+                            {"context_values": '"context_data" must be a JSON object'}
+                        )
+
             except json.JSONDecodeError:
-                raise ValidationError({'context_values': 'Invalid JSON format'})
-        
+                raise ValidationError({"context_values": "Invalid JSON format"})
+
         # Validate AI model field
-        valid_ai_models = ['gpt-4o', 'gpt-4', 'gpt-3.5-turbo']  # Update with your valid models
+        valid_ai_models = [
+            "gpt-4o",
+            "gpt-4",
+            "gpt-3.5-turbo",
+        ]  # Update with your valid models
         if self.ai_model and self.ai_model not in valid_ai_models:
-            raise ValidationError({'ai_model': f'Invalid AI model. Choose from: {", ".join(valid_ai_models)}'})
+            raise ValidationError(
+                {
+                    "ai_model": f'Invalid AI model. Choose from: {", ".join(valid_ai_models)}'
+                }
+            )
 
     def get_absolute_url(self):
-        return settings.APP_ROOT.rstrip('/') + reverse('story_detail', args=[self.id])
+        return settings.APP_ROOT.rstrip("/") + reverse("story_detail", args=[self.id])
 
     def get_email_list_entry(self):
         return f"<b>{self.title}:</b></br><p>{self.summary}<p>"
+
 
 class StoryLog(models.Model):
     story = models.ForeignKey(
@@ -680,7 +736,7 @@ class Graphic(models.Model):
 
     def __str__(self):
         return str(self.title)
-    
+
 
 class StoryTable(models.Model):
     story = models.ForeignKey(

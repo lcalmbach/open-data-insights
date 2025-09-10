@@ -88,6 +88,7 @@ class ReferencePeriod(Enum):
     ALLTIME = 39
     DECADAL = 44  # For backward compatibility
     IRREGULAR = 56  # For backward compatibility
+    WEEKLY = 70  # For backward compatibility
 
     @classmethod
     def get_name(cls, value: int) -> str:
@@ -144,9 +145,10 @@ class StoryProcessor:
         self.month = self.story.reference_period_start.month
         self.reference_period_expression = self._get_reference_period_expression()
         self.last_published_date = self._get_last_published_date()
-        self.story.context_values = self._get_context_data()
-        
-        self.story.title = self._replace_reference_period_expression(template.title)
+        self.is_data_based = StoryTemplateContext.objects.filter(story_template=template).exists()
+        if self.is_data_based:
+            self.story.context_values = self._get_context_data()
+
         self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
         
     def _get_reference_period_expression(self) -> str:
@@ -165,6 +167,8 @@ class StoryProcessor:
         """
         if self.reference_period == ReferencePeriod.DAILY.value:
             return self.story.reference_period_start.strftime("%Y-%m-%d")
+        elif self.reference_period == ReferencePeriod.WEEKLY.value:
+            return f'{self.story.reference_period_start.strftime("%Y-%m-%d")} - {self.story.reference_period_end.strftime("%Y-%m-%d")}'
         elif self.reference_period == ReferencePeriod.MONTHLY.value:
             month_id = self.story.reference_period_start.month
             return f"{calendar.month_name[month_id]} {self.year}"
@@ -250,6 +254,8 @@ class StoryProcessor:
                 is_due = has_data
                 date_is_due = True
                 publish_conditions_met = True
+            elif not self.is_data_based:
+                is_due = get_publish_conditions_result()
             else:
                 # check if the regular due date has passed without publishing the story
                 date_is_due = (
@@ -371,7 +377,7 @@ class StoryProcessor:
             
             # Generate content
             self.logger.info("Generating story content...")
-            self.story.content = self._generate_report_text()
+            self.story.content = self._generate_insight_text()
             
             if not self.story.content:
                 self.logger.warning(f"Empty content generated for story {self.story.template.title}")
@@ -379,8 +385,15 @@ class StoryProcessor:
             
             self.logger.info("Generating summary...")
             # Generate lead (summary) and an engaging title using the unified LLM helper
-            self.story.summary = self.generate_summary(self.story.content, kind="lead")
-            self.story.title = self.generate_summary(self.story.content, kind="title")
+            if self.story.template.create_lead:
+                self.story.summary = self.generate_summary(self.story.content, kind="lead")
+            else:
+                self.story.summary = self.story.template.summary
+
+            if self.story.template.create_title:
+                self.story.title = self.generate_summary(self.story.content, kind="title")
+            else:
+                self.story.title = self.story.template.title
             self.logger.info("Saving story to database...")
             try:
                 self.story.full_clean()  # This validates the model
@@ -490,6 +503,11 @@ class StoryProcessor:
                 fallback_date = published_date - timedelta(days=1)
                 period_start = datetime.combine(fallback_date, datetime.min.time())
                 period_end = datetime.combine(fallback_date, datetime.min.time())
+        elif (
+            template.reference_period_id == ReferencePeriod.WEEKLY.value
+        ):  # weekly
+            period_start = published_date - pd.DateOffset(days=published_date.weekday() + 7)
+            period_end = published_date
         elif (
             template.reference_period_id == ReferencePeriod.MONTHLY.value
         ):  # monthly
@@ -623,7 +641,7 @@ class StoryProcessor:
             self.logger.error(f"Error saving log record: {e}")
             raise
 
-    def _generate_report_text(self) -> Optional[str]:
+    def _generate_insight_text(self) -> Optional[str]:
         """Generate story text using OpenAI API"""
         try:
             # Get OpenAI API key from settings
@@ -635,28 +653,41 @@ class StoryProcessor:
             # Initialize OpenAI client
             client = OpenAI(api_key=api_key)
 
-            messages = [
-                {
-                    "role": "system",
-                    "content": f"{self.story.template.prompt_text}\n\n{LLM_FORMATTING_INSTRUCTIONS}",
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        "Below is the statistical data in JSON format.\n\n"
-                        "```json\n"
-                        + self.story.context_values
-                        + "\n```"
-                    ),
-                },
-            ]
+            if self.is_data_based:
+                messages = [
+                    {
+                        "role": "system",
+                        "content": f"{self.story.template.prompt_text}\n\n{LLM_FORMATTING_INSTRUCTIONS}",
+                    },
+                    {
+                        "role": "user",
+                        "content": (
+                            "Below is the statistical data in JSON format.\n\n"
+                            "```json\n"
+                            + self.story.context_values
+                            + "\n```"
+                        ),
+                    },
+                ]
+            else:
+                messages = [
+                    {
+                        "role": "system",
+                        "content": self.story.template.system_prompt
+                    },
+                    {
+                        "role": "user",
+                        "content": (self._replace_reference_period_expression(self.story.template.prompt_text)
+                        ),
+                    },
+                ]
 
-            # Generate response
+                # Generate response
             response = client.chat.completions.create(
                 model=self.story.ai_model,
                 messages=messages,
                 temperature=self.story.template.temperature,
-                max_tokens=2000,
+                max_tokens=3000,
             )
 
             return response.choices[0].message.content

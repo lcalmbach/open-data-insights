@@ -65,13 +65,17 @@ def home_view(request):
     stories = list(Story.objects.order_by("-published_date"))
     if not stories:
         return render(request, "home.html", {"story": None})
-    selected_story = stories[0] 
+    selected_story = stories[0]
     next_story_id = stories[1].id if len(stories) > 1 else None
-    selected_story.content_html = markdown2.markdown(selected_story.content, extras=["tables"])
+    selected_story.content_html = markdown2.markdown(
+        selected_story.content, extras=["tables"]
+    )
     tables = get_tables(selected_story) if selected_story else []
     graphics = selected_story.story_graphics.all() if selected_story else []
     data_source = selected_story.template.data_source if selected_story else None
-    other_ressources = selected_story.template.other_ressources if selected_story else None
+    other_ressources = (
+        selected_story.template.other_ressources if selected_story else None
+    )
     available_subscriptions = StoryTemplate.objects.count()
     return render(
         request,
@@ -84,7 +88,7 @@ def home_view(request):
             "graphics": graphics,
             "data_source": data_source,
             "other_ressources": other_ressources,
-            "available_subscriptions": available_subscriptions
+            "available_subscriptions": available_subscriptions,
         },
     )
 
@@ -141,13 +145,15 @@ def stories_view(request):
     if selected_story:
         graphics = selected_story.story_graphics.all() if selected_story else []
         data_source = selected_story.template.data_source if selected_story else None
-        other_ressources = selected_story.template.other_ressources if selected_story else None
+        other_ressources = (
+            selected_story.template.other_ressources if selected_story else None
+        )
         # Get tables and convert directly to DataFrames
         tables = get_tables(selected_story) if selected_story else []
         selected_story.content_html = markdown2.markdown(
             selected_story.content, extras=["tables"]
         )
-    
+
     return render(
         request,
         "reports/stories_list.html",
@@ -167,8 +173,8 @@ def stories_view(request):
 def storytemplate_detail_view(request, pk):
     template = get_object_or_404(StoryTemplate, pk=pk)
     template.description_html = markdown2.markdown(
-            template.description, extras=["tables"]
-        )
+        template.description, extras=["tables"]
+    )
     back_url = request.META.get("HTTP_REFERER", "/")  # fallback: Startseite
     return render(
         request,
@@ -225,9 +231,13 @@ def view_story(request, story_id=None):
     tables = get_tables(selected_story) if selected_story else []
     graphics = selected_story.story_graphics.all() if selected_story else []
     data_source = selected_story.template.data_source if selected_story else None
-    other_ressources = selected_story.template.other_ressources if selected_story else None
+    other_ressources = (
+        selected_story.template.other_ressources if selected_story else None
+    )
     available_subscriptions = StoryTemplate.objects.count()
-    selected_story.content_html = markdown2.markdown(selected_story.content, extras=["tables"])
+    selected_story.content_html = markdown2.markdown(
+        selected_story.content, extras=["tables"]
+    )
     return render(
         request,
         "home.html",
@@ -239,18 +249,23 @@ def view_story(request, story_id=None):
             "tables": tables,
             "other_ressources": other_ressources,
             "data_source": data_source,
-            "available_subscriptions": available_subscriptions
+            "available_subscriptions": available_subscriptions,
         },
     )
+
 
 def story_detail(request, story_id=None):
     selected_story = get_object_or_404(Story, id=story_id)
     tables = get_tables(selected_story) if selected_story else []
     graphics = selected_story.story_graphics.all() if selected_story else []
     data_source = selected_story.template.data_source if selected_story else None
-    other_ressources = selected_story.template.other_ressources if selected_story else None
+    other_ressources = (
+        selected_story.template.other_ressources if selected_story else None
+    )
 
-    selected_story.content_html = markdown2.markdown(selected_story.content, extras=["tables"])
+    selected_story.content_html = markdown2.markdown(
+        selected_story.content, extras=["tables"]
+    )
     return render(
         request,
         "reports/story_detail.html",
@@ -275,12 +290,14 @@ def get_tables(selected_story):
                 if t.data:
                     data = json.loads(t.data)
                     columns = list(data[0].keys()) if data else []
-                    tables.append({
-                        'table_id': f"table-{t.id}",
-                        'rows': data,
-                        'columns': columns,
-                        'title': t.title or f"Table {t.id}"
-                    })
+                    tables.append(
+                        {
+                            "table_id": f"table-{t.id}",
+                            "rows": data,
+                            "columns": columns,
+                            "title": t.title or f"Table {t.id}",
+                        }
+                    )
             except Exception as e:
                 print(f"Error processing table {t.id}: {e}")
     return tables
