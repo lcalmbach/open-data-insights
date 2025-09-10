@@ -27,6 +27,7 @@
                 "generate_stories",
                 "--id",
                 "34", 
+                "--force",
                 "-v",
                 "2"
             ],

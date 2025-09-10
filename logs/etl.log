@@ -6122,3 +6122,27 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2025-09-10 06:32:23,877 - EmailService - INFO - Email sent successfully to 1 recipients
 2025-09-10 06:32:24,876 - EmailService - INFO - Email sent successfully to 1 recipients
 2025-09-10 06:32:25,814 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-09-10 07:58:12,050 - StoryGeneration - ERROR - Error processing template 34: 'bool' object has no attribute 'get'
+2025-09-10 08:20:02,497 - StoryGeneration - INFO - Skipping template 11 - not due
+2025-09-10 08:20:02,664 - StoryGeneration - INFO - Skipping template 12 - not due
+2025-09-10 08:20:02,781 - StoryGeneration - INFO - Skipping template 13 - not due
+2025-09-10 08:20:02,797 - StoryGeneration - INFO - Skipping template 14 - not due
+2025-09-10 08:20:02,802 - StoryGeneration - INFO - Skipping template 15 - not due
+2025-09-10 08:20:02,828 - StoryGeneration - INFO - Skipping template 16 - not due
+2025-09-10 08:20:02,849 - StoryGeneration - INFO - Skipping template 17 - not due
+2025-09-10 08:20:02,997 - StoryGeneration - INFO - Skipping template 18 - not due
+2025-09-10 08:20:03,077 - StoryGeneration - INFO - Skipping template 19 - not due
+2025-09-10 08:20:03,134 - StoryGeneration - INFO - Skipping template 20 - not due
+2025-09-10 08:20:03,144 - StoryGeneration - INFO - Skipping template 21 - not due
+2025-09-10 08:20:03,151 - StoryGeneration - INFO - Skipping template 22 - not due
+2025-09-10 08:20:03,159 - StoryGeneration - INFO - Skipping template 23 - not due
+2025-09-10 08:20:03,187 - StoryGeneration - INFO - Skipping template 24 - not due
+2025-09-10 08:20:03,304 - StoryGeneration - INFO - Skipping template 25 - not due
+2025-09-10 08:20:03,326 - StoryGeneration - INFO - Skipping template 26 - not due
+2025-09-10 08:20:03,603 - StoryGeneration - INFO - Skipping template 27 - not due
+2025-09-10 08:20:03,693 - StoryGeneration - INFO - Skipping template 28 - not due
+2025-09-10 08:20:03,825 - StoryGeneration - INFO - Skipping template 29 - not due
+2025-09-10 08:20:03,838 - StoryGeneration - INFO - Skipping template 30 - not due
+2025-09-10 08:20:03,897 - StoryGeneration - INFO - Skipping template 31 - not due
+2025-09-10 08:20:03,906 - StoryGeneration - INFO - Skipping template 32 - not due
+2025-09-10 08:20:03,915 - StoryGeneration - INFO - Skipping template 33 - not due

@@ -265,7 +265,7 @@ class StoryTemplate(models.Model):
         help_text="SQL command to get the most recent day for which data is available. This is used to determine the reference period for the story.",
     )
     title = models.CharField(max_length=255, help_text="Title of the story template.")
-    summmary = models.TextField(
+    summary = models.TextField(
         blank=True, null=True, help_text="Lead paragraph of the story template."
     )
     description = models.TextField(
