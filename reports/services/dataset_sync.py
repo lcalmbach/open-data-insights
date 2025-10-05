@@ -70,22 +70,11 @@ class DatasetSyncService(ETLBaseService):
 
     def synchronize_datasets(self, dataset_id: Optional[int] = None) -> Dict[str, Any]:
         """Synchronize multiple datasets"""
-        # Use Django ORM to fetch datasets
+        
         if dataset_id:
             datasets = Dataset.objects.filter(id=dataset_id)
         else:
             datasets = Dataset.objects.filter(active=True)
-
-        if not datasets.exists():
-            if dataset_id:
-                self.logger.error(f"No active dataset found with ID: {dataset_id}")
-                return {
-                    "success": False,
-                    "message": f"Dataset ID {dataset_id} not found",
-                }
-            else:
-                self.logger.info("No active datasets found")
-                return {"success": True, "message": "No active datasets to synchronize"}
 
         results = {
             "success": True,
@@ -94,6 +83,19 @@ class DatasetSyncService(ETLBaseService):
             "failed": 0,
             "details": [],
         }
+        
+        if not datasets.exists():
+            self.logger.error(f"No active dataset found with ID: {dataset_id}")
+            results["failed"] += 1
+            results["success"] = False
+            results["details"].append(
+                {
+                    "dataset_id": dataset_id,
+                    "dataset_name": "None",
+                    "success": False,
+                    "error": "No dataset found with this ID",
+                }
+            )
 
         for dataset in datasets:
             try:
@@ -180,10 +182,14 @@ class DatasetProcessor:
         # Get ODS metadata and last record
         try:
             self.ods_records, self.ods_last_record = self.get_ods_last_record()
+            self.ods_last_record_date, self.ods_last_record_identifier = None, None
             if self.ods_last_record and self.dataset.source_timestamp_field:
                 self.ods_last_record_date = datetime.fromisoformat(
                     self.ods_last_record[self.dataset.source_timestamp_field]
                 )
+            elif self.ods_last_record and self.dataset.record_identifier_field:
+                self.ods_last_record_identifier = self.ods_last_record[self.dataset.record_identifier_field]
+            
         except Exception as e:
             self.logger.warning(f"Could not get ODS last record: {e}")
             self.ods_records = 0
@@ -217,24 +223,67 @@ class DatasetProcessor:
 
     def get_ods_last_record(self) -> tuple:
         """Get the last record from ODS API"""
-        if not self.dataset.source_timestamp_field:
+        if self.has_record_identifier_field:
+            url = self.url_last_record.format(
+                self.dataset.base_url,
+                self.dataset.source_identifier,
+                self.dataset.record_identifier_field,
+            )
+            try:
+                response = requests.get(url, timeout=30)
+                response.raise_for_status()
+                data = response.json()
+                records = data.get("total_count", 0)
+                record = data.get("results", [])
+                return records, record[0] if record else None
+            except Exception as e:
+                self.logger.error(f"Failed to fetch ODS last record: {e}")
+                return 0, None
+        elif self.dataset.source_timestamp_field:
+            url = self.url_last_record.format(
+                self.dataset.base_url,
+                self.dataset.source_identifier,
+                self.dataset.source_timestamp_field,
+            )
+            try:
+                response = requests.get(url, timeout=30)
+                response.raise_for_status()
+                data = response.json()
+                records = data.get("total_count", 0)
+                record = data.get("results", [])
+                return records, record[0] if record else None
+            except Exception as e:
+                self.logger.error(f"Failed to fetch ODS last record: {e}")
+                return 0, None
+        else:
             return 0, None
-
-        url = self.url_last_record.format(
-            self.dataset.base_url,
-            self.dataset.source_identifier,
-            self.dataset.source_timestamp_field,
-        )
+    
+    def get_ods_identifiers(self) -> List[Any]:
+        """Get all record identifiers from ODS"""
+        if self.has_record_identifier_field:
+            # url = f"https://{self.dataset.base_url}/api/explore/v2.1/catalog/datasets/{self.dataset.source_identifier}/exports/json?lang=de&timezone=Europe%2FBerlin&use_labels=false"
+            url = f"https://{self.dataset.base_url}/api/explore/v2.1/catalog/datasets/{self.dataset.source_identifier}/exports/csv?lang=de&timezone=Europe%2FBerlin&use_labels=false&delimiter=%3B&select={self.dataset.record_identifier_field}"
+            try:
+                response = requests.get(url, timeout=60)
+                response.raise_for_status()
+                ids = sorted({int(s) for s in response.content.decode("utf-8-sig").splitlines()[1:] if s.strip()})
+                return ids
+            except Exception as e:
+                self.logger.error(f"Failed to fetch ODS identifiers: {e}")
+                return []
+        else:
+            return []
+    
+    def get_db_identifiers(self, table_name: str) -> List[Any]:
+        """Get all record identifiers from the target database table"""
         try:
-            response = requests.get(url, timeout=30)
-            response.raise_for_status()
-            data = response.json()
-            records = data.get("total_count", 0)
-            record = data.get("results", [])
-            return records, record[0] if record else None
+            query = f"SELECT {self.dataset.record_identifier_field} FROM opendata.{table_name}"
+            results = self.dbclient.run_query(query)
+            identifiers = list(results[self.dataset.record_identifier_field])
+            return identifiers
         except Exception as e:
-            self.logger.error(f"Failed to fetch ODS last record: {e}")
-            return 0, None
+            self.logger.error(f"Failed to fetch DB identifiers: {e}")
+            return []
 
     def synchronize(self) -> bool:
         """
@@ -374,9 +423,63 @@ class DatasetProcessor:
                         return True
                 else:
                     self.logger.warning(
-                        f"Could not get last record from table {remote_table}"
+                        f"No new recorords detected in table {remote_table}"
                     )
                     return False
+            elif self.has_record_identifier_field and self.ods_last_record_identifier:
+                ods_identifers = self.get_ods_identifiers()
+                db_identifiers = self.get_db_identifiers(remote_table)
+                # unique indentifiers only
+                ods_identifers = sorted(set(ods_identifers))
+                db_identifiers = sorted(set(db_identifiers))
+                new_identifiers = list(set(ods_identifers) - set(db_identifiers))
+                if new_identifiers:
+                    self.logger.info(
+                        f"New data available in ODS. New record IDs: {new_identifiers}"
+                    )
+
+                    # Download incremental data
+                    where_clause = (
+                        f"{self.dataset.record_identifier_field} IN ({', '.join([f'\'{id}\'' for id in new_identifiers])})"
+                    )
+
+                    df = self.download_ods_data(
+                        filename,
+                        where_clause=where_clause,
+                        fields=(
+                            self.dataset.fields_selection
+                            if self.dataset.fields_selection
+                            else None
+                        ),
+                    )
+
+                    if df is not False and not df.empty:
+                        df = self.transform_ods_data(df)
+                        df.to_parquet(agg_filename)
+                        self.dbclient.upload_to_db(
+                            str(agg_filename), self.dataset.target_table_name
+                        )
+
+                        count = get_parquet_row_count(str(agg_filename))
+                        self.logger.info(
+                            f"{count} records added to target database table {remote_table}."
+                        )
+
+                        self.post_process_data()
+                        return True
+                    if df.empty:
+                        self.logger.info(
+                            f"No new data found for dataset {remote_table}."
+                        )
+                        return True
+                    else:
+                        self.logger.warning("Failed to download data new data available")
+                        return False
+                else:
+                    self.logger.warning(
+                        f"no new records detected in table {remote_table}"
+                    )
+                    return True
             else:
                 self.logger.info(
                     f"No timestamp field configured or no last record available"

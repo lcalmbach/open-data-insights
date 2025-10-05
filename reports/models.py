@@ -461,11 +461,6 @@ class Story(models.Model):
         blank=True,
         null=True,
     )
-    reference_values = models.JSONField(
-        help_text="Reference values for the story, e.g., {'max_temperature_degc': 30, 'precipitation_mm': 14}",
-        blank=True,
-        null=True,
-    )
     content = models.TextField(help_text="Content of the story.", blank=True, null=True)
 
     @property
@@ -506,37 +501,6 @@ class Story(models.Model):
                         "reference_period_start": "Reference period start date cannot be after end date"
                     }
                 )
-
-        # Validate JSON fields
-        # Validate reference_values field
-        if self.reference_values:
-            try:
-                if isinstance(self.reference_values, str):
-                    json_obj = json.loads(self.reference_values)
-                    # Additional structure validation if needed
-                    if not isinstance(json_obj, dict):
-                        raise ValidationError(
-                            {"reference_values": "Must be a valid JSON object"}
-                        )
-
-                    # Check for required structure in reference_values
-                    if "period_of_interest" not in json_obj:
-                        raise ValidationError(
-                            {
-                                "reference_values": 'Missing "period_of_interest" in reference values'
-                            }
-                        )
-
-                    if "measured_values" not in json_obj:
-                        raise ValidationError(
-                            {
-                                "reference_values": 'Missing "measured_values" in reference values'
-                            }
-                        )
-
-            except json.JSONDecodeError:
-                raise ValidationError({"reference_values": "Invalid JSON format"})
-
         # Validate context_values field
         if self.context_values:
             try:

@@ -123,7 +123,7 @@ def stories_view(request):
 
     # Base queryset
     stories = Story.objects.select_related("template").order_by("-published_date")
-
+    periods = Period.objects.order_by("value")
     # Filter by selected template
     template_id = request.GET.get("template")
     if template_id:
@@ -165,6 +165,7 @@ def stories_view(request):
             "tables": tables,
             "other_ressources": other_ressources,
             "data_source": data_source,
+            "periods": periods,
         },
     )
 

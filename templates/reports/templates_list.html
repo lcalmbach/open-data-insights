@@ -3,15 +3,11 @@
 
 {% block content %}
 <div class="container">
-  <h2 class="mb-3">Explore Insight Templates</h2>
+  <h2 class="mb-3">Explore Insight Templates ({{ templates|length }})</h2>
   <p>Insight templates are the blueprints for generating insights from your data. They contain various metadata, including the prompt with instructions for the LLM to generate the story, as well as all queries, table definitions, and graph configurations. In the ouptut below, only the description field is shown. Each template contains a link in its footer that allows to explore the respective insights, generated with the current template.</p>
   <br>
   <div class="row mb-3">
-    <div class="col-md-6">
-      <label for="template-filter" class="form-label">Filter (title)</label>
-      <input id="template-filter" class="form-control" placeholder="Type to filter insights..." />
-    </div>
-    <div class="col-md-6">
+    <div class="col-md-3">
       <label for="period-filter" class="form-label">Period</label>
       <select id="period-filter" class="form-select">
         <option value="all">All periods</option>
@@ -19,6 +15,29 @@
           <option value="{{ period.id }}">{{ period.value }}</option>
         {% endfor %}
       </select>
+    </div>
+
+    <div class="col-md-5">
+      <label for="template-select" class="form-label">Template</label>
+      <select id="template-select" class="form-select">
+        {% for template in templates %}
+          <option value="{{ template.id }}" data-period="{{ template.reference_period.id|default:'' }}"
+            {% if selected_template and template.id == selected_template.id %}
+              selected
+            {% elif not selected_template and forloop.first %}
+              selected
+            {% endif %}>
+            {{ template.title }} ({{ template.reference_period }})
+          </option>
+        {% empty %}
+          <option disabled>No templates available</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <label for="template-filter" class="form-label">Title contains...</label>
+      <input id="template-filter" class="form-control" placeholder="Type to filter insights..." />
     </div>
   </div>
 

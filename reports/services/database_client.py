@@ -32,30 +32,35 @@ class DjangoPostgresClient:
         )
         self.engine = create_engine(connection_string)
 
-    def run_query(self, query: str, params: Optional[Dict] = None) -> pd.DataFrame:
+    def run_query(self, query: str, params: dict | None = None):
         """Execute a query and return DataFrame - uses Django connection"""
         # Normalize the query using our utility function
         clean_query = normalize_sql_query(query)
+        params = params or {}
 
         try:
             with connection.cursor() as cursor:
-                # Handle both list and dict parameter formats
-                if isinstance(params, dict):
-                    params = {k: v for k, v in params.items() if v is not None}
-                if params is None:
-                    cursor.execute(clean_query)
-                elif isinstance(params, (list, tuple)):
-                    cursor.execute(clean_query, params)
-                else:
-                    cursor.execute(clean_query, params)
-                columns = [col[0] for col in cursor.description]
-                data = cursor.fetchall()
-                return pd.DataFrame(data, columns=columns)
-        except Exception as e:
-            self.logger.error(f"Database query error:")
-            self.logger.error(f"Query: {repr(clean_query)}")
-            self.logger.error(f"Params: {params}")
-            self.logger.error(f"Error: {e}")
+                # Log rendered SQL for debugging (psycopg2-style)
+                try:
+                    rendered = cursor.mogrify(clean_query, params)
+                    self.logger.debug(
+                        "Executing SQL: %s",
+                        rendered.decode()
+                        if isinstance(rendered, (bytes, bytearray))
+                        else rendered,
+                    )
+                except Exception:
+                    self.logger.debug(
+                        "Could not mogrify SQL; query: %s params: %s",
+                        clean_query,
+                        params,
+                    )
+                cursor.execute(clean_query, params)
+                cols = [c[0] for c in cursor.description] if cursor.description else []
+                rows = cursor.fetchall()
+                return pd.DataFrame(rows, columns=cols)
+        except Exception:
+            self.logger.exception("Error executing SQL")
             raise
 
     def run_action_query(self, query: str, params: Optional[Dict] = None) -> None:

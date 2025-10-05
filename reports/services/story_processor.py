@@ -195,6 +195,7 @@ class StoryProcessor:
         result = result.replace(":reference_period_previous_year", str(self.year - 1))
         result = result.replace(":reference_period_season", self._season_name())
         result = result.replace(":reference_period", self.reference_period_expression)
+        result = result.replace(":published_date", self.story.published_date.strftime("%Y-%m-%d"))
         return result
 
     def story_is_due(self) -> bool:
@@ -218,7 +219,8 @@ class StoryProcessor:
                     bool: True if all conditions are met, False otherwise.
                 """
                 if self.story.template.publish_conditions:
-                    params = self._get_sql_command_params(self.story.template.publish_conditions)
+                    cmd = self._replace_reference_period_expression(self.story.template.publish_conditions)
+                    params = self._get_sql_command_params(cmd)
                     df = self.dbclient.run_query(self.story.template.publish_conditions, params)
                     return df.iloc[0, 0] == 1
                 else:

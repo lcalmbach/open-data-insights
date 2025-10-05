@@ -3,24 +3,40 @@
 {% block title %}Explore Stories{% endblock %}
 {% block content %}
 
-<h2 class="mb-3">Explore Insights</h2>
+<h2 class="mb-3">Explore Insights ({{ stories|length }})</h2>
 <!-- Filter Form -->
 <form id="filter-form" method="get" class="row g-3 mb-4" autocomplete="off">
-  <div class="col-md-4">
-    <label for="template" class="form-label">Template</label>
-    <select class="form-select" id="template" name="template">
-      <option value="">All templates</option>
-      {% for template in templates %}
-        <option value="{{ template.id }}" {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
-          {{ template.title }}
+  <div class="col-md-3">
+    <label for="reference_period" class="form-label">Reference period</label>
+    <select class="form-select" id="reference_period" name="reference_period">
+      <option value="">All periods</option>
+      {% for period in periods %}
+        <option value="{{ period }}" {% if request.GET.reference_period == period|stringformat:"s" %}selected{% endif %}>
+          {{ period }}
         </option>
       {% endfor %}
     </select>
   </div>
-  <div class="col-md-6">
+
+  <div class="col-md-3">
+    <label for="template" class="form-label">Template</label>
+    <select class="form-select" id="template" name="template">
+      <option value="">All templates</option>
+      {% for template in templates %}
+        <option value="{{ template.id }}"
+                data-reference-period="{{ template.reference_period }}"
+                {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
+          {{ template.title }} ({{ template.reference_period }})
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-4">
     <label for="search" class="form-label">Title contains...</label>
     <input type="text" class="form-control" id="search" name="search" value="{{ request.GET.search }}" placeholder="Title or description...">
   </div>
+
   <div class="col-md-2 d-flex align-items-end">
     <!-- Hidden submit kept for keyboard accessibility; JS will auto-submit -->
     <button type="submit" class="btn btn-primary w-100 visually-hidden">Filter</button>
@@ -64,15 +80,58 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const templateSelect = document.getElementById('template');
+  const periodSelect = document.getElementById('reference_period');
   const searchInput = document.getElementById('search');
   const storySelect = document.getElementById('story-select');
+
+  // preserve original template options for client-side filtering
+  let originalTemplateOptions = [];
+  if (templateSelect) {
+    originalTemplateOptions = Array.from(templateSelect.options).map(opt => ({
+      value: opt.value,
+      text: opt.text,
+      period: opt.dataset ? opt.dataset.referencePeriod : opt.getAttribute('data-reference-period')
+    }));
+  }
+
+  // helper to repopulate template select based on chosen period
+  function filterTemplateOptions(period) {
+    if (!templateSelect) return;
+    // remember currently selected template value
+    const prev = templateSelect.value;
+    // clear options and add default
+    templateSelect.innerHTML = '';
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = 'All templates';
+    templateSelect.appendChild(defaultOpt);
+
+    originalTemplateOptions.forEach(o => {
+      // include option if no period filter or periods match
+      if (!period || String(o.period) === String(period)) {
+        const opt = document.createElement('option');
+        opt.value = o.value;
+        opt.textContent = o.text;
+        opt.setAttribute('data-reference-period', o.period || '');
+        templateSelect.appendChild(opt);
+      }
+    });
+
+    // try to restore previous selection if it still exists
+    if (prev) {
+      const exists = Array.from(templateSelect.options).some(opt => opt.value === prev);
+      templateSelect.value = exists ? prev : '';
+    }
+  }
 
   // build and navigate to URL with current filter values
   function applyFilters() {
     const params = new URLSearchParams();
     const tpl = templateSelect ? templateSelect.value.trim() : '';
+    const period = periodSelect ? periodSelect.value.trim() : '';
     const q = searchInput ? searchInput.value.trim() : '';
     if (tpl) params.set('template', tpl);
+    if (period) params.set('reference_period', period);
     if (q) params.set('search', q);
     // remove any selected story when changing filters
     const url = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
@@ -86,6 +145,19 @@ document.addEventListener('DOMContentLoaded', function () {
       if (t) clearTimeout(t);
       t = setTimeout(() => { fn.apply(this, args); }, wait);
     };
+  }
+
+  // initialize template list according to current period on page load
+  if (periodSelect) {
+    filterTemplateOptions(periodSelect.value);
+  }
+
+  // auto-apply when reference period changes immediately and filter templates shown
+  if (periodSelect) {
+    periodSelect.addEventListener('change', function () {
+      filterTemplateOptions(this.value);
+      applyFilters();
+    });
   }
 
   // auto-apply when template changes immediately
