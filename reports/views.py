@@ -153,6 +153,11 @@ def stories_view(request):
         selected_story.content_html = markdown2.markdown(
             selected_story.content, extras=["tables"]
         )
+    else:
+        graphics = []
+        data_source = None
+        other_ressources = None
+        tables = []
 
     return render(
         request,

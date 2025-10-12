@@ -129,11 +129,23 @@ class StoryTemplateTableAdmin(admin.ModelAdmin):
 class StoryTableAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "story",
+        "story_published_date",
+        "story_template",
         "table_template",
     )
-    sortable_by = ("id", "story")
-    search_fields = ("story__title", "table_template__title")
+    list_select_related = ("story__template",)
+    search_fields = ("table_template__title", "table_template__id", "story__title")
+
+    def story_published_date(self, obj):
+        return getattr(getattr(obj, "story", None), "published_date", None)
+    story_published_date.short_description = "Story published"
+    story_published_date.admin_order_field = "story__published_date"
+
+    def story_template(self, obj):
+        tpl = getattr(getattr(obj, "story", None), "template", None)
+        return getattr(tpl, "title", None) if tpl is not None else None
+    story_template.short_description = "Story template"
+    story_template.admin_order_field = "story__template__title"
 
 
 @admin.register(StoryTemplateGraphic)

@@ -1,70 +1,90 @@
 from django.core.management.base import BaseCommand, CommandError
-from reports.models import StoryTemplate, Story
+from reports.models import StoryTemplate, Story, Graphic, StoryTemplateGraphic, StoryTable, StoryTemplateTable
 from reports.services.story_processor import StoryProcessor
 from datetime import datetime, date
 
 class Command(BaseCommand):
-    help = 'Generate tables and/or graphics for a given story template and date'
+    help = 'Generate tables and/or graphics for a given story template, story or single graphic'
 
     def add_arguments(self, parser):
-        parser.add_argument('--id', type=int, help='StoryTemplate ID')
-        parser.add_argument('--date', type=str, help='Date (YYYY-MM-DD)')
+        parser.add_argument('--id', type=int, help='Graphic ID: regenerate a single graphic (requires Graphic model/regenerate logic)')
+        parser.add_argument('--graphic_template_id', type=int, help='Graphic template ID: regenerate a all graphics done from the same graphic-template')
+        parser.add_argument('--table_template_id', type=int, help='Table template ID: regenerate a all tables done from the same table-template')
+        parser.add_argument('--story_id', type=int, help='Story ID: regenerate all graphics for this story')
+        parser.add_argument('--story_template_id', type=int, help='StoryTemplate ID: all stories of this template')
         parser.add_argument('--tables', action='store_true', help='Generate tables')
         parser.add_argument('--graphics', action='store_true', help='Generate graphics')
         parser.add_argument('--all', action='store_true', help='Process all story templates')
 
     def handle(self, *args, **options):
-        template_id = options.get('id')
+        story_template_id = options.get('story_template_id')
+        story_id = options.get('story_id')
+        graphic_template_id = options.get('graphic_template_id')
+        table_template_id = options.get('table_template_id')
+        id = options.get('id')
         all_flag = options.get('all', False)
-        run_date = date.today()
-        if options.get('date'):
-            try:
-                run_date = datetime.strptime(options['date'], '%Y-%m-%d').date()
-            except ValueError:
-                self.stdout.write(self.style.ERROR("Invalid date format. Use YYYY-MM-DD."))
-                return
-
-        # validation: require either --id or --all
-        if not all_flag and not template_id:
-            raise CommandError("Provide --id or --all to select templates to process.")
-        if all_flag and template_id:
-            raise CommandError("Provide only one of --id or --all (not both).")
-
+        graphics_flag = options.get('graphics', False)
+        tables_flag = options.get('tables', False)
+        
         if not options.get('tables') and not options.get('graphics'):
             self.stdout.write(self.style.WARNING("No action specified. Use --tables and/or --graphics."))
             return
 
-        templates_qs = None
-        if all_flag:
-            templates_qs = StoryTemplate.objects.all()
-            self.stdout.write(f"Processing all {templates_qs.count()} story templates for date {run_date}")
-        else:
-            try:
-                tpl = StoryTemplate.objects.get(id=template_id)
-            except StoryTemplate.DoesNotExist:
-                self.stdout.write(self.style.ERROR(f"StoryTemplate with id={template_id} does not exist."))
-                return
-            templates_qs = StoryTemplate.objects.filter(id=template_id)
-            self.stdout.write(f"Processing StoryTemplate id={template_id} ({tpl.title}) for date {run_date}")
+        # Validate mutually exclusive selection: only one of template_id / story_id / id / all
+        selection_flags = sum(bool(x) for x in (story_template_id, story_id, id, graphic_template_id, table_template_id, all_flag))
+        if selection_flags == 0:
+            raise CommandError("Provide one of --template_id, --story_id, --id or --all to select what to process.")
+        if selection_flags > 1:
+            raise CommandError("Provide only one of --template_id, --story_id, --id (graphic) or --all (not multiple).")
 
-        total = templates_qs.count()
-        processed = 0
-        errors = 0
+        # Handle single graphic id (best-effort; requires a Graphic model / regenerate API)
+        graphics = []
+        tables = []
+        if id and graphics_flag:
+            graphics = [Graphic.objects.get(id=id)]
+            template = graphics[0].story.template
+        elif id and tables_flag:
+            tables = [StoryTable.objects.get(id=id)]
+            template = tables[0].story.template
+        elif graphic_template_id:
+            template = StoryTemplateGraphic.objects.get(id=graphic_template_id)
+            graphics = template.story_template_graphics.all()
+        elif table_template_id:
+            template = StoryTemplateTable.objects.get(id=table_template_id)
+            tables = template.story_template_tables.all()
+        elif story_id:
+            graphics = Graphic.objects.filter(story_id=story_id)
+            tables = StoryTable.objects.filter(story_id=story_id)
+        elif story_template_id:
+            template = StoryTemplate.objects.get(id=story_template_id)
+            graphics = Graphic.objects.filter(story__template=template)
+            tables = StoryTable.objects.filter(story__template=template)
+        elif all_flag and graphics_flag:
+            graphics = Graphic.objects.all()
+        elif all_flag and tables_flag:
+            tables = StoryTable.objects.all()   
+        elif all_flag:
+            graphics = Graphic.objects.all()
+            tables = StoryTable.objects.all()
 
-        for template in templates_qs.iterator():
-            try:
-                processor = StoryProcessor(template, run_date)
-                if options.get('tables'):
-                    self.stdout.write(f"Generating tables for template id={template.id} ({template.title})...")
-                    processor.generate_tables()
-                    self.stdout.write(self.style.SUCCESS(f"Tables generated for template id={template.id}"))
-                if options.get('graphics'):
-                    self.stdout.write(f"Generating graphics for template id={template.id} ({template.title})...")
-                    processor.generate_graphics()
-                    self.stdout.write(self.style.SUCCESS(f"Graphics generated for template id={template.id}"))
+        total, processed, errors = 0,0,0
+        if options.get('graphics'):
+            total = len(graphics)
+        if options.get('tables'):
+            total += len(tables)
+        
+        
+        if options.get('graphics'):
+            for graphic in graphics:
+                processor = StoryProcessor(template=None, published_date=None, force_generation=False, story=graphic.story)
+                if not processor.generate_graphic(graphic):
+                    errors += 1
                 processed += 1
-            except Exception as exc:
-                self.stderr.write(f"Error processing template id={getattr(template, 'id', 'unknown')}: {exc}")
-                errors += 1
+        if options.get('tables'):            
+            for table in tables:
+                processor = StoryProcessor(template=None, published_date=None, force_generation=False, story=table.story)
+                if not processor.generate_table(table):
+                    errors += 1
+                processed += 1
 
         self.stdout.write(self.style.SUCCESS(f"Done. processed={processed}/{total} errors={errors}"))

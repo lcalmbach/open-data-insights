@@ -228,14 +228,10 @@ def create_bar_stacked_chart(data, settings):
         logger.error("Stacked bar chart requires 'x', 'y', and 'color' fields")
         return alt.Chart(data).mark_point()  # Return empty chart
     
-    # decide x axis type (O for ordinal, Q for quantitative)
-    x_type = (settings.get('x_type') or 'Q').upper()
-    x_field_spec = f"{x_field}:O" if x_type == 'O' else f"{x_field}:Q"
-    
     # Create stacked encoding
     encodings = {
         'x': alt.X(
-            x_field_spec,
+            x_field, 
             title=settings.get('x_title', x_field)
         ),
         'y': alt.Y(
@@ -499,8 +495,6 @@ def apply_common_settings(chart, settings):
       - x_domain / y_domain: explicit numeric domain for quantitative axes.
       - x_tick_integer / y_tick_integer: force integer ticks (tickMinStep=1 + integer format)
       - x_axis / y_axis: dict of axis options (labelAngle, tickCount, format, etc.)
-      - x_axis_labels / y_axis_labels: optional list of labels to map numeric tick values to strings.
-        Example: x_axis_labels=['Jan','Feb',...], with data values 1..12 will display month names.
     """
     encodings = {}
 
@@ -515,22 +509,12 @@ def apply_common_settings(chart, settings):
             ax_opts.setdefault("format", "d")
             ax_opts.setdefault("tickMinStep", 1)
         # always provide an Axis object
-        return ax_opts
+        return alt.Axis(**ax_opts) if ax_opts else alt.Axis()
 
     def _build_scale(domain):
         if domain is None:
             return None
         return alt.Scale(domain=domain, nice=False)
-
-    # helper to produce a Vega-Lite labelExpr for mapping numeric tick values to labels
-    def _label_expr_for_labels(labels: list):
-        # build a JSON array in JS and index by datum.value-1 (assumes 1-based values)
-        # Limitations: this expects numeric 1..N values. If your data uses strings, consider
-        # converting them to integers or using an ordinal axis with explicit sort.
-        import json as _json
-        js_array = _json.dumps(labels)
-        # label expression: (labels)[datum.value - 1] || datum.value
-        return f"({js_array})[datum.value - 1] || datum.value"
 
     # X-axis
     x_field = settings.get("x")
@@ -540,22 +524,12 @@ def apply_common_settings(chart, settings):
         x_integer = bool(settings.get("x_tick_integer", False))
         x_sort = settings.get("x_sort", None)
         x_domain = settings.get("x_domain", None)
-        x_axis_labels = settings.get("x_axis_labels")
 
-        axis_opts = _build_axis(x_axis_settings, x_integer)
+        axis_obj = _build_axis(x_axis_settings, x_integer)
         scale_obj = _build_scale(x_domain)
 
-        # if axis labels provided and numeric mapping desired, set tickValues and labelExpr
-        axis_kwargs = dict(axis_opts)
-        if x_axis_labels:
-            # tick values will be 1..len(labels)
-            tick_vals = list(range(1, len(x_axis_labels) + 1))
-            axis_kwargs["values"] = tick_vals
-            axis_kwargs["labelExpr"] = _label_expr_for_labels(x_axis_labels)
-
-        axis_obj = alt.Axis(**axis_kwargs) if axis_kwargs else alt.Axis()
-
         if x_type == "O":
+            # ordinal axis; allow explicit sort list
             encodings["x"] = alt.X(
                 f"{x_field}:O",
                 title=settings.get("x_title", x_field),
@@ -578,23 +552,15 @@ def apply_common_settings(chart, settings):
             )
 
     # Y-axis
-    y_field = settings.get('y')
+    y_field = settings.get("y")
     if y_field:
         y_type = (settings.get("y_type") or "Q").upper()
         y_axis_settings = settings.get("y_axis") or {}
         y_integer = bool(settings.get("y_tick_integer", False))
         y_domain = settings.get("y_domain", None)
-        y_axis_labels = settings.get("y_axis_labels")
 
-        axis_opts = _build_axis(y_axis_settings, y_integer)
+        axis_obj = _build_axis(y_axis_settings, y_integer)
         scale_obj = _build_scale(y_domain)
-
-        axis_kwargs = dict(axis_opts)
-        if y_axis_labels:
-            tick_vals = list(range(1, len(y_axis_labels) + 1))
-            axis_kwargs["Values"] = tick_vals
-            axis_kwargs["labelExpr"] = _label_expr_for_labels(y_axis_labels)
-        axis_obj = alt.Axis(**axis_kwargs) if axis_kwargs else alt.Axis()
 
         if y_type == "O":
             encodings["y"] = alt.Y(
@@ -611,33 +577,33 @@ def apply_common_settings(chart, settings):
                 scale=scale_obj if scale_obj is not None else None,
             )
         else:
-            encodings['y'] = alt.Y(
+            encodings["y"] = alt.Y(
                 f"{y_field}:Q",
                 title=settings.get("y_title", y_field),
                 axis=axis_obj,
-                scale=alt.Scale(zero=settings.get('y_zero', True)),
-                sort=settings.get("y_sort", None),
+                scale=scale_obj if scale_obj is not None else None,
             )
 
     # Color encoding (optional)
-    color_field = settings.get('color')
+    color_field = settings.get("color")
     if color_field:
-        encodings['color'] = color_field
+        encodings["color"] = color_field
 
     # Tooltip (optional)
-    tooltip_fields = settings.get('tooltips')
+    tooltip_fields = settings.get("tooltips")
     if tooltip_fields:
-        encodings['tooltip'] = tooltip_fields  # can be list of strings or alt.Tooltip instances
+        encodings["tooltip"] = tooltip_fields  # can be list of strings or alt.Tooltip instances
 
-    # Apply encodings
-    chart = chart.encode(**encodings)
+    # Apply encodings when present
+    if encodings:
+        chart = chart.encode(**encodings)
 
     # Set properties
     props = {}
-    if 'title' in settings:
-        props['title'] = settings['title']
-    props['height'] = settings.get('height', 300)
-    props['width'] = settings.get('width', 'container')
+    if "title" in settings:
+        props["title"] = settings["title"]
+    props["height"] = settings.get("height", 300)
+    props["width"] = settings.get("width", "container")
 
     chart = chart.properties(**props)
 

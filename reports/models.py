@@ -331,7 +331,7 @@ class StoryTemplateGraphic(models.Model):
     story_template = models.ForeignKey(
         StoryTemplate,
         on_delete=models.CASCADE,
-        related_name="graphics",
+        related_name="graphic_templates",
         help_text="The story template this graphic belongs to.",
     )
     title = models.CharField(max_length=255, help_text="Title of the graphic.")
@@ -364,7 +364,7 @@ class StoryTemplateTable(models.Model):
     story_template = models.ForeignKey(
         StoryTemplate,
         on_delete=models.CASCADE,
-        related_name="tables",  # Changed from "graphics" to "tables"
+        related_name="story_template_tables",  
         help_text="The story template this table belongs to.",
     )
     title = models.CharField(max_length=255, help_text="Title of the table.")
@@ -706,13 +706,13 @@ class StoryTable(models.Model):
     story = models.ForeignKey(
         Story,
         on_delete=models.CASCADE,
-        related_name="storytables",
+        related_name="story_tables",
         help_text="The story this table belongs to.",
     )
     table_template = models.ForeignKey(
         StoryTemplateTable,
         on_delete=models.CASCADE,
-        related_name="storytables",
+        related_name="story_template_tables",
         help_text="The story template this table belongs to.",
     )
     title = models.CharField(max_length=255, help_text="Title of the table.")

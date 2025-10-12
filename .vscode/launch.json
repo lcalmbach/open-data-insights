@@ -19,16 +19,14 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Django: Generate Stories id=11",
+            "name": "Django: Generate Stories id=40",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
                 "generate_stories",
                 "--id",
-                "11", 
-                "--date",
-                "2023-01-01",
+                "40", 
                 "--force",
                 "-v",
                 "2"
@@ -123,7 +121,7 @@
             "args": [
                 "generate_appendices",
                 "--id",
-                "25",
+                "97",
                 "--graphics",
                 "-v",
                 "2"

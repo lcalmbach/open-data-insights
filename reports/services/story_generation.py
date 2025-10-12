@@ -10,7 +10,7 @@ from typing import Optional, Dict, Any, List
 from django.utils import timezone
 import json
 
-from reports.models import StoryTemplate, Dataset, Story
+from reports.models import StoryTemplate, Story, Graphic
 from reports.services.base import ETLBaseService
 from reports.services.story_processor import StoryProcessor
 from reports.models import StoryTemplate
@@ -86,7 +86,7 @@ class StoryGenerationService(ETLBaseService):
         """Generate multiple stories from templates"""
         # Use Django ORM to fetch templates
         if template_id:
-            templates = StoryTemplate.objects.filter(id=template_id)
+            templates = StoryTemplate.objects.filter(id=template_id, active=True)
         else:
             templates = StoryTemplate.objects.filter(active=True).order_by('id')
 

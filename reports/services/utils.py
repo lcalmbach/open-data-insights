@@ -10,6 +10,8 @@ from pathlib import Path
 from datetime import timezone, date, datetime
 from typing import Optional
 from dateutil.relativedelta import relativedelta
+import calendar
+import json
 
 
 def get_parquet_row_count(file_path: str) -> int:
@@ -101,4 +103,28 @@ SQL_TEMPLATES = {
 
 def ensure_date(dt):
     return dt.date() if isinstance(dt, datetime) else dt
+
+def get_month_labels(abbrev: bool = True) -> list:
+    """Return month labels for 1..12.
+
+    Args:
+        abbrev: if True return 3-letter abbreviations (Jan, Feb, ...),
+                otherwise full month names (January, February, ...).
+
+    Returns:
+        list of 12 strings for months January..December
+    """
+    if abbrev:
+        # month_abbr[1]..month_abbr[12]
+        return [calendar.month_abbr[i] for i in range(1, 13)]
+    return [calendar.month_name[i] for i in range(1, 13)]
+
+def get_month_labels_literal(abbrev: bool = True) -> str:
+    """Return month labels as a JSON-style array string with double quotes.
+
+    Useful when you want to copy a double-quoted list into other tools or the database.
+    Example: "["Jan","Feb",... ]"
+    """
+    labels = get_month_labels(abbrev=abbrev)
+    return json.dumps(labels)
 

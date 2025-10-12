@@ -106,40 +106,60 @@ class StoryProcessor:
     """
 
     def __init__(
-        self, template: StoryTemplate, published_date: date, force_generation: bool = False
+        self, 
+        template: StoryTemplate = None, 
+        published_date: date = None, 
+        force_generation: bool = False, 
+        story: Story = None
     ):
-        print(f"{template.id} {template.title}")
-        self.logger = logging.getLogger(
-            f"StoryProcessor.{template.title}"
-        )
-        self.dbclient = DjangoPostgresClient()
-        self.most_recent_day = self._get_most_recent_day(published_date, template)
-        self.season, self.season_year = self._get_season(published_date, template)
-        reference_period_start, reference_period_end = (
-            self._get_reference_period(published_date, template)
-        )
+        #verify if either template or story is provided
+        if not template and not story:
+            raise ValueError("Either template or story must be provided")
+        #verify that published_date is provided if template is provided
+        if template and not published_date:
+            raise ValueError("published_date must be provided if template is provided")
         
-        self.story = (
-            Story.objects
-            .filter(
-                template=template,
-                reference_period_start=reference_period_start,
-                reference_period_end=reference_period_end
-            )
-            .first()
-            or Story()  # creates a new, empty instance if no match
-        )
-        if self.story.id is None:
-            self.story.template = template
-            
-            self.story.reference_period_start, self.story.reference_period_end = (
+        
+        self.dbclient = DjangoPostgresClient()
+        self.force_generation = force_generation
+        if story:
+            self.story = story
+            template = story.template
+            published_date = story.published_date
+            self.most_recent_day = self._get_most_recent_day(published_date, template)
+            self.season, self.season_year = self._get_season(published_date, template)
+            reference_period_start, reference_period_end = (
                 self._get_reference_period(published_date, template)
             )
+        else:
+            self.most_recent_day = self._get_most_recent_day(published_date, template)
+            self.season, self.season_year = self._get_season(published_date, template)
+            reference_period_start, reference_period_end = (
+                self._get_reference_period(published_date, template)
+            )
+            self.story = (
+                Story.objects
+                .filter(
+                    template=template,
+                    reference_period_start=reference_period_start,
+                    reference_period_end=reference_period_end
+                )
+                .first()
+                or Story()  # creates a new, empty instance if no match
+            )
+            if self.story.id is None:
+                self.story.template = template
+                
+                self.story.reference_period_start, self.story.reference_period_end = (
+                    self._get_reference_period(published_date, template)
+                )
         
-        self.story.published_date = published_date
-        self.story.prompt_text = self.story.template.prompt_text
-        self.force_generation = force_generation
-        
+            self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
+            self.story.published_date = published_date
+
+        self.logger = logging.getLogger(
+            f"StoryProcessor.{template.id} {template.title}"
+        )
         self.reference_period = template.reference_period.id
         self.year = self.story.reference_period_start.year
         self.month = self.story.reference_period_start.month
@@ -149,7 +169,7 @@ class StoryProcessor:
         if self.is_data_based:
             self.story.context_values = self._get_context_data()
 
-        self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
+            
         
     def _get_reference_period_expression(self) -> str:
         """
@@ -262,8 +282,8 @@ class StoryProcessor:
                 # check if the regular due date has passed without publishing the story
                 date_is_due = (
                     True
-                    if (self.last_published_date is None or self.story.template.reference_period_id == self.story.template.reference_period_id == ReferencePeriod.IRREGULAR.value)
-                    else regular_due_date >= self.last_published_date
+                    if (self.last_published_date is None or self.story.template.reference_period_id == ReferencePeriod.IRREGULAR.value)
+                    else regular_due_date <= self.last_published_date
                 )
                 publish_conditions_met = get_publish_conditions_result()
                 is_due = has_data and date_is_due and publish_conditions_met
@@ -274,102 +294,110 @@ class StoryProcessor:
             self.logger.error(f"Error checking if story is due: {e}")
             return False
 
-    def generate_tables(self) -> list:
-        """Generate tables for the story"""
-        tables = StoryTemplateTable.objects.filter(story_template=self.story.template)  # Use StoryTemplateTable
-        for table in tables:
-            sql_cmd = table.sql_command
-            params = self._get_sql_command_params(sql_cmd)
-            try:
-                df = self.dbclient.run_query(sql_cmd, params)
-                data = df.to_dict(orient="records")
-                story_table = StoryTable.objects.filter(
-                    story=self.story, table_template=table
-                ).first() or StoryTable(story=self.story, table_template=table)
-                story_table.title = self._replace_reference_period_expression(table.title)
-                story_table.data = json.dumps(data, indent=2, ensure_ascii=False, cls=DecimalEncoder)
-                story_table.sort_order = table.sort_order
-                story_table.save()  
-
-            except Exception as e:
-                self.logger.error(f"Error generating table {table.id}: {e}")
-                continue
-
-    def generate_graphics(self) -> list:
-        """Generate graphics for the story template and save them directly to database"""
-        
-        
+    def generate_table(self, table: StoryTable):
+        table_template = table.table_template
+        sql_cmd = table_template.sql_command
+        params = self._get_sql_command_params(sql_cmd)
         try:
-            graphic_templates = StoryTemplateGraphic.objects.filter(
-                story_template_id=self.story.template.id
-            ).order_by('sort_order')
-            
-            self.logger.info(f"Found {graphic_templates.count()} graphic templates to process")
-            
-            for template in graphic_templates:
-                try:
-                    # Get SQL command
-                    sql_command = template.sql_command
-                    if not sql_command:
-                        self.logger.warning(f"Empty SQL command for graphic template: {template.title}")
-                        continue
-                    
-                    # Replace parameters in SQL
-                    params = self._get_sql_command_params(sql_command)
-                    self.logger.info(f"Executing SQL for graphic: {template.title}")
-                    
-                    # Execute SQL to get data
-                    data = self.dbclient.run_query(sql_command, params)
-                    
-                    if data is None or len(data) == 0:
-                        self.logger.warning(f"No data returned for graphic template: {template.title}")
-                        continue
-                    
-                    # Generate unique chart ID
-                    chart_id = f"chart-{template.id}-{uuid.uuid4().hex[:8]}"
-                    # Use settings from template
-                    settings = template.settings
-                    settings['type'] = template.graphic_type
-
-                    # Generate chart HTML
-                    self.logger.info(f"Generating chart for: {template.title}")
-                    col = settings['y']
-                    data[col] = pd.to_numeric(data[col], errors='coerce')
-                    chart_html = generate_chart(
-                        data=data,
-                        settings=settings,
-                        chart_id=chart_id
-                    )
-                    
-                    # Create and save Graphic object directly to database
-                    story_graphic = (
-                        Graphic.objects
-                        .filter(story=self.story, graphic_template=template)
-                        .first()
-                        or Graphic(
-                            story=self.story,
-                            graphic_template=template
-                        )
-                    )
-                    story_graphic.title=self._replace_reference_period_expression(template.title)
-                    story_graphic.content_html=chart_html
-                    data = data.map(str)
-                    story_graphic.data=json.dumps(data.to_dict(orient="records"), indent=2, ensure_ascii=False, cls=DecimalEncoder)
-                    story_graphic.sort_order=template.sort_order
-                    story_graphic.save()
-                    self.logger.info(f"Successfully generated and saved graphic: {template.title} {story_graphic.id}")
-                    
-                except Exception as e:
-                    self.logger.error(f"Error generating graphic '{template.title}': {str(e)}")
-                    import traceback
-                    self.logger.error(traceback.format_exc())
-            
+            df = self.dbclient.run_query(sql_cmd, params)
+            data = df.to_dict(orient="records")
+            story_table = StoryTable.objects.filter(    
+                story=self.story, table_template=table_template
+            ).first() or StoryTable(story=self.story, table_template=table_template)
+            story_table.title = self._replace_reference_period_expression(table_template.title)
+            story_table.data = json.dumps(data, indent=2, ensure_ascii=False, cls=DecimalEncoder)
+            story_table.sort_order = table_template.sort_order
+            story_table.save()  
+            return True
         except Exception as e:
-            self.logger.error(f"Error in generate_graphics: {str(e)}")
+            self.logger.error(f"Error generating table {table_template.id}: {e}")
+            return False
+    
+    def _generate_tables(self):
+        """Generate tables for the story"""
+        table_templates = self.story.template.story_template_tables.all()
+        self.logger.info(f"Found {table_templates.count()} table templates to process")
+        
+        for table_template in table_templates:
+            tables = StoryTable.objects.filter(story=self.story, table_template=table_template)
+            if not tables.exists():
+                table = StoryTable(story=self.story, table_template=table_template)
+            else:
+                if tables.count() > 1:
+                    #delete all but the last table
+                    for t in tables[:-1]:
+                        t.delete()
+                table = tables.first()
+            self.generate_table(table)
+            
+    def generate_graphic(self, graphic: Graphic):
+        try:     
+            graphic_template = graphic.graphic_template
+            sql_command = graphic_template.sql_command
+            if not sql_command:
+                self.logger.warning(f"Empty SQL command for graphic template: {graphic_template.title}")
+                return
+            
+            # Replace parameters in SQL
+            params = self._get_sql_command_params(sql_command)
+            self.logger.info(f"Executing SQL for graphic: {graphic_template.title}")
+            
+            # Execute SQL to get data
+            data = self.dbclient.run_query(sql_command, params)
+        
+            if data is None or len(data) == 0:
+                self.logger.warning(f"No data returned for graphic template: {graphic_template.title}")
+                return
+            
+            # Generate unique chart ID
+            chart_id = f"chart-{graphic_template.id}-{uuid.uuid4().hex[:8]}"
+            # Use settings from template
+            settings = graphic_template.settings
+            settings['type'] = graphic_template.graphic_type
+
+            # Generate chart HTML
+            self.logger.info(f"Generating chart for: {graphic_template.title}")
+            col = settings['y']
+            data[col] = pd.to_numeric(data[col], errors='coerce')
+            chart_html = generate_chart(
+                data=data,
+                settings=settings,
+                chart_id=chart_id
+            )
+            
+            graphic.title=self._replace_reference_period_expression(graphic_template.title)
+            graphic.content_html=chart_html
+            data = data.map(str)
+            graphic.data=json.dumps(data.to_dict(orient="records"), indent=2, ensure_ascii=False, cls=DecimalEncoder)
+            graphic.sort_order=graphic_template.sort_order
+            graphic.save()
+
+            self.logger.info(f"Successfully generated and saved graphic: {graphic_template.title} {graphic.id}")
+            return True
+        
+        except Exception as e:
+            self.logger.error(f"Error generating graphic '{graphic_template.title}': {str(e)}")
             import traceback
             self.logger.error(traceback.format_exc())
-            return []
+            return False
 
+    def _generate_graphics(self) -> list:
+        """Generate graphics for the story template and save them directly to database"""
+        graphic_templates = self.story.template.graphic_templates.all()
+        self.logger.info(f"Found {graphic_templates.count()} graphic templates to process")
+        
+        for graphic_template in graphic_templates:
+            graphics = Graphic.objects.filter(story=self.story, graphic_template=graphic_template)
+            if not graphics.exists():
+                graphic = Graphic(story=self.story, graphic_template=graphic_template)
+            else:
+                if graphics.count() > 1:
+                    #delete all but the last graphic
+                    for g in graphics[:-1]:
+                        g.delete()
+                graphic = graphics.first()
+            self.generate_graphic(graphic)
+                
     def generate_story(self) -> bool:
         """Generate the complete story"""
         try:
@@ -408,9 +436,9 @@ class StoryProcessor:
                 
             self.story.save()
             self.logger.info("Generating tables...")
-            self.generate_tables()                
+            self._generate_tables()                
             self.logger.info("Generating graphics...")
-            self.story.graphics = self.generate_graphics()
+            self._generate_graphics()
             self._save_log_record()
 
             # Execute post-publish commands
