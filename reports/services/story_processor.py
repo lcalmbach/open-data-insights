@@ -169,8 +169,7 @@ class StoryProcessor:
         if self.is_data_based:
             self.story.context_values = self._get_context_data()
 
-            
-        
+                    
     def _get_reference_period_expression(self) -> str:
         """
         Generates a human-readable string representation of the reference period for the story.
@@ -283,7 +282,7 @@ class StoryProcessor:
                 date_is_due = (
                     True
                     if (self.last_published_date is None or self.story.template.reference_period_id == ReferencePeriod.IRREGULAR.value)
-                    else regular_due_date <= self.last_published_date
+                    else regular_due_date >= self.last_published_date
                 )
                 publish_conditions_met = get_publish_conditions_result()
                 is_due = has_data and date_is_due and publish_conditions_met
@@ -404,26 +403,25 @@ class StoryProcessor:
             self.logger.info(
                 f"Initializing story generation for {self.story.template.title} ({self.story.published_date.strftime('%Y-%m-%d')})"
             )
-            
             # Generate content
             self.logger.info("Generating story content...")
-            self.story.content = self._generate_insight_text()
-            
+            # generate main content
+            self._generate_insight_text()
             if not self.story.content:
-                self.logger.warning(f"Empty content generated for story {self.story.template.title}")
-                return False
-            
-            self.logger.info("Generating summary...")
-            # Generate lead (summary) and an engaging title using the unified LLM helper
-            if self.story.template.create_lead:
-                self.story.summary = self.generate_summary(self.story.content, kind="lead")
-            else:
-                self.story.summary = self.story.template.summary
+                raise RuntimeError(f"Failed to generate story content for template {self.story.template.id}")
 
-            if self.story.template.create_title:
-                self.story.title = self.generate_summary(self.story.content, kind="title")
-            else:
-                self.story.title = self.story.template.title
+            # generate summary/lead
+            self.logger.info("Generating lead...")
+            self.generate_lead()
+            if not self.story.summary:
+                raise RuntimeError(f"Failed to generate story summary for template {self.story.template.id}")
+
+            # generate title
+            self.logger.info("Generating title...")
+            self.generate_title()
+            if not self.story.title:
+                raise RuntimeError(f"Failed to generate story title for template {self.story.template.id}")
+
             self.logger.info("Saving story to database...")
             try:
                 self.story.full_clean()  # This validates the model
@@ -671,7 +669,7 @@ class StoryProcessor:
             self.logger.error(f"Error saving log record: {e}")
             raise
 
-    def _generate_insight_text(self) -> Optional[str]:
+    def _generate_insight_text(self) -> bool:
         """Generate story text using OpenAI API"""
         try:
             # Get OpenAI API key from settings
@@ -719,19 +717,16 @@ class StoryProcessor:
                 temperature=self.story.template.temperature,
                 max_tokens=3000,
             )
-
-            return response.choices[0].message.content
+            self.story.content = (response.choices[0].message.content or "").strip()
+            if not self.story.content:
+                self.logger.warning(f"Empty content generated for story {self.story.template.title}")
+            return bool(self.story.content)  
 
         except Exception as e:
             self.logger.error(f"Error generating report text with OpenAI: {e}")
             return None
 
-    def generate_summary(self, insight_text: str, kind: str = "lead") -> Optional[str]:
-        """
-        Generic LLM helper to produce different short outputs.
-        kind: "lead" -> one- or two-sentence summary
-              "title" -> single-line engaging analytical title
-        """
+    def _generate_summary(self, kind: str) -> Optional[str]:
         try:
             api_key = getattr(settings, "OPENAI_API_KEY", None)
             if not api_key:
@@ -739,11 +734,10 @@ class StoryProcessor:
                 return None
 
             client = OpenAI(api_key=api_key)
-
             # Kind-specific instructions
             if kind == "title":
-                system = "You are a concise editorial assistant producing sharp, data-driven titles"
-                user_instruction = (
+                system = "You are a concise editorial assistant producing sharp, data-driven insight titles"
+                user_instruction = self.story.template.lead_prompt if self.story.template.lead_prompt else (
                     f""".Write a single-line analytical headline (max 10–12 words). 
                     Prefer compact forms over wordiness. 
                     Keep neutral, factual tone. 
@@ -753,16 +747,14 @@ class StoryProcessor:
                 temperature = min(max(getattr(self.story.template, "temperature", 0.7), 0.2), 1.0)
             else:  # lead (default)
                 system = "Generate a concise one- or two-sentence summary of the provided insight text."
-                user_instruction = (
-                    "Summarize the following insight text in one or two clear sentences."
-                )
+                user_instruction = self.story.template.lead_prompt if self.story.template.lead_prompt else "Summarize the following insight text in one or two clear sentences."
                 max_tokens = 200
                 temperature = getattr(self.story.template, "temperature", 0.2)
 
             # Construct messages
             messages = [
                 {"role": "system", "content": f"{system}\n\n{LLM_FORMATTING_INSTRUCTIONS}"},
-                {"role": "user", "content": f"{user_instruction}\n\nInsight text:\n\n{insight_text}"},
+                {"role": "user", "content": f"{user_instruction}\n\nInsight text:\n\n{self.story.content}"},
             ]
 
             response = client.chat.completions.create(
@@ -772,18 +764,31 @@ class StoryProcessor:
                 max_tokens=max_tokens,
             )
 
-            raw = response.choices[0].message.content.strip()
-            # For title return first non-empty line trimmed
-            if kind == "title":
-                title_line = next((ln.strip() for ln in raw.splitlines() if ln.strip()), "")
-                if not title_line:
-                    return None
-                return title_line if len(title_line) <= 140 else title_line[:137].rstrip() + "..."
-
-            # For lead return the first paragraph/line(s)
-            return next((p.strip() for p in raw.split("\n\n") if p.strip()), raw)
+            return response.choices[0].message.content.strip()
 
         except Exception as e:
             self.logger.error(f"Error generating {kind} with OpenAI: {e}")
-            return None
+            return None    
 
+    def generate_title(self) -> Optional[str]:
+        """Generate title using the unified LLM helper"""
+        self.logger.info("Generating title...")
+        # Generate lead (summary) and an engaging title using the unified LLM helper
+        
+        if self.story.template.create_title:
+            self.story.title = self._generate_summary(kind="title")
+        else:
+            self.story.title = self._replace_reference_period_expression(self.story.template.default_title)
+        return bool(self.story.title)
+
+    def generate_lead(self) -> Optional[str]:
+        """
+        Generic LLM helper to produce different short outputs.
+        kind: "lead" -> one- or two-sentence summary
+              "title" -> single-line engaging analytical title
+        """
+        self.logger.info("Generating lead...")
+        if self.story.template.create_lead:
+            self.story.summary = self._generate_summary(kind="lead")
+        else:
+            self.story.summary = self._replace_reference_period_expression(self.story.template.summary)

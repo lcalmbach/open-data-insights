@@ -70,15 +70,17 @@ def generate_chart(data, settings, chart_id):
 
 def create_line_chart(data, settings):
     """Create a line chart with the given data and settings"""
+    
+    if settings.get('x_type') == "T":
+        data[settings.get('x')] = pd.to_datetime(data[settings.get('x')], errors='coerce')
     # Create base chart
     chart = alt.Chart(data).mark_line(
         point=settings.get('show_points', False),
         interpolate=settings.get('interpolate', 'linear')
     )
-    
     # Apply encodings and properties
     chart = apply_common_settings(chart, settings)
-    
+
     # Line-specific settings
     if 'stroke_width' in settings:
         chart = chart.mark_line(strokeWidth=settings['stroke_width'])

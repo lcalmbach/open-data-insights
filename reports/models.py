@@ -265,6 +265,17 @@ class StoryTemplate(models.Model):
         help_text="SQL command to get the most recent day for which data is available. This is used to determine the reference period for the story.",
     )
     title = models.CharField(max_length=255, help_text="Title of the story template.")
+    default_title = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Default title for the story. This title is used for the story when create_title is false.",
+    )
+    default_lead = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Default lead for the story. This lead is used for the story when create_lead is false.",
+    )
     summary = models.TextField(
         blank=True, null=True, help_text="Lead paragraph of the story template."
     )
@@ -297,6 +308,16 @@ class StoryTemplate(models.Model):
     system_prompt = models.TextField(
         blank=True, null=True, help_text="System prompt for the AI model."
     )
+    title_prompt = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Title prompt for the AI model. If empty and create_title is true, a generic prompt will be used to generate the title.",
+    )
+    lead_prompt = models.TextField(
+        blank=True,
+        null=True,
+        help_text="prompt for generating the lead for the story.",
+    )
     post_publish_command = models.TextField(
         blank=True,
         null=True,
@@ -304,7 +325,7 @@ class StoryTemplate(models.Model):
     )
     create_title = models.BooleanField(
         default=True,
-        help_text="Indicates if a title should be created for the story, if false, the tempalte taitle will be used for all stories.",
+        help_text="Indicates if a title should be created for the story, If false, the default title will be used.",
     )
     create_lead = models.BooleanField(
         default=True, help_text="Indicates if a lead should be created for the story."
@@ -364,7 +385,7 @@ class StoryTemplateTable(models.Model):
     story_template = models.ForeignKey(
         StoryTemplate,
         on_delete=models.CASCADE,
-        related_name="story_template_tables",  
+        related_name="story_template_tables",
         help_text="The story template this table belongs to.",
     )
     title = models.CharField(max_length=255, help_text="Title of the table.")
