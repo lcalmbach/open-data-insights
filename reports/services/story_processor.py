@@ -737,7 +737,7 @@ class StoryProcessor:
             # Kind-specific instructions
             if kind == "title":
                 system = "You are a concise editorial assistant producing sharp, data-driven insight titles"
-                user_instruction = self.story.template.lead_prompt if self.story.template.lead_prompt else (
+                user_instruction = self.story.template.title_prompt if self.story.template.title_prompt else (
                     f""".Write a single-line analytical headline (max 10–12 words). 
                     Prefer compact forms over wordiness. 
                     Keep neutral, factual tone. 

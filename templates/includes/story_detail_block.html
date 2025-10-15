@@ -12,9 +12,9 @@
   </div>
   <div class="card-body text-start">
     <b>
-      <!-- debug: story id / template 
+      <!-- debug: story id / template -->
       storyid: {{selected_story.id}} template_id: {{selected_story.template.id}} ({{selected_story.template.title}})
-      -->
+      
       <p class="card-text mt-3">{{ selected_story.summary|safe }}</p>
     </b>
     <p class="card-text mt-3">{{ selected_story.content_html|safe }}</p>

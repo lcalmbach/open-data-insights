@@ -7,7 +7,6 @@ class Command(BaseCommand):
     help = 'Generate tables and/or graphics for a given story template, story or single graphic'
 
     def add_arguments(self, parser):
-        parser.add_argument('--id', type=int, help='Graphic ID: regenerate a single graphic (requires Graphic model/regenerate logic)')
         parser.add_argument('--story_id', type=int, help='Story ID: regenerate all graphics for this story')
         parser.add_argument('--template_id', type=int, help='StoryTemplate ID: all stories of this template')
         parser.add_argument('--title', action='store_true', help='Process all story templates')
@@ -22,7 +21,7 @@ class Command(BaseCommand):
         elif story_id:
             stories = Story.objects.filter(id=story_id)
         else:
-            stories = Story.objects.all(active=True)
+            stories = Story.objects.all()
         total = len(stories) 
         processed, errors = 0,0
         
