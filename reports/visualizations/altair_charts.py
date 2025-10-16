@@ -576,7 +576,7 @@ def apply_common_settings(chart, settings):
                 f"{x_field}:Q",
                 title=settings.get("x_title", x_field),
                 axis=axis_obj,
-                scale=scale_obj if scale_obj is not None else None,
+                #scale=scale_obj if scale_obj is not None else None,
             )
 
     # Y-axis

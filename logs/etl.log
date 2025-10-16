@@ -8659,3 +8659,6 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2025-10-16 07:48:26,894 - EmailService - INFO - Starting sending mails for 2025-10-16...
 2025-10-16 07:50:58,844 - EmailService - INFO - Email sent successfully to 1 recipients
 2025-10-16 07:53:16,092 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-10-16 10:44:11,262 - StoryGeneration - ERROR - No active story template found with ID: 41
+2025-10-16 11:08:46,833 - StoryGeneration - INFO - Skipping template 41 - not due
+2025-10-16 12:34:20,595 - StoryGeneration - INFO - Skipping template 41 - not due
