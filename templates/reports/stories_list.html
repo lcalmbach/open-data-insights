@@ -51,7 +51,7 @@
         Select insight
         <small class="text-muted">(<span id="story-select-count">{{ stories|length }}</span> found)</small>
       </label>
-      <select id="story-select" class="form-select">
+      <select id="story-select" class="form-select" data-selected="{{ selected_story.id|default:'' }}">
         {% for story in stories %}
           <option
             value="{{ story.id }}"
@@ -84,36 +84,22 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('filter-form');
   const templateSelect = document.getElementById('template');
   const periodSelect = document.getElementById('reference_period');
   const searchInput = document.getElementById('search');
   const storySelect = document.getElementById('story-select');
-  const storiesCountEl = document.getElementById('stories-count');
-  const storySelectCountEl = document.getElementById('story-select-count');
 
-  // preserve original template options for client-side filtering
+  // (optional) ursprüngliche Template-Options merken, um clientseitig nach Periode zu filtern
   let originalTemplateOptions = [];
   if (templateSelect) {
     originalTemplateOptions = Array.from(templateSelect.options).map(opt => ({
       value: opt.value,
       text: opt.text,
-      period: opt.dataset ? opt.dataset.referencePeriod : opt.getAttribute('data-reference-period')
+      period: opt.dataset ? opt.dataset.referencePeriod : opt.getAttribute('data-reference-period') || ''
     }));
   }
 
-  // preserve original story options for client-side filtering
-  let originalStoryOptions = [];
-  if (storySelect) {
-    originalStoryOptions = Array.from(storySelect.options).map(opt => ({
-      value: opt.value,
-      text: opt.text,
-      template: opt.getAttribute('data-template') || '',
-      period: opt.getAttribute('data-period') || '',
-      title: opt.getAttribute('data-title') || opt.textContent || ''
-    }));
-  }
-
-  // helper to repopulate template select based on chosen period
   function filterTemplateOptions(period) {
     if (!templateSelect) return;
     const prev = templateSelect.value;
@@ -124,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
     templateSelect.appendChild(defaultOpt);
 
     originalTemplateOptions.forEach(o => {
+      if (!o.value) return; // skip default "All templates" we already added
       if (!period || String(o.period) === String(period)) {
         const opt = document.createElement('option');
         opt.value = o.value;
@@ -133,53 +120,12 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    if (prev) {
-      const exists = Array.from(templateSelect.options).some(opt => opt.value === prev);
-      templateSelect.value = exists ? prev : '';
-    }
+    // falls der bisherige Wert nicht mehr existiert, auf leer setzen
+    const exists = Array.from(templateSelect.options).some(opt => opt.value === prev);
+    templateSelect.value = exists ? prev : '';
   }
 
-  // filter the story select options in-place by period/template/search
-  function filterStoryOptions() {
-    if (!storySelect) return;
-    const selectedTemplate = templateSelect ? templateSelect.value.trim() : '';
-    const selectedPeriod = periodSelect ? periodSelect.value.trim() : '';
-    const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
-
-    // rebuild options
-    storySelect.innerHTML = '';
-    let matchCount = 0;
-    originalStoryOptions.forEach(o => {
-      // apply period filter
-      if (selectedPeriod && String(o.period) !== String(selectedPeriod)) return;
-      // apply template filter
-      if (selectedTemplate && String(o.template) !== String(selectedTemplate)) return;
-      // apply search filter (title)
-      if (q && String(o.title).toLowerCase().indexOf(q) === -1) return;
-
-      const opt = document.createElement('option');
-      opt.value = o.value;
-      opt.textContent = o.text;
-      opt.setAttribute('data-template', o.template);
-      opt.setAttribute('data-period', o.period);
-      opt.setAttribute('data-title', o.title);
-      storySelect.appendChild(opt);
-      matchCount++;
-    });
-
-    if (matchCount === 0) {
-      const emptyOpt = document.createElement('option');
-      emptyOpt.disabled = true;
-      emptyOpt.textContent = 'No stories found.';
-      storySelect.appendChild(emptyOpt);
-    }
-
-    // update counts
-    if (storiesCountEl) storiesCountEl.textContent = matchCount;
-    if (storySelectCountEl) storySelectCountEl.textContent = matchCount;
-  }
-
-  // simple debounce
+  // Debounce helper
   function debounce(fn, wait) {
     let t = null;
     return function (...args) {
@@ -188,44 +134,36 @@ document.addEventListener('DOMContentLoaded', function () {
     };
   }
 
-  // initialize template list according to current period on page load
+  // initial: Templates nach aktueller Periode einschränken (optional)
   if (periodSelect) filterTemplateOptions(periodSelect.value);
 
-  // initialize story list filter on page load (in case template/period/search prefilled)
-  filterStoryOptions();
-
-  // when period changes: update template list and story list
+  // Änderungen -> Server submitten (Server filtert Stories + setzt selected_story)
   if (periodSelect) {
     periodSelect.addEventListener('change', function () {
-      filterTemplateOptions(this.value);
-      filterStoryOptions();
+      filterTemplateOptions(this.value); // optional UX
+      form.requestSubmit();
     });
   }
 
-  // when template changes: update story list
   if (templateSelect) {
     templateSelect.addEventListener('change', function () {
-      filterStoryOptions();
+      form.requestSubmit();
     });
   }
 
-  // search input -> filter (debounced)
   if (searchInput) {
-    const debounced = debounce(filterStoryOptions, 300);
-    searchInput.addEventListener('input', debounced);
+    const debouncedSubmit = debounce(() => form.requestSubmit(), 300);
+    searchInput.addEventListener('input', debouncedSubmit);
     searchInput.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); filterStoryOptions(); }
+      if (e.key === 'Enter') { e.preventDefault(); form.requestSubmit(); }
     });
   }
 
-  // story select still navigates to story details (preserve filters as query params)
+  // Story-Auswahl -> Detailseite mit Query-Parametern laden
   if (storySelect) {
     storySelect.addEventListener('change', function () {
       const storyId = this.value || '';
-      const params = new URLSearchParams();
-      if (periodSelect && periodSelect.value) params.set('reference_period', periodSelect.value);
-      if (templateSelect && templateSelect.value) params.set('template', templateSelect.value);
-      if (searchInput && searchInput.value) params.set('search', searchInput.value);
+      const params = new URLSearchParams(new FormData(form));
       if (storyId) params.set('story', storyId);
       const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
       window.location.href = newUrl;
@@ -233,4 +171,5 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
+
 {% endblock %}

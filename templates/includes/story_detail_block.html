@@ -53,9 +53,9 @@
     {% for graphic in graphics %}
     <h5>{{ graphic.title }}</h5>
     {{ graphic.content_html|safe }}
-    <!-- debug: graphic ids-->
+    <!-- debug: graphic ids
     {{ graphic.id}} {{graphic.graphic_template.id}}
-    
+    -->
     {% endfor %}
   {% endif %}
   

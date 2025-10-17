@@ -94,27 +94,50 @@ def home_view(request):
 
 
 def templates_view(request):
-    templates = StoryTemplate.objects.all()
-    # provide period lookup values for the template filter (Period model contains code/name)
-    periods = Period.objects.order_by("value")
-    selected_template_id = request.GET.get("template")
-    selected_template = None
+    # Filter aus Query
+    period_id = (request.GET.get("period") or "").strip()
+    search = (request.GET.get("search") or "").strip()
+    selected_template_id = (request.GET.get("template") or "").strip()
+    story_count = 0
 
+    # Gefilterte Ergebnisliste
+    qs = StoryTemplate.objects.select_related("reference_period").order_by("title")
+
+    if period_id:
+        qs = qs.filter(reference_period_id=period_id)
+
+    if search:
+        qs = qs.filter(Q(title__icontains=search) | Q(description__icontains=search))
+
+    # Ausgewähltes Template: zuerst ?template=..., sonst erstes der gefilterten Liste
+    selected_template = None
     if selected_template_id:
-        selected_template = get_object_or_404(StoryTemplate, id=selected_template_id)
+        selected_template = qs.filter(id=selected_template_id).first()
+    if not selected_template:
+        selected_template = qs.first()
+
+    # Markdown nur für das ausgewählte Template rendern
+    if selected_template and selected_template.description:
         selected_template.description_html = markdown2.markdown(
             selected_template.description, extras=["tables"]
         )
+        story_count = Story.objects.filter(template=selected_template).count()
+    else:
+        story_count = 0
+    periods = Period.objects.order_by("value")
 
     return render(
         request,
         "reports/templates_list.html",
         {
-            "templates": templates,
+            "templates": qs,                  # gefilterte Liste
             "selected_template": selected_template,
-            "periods": periods,
+            "periods": periods,               # für Perioden-Select
+            "story_count": story_count,
         },
     )
+
+
 
 
 def stories_view(request):

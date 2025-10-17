@@ -119,8 +119,8 @@
             "program": "${workspaceFolder}/manage.py",
             "args": [
                 "generate_appendices",
-                "--story_template_id",
-                "41",
+                "--id",
+                "144",
                 "--graphics",
                 "-v",
                 "2"
