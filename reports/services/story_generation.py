@@ -88,7 +88,7 @@ class StoryGenerationService(ETLBaseService):
         if template_id:
             templates = StoryTemplate.objects.filter(id=template_id, active=True)
         else:
-            templates = StoryTemplate.objects.filter(active=True).order_by('id')
+            templates = StoryTemplate.objects.filter(active=True).order_by("id")
 
         if not templates.exists():
             if template_id:
@@ -113,6 +113,7 @@ class StoryGenerationService(ETLBaseService):
         }
 
         for template in templates:
+            print(f"Processing template ID {template.id}: {template.title}")
             service = StoryProcessor(template, run_date, force)
             if service.story_is_due():
                 try:
@@ -120,31 +121,41 @@ class StoryGenerationService(ETLBaseService):
 
                     if result:
                         results["successful"] += 1
-                        results["details"].append({
-                            "template_id": template.id,
-                            "status": "success",
-                        })
+                        results["details"].append(
+                            {
+                                "template_id": template.id,
+                                "status": "success",
+                            }
+                        )
                     else:
                         results["failed"] += 1
-                        results["details"].append({
-                            "template_id": template.id,
-                            "status": "failed",
-                            "error": result.get("error", "Unknown error"),
-                        })
+                        results["details"].append(
+                            {
+                                "template_id": template.id,
+                                "status": "failed",
+                                "error": result.get("error", "Unknown error"),
+                            }
+                        )
                 except Exception as e:
-                    self.logger.error(f"Error processing template {template.id}: {str(e)}")
+                    self.logger.error(
+                        f"Error processing template {template.id}: {str(e)}"
+                    )
                     results["failed"] += 1
-                    results["details"].append({
-                        "template_id": template.id,
-                        "status": "error",
-                        "error": str(e),
-                    })
+                    results["details"].append(
+                        {
+                            "template_id": template.id,
+                            "status": "error",
+                            "error": str(e),
+                        }
+                    )
             else:
                 self.logger.info(f"Skipping template {template.id} - not due")
                 results["skipped"] += 1
-                results["details"].append({
-                    "template_id": template.id,
-                    "status": "skipped",
-                    "message": "Story generation conditions not met",
-                })
+                results["details"].append(
+                    {
+                        "template_id": template.id,
+                        "status": "skipped",
+                        "message": "Story generation conditions not met",
+                    }
+                )
         return results

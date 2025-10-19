@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from reports.services import DatasetSyncService, StoryGenerationService, EmailService
+from reports.services import DatasetSyncService, StoryGenerationService, EmailService, StorySubscriptionService
 from datetime import date, datetime
 
 
@@ -116,8 +116,31 @@ class Command(BaseCommand):
                     return
         else:
             self.stdout.write("Skipping story generation...")
-        
-        # Step 3: Send emails
+
+        # Step 3: subscribe users with the autosubscribe flag set to true to new stories (templates where is_published changed from False to True)
+        self.stdout.write("Step 3: Subscribing users to new stories...")
+        subscribe_service = StorySubscriptionService()
+        subscribe_result = subscribe_service.subscribe_users_to_new_stories()
+
+        if subscribe_result['success']:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"✓ User subscription completed. "
+                    f"Subscribed: {subscribe_result['successful']}, Failed: {subscribe_result['failed']}"
+                )
+            )
+        else:
+            self.stdout.write(
+                self.style.ERROR(
+                    f"✗ User subscription failed. "
+                    f"Subscribed: {subscribe_result['successful']}, Failed: {subscribe_result['failed']}"
+                )
+            )
+            if not force and not continue_on_error:
+                self.stdout.write("Stopping pipeline due to subscription failures. Use --force or --continue-on-error to proceed.")
+                return
+
+        # Step 4: Send emails
         if not options.get('skip_email'):
             self.stdout.write("Step 3: Sending emails...")
             email_service = EmailService()

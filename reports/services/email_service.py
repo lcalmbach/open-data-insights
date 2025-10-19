@@ -89,10 +89,14 @@ class EmailService(ETLBaseService):
             details = []
 
             # fetch templates that are not yet published for creation (one query)
-            new_templates_qs = StoryTemplate.objects.filter(creation_is_published=False)
-            root = settings.APP_ROOT.rstrip('/')
+            new_templates_qs = StoryTemplate.objects.filter(is_published=False)
+            root = settings.APP_ROOT.rstrip("/")
             new_templates = [
-                {"id": t.id, "title": t.title, "url": f"{root}/templates/?template={t.id}"}
+                {
+                    "id": t.id,
+                    "title": t.title,
+                    "url": f"{root}/templates/?template={t.id}",
+                }
                 for t in new_templates_qs
             ]
 
@@ -100,12 +104,11 @@ class EmailService(ETLBaseService):
                 # Find subscriptions for this user
                 subscriptions = StoryTemplateSubscription.objects.filter(user=user)
                 # Get all templates the user is subscribed to
-                template_ids = subscriptions.values_list('story_template_id', flat=True)
+                template_ids = subscriptions.values_list("story_template_id", flat=True)
                 # Find stories published on send_date for these templates
                 stories = Story.objects.filter(
-                    template_id__in=template_ids,
-                    published_date=send_date
-                ).select_related('template')
+                    template_id__in=template_ids, published_date=send_date
+                ).select_related("template")
 
                 if not stories.exists():
                     continue
@@ -113,35 +116,47 @@ class EmailService(ETLBaseService):
                 # Build insights list for email
                 insights = []
                 for story in stories:
-                    insights.append({
-                        "title": story.title,
-                        "summary": story.summary,
-                        "url": story.get_absolute_url() if hasattr(story, "get_absolute_url") else f"{settings.APP_ROOT.rstrip('/')}/story/{story.id}/"
-                    })
+                    insights.append(
+                        {
+                            "title": story.title,
+                            "summary": story.summary,
+                            "url": (
+                                story.get_absolute_url()
+                                if hasattr(story, "get_absolute_url")
+                                else f"{settings.APP_ROOT.rstrip('/')}/story/{story.id}/"
+                            ),
+                        }
+                    )
 
                 # Render email body, include new_templates
-                email_body = self._render_insights_email(user, insights, new_templates=new_templates)
+                email_body = self._render_insights_email(
+                    user, insights, new_templates=new_templates
+                )
                 subject = f"Open Data Insights for {send_date.strftime('%Y-%m-%d')}"
                 result = self.send_story_email(
                     story_content=email_body,
                     recipients=[user.email],
                     subject=subject,
-                    send_date=send_date
+                    send_date=send_date,
                 )
-                details.append({
-                    "user": user.first_name,
-                    "email": user.email,
-                    "success": result.get("success"),
-                    "error": result.get("error"),
-                })
+                details.append(
+                    {
+                        "user": user.first_name,
+                        "email": user.email,
+                        "success": result.get("success"),
+                        "error": result.get("error"),
+                    }
+                )
                 if result.get("success"):
                     total_sent += 1
 
             # mark templates as published if we sent at least one email
             if new_templates_qs.exists() and total_sent > 0:
                 try:
-                    count = new_templates_qs.update(creation_is_published=True)
-                    self.logger.info(f"Marked {count} new templates as creation_is_published=True")
+                    count = new_templates_qs.update(is_published=True)
+                    self.logger.info(
+                        f"Marked {count} new templates as is_published=True"
+                    )
                 except Exception as e:
                     self.logger.error(f"Failed to mark new templates as published: {e}")
 
@@ -157,39 +172,53 @@ class EmailService(ETLBaseService):
 
     def _get_new_templates(self) -> list:
         """Return list of templates not yet published for creation (title + full url)."""
-        templates = StoryTemplate.objects.filter(creation_is_published=False)
+        templates = StoryTemplate.objects.filter(is_published=False)
         if not templates.exists():
             return []
-        root = settings.APP_ROOT.rstrip('/')
+        root = settings.APP_ROOT.rstrip("/")
         result = []
         for t in templates:
-            result.append({"id": t.id, "title": t.title, "url": f"{root}/templates/?template={t.id}"})
+            result.append(
+                {
+                    "id": t.id,
+                    "title": t.title,
+                    "url": f"{root}/templates/?template={t.id}",
+                }
+            )
         return result
 
-    def _render_insights_email(self, user, insights: list, new_templates: list | None = None):
+    def _render_insights_email(
+        self, user, insights: list, new_templates: list | None = None
+    ):
         """Render the email body for a user, their insights and optional new-template section."""
         lines = [
             f"Hello {user.first_name},",
-            "", "",
+            "",
+            "",
             "We’ve just published new insights from your subscribed topics:",
-            "", "",
+            "",
+            "",
         ]
         for insight in insights:
             lines.append(f"**{insight['title']}**: {insight['summary']} ")
-            lines.append(f"[View the full story with tables and graphs]({insight['url']})")
+            lines.append(
+                f"[View the full story with tables and graphs]({insight['url']})"
+            )
             lines += ["", ""]  # spacer# spacer
         # New templates / subscription prompt
         if new_templates:
-            root = settings.APP_ROOT.rstrip('/')
+            root = settings.APP_ROOT.rstrip("/")
             lines.append("🔥We’ve uncovered new insights — discover them now:")
             lines.append("")
             for t in new_templates:
                 lines.append(f"- [{t['title']}]({t['url']})")
             lines.append("")  # spacer
             # subscription prompt linking to account/profile
-            lines.append(f"Interested? Subscribe to new insights [here]({root}/account/profile/)")
-        lines += ["", "", "Best regards,","your **O**pen **D**ata **I**nsights Team"]
-                     
+            lines.append(
+                f"Interested? Subscribe to new insights [here]({root}/account/profile/)"
+            )
+        lines += ["", "", "Best regards,", "your **O**pen **D**ata **I**nsights Team"]
+
         return "\n".join(lines)
 
     def _cleanup_empty_stories(self):

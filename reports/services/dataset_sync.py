@@ -74,7 +74,7 @@ class DatasetSyncService(ETLBaseService):
         if dataset_id:
             datasets = Dataset.objects.filter(id=dataset_id)
         else:
-            datasets = Dataset.objects.filter(active=True)
+            datasets = Dataset.objects.filter(active=True, source="ods").order_by("id")
 
         results = {
             "success": True,
@@ -98,6 +98,7 @@ class DatasetSyncService(ETLBaseService):
             )
 
         for dataset in datasets:
+            print(f"Synchronizing dataset ID {dataset.id}: {dataset.name}")
             try:
                 with transaction.atomic():
                     success = self.synchronize_dataset(dataset)

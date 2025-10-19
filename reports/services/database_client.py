@@ -43,10 +43,10 @@ class DjangoPostgresClient:
                 # Log rendered SQL for debugging (psycopg2-style)§
                 # try in your environment to see the exact error
                 try:
-                    #print("SQL:", clean_query)
-                    #print("params:", params, "type:", type(params))
+                    # print("SQL:", clean_query)
+                    # print("params:", params, "type:", type(params))
                     rendered = cursor.mogrify(clean_query, params)
-                    #print("rendered:", rendered)
+                    # print("rendered:", rendered)
                 except Exception as ex:
                     print("mogrify error:", type(ex).__name__, ex)
                 cursor.execute(clean_query, params)

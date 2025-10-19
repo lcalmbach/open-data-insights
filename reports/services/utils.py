@@ -101,8 +101,10 @@ SQL_TEMPLATES = {
     WHERE {0} IS NOT NULL {2};"""
 }
 
+
 def ensure_date(dt):
     return dt.date() if isinstance(dt, datetime) else dt
+
 
 def get_month_labels(abbrev: bool = True) -> list:
     """Return month labels for 1..12.
@@ -119,6 +121,7 @@ def get_month_labels(abbrev: bool = True) -> list:
         return [calendar.month_abbr[i] for i in range(1, 13)]
     return [calendar.month_name[i] for i in range(1, 13)]
 
+
 def get_month_labels_literal(abbrev: bool = True) -> str:
     """Return month labels as a JSON-style array string with double quotes.
 
@@ -127,4 +130,3 @@ def get_month_labels_literal(abbrev: bool = True) -> str:
     """
     labels = get_month_labels(abbrev=abbrev)
     return json.dumps(labels)
-

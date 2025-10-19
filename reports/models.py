@@ -334,7 +334,7 @@ class StoryTemplate(models.Model):
         auto_now_add=True,
         help_text="Timestamp of when the story template was created.",
     )
-    creation_is_published = models.BooleanField(
+    is_published = models.BooleanField(
         default=False,
         help_text="Indicates if the story has been made public to the users.",
     )
@@ -655,8 +655,8 @@ class StoryTemplateSubscription(models.Model):
     story_template = models.ForeignKey(
         StoryTemplate,
         on_delete=models.CASCADE,
-        related_name="ratings",
-        help_text="The story template being rated.",
+        related_name="subscriptions",
+        help_text="Subscriptions to this template",
     )
     user = models.ForeignKey(
         CustomUser,

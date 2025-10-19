@@ -40,7 +40,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_confirmed = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_active = models.DateTimeField(auto_now=True)
-
+    auto_subscribe = models.BooleanField(default=False, help_text="Automatically subscribe to new insights and updates")
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)  # ✅ required for admin access
     
