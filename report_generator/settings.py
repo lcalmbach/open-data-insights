@@ -44,7 +44,9 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'crispy_forms',
     'crispy_bootstrap5',
-    'markdownify'
+    'markdownify',
+    'django_countries',
+    "base"
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = ["bootstrap5"]
@@ -122,6 +124,13 @@ else:
             }
         }
     }
+SYNC_DB_URL = os.getenv("SYNC_DATABASE_URL")
+if SYNC_DB_URL:
+    DATABASES["prod"] = dj_database_url.parse(
+        SYNC_DB_URL,
+        conn_max_age=600,
+        ssl_require=True,  # set to True if your remote Postgres requires SSL (Heroku etc.)
+    )
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -184,8 +193,8 @@ MARKDOWNIFY = {
 }
 
 APP_INFO = {
-    "version": "0.0.20",
-    "version_date": "2025-10-21",
+    "version": "0.0.2§",
+    "version_date": "2025-10-26",
     "author_name": "Lukas Calmbach",
     "author_email": "lcalmbach@gmail.com",
     "repo_url": "https://github.com/lcalmbach/open-data-insights",

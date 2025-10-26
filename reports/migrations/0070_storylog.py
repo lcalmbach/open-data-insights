@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import reports.models
+from base.utils import default_yesterday
 
 
 class Migration(migrations.Migration):
@@ -33,14 +33,14 @@ class Migration(migrations.Migration):
                 (
                     "reference_period_start",
                     models.DateField(
-                        default=reports.models.default_yesterday,
+                        default=default_yesterday,
                         help_text="Start date of the reference period for the log.",
                     ),
                 ),
                 (
                     "reference_period_end",
                     models.DateField(
-                        default=reports.models.default_yesterday,
+                        default=default_yesterday,
                         help_text="End date of the reference period for the log.",
                     ),
                 ),

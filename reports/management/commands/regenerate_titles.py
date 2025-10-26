@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from reports.models import Story, StoryTemplate
 from reports.services.story_processor import StoryProcessor
-
+from reports.models.story import Story
+from reports.models.story_template import StoryTemplate
 
 class Command(BaseCommand):
     help = "Regenerate titles for existing stories. Use --template-id to process all stories for a template, --id for a single story, or --all to process every story."

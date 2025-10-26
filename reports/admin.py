@@ -1,19 +1,15 @@
 from django.contrib import admin
-from .models import (
-    Story,
-    StoryTemplate,
-    StoryTemplateContext,
-    LookupCategory,
-    LookupValue,
-    Dataset,
-    StoryTemplateSubscription,
-    StoryLog,
-    StoryTable,
-    Graphic,
-    StoryRating,
-    StoryTemplateTable,
-    StoryTemplateGraphic,
-)
+from .models.story import Story
+from .models.story import StoryTemplate
+from .models.story_context import StoryTemplateContext
+from .models.lookups import LookupCategory, LookupValue
+from .models.dataset import Dataset
+from .models.subscription import StoryTemplateSubscription
+from .models.story_log import StoryLog
+from .models.story_table import StoryTable
+from .models.graphic import Graphic
+from .models.story_table_template import StoryTemplateTable
+from .models.graphic import StoryTemplateGraphic
 
 
 @admin.register(Story)

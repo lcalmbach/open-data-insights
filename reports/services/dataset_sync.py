@@ -3,7 +3,6 @@ Dataset Synchronization Service
 Handles importing and synchronizing datasets from external sources
 """
 
-import json
 import logging
 import pandas as pd
 import numpy as np
@@ -19,14 +18,13 @@ from django.utils import timezone as django_timezone
 from django.conf import settings
 from tqdm import tqdm
 
-from reports.models import Dataset
 from reports.services.base import ETLBaseService
 from reports.services.database_client import DjangoPostgresClient
 from reports.services.utils import (
     get_parquet_row_count,
     make_utc,
 )
-from reports.models import Dataset
+from reports.models.dataset import Dataset
 
 
 class DatasetSyncService(ETLBaseService):

@@ -2,29 +2,79 @@
 
 {% block content %}
   <h2>My Profile</h2>
-  <p>Email: {{ request.user.email }}</p>
-  <p>Name: {{ request.user.first_name }} {{ request.user.last_name }}</p>
-  <p>Country: {{ request.user.country }}</p>
-  <p>
-    Confirmed:
-    {% if request.user.is_confirmed %}
-      ✅
-    {% else %}
-      ❌
-    {% endif %}
-  </p>
+
+  <form method="post" class="mb-4">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Email</label>
+      {{ profile_form.email }}
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label" for="{{ profile_form.first_name.id_for_label }}">First name</label>
+        {{ profile_form.first_name }}
+        {% if profile_form.first_name.errors %}
+          <div class="text-danger small">{{ profile_form.first_name.errors }}</div>
+        {% endif %}
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label" for="{{ profile_form.last_name.id_for_label }}">Last name</label>
+        {{ profile_form.last_name }}
+        {% if profile_form.last_name.errors %}
+          <div class="text-danger small">{{ profile_form.last_name.errors }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ profile_form.country.id_for_label }}">Country</label>
+      {{ profile_form.country }}
+      {% if profile_form.country.errors %}
+        <div class="text-danger small">{{ profile_form.country.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="form-check mb-3">
+      {{ profile_form.auto_subscribe }}
+      <label class="form-check-label" for="{{ profile_form.auto_subscribe.id_for_label }}">
+        Automatically subscribe to new insights
+      </label>
+      {% if profile_form.auto_subscribe.errors %}
+        <div class="text-danger small">{{ profile_form.auto_subscribe.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="d-flex justify-content-between mt-3">
+      <div>
+        <button type="submit" name="action" value="save_profile" class="btn btn-primary">
+          Save Profile
+        </button>
+        <a href="{% url 'password_change' %}" class="btn btn-secondary ms-2">
+          Reset Password
+        </a>
+      </div>
+      <div>
+        <a href="{% url 'account:delete_account' %}" class="btn btn-danger ms-2">
+          Delete Account
+        </a>
+      </div>
+  </div>
+  </form>
+
   <hr>
+
   <h3>Data Insights Subscriptions</h3>
+
+  {# Dein bestehendes Subscriptions-Formular bleibt separat #}
   <form method="post">
     {% csrf_token %}
-    {# Toggle control provided by the form (added in SubscriptionForm) #}
     {% if form.toggle_control %}
       <div class="mb-2">
         {{ form.toggle_control }}
       </div>
     {% endif %}
 
-    {# render any form-level errors #}
     {% if form.non_field_errors %}
       <div class="alert alert-danger">
         {{ form.non_field_errors }}
@@ -32,14 +82,15 @@
     {% endif %}
 
     {{ form.subscriptions }}
-     <hr>
-     <div class="d-flex mt-3">
-       <button type="submit" class="btn btn-primary">Save Subscriptions</button>
-       <a href="{% url 'password_change' %}" class="btn btn-secondary ms-2">Reset Password</a>
-     </div>
-   </form>
 
-  {# include the toggle JS once per page (provided by the form) #}
+    <hr>
+    <div class="d-flex mt-3">
+      <button type="submit" name="action" value="save_subscriptions" class="btn btn-primary">
+        Save Subscriptions
+      </button>
+    </div>
+  </form>
+
   {% if form.toggle_script %}
     {{ form.toggle_script }}
   {% endif %}

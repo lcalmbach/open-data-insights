@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .models import Graphic, StoryTemplate, Story, StoryTable, Period
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
@@ -15,9 +14,14 @@ import pandas as pd
 from django.conf import settings
 from django.views.generic import TemplateView
 from django.db.models import Q
-
 from .forms import StoryRatingForm
-from .models import Graphic, Story, StoryRating, StoryTable, StoryTemplate
+
+from .models.graphic import Graphic
+from .models.story_template import StoryTemplate
+from .models.story import Story
+from .models.story_table import StoryTable
+from .models.lookups import Period
+from .models.story_rating import StoryRating
 
 
 def generate_fake_graphic(chart_id):
@@ -76,7 +80,7 @@ def home_view(request):
     other_ressources = (
         selected_story.template.other_ressources if selected_story else None
     )
-    available_subscriptions = StoryTemplate.objects.count()
+    available_subscriptions = StoryTemplate.objects.filter(active=True).count()
     return render(
         request,
         "home.html",
@@ -263,7 +267,7 @@ def view_story(request, story_id=None):
     other_ressources = (
         selected_story.template.other_ressources if selected_story else None
     )
-    available_subscriptions = StoryTemplate.objects.count()
+    available_subscriptions = StoryTemplate.objects.filter(active=True).count()
     selected_story.content_html = markdown2.markdown(
         selected_story.content, extras=["tables"]
     )

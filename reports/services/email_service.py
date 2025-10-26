@@ -5,17 +5,17 @@ Handles sending generated stories and reports via email
 
 import logging
 import time
+from django.urls import reverse
 from typing import Optional, Dict, Any, List
 from datetime import date, timedelta
 from django.conf import settings
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template.loader import render_to_string
-from django.utils import timezone
 import markdown
-import pandas as pd
 from django.contrib.auth import get_user_model
-from reports.models import Story, StoryTemplateSubscription, StoryTemplate, CustomUser
-from django.urls import reverse
+from reports.models.story import Story
+from reports.models.subscription import StoryTemplateSubscription
+from reports.models.story import StoryTemplate
 
 from reports.services.base import ETLBaseService
 from reports.services.database_client import DjangoPostgresClient

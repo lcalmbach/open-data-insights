@@ -71,3 +71,5 @@
   color: steelblue;
   font-weight: bold;
 }
+
+h1.headline { text-align: center !important; }

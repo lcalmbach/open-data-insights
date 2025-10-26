@@ -6,14 +6,13 @@ Handles generating data insights and stories from templates
 import logging
 import pandas as pd
 from datetime import date, timedelta, datetime
-from typing import Optional, Dict, Any, List
-from django.utils import timezone
+from typing import Optional, Dict, Any
 import json
 
-from reports.models import StoryTemplate, Story, Graphic
+from reports.models.story_template import StoryTemplate
 from reports.services.base import ETLBaseService
 from reports.services.story_processor import StoryProcessor
-from reports.models import StoryTemplate
+from reports.models.story_template import StoryTemplate
 
 
 class StoryGenerationService(ETLBaseService):

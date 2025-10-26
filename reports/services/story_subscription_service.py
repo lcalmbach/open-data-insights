@@ -2,7 +2,7 @@ import logging
 from typing import Optional, Iterable, Dict, Any
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from reports.models import StoryTemplate
+from reports.models.story_template import StoryTemplate
 
 logger = logging.getLogger(__name__)
 

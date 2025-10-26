@@ -2,14 +2,39 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.safestring import mark_safe
-from .models import CustomUser
-from reports.models import StoryTemplate
+from account.models import CustomUser
+from django_countries.widgets import CountrySelectWidget
 
+from reports.models.story_template import StoryTemplate
+
+
+class CustomUserUpdateForm(forms.ModelForm):
+    # E-Mail nur anzeigen (nicht änderbar)
+    email = forms.EmailField(disabled=True, required=False, label="Email")
+
+    class Meta:
+        model = CustomUser
+        fields = ["first_name", "last_name", "country", "auto_subscribe", "email"]  # email nicht speichern
+        widgets = {
+            "first_name": forms.TextInput(attrs={"class": "form-control"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control"}),
+            "country": CountrySelectWidget(attrs={"class": "form-select"}),
+            "auto_subscribe": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+        labels = {
+            "first_name": "First name",
+            "last_name": "Last name",
+            "country": "Country",
+            "auto_subscribe": "Auto subscribe to new content",
+        }
 
 class RegistrationForm(UserCreationForm):
     class Meta:
         model = get_user_model()
-        fields = ("email", "first_name", "last_name", "country")
+        fields = ("email", "first_name", "last_name", "country", "auto_subscribe")
+        labels = {
+            "auto_subscribe": "Auto subscribe to new content",
+        }
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -32,7 +57,7 @@ class SubscriptionForm(forms.Form):
 
     def custom_label(self, obj):
         url = f"/templates/{obj.pk}/"
-        return mark_safe(f'{obj.title} – <a href="{url}" target="_blank">Details</a>')
+        return mark_safe(f'{obj.title} ({obj.reference_period}) – <a href="{url}" target="_blank">Details</a>')
 
     @property
     def toggle_control(self):

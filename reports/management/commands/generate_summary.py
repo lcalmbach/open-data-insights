@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
-from reports.models import StoryTemplate, Story, Graphic, StoryTemplateGraphic, StoryTable, StoryTemplateTable
+from reports.models.story_template import StoryTemplate
+from reports.models.story import Story
 from reports.services.story_processor import StoryProcessor
-from datetime import datetime, date
 
 class Command(BaseCommand):
     help = 'Generate tables and/or graphics for a given story template, story or single graphic'

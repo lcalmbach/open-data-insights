@@ -2,6 +2,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.base_user import BaseUserManager
 from django.shortcuts import render, redirect
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import get_user_model
@@ -9,22 +10,100 @@ from django.core.mail import send_mail
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
+from django.utils import timezone
 from django.template.loader import render_to_string
 from django.contrib.auth.tokens import default_token_generator
 from .forms import RegistrationForm
 from .forms import SubscriptionForm
-from reports.models import StoryTemplateSubscription, StoryTemplate
-from django.utils import timezone
-from django.contrib.auth import authenticate, login
-from django.contrib.auth import get_user_model
-from django.contrib.auth.base_user import BaseUserManager
+from .forms import CustomUserUpdateForm
 from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
+from django.db import transaction
 import logging
+
+from reports.models.subscription import StoryTemplateSubscription
+from reports.models.story_template import StoryTemplate
 
 logger = logging.getLogger(__name__)
 
 User = get_user_model()
+
+
+@login_required
+def profile_view(request):
+    user = request.user
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        # --- Profil speichern ---
+        if action == "save_profile":
+            profile_form = CustomUserUpdateForm(request.POST, instance=user)
+
+            # Für den unteren Bereich nur "anzeigefähig" initialisieren
+            current_subscriptions = StoryTemplateSubscription.objects.filter(
+                user=user, cancellation_date__isnull=True
+            ).values_list("story_template_id", flat=True)
+            subscriptions_form = SubscriptionForm(initial={"subscriptions": current_subscriptions})
+
+            if profile_form.is_valid():
+                profile_form.save()
+                messages.success(request, "Your profile has been updated.")
+                return redirect("account:profile")
+
+        # --- Subscriptions speichern ---
+        elif action == "save_subscriptions":
+            profile_form = CustomUserUpdateForm(instance=user)
+
+            subscriptions_form = SubscriptionForm(request.POST)
+            if subscriptions_form.is_valid():
+                selected_templates = subscriptions_form.cleaned_data["subscriptions"]
+
+                # Änderungen atomar durchführen
+                with transaction.atomic():
+                    # Bestehende Subscriptions beenden, die nicht mehr ausgewählt sind
+                    StoryTemplateSubscription.objects.filter(
+                        user=user, cancellation_date__isnull=True
+                    ).exclude(
+                        story_template__in=selected_templates
+                    ).update(
+                        cancellation_date=timezone.now()
+                    )
+
+                    # Neue hinzufügen (oder bestehende fortschreiben)
+                    for template in selected_templates:
+                        StoryTemplateSubscription.objects.get_or_create(
+                            user=user,
+                            story_template=template,
+                            cancellation_date__isnull=True,
+                            defaults={"user": user, "story_template": template},
+                        )
+
+                messages.success(request, "Your subscriptions have been saved.")
+                return redirect("account:profile")
+
+        else:
+            # Fallback: beide Formulare binden, damit Fehler sichtbar sind
+            profile_form = CustomUserUpdateForm(request.POST, instance=user)
+            subscriptions_form = SubscriptionForm(request.POST)
+
+    else:
+        # GET: beide Formulare befüllen
+        profile_form = CustomUserUpdateForm(instance=user)
+
+        current_subscriptions = StoryTemplateSubscription.objects.filter(
+            user=user, cancellation_date__isnull=True
+        ).values_list("story_template_id", flat=True)
+        subscriptions_form = SubscriptionForm(initial={"subscriptions": current_subscriptions})
+
+    return render(
+        request,
+        "account/profile.html",
+        {
+            "profile_form": profile_form,    # oben im Template verwenden
+            "form": subscriptions_form,      # dein bestehender Name unten
+        },
+    )
 
 
 def login_view(request):
@@ -154,37 +233,14 @@ def confirm_email(request, uidb64, token):
         messages.error(request, "Dieser Bestätigungslink ist ungültig oder abgelaufen.")
         return render(request, "account/email_confirmation_invalid.html")
 
+
 @login_required
-def profile_view(request):
-    user = request.user
-
+def delete_account_view(request):
+    """Ask for confirmation, then delete the logged-in user."""
     if request.method == "POST":
-        form = SubscriptionForm(request.POST)
-        if form.is_valid():
-            selected_templates = form.cleaned_data["subscriptions"]
+        user_email = request.user.email
+        request.user.delete()
+        messages.success(request, f"Account {user_email} has been deleted.")
+        return redirect("home")  # or your landing page
 
-            # Bestehende Subscriptions beenden
-            StoryTemplateSubscription.objects.filter(
-                user=user, cancellation_date__isnull=True
-            ).exclude(story_template__in=selected_templates).update(
-                cancellation_date=timezone.now()
-            )
-
-            # Neue hinzufügen
-            for template in selected_templates:
-                StoryTemplateSubscription.objects.get_or_create(
-                    user=user,
-                    story_template=template,
-                    cancellation_date__isnull=True,
-                    defaults={"user": user, "story_template": template},
-                )
-            messages.success(request, "Your subscriptions have been saved.")
-            return redirect("account:profile")  # <– wichtig: Namespace!
-    else:
-        current_subscriptions = StoryTemplateSubscription.objects.filter(
-            user=user, cancellation_date__isnull=True
-        ).values_list("story_template_id", flat=True)
-
-        form = SubscriptionForm(initial={"subscriptions": current_subscriptions})
-
-    return render(request, "account/profile.html", {"form": form})
+    return render(request, "account/delete_account_confirm.html")

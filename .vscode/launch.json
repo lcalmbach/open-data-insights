@@ -26,10 +26,7 @@
             "args": [
                 "generate_stories",
                 "--id",
-                "43",
-                "--date",
-                "2025-10-16",
-                "--force"
+                "44",
                 "-v",
                 "2"
             ],
@@ -122,8 +119,8 @@
             "program": "${workspaceFolder}/manage.py",
             "args": [
                 "generate_appendices",
-                "--id",
-                "144",
+                "--graphic_template_id",
+                "27",
                 "--graphics",
                 "-v",
                 "2"

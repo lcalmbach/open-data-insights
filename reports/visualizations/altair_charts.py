@@ -1,10 +1,7 @@
 import pandas as pd
 import altair as alt
-import json
 import logging
-from reports.models import GraphType
 from typing import List
-import math
 
 logger = logging.getLogger(__name__)
 
