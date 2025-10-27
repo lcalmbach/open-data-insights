@@ -173,12 +173,17 @@
             "cwd": "${workspaceFolder}"
         },
         {
-            "name": "Django: autosubsribe",
+            "name": "Django: Synch local > prod",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "autosubscribe_users",
+                "sync_prod",
+                "--id", 
+                "44",
+                "--story_template",
+                "--direction",
+                "push"
             ],
             "django": true,
             "justMyCode": true,
@@ -191,3 +196,4 @@
 
     ]
 }
+--id 44 --story_template --direction push
