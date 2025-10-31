@@ -7,7 +7,6 @@ import logging
 import pandas as pd
 from datetime import date, timedelta, datetime
 from typing import Optional, Dict, Any
-import json
 
 from reports.models.story_template import StoryTemplate
 from reports.services.base import ETLBaseService

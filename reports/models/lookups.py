@@ -4,8 +4,9 @@ THEME_CATEGORY_ID = 1
 PERIOD_CATEGORY_ID = 2
 AGGREGATION_FUNCTION_CATEGORY_ID = 3
 CONTEXT_PERIOD_CATEGORY_ID = 4
-
-
+DAY_PERIOD_CATEGORY_ID = 5
+GRAPH_TYPE_CATEGORY_ID = 6
+PERIOD_DIRECTION_CATEGORY_ID = 7
 
 class LookupCategory(models.Model):
     name = models.CharField(max_length=255, help_text="Name of the lookup category.")
@@ -58,9 +59,23 @@ class LookupValue(models.Model):
         return self.value
 
 
+class PeriodDirectionManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(category_id=PERIOD_DIRECTION_CATEGORY_ID)
+
+
+class PeriodDirection(LookupValue):
+    objects = PeriodDirectionManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "PeriodDirection"
+        verbose_name_plural = "PeriodDirections"
+
+
 class GraphTypeManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(category_id=6)
+        return super().get_queryset().filter(category_id=GRAPH_TYPE_CATEGORY_ID)
 
 
 class GraphType(LookupValue):

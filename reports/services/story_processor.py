@@ -25,6 +25,7 @@ from reports.models.story_context import StoryTemplate
 from reports.models.story import Story
 from reports.models.story_table import StoryTable
 from reports.models.graphic import Graphic
+from dateutil.relativedelta import relativedelta
 
 
 LLM_FORMATTING_INSTRUCTIONS = """
@@ -420,22 +421,10 @@ class StoryProcessor:
                 raise RuntimeError(
                     f"Failed to generate story content for template {self.story.template.id}"
                 )
-
-            # generate summary/lead
             self.logger.info("Generating lead...")
             self.generate_lead()
-            if not self.story.summary:
-                raise RuntimeError(
-                    f"Failed to generate story summary for template {self.story.template.id}"
-                )
-
-            # generate title
             self.logger.info("Generating title...")
             self.generate_title()
-            if not self.story.title:
-                raise RuntimeError(
-                    f"Failed to generate story title for template {self.story.template.id}"
-                )
 
             self.logger.info("Saving story to database...")
             try:
@@ -518,64 +507,109 @@ class StoryProcessor:
     def _get_reference_period(
         self, published_date: datetime, template: StoryTemplate
     ) -> Tuple[datetime, datetime]:
-        """Get the reference period start and end dates"""
-        if template.reference_period_id in (
-            ReferencePeriod.DAILY.value,
-            ReferencePeriod.IRREGULAR.value,
-        ):  # daily, irregular
-            # Use most_recent_day if available, otherwise use published_date minus 1 day
-            if self.most_recent_day:
-                period_start = self.most_recent_day
-                period_end = self.most_recent_day
-            else:
-                fallback_date = published_date - timedelta(days=1)
-                period_start = datetime.combine(fallback_date, datetime.min.time())
-                period_end = datetime.combine(fallback_date, datetime.min.time())
-        elif template.reference_period_id == ReferencePeriod.WEEKLY.value:  # weekly
-            period_start = published_date - pd.DateOffset(
-                days=published_date.weekday() + 7
-            )
-            period_end = published_date
-        elif template.reference_period_id == ReferencePeriod.MONTHLY.value:  # monthly
-            if published_date.month > 1:
-                month = published_date.month - 1
-                year = published_date.year
-            else:
-                month = 12
-                year = published_date.year - 1
-            period_start = datetime(year, month, 1)
-            period_end = datetime(year, month, calendar.monthrange(year, month)[1])
-        elif template.reference_period_id == ReferencePeriod.SEASONAL.value:  # seasonal
-            self.season, self.season_year = self._get_season(
-                    published_date, template
-                )
-            start_month, start_day = season_dates[self.season][0]
-            end_month, end_day = season_dates[self.season][1]
-            start_year = (
-                published_date.year - 1 if self.season == 4 else published_date.year
-            )
-            period_start = datetime(start_year, start_month, start_day)
-            end_year = published_date.year
-            period_end = datetime(end_year, end_month, end_day)
-            period_end += pd.DateOffset(days=1)
-        elif template.reference_period_id == ReferencePeriod.YEARLY.value:  # yearly
-            if self.most_recent_day:
-                period_start = self.most_recent_day
-                period_end = datetime(period_start.year, 12, 31)
-            else:
-                year = published_date.year - 1
-                period_start = datetime(year, 1, 1)
-                period_end = datetime(year, 12, 31)
+        """Get the reference period start and end dates relative to published_date.
+
+        This consolidates forward/backward logic: compute the period containing an
+        anchor date (most_recent_day if available, else published_date) and then
+        shift that period by -1 (backward) or +1 (forward) depending on
+        template.period_direction.
+        Returns date objects (period_start, period_end).
+        """
+
+        def to_datetime_obj(d):
+            if d is None:
+                return None
+            if isinstance(d, pd.Timestamp):
+                return d.to_pydatetime()
+            if isinstance(d, date) and not isinstance(d, datetime):
+                return datetime.combine(d, datetime.min.time())
+            if isinstance(d, datetime):
+                return d
+            try:
+                return pd.to_datetime(d).to_pydatetime()
+            except Exception:
+                return None
+
+        anchor = self.most_recent_day if self.most_recent_day is not None else published_date
+        anchor_dt = to_datetime_obj(anchor) or to_datetime_obj(published_date)
+
+        # Determine the base period that contains anchor_dt
+        if template.reference_period_id in (ReferencePeriod.DAILY.value, ReferencePeriod.IRREGULAR.value):
+            base_start = anchor_dt
+            base_end = anchor_dt
+            unit = 'days'
+        elif template.reference_period_id == ReferencePeriod.WEEKLY.value:
+            # week starting on Monday that contains anchor
+            week_start = anchor_dt - pd.DateOffset(days=anchor_dt.weekday())
+            base_start = week_start
+            base_end = week_start + pd.DateOffset(days=6)
+            unit = 'weeks'
+        elif template.reference_period_id == ReferencePeriod.MONTHLY.value:
+            base_start = datetime(anchor_dt.year, anchor_dt.month, 1)
+            base_end = datetime(anchor_dt.year, anchor_dt.month, calendar.monthrange(anchor_dt.year, anchor_dt.month)[1])
+            unit = 'months'
+        elif template.reference_period_id == ReferencePeriod.SEASONAL.value:
+            season_idx, season_year = self._get_season(anchor_dt, template)
+            sm, sd = season_dates[season_idx][0]
+            em, ed = season_dates[season_idx][1]
+            start_year = season_year
+            end_year = start_year if em >= sm else start_year + 1
+            base_start = datetime(start_year, sm, sd)
+            base_end = datetime(end_year, em, ed)
+            base_end += pd.DateOffset(days=1)
+            unit = 'season'
+        elif template.reference_period_id == ReferencePeriod.YEARLY.value:
+            base_start = datetime(anchor_dt.year, 1, 1)
+            base_end = datetime(anchor_dt.year, 12, 31)
+            unit = 'years'
         else:
-            period_start = published_date
-            period_end = published_date
-            self.logger.warning(
-                f"Unknown reference period: {template['reference_period_id']}"
-            )
+            # fallback: single-day period at anchor
+            base_start = anchor_dt
+            base_end = anchor_dt
+            unit = 'days'
+
+        # Decide shift direction: backward -> -1, else +1
+        direction = getattr(template, 'period_direction', None)
+        dir_val = 'backward' if direction is None else str(direction.value).lower()
+        shift = -1 if dir_val == 'backward' else 1
+
+        # Apply the shift
+        if unit == 'days':
+            period_start = base_start + pd.DateOffset(days=shift)
+            period_end = base_end + pd.DateOffset(days=shift)
+        elif unit == 'weeks':
+            period_start = base_start + pd.DateOffset(days=7 * shift)
+            period_end = base_end + pd.DateOffset(days=7 * shift)
+        elif unit == 'months':
+            period_start = base_start + relativedelta(months=shift)
+            # recompute end as last day of the target month
+            period_end = datetime(period_start.year, period_start.month, calendar.monthrange(period_start.year, period_start.month)[1])
+        elif unit == 'season':
+            # compute new season index/year
+            cur_season, cur_season_year = self._get_season(anchor_dt, template)
+            new_index = cur_season - 1 + shift
+            new_year = cur_season_year + (new_index // 4)
+            new_season = (new_index % 4) + 1
+            sm, sd = season_dates[new_season][0]
+            em, ed = season_dates[new_season][1]
+            start_year = new_year
+            end_year = start_year if em >= sm else start_year + 1
+            period_start = datetime(start_year, sm, sd)
+            period_end = datetime(end_year, em, ed)
+            period_end += pd.DateOffset(days=1)
+        elif unit == 'years':
+            period_start = base_start + relativedelta(years=shift)
+            period_end = datetime(period_start.year, 12, 31)
+        else:
+            period_start = base_start + pd.DateOffset(days=shift)
+            period_end = base_end + pd.DateOffset(days=shift)
+
+        # normalize to date objects
         if isinstance(period_start, datetime):
             period_start = period_start.date()
         if isinstance(period_end, datetime):
             period_end = period_end.date()
+
         return period_start, period_end
 
     def _season_name(self) -> str:

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from reports.models.story_template import StoryTemplate
-from reports.models.story import story
+from reports.models.story import Story
 from reports.models.graphic import Graphic
 from reports.models.graphic import StoryTemplateGraphic
 from reports.models.story_table import StoryTable

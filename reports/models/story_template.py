@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 
 from .managers import NaturalKeyManager
-from .lookups import Period
+from .lookups import Period, PeriodDirection
 
 
 class StoryTemplateManager(NaturalKeyManager):
@@ -53,6 +53,13 @@ class StoryTemplate(models.Model):
         related_name="story_templates",
         help_text="Reference period for the story template: day, month, season, year, etc.",
     )
+    period_direction = models.ForeignKey(
+        PeriodDirection,
+        on_delete=models.CASCADE,
+        related_name="direction_story_templates",
+        help_text="Direction of the period for the story template: current, previous, etc.",
+    )
+
     data_source = models.JSONField(
         default=dict,
         blank=True,
