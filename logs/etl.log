@@ -10250,3 +10250,149 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2025-10-31 07:12:55,704 - EmailService - INFO - Starting sending mails for 2025-10-31...
 2025-10-31 08:02:31,561 - StoryGeneration - ERROR - Error processing template 36: 'bool' object has no attribute 'get'
 2025-10-31 08:12:03,537 - StoryGeneration - ERROR - Error processing template 36: 'bool' object has no attribute 'get'
+2025-11-02 08:19:25,359 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Station Binningen
+2025-11-02 08:19:26,945 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Station Binningen
+2025-11-02 08:19:26,949 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2025-11-02 08:19:27,791 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2025-11-02 08:19:27,791 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine river discharge and water level
+2025-11-02 08:19:29,146 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine river discharge and water level
+2025-11-02 08:19:29,146 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog population in Basel by breed
+2025-11-02 08:19:29,404 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog population in Basel by breed
+2025-11-02 08:19:29,405 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2025-11-02 08:19:40,101 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2025-11-02 08:19:40,101 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2025-11-02 08:19:41,077 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2025-11-02 08:19:41,077 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2025-11-02 08:19:42,669 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2025-11-02 08:19:42,669 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-11-02 08:19:43,322 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air traffic at airport Basel/Mulhouse
+2025-11-02 08:19:43,322 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2025-11-02 08:20:03,480 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2025-11-02 08:20:03,481 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land price by community in Baselland
+2025-11-02 08:20:03,746 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land price by community in Baselland
+2025-11-02 08:20:03,746 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel
+2025-11-02 08:20:04,142 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel
+2025-11-02 08:20:04,153 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by age, gender and nationality
+2025-11-02 08:20:04,614 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by age, gender and nationality
+2025-11-02 08:20:04,624 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by residential district
+2025-11-02 08:20:05,103 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by residential district
+2025-11-02 08:20:05,113 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-11-02 08:20:05,723 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily arrivals and overnight stays by origin in Basel
+2025-11-02 08:20:05,724 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-11-02 08:20:06,413 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily arrivals, overnight stays, rooms by hotel category in Basel
+2025-11-02 08:20:06,414 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-11-02 08:20:06,780 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily overnight stays, available and occupied rooms in Basel
+2025-11-02 08:20:06,780 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity consumption in Basel
+2025-11-02 08:20:08,049 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity consumption in Basel
+2025-11-02 08:20:08,049 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-11-02 08:20:08,325 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2025-11-02 08:20:08,326 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-11-02 08:20:08,777 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2025-11-02 08:20:08,787 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel
+2025-11-02 08:20:09,099 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel
+2025-11-02 08:20:09,109 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2025-11-02 08:20:10,112 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2025-11-02 08:20:10,112 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2025-11-02 08:20:11,524 - DatasetSync - INFO - Successfully synchronized dataset ID 28: Noise Monitoring in Basel
+2025-11-02 08:20:11,527 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2025-11-02 08:20:11,908 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2025-11-02 08:20:11,918 - DatasetSync - INFO - Starting synchronization for dataset ID 30: traffic accidents
+2025-11-02 08:20:12,241 - DatasetSync - INFO - Successfully synchronized dataset ID 30: traffic accidents
+2025-11-02 08:20:12,250 - DatasetSync - INFO - Starting synchronization for dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2025-11-02 08:20:13,193 - DatasetSync - INFO - Successfully synchronized dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2025-11-02 08:20:13,194 - DatasetSync - INFO - Starting synchronization for dataset ID 32: Population Baselland
+2025-11-02 08:20:13,472 - DatasetSync - INFO - Successfully synchronized dataset ID 32: Population Baselland
+2025-11-02 08:20:13,472 - DatasetSync - INFO - Starting synchronization for dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2025-11-02 08:20:14,028 - DatasetSync - INFO - Successfully synchronized dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2025-11-02 08:20:14,028 - DatasetSync - INFO - Starting synchronization for dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2025-11-02 08:20:14,210 - DatasetSync - INFO - Successfully synchronized dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2025-11-02 08:20:14,220 - DatasetSync - INFO - Starting synchronization for dataset ID 35: Newborns in the canton of basel-Stadt by sex and origin
+2025-11-02 08:20:14,491 - DatasetSync - INFO - Successfully synchronized dataset ID 35: Newborns in the canton of basel-Stadt by sex and origin
+2025-11-02 08:20:14,501 - DatasetSync - INFO - Starting synchronization for dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2025-11-02 08:20:14,730 - DatasetSync - INFO - Successfully synchronized dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2025-11-02 08:20:14,730 - DatasetSync - INFO - Starting synchronization for dataset ID 37: Population by Country of origin
+2025-11-02 08:20:14,889 - DatasetSync - INFO - Successfully synchronized dataset ID 37: Population by Country of origin
+2025-11-02 08:20:14,899 - DatasetSync - INFO - Starting synchronization for dataset ID 38: Fishing Statistics Basel-Stadt
+2025-11-02 08:20:16,732 - DatasetSync - INFO - Successfully synchronized dataset ID 38: Fishing Statistics Basel-Stadt
+2025-11-02 08:20:16,732 - DatasetSync - INFO - Starting synchronization for dataset ID 39: Mortality in the Canton of Basel-Stadt by date and age group
+2025-11-02 08:20:17,139 - DatasetSync - INFO - Successfully synchronized dataset ID 39: Mortality in the Canton of Basel-Stadt by date and age group
+2025-11-02 08:20:17,139 - DatasetSync - INFO - Starting synchronization for dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2025-11-02 08:20:17,728 - DatasetSync - INFO - Successfully synchronized dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2025-11-02 08:20:17,728 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2025-11-02 08:20:19,300 - DatasetSync - INFO - Successfully synchronized dataset ID 41: Traffic-Relevant Events in Basel
+2025-11-02 08:20:19,300 - DatasetSync - INFO - Starting synchronization for dataset ID 42: Cantonal votes
+2025-11-02 08:20:19,852 - DatasetSync - INFO - Successfully synchronized dataset ID 42: Cantonal votes
+2025-11-02 08:20:19,852 - DatasetSync - INFO - Starting synchronization for dataset ID 43: National votations
+2025-11-02 08:20:20,449 - DatasetSync - INFO - Successfully synchronized dataset ID 43: National votations
+2025-11-02 08:20:20,449 - DatasetSync - INFO - Starting synchronization for dataset ID 44: Degrees of students in Baselland
+2025-11-02 08:20:20,684 - DatasetSync - INFO - Successfully synchronized dataset ID 44: Degrees of students in Baselland
+2025-11-02 08:20:20,694 - DatasetSync - INFO - Starting synchronization for dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2025-11-02 08:20:20,890 - DatasetSync - INFO - Successfully synchronized dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2025-11-02 08:20:20,890 - DatasetSync - INFO - Starting synchronization for dataset ID 46: Illegal Waste dumps
+2025-11-02 08:20:21,678 - DatasetSync - INFO - Successfully synchronized dataset ID 46: Illegal Waste dumps
+2025-11-02 08:20:21,679 - DatasetSync - INFO - Starting synchronization for dataset ID 48: Groundwater Quality in Basel-Stadt
+2025-11-02 08:20:22,318 - DatasetSync - INFO - Successfully synchronized dataset ID 48: Groundwater Quality in Basel-Stadt
+2025-11-02 08:20:22,318 - DatasetSync - INFO - Starting synchronization for dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2025-11-02 08:20:23,061 - DatasetSync - INFO - Successfully synchronized dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2025-11-02 08:20:23,071 - DatasetSync - INFO - Starting synchronization for dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2025-11-02 08:20:24,582 - DatasetSync - INFO - Successfully synchronized dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2025-11-02 08:20:24,592 - DatasetSync - INFO - Starting synchronization for dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2025-11-02 08:20:25,399 - DatasetSync - INFO - Successfully synchronized dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2025-11-02 08:20:25,400 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-11-02 08:20:25,400 - DatasetSync - INFO - Synchronization completed successfully. Processed: 44, All successful
+2025-11-02 08:20:25,419 - StoryGeneration - INFO - Skipping template 11 - not due
+2025-11-02 08:20:25,450 - StoryGeneration - INFO - Skipping template 12 - not due
+2025-11-02 08:20:25,465 - StoryGeneration - INFO - Skipping template 13 - not due
+2025-11-02 08:20:25,469 - StoryGeneration - INFO - Skipping template 14 - not due
+2025-11-02 08:20:30,850 - StoryGeneration - INFO - Skipping template 16 - not due
+2025-11-02 08:20:30,855 - StoryGeneration - INFO - Skipping template 17 - not due
+2025-11-02 08:20:40,087 - StoryGeneration - INFO - Skipping template 19 - not due
+2025-11-02 08:20:40,102 - StoryGeneration - INFO - Skipping template 20 - not due
+2025-11-02 08:20:40,108 - StoryGeneration - INFO - Skipping template 21 - not due
+2025-11-02 08:20:52,214 - StoryGeneration - INFO - Skipping template 23 - not due
+2025-11-02 08:21:01,572 - StoryGeneration - INFO - Skipping template 25 - not due
+2025-11-02 08:21:01,577 - StoryGeneration - INFO - Skipping template 26 - not due
+2025-11-02 08:21:01,641 - StoryGeneration - INFO - Skipping template 27 - not due
+2025-11-02 08:21:01,646 - StoryGeneration - INFO - Skipping template 28 - not due
+2025-11-02 08:21:01,660 - StoryGeneration - INFO - Skipping template 29 - not due
+2025-11-02 08:21:31,117 - StoryGeneration - INFO - Skipping template 33 - not due
+2025-11-02 08:21:31,121 - StoryGeneration - INFO - Skipping template 35 - not due
+2025-11-02 08:21:31,124 - StoryGeneration - INFO - Skipping template 36 - not due
+2025-11-02 08:21:31,126 - StoryGeneration - INFO - Skipping template 37 - not due
+2025-11-02 08:22:09,957 - StoryGeneration - INFO - Skipping template 44 - not due
+2025-11-02 08:22:10,016 - EmailService - INFO - Starting sending mails for 2025-11-02...
+2025-11-02 08:22:10,894 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-11-02 08:22:11,742 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-11-02 08:22:12,465 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-11-02 08:22:13,220 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-11-02 08:22:13,903 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-11-02 08:29:29,819 - StoryGeneration - INFO - Skipping template 22 - not due
+2025-11-02 08:43:14,203 - StoryGeneration - INFO - Skipping template 15 - not due
+2025-11-02 08:45:50,287 - StoryGeneration - INFO - Skipping template 11 - not due
+2025-11-02 08:45:50,324 - StoryGeneration - INFO - Skipping template 12 - not due
+2025-11-02 08:45:50,344 - StoryGeneration - INFO - Skipping template 13 - not due
+2025-11-02 08:45:50,348 - StoryGeneration - INFO - Skipping template 14 - not due
+2025-11-02 08:45:50,353 - StoryGeneration - INFO - Skipping template 15 - not due
+2025-11-02 08:45:50,356 - StoryGeneration - INFO - Skipping template 16 - not due
+2025-11-02 08:45:56,405 - StoryGeneration - INFO - Skipping template 18 - not due
+2025-11-02 08:45:56,423 - StoryGeneration - INFO - Skipping template 19 - not due
+2025-11-02 08:46:08,080 - StoryGeneration - INFO - Skipping template 21 - not due
+2025-11-02 08:46:08,083 - StoryGeneration - INFO - Skipping template 22 - not due
+2025-11-02 08:46:08,086 - StoryGeneration - INFO - Skipping template 23 - not due
+2025-11-02 08:46:08,091 - StoryGeneration - INFO - Skipping template 24 - not due
+2025-11-02 08:46:19,686 - StoryGeneration - INFO - Skipping template 26 - not due
+2025-11-02 08:46:19,747 - StoryGeneration - INFO - Skipping template 27 - not due
+2025-11-02 08:46:28,632 - StoryGeneration - INFO - Skipping template 29 - not due
+2025-11-02 08:46:28,638 - StoryGeneration - INFO - Skipping template 30 - not due
+2025-11-02 08:46:28,644 - StoryGeneration - INFO - Skipping template 31 - not due
+2025-11-02 08:46:28,647 - StoryGeneration - INFO - Skipping template 32 - not due
+2025-11-02 08:46:36,418 - StoryGeneration - INFO - Skipping template 35 - not due
+2025-11-02 08:46:36,421 - StoryGeneration - INFO - Skipping template 36 - not due
+2025-11-02 08:46:36,424 - StoryGeneration - INFO - Skipping template 37 - not due
+2025-11-02 08:46:36,428 - StoryGeneration - INFO - Skipping template 38 - not due
+2025-11-02 08:46:36,432 - StoryGeneration - INFO - Skipping template 39 - not due
+2025-11-02 08:46:36,438 - StoryGeneration - INFO - Skipping template 40 - not due
+2025-11-02 08:46:36,447 - StoryGeneration - INFO - Skipping template 41 - not due
+2025-11-02 08:46:36,464 - StoryGeneration - INFO - Skipping template 42 - not due
+2025-11-02 08:46:36,472 - StoryGeneration - INFO - Skipping template 43 - not due
+2025-11-02 08:46:36,475 - StoryGeneration - INFO - Skipping template 44 - not due

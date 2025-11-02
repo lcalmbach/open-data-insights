@@ -571,7 +571,7 @@ class StoryProcessor:
         # Decide shift direction: backward -> -1, else +1
         direction = getattr(template, 'period_direction', None)
         dir_val = 'backward' if direction is None else str(direction.value).lower()
-        shift = -1 if dir_val == 'backward' else 1
+        shift = 0 if dir_val == 'backward' else 1
 
         # Apply the shift
         if unit == 'days':
