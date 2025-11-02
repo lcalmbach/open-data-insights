@@ -223,6 +223,7 @@ def create_bar_stacked_chart(data, settings):
     # Get fields
     y_field = settings.get('y')
     color_field = settings.get('color')
+    x_type = settings.get('x_type', 'O').upper()
     
     if not x_field or not y_field or not color_field:
         logger.error("Stacked bar chart requires 'x', 'y', and 'color' fields")
@@ -231,7 +232,7 @@ def create_bar_stacked_chart(data, settings):
     # Create stacked encoding
     encodings = {
         'x': alt.X(
-            x_field, 
+            f"{x_field}:{x_type}", 
             title=settings.get('x_title', x_field)
         ),
         'y': alt.Y(
@@ -247,8 +248,7 @@ def create_bar_stacked_chart(data, settings):
     }
     
     # Add tooltip
-    if settings.get('show_tooltip', True):
-        encodings['tooltip'] = [x_field, y_field, color_field]
+    encodings['tooltip'] = settings['tooltips'] if 'tooltip' in settings else [x_field, y_field, color_field]
     
     # Apply encodings
     chart = chart.encode(**encodings)

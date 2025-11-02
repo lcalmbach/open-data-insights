@@ -1,4 +1,5 @@
 from django.db import models
+from enum import Enum
 
 THEME_CATEGORY_ID = 1
 PERIOD_CATEGORY_ID = 2
@@ -7,6 +8,10 @@ CONTEXT_PERIOD_CATEGORY_ID = 4
 DAY_PERIOD_CATEGORY_ID = 5
 GRAPH_TYPE_CATEGORY_ID = 6
 PERIOD_DIRECTION_CATEGORY_ID = 7
+
+class PeriodDirectionEnum(Enum):
+    Backward = 72
+    Forward = 71
 
 class LookupCategory(models.Model):
     name = models.CharField(max_length=255, help_text="Name of the lookup category.")

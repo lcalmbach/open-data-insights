@@ -12,13 +12,12 @@ from datetime import datetime, date, timedelta
 from typing import Optional, Dict, Any, Tuple
 from decimal import Decimal
 from enum import Enum
-from django.db import models
 from django.conf import settings
 from openai import OpenAI
 from ..visualizations.altair_charts import generate_chart
 from django.db.models import Max
+
 from reports.services.database_client import DjangoPostgresClient
-from reports.services.utils import ensure_date
 from reports.models.story_context import StoryTemplateContext
 from reports.models.story_log import StoryLog
 from reports.models.story_context import StoryTemplate
@@ -26,6 +25,7 @@ from reports.models.story import Story
 from reports.models.story_table import StoryTable
 from reports.models.graphic import Graphic
 from dateutil.relativedelta import relativedelta
+from reports.models.lookups import PeriodDirectionEnum
 
 
 LLM_FORMATTING_INSTRUCTIONS = """
@@ -44,6 +44,28 @@ class DecimalEncoder(json.JSONEncoder):
         if isinstance(obj, Decimal):
             return float(obj)
         return super().default(obj)
+
+
+def to_datetime_obj(d) -> Optional[datetime]:
+    """Normalize various date-like inputs to a datetime (or None)."""
+    if d is None:
+        return None
+    if isinstance(d, pd.Timestamp):
+        return d.to_pydatetime()
+    if isinstance(d, datetime):
+        return d
+    if isinstance(d, date):
+        return datetime.combine(d, datetime.min.time())
+    try:
+        return pd.to_datetime(d).to_pydatetime()
+    except Exception:
+        return None
+
+
+def to_date_obj(d) -> Optional[date]:
+    """Normalize various date-like inputs to a date (or None)."""
+    dt = to_datetime_obj(d)
+    return dt.date() if dt is not None else None
 
 
 # Season mapping
@@ -152,12 +174,24 @@ class StoryProcessor:
                 self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
                 self.story.published_date = published_date
 
-        self.logger = logging.getLogger(
-            f"StoryProcessor.{template.id} {template.title}"
-        )
+        # Ensure reference period fields are set to avoid AttributeError later
+        self.logger = logging.getLogger(f"StoryProcessor.{template.id} {template.title}")
         self.reference_period = template.reference_period.id
-        self.year = self.story.reference_period_start.year
-        self.month = self.story.reference_period_start.month
+        # make sure reference_period_start/end are present; compute from published_date if missing
+        if not getattr(self.story, 'reference_period_start', None) or not getattr(self.story, 'reference_period_end', None):
+            try:
+                rs, re = self._get_reference_period(published_date, template)
+                self.story.reference_period_start = rs
+                self.story.reference_period_end = re
+            except Exception:
+                # fallback: use published_date as single-day period
+                pd_date = published_date.date() if isinstance(published_date, datetime) else published_date
+                self.story.reference_period_start = pd_date
+                self.story.reference_period_end = pd_date
+
+        # safe access to year/month
+        self.year = self.story.reference_period_start.year if self.story.reference_period_start else datetime.now().year
+        self.month = self.story.reference_period_start.month if self.story.reference_period_start else datetime.now().month
         self.reference_period_expression = self._get_reference_period_expression()
         self.last_reference_period_start_date = self._get_last_published_date()
         self.is_data_based = StoryTemplateContext.objects.filter(
@@ -475,11 +509,10 @@ class StoryProcessor:
             try:
                 params = {"published_date": published_date}
                 df = self.dbclient.run_query(most_recent_day_sql, params)
-                return (
-                    pd.to_datetime(df.iloc[0, 0])
-                    if not df.empty and df.iloc[0, 0] is not None
-                    else None
-                )
+                if not df.empty and df.iloc[0, 0] is not None:
+                    # return a date object for consistency with DB DateFields
+                    return to_date_obj(pd.to_datetime(df.iloc[0, 0]))
+                return None
             except Exception as e:
                 return None
         else:
@@ -516,21 +549,12 @@ class StoryProcessor:
         Returns date objects (period_start, period_end).
         """
 
-        def to_datetime_obj(d):
-            if d is None:
-                return None
-            if isinstance(d, pd.Timestamp):
-                return d.to_pydatetime()
-            if isinstance(d, date) and not isinstance(d, datetime):
-                return datetime.combine(d, datetime.min.time())
-            if isinstance(d, datetime):
-                return d
-            try:
-                return pd.to_datetime(d).to_pydatetime()
-            except Exception:
-                return None
-
-        anchor = self.most_recent_day if self.most_recent_day is not None else published_date
+        # choose anchor: most_recent_day (if present) or published_date
+        if template.period_direction_id == PeriodDirectionEnum.Backward.value:
+            anchor = self.most_recent_day if self.most_recent_day is not None else (published_date - timedelta(days=1))
+        else:
+            anchor = published_date
+        # normalize anchor to datetime for period arithmetic
         anchor_dt = to_datetime_obj(anchor) or to_datetime_obj(published_date)
 
         # Determine the base period that contains anchor_dt
@@ -568,10 +592,7 @@ class StoryProcessor:
             base_end = anchor_dt
             unit = 'days'
 
-        # Decide shift direction: backward -> -1, else +1
-        direction = getattr(template, 'period_direction', None)
-        dir_val = 'backward' if direction is None else str(direction.value).lower()
-        shift = 0 if dir_val == 'backward' else 1
+        shift = 1 if template.period_direction_id == PeriodDirectionEnum.Forward.value else 0
 
         # Apply the shift
         if unit == 'days':

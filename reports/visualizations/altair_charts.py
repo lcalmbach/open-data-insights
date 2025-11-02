@@ -227,14 +227,13 @@ def create_bar_stacked_chart(data, settings):
         logger.error("Stacked bar chart requires 'x', 'y', and 'color' fields")
         return alt.Chart(data).mark_point()  # Return empty chart
     
-    # decide x axis type (O for ordinal, Q for quantitative)
-    x_type = (settings.get('x_type') or 'Q').upper()
-    x_field_spec = f"{x_field}:O" if x_type == 'O' else f"{x_field}:Q"
+    # decide x axis type (O for ordinal, O for quantitative)
+    x_type = (settings.get('x_type') or 'O').upper()
     
     # Create stacked encoding
     encodings = {
         'x': alt.X(
-            x_field_spec,
+            f"{x_field}:{x_type}",
             title=settings.get('x_title', x_field)
         ),
         'y': alt.Y(

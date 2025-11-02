@@ -10396,3 +10396,4 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2025-11-02 08:46:36,464 - StoryGeneration - INFO - Skipping template 42 - not due
 2025-11-02 08:46:36,472 - StoryGeneration - INFO - Skipping template 43 - not due
 2025-11-02 08:46:36,475 - StoryGeneration - INFO - Skipping template 44 - not due
+2025-11-02 09:15:49,910 - StoryGeneration - INFO - Skipping template 15 - not due
