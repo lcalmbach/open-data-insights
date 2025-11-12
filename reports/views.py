@@ -22,6 +22,7 @@ from .models.story import Story
 from .models.story_table import StoryTable
 from .models.lookups import Period
 from .models.story_rating import StoryRating
+from account.models import CustomUser
 
 
 def generate_fake_graphic(chart_id):
@@ -138,6 +139,8 @@ def templates_view(request):
             "selected_template": selected_template,
             "periods": periods,               # für Perioden-Select
             "story_count": story_count,
+            "total_users": CustomUser.objects.all().count(),
+            "subscribed_count": selected_template.subscriptions.all().count(),
         },
     )
 
@@ -314,23 +317,48 @@ def story_detail(request, story_id=None):
 
 def get_tables(selected_story):
     """
-    Returns a list of table dicts for the given story, each with table_id, rows, columns, and title.
+    Returns a list of table dicts for the given story, each with:
+      table_id, rows, columns, title, sort_order, display_title.
     """
     tables = []
-    if selected_story:
-        for t in StoryTable.objects.filter(story=selected_story):
-            try:
-                if t.data:
-                    data = json.loads(t.data)
-                    columns = list(data[0].keys()) if data else []
-                    tables.append(
-                        {
-                            "table_id": f"table-{t.id}",
-                            "rows": data,
-                            "columns": columns,
-                            "title": t.title or f"Table {t.id}",
-                        }
-                    )
-            except Exception as e:
-                print(f"Error processing table {t.id}: {e}")
+    if not selected_story:
+        return tables
+
+    # Prefer ordering by sort_order if the model has it; fall back to id.
+    qs = (
+        StoryTable.objects
+        .filter(story=selected_story)
+        .select_related('table_template')  # if relation exists
+        .order_by('sort_order', 'id')      # adjust if your field is named differently
+    )
+
+    for t in qs:
+        try:
+            data = json.loads(t.data) if t.data else []
+            columns = list(data[0].keys()) if data else []
+
+            # Try table.sort_order first; else table.table_template.sort_order; else None
+            sort_order = getattr(t, 'sort_order', None)
+            if sort_order is None and hasattr(t, 'table_template'):
+                sort_order = getattr(t.table_template, 'sort_order', None)
+
+            title = t.title or f"Table {t.id}"
+
+            # Precompute a display title so the template stays simple
+            display_title = f"Table {sort_order + 1}: {title}" if sort_order is not None else title
+
+            tables.append(
+                {
+                    "table_id": f"table-{t.id}",
+                    "rows": data,
+                    "columns": columns,
+                    "title": title,
+                    "sort_order": sort_order,
+                    "display_title": display_title,
+                }
+            )
+        except Exception as e:
+            print(f"Error processing table {t.id}: {e}")
+
     return tables
+

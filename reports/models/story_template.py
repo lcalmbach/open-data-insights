@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.conf import settings
 
 from .managers import NaturalKeyManager
 from .lookups import Period, PeriodDirection

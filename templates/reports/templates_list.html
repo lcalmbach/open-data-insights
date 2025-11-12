@@ -67,6 +67,9 @@
       <hr>
       <div id="details-body">{{ selected_template.description_html|safe }}</div>
       <hr>
+      <p class="text-muted mb-2">
+        {{ subscribed_count|default:"0" }} of {{ total_users|default:"0" }} users have subscribed to this template
+      </p>
       <a id="details-link" href="{% url 'stories' %}?template={{ selected_template.id }}">
         View all {{ story_count }} insights created with this template
       </a>

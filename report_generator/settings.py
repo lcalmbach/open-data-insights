@@ -193,7 +193,7 @@ MARKDOWNIFY = {
 }
 
 APP_INFO = {
-    "version": "0.0.22",
+    "version": "0.0.23",
     "version_date": "2025-10-27",
     "author_name": "Lukas Calmbach",
     "author_email": "lcalmbach@gmail.com",

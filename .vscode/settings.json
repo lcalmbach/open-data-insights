@@ -1,4 +1,15 @@
 {
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
-    "python.terminal.activateEnvironment": true
+    "python.terminal.activateEnvironment": true,
+    "terminal.integrated.env.linux": {
+        "VIRTUAL_ENV": "${workspaceFolder}/.venv",
+        "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
+    },
+    "terminal.integrated.profiles.linux": {
+        "venv-bash": {
+            "path": "/bin/bash",
+            "args": ["-lc", "source ${workspaceFolder}/.venv/bin/activate; exec bash -i"]
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "venv-bash"
 }

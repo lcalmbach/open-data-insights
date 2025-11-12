@@ -32,11 +32,11 @@ MODEL_NAME = {
 }
 
 EXCLUDE_FIELDS_BY_MODEL = {
-    Dataset: {"id"},
-    StoryTemplate: {"id"},
-    StoryTemplateGraphic: {"id"},
-    StoryTemplateTable: {"id"},
-    StoryTemplateContext: {"id"},
+    Dataset: {"id", "slug"},
+    StoryTemplate: {"id", "slug"},
+    StoryTemplateGraphic: {"id", "slug"},
+    StoryTemplateTable: {"id", "slug"},
+    StoryTemplateContext: {"id", "slug"},
 }
 
 
@@ -61,7 +61,10 @@ def _values_dict_from_instance(
             continue
         if isinstance(f, models.ManyToManyField):
             continue
+        # For ForeignKey fields, use the underlying "<field>_id" value (integer)
+        # so we don't pass source-DB model instances into destination DB operations.
         if isinstance(f, models.ForeignKey):
+            data[f.attname] = getattr(obj, f.attname)
             continue
         data[f.name] = getattr(obj, f.name)
     return data
