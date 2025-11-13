@@ -50,7 +50,7 @@
 
   {% if graphics %}
     {% for graphic in graphics %}
-    <h5>Figure {{ graphic.graphic_template.sort_order }}: {{ graphic.title }}</h5>
+    <h5>Figure {{ graphic.graphic_template.sort_order + 1}}: {{ graphic.title }}</h5>
     {{ graphic.content_html|safe }}
     <!-- debug: graphic ids
     {{ graphic.id}} {{graphic.graphic_template.id}}
