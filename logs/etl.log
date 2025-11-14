@@ -11059,3 +11059,11 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2025-11-13 07:25:41,468 - EmailService - INFO - Email sent successfully to 1 recipients
 2025-11-13 07:25:42,480 - EmailService - INFO - Email sent successfully to 1 recipients
 2025-11-13 07:25:43,178 - EmailService - INFO - Email sent successfully to 1 recipients
+2025-11-14 07:01:40,299 - DatasetSync - INFO - Starting synchronization for dataset ID 53: Motor vehicle stock by vehicle type, fuel, municipality and month
+2025-11-14 07:01:49,438 - DatasetSync - INFO - Successfully synchronized dataset ID 53: Motor vehicle stock by vehicle type, fuel, municipality and month
+2025-11-14 07:01:49,439 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-11-14 07:01:49,439 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2025-11-14 07:06:52,546 - DatasetSync - INFO - Starting synchronization for dataset ID 53: Motor vehicle stock by vehicle type, fuel, municipality and month
+2025-11-14 07:07:06,905 - DatasetSync - INFO - Successfully synchronized dataset ID 53: Motor vehicle stock by vehicle type, fuel, municipality and month
+2025-11-14 07:07:06,906 - DatasetSync - INFO - Cleaned up temporary files in: files
+2025-11-14 07:07:06,906 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
