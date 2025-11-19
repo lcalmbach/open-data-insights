@@ -72,12 +72,25 @@ def profile_view(request):
 
                     # Neue hinzufügen (oder bestehende fortschreiben)
                     for template in selected_templates:
-                        StoryTemplateSubscription.objects.get_or_create(
+                        # Alle aktiven Subscriptions für user+template holen
+                        active_qs = StoryTemplateSubscription.objects.filter(
                             user=user,
                             story_template=template,
                             cancellation_date__isnull=True,
-                            defaults={"user": user, "story_template": template},
                         )
+
+                        if active_qs.exists():
+                            # Falls es mehrere sind, optional aufräumen: nur eine aktiv lassen
+                            main = active_qs.first()
+                            # Die anderen ggf. mit cancellation_date setzen (oder löschen)
+                            active_qs.exclude(pk=main.pk).update(cancellation_date=timezone.now())
+                            # Nichts neues anlegen – es existiert ja schon eine aktive
+                        else:
+                            # Neue aktive Subscription anlegen
+                            StoryTemplateSubscription.objects.create(
+                                user=user,
+                                story_template=template,
+                            )
 
                 messages.success(request, "Your subscriptions have been saved.")
                 return redirect("account:profile")

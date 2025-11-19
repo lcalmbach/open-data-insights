@@ -4,44 +4,51 @@
 {% block content %}
 
 <h2 class="mb-3">Explore Insights (<span id="stories-count">{{ stories|length }}</span>)</h2>
-<!-- Filter Form -->
-<form id="filter-form" method="get" class="row g-3 mb-4" autocomplete="off">
-  <div class="col-md-3">
-    <label for="reference_period" class="form-label">Reference period</label>
-    <select class="form-select" id="reference_period" name="reference_period">
-      <option value="">All periods</option>
-      {% for period in periods %}
-        <option value="{{ period }}" {% if request.GET.reference_period == period|stringformat:"s" %}selected{% endif %}>
-          {{ period }}
-        </option>
-      {% endfor %}
-    </select>
-  </div>
 
-  <div class="col-md-3">
-    <label for="template" class="form-label">Template</label>
-    <select class="form-select" id="template" name="template">
-      <option value="">All templates</option>
-      {% for template in templates %}
-        <option value="{{ template.id }}"
-                data-reference-period="{{ template.reference_period }}"
-                {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
-          {{ template.title }} ({{ template.reference_period }})
-        </option>
-      {% endfor %}
-    </select>
-  </div>
+<!-- Filter Form in a Card -->
+<div class="card mb-4 shadow-sm">
+  <div class="card-body">
+    <h5 class="card-title mb-3">Filter Insights</h5>
+    <!-- Filter Form -->
+    <form id="filter-form" method="get" class="row g-3" autocomplete="off">
+      <div class="col-md-3">
+        <label for="reference_period" class="form-label">Reference period</label>
+        <select class="form-select" id="reference_period" name="reference_period">
+          <option value="">All periods</option>
+          {% for period in periods %}
+            <option value="{{ period }}" {% if request.GET.reference_period == period|stringformat:"s" %}selected{% endif %}>
+              {{ period }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
 
-  <div class="col-md-4">
-    <label for="search" class="form-label">Title contains...</label>
-    <input type="text" class="form-control" id="search" name="search" value="{{ request.GET.search }}" placeholder="Title or description...">
-  </div>
+      <div class="col-md-3">
+        <label for="template" class="form-label">Template</label>
+        <select class="form-select" id="template" name="template">
+          <option value="">All templates</option>
+          {% for template in templates %}
+            <option value="{{ template.id }}"
+                    data-reference-period="{{ template.reference_period }}"
+                    {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
+              {{ template.title }} ({{ template.reference_period }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
 
-  <div class="col-md-2 d-flex align-items-end">
-    <!-- Hidden submit kept for keyboard accessibility; JS will auto-submit -->
-    <button type="submit" class="btn btn-primary w-100 visually-hidden">Filter</button>
+      <div class="col-md-4">
+        <label for="search" class="form-label">Title contains...</label>
+        <input type="text" class="form-control" id="search" name="search" value="{{ request.GET.search }}" placeholder="Title or description...">
+      </div>
+
+      <div class="col-md-2 d-flex align-items-end">
+        <!-- Hidden submit kept for keyboard accessibility; JS will auto-submit -->
+        <button type="submit" class="btn btn-primary w-100 visually-hidden">Filter</button>
+      </div>
+    </form>
   </div>
-</form>
+</div>
 
 
 <div class="row">
@@ -68,6 +75,8 @@
     </div>
   </div>
 </div>
+
+<br>
 
 <div class="row">
   <div class="col-12">
