@@ -1,18 +1,42 @@
-# Open Data Insights
+# Open Data Insights (ODI)
 
-**Open Data Insights** is a Django-based platform that transforms open datasets into automated, human-readable reports and insights. It is designed for statistical offices, journalists, and civic tech enthusiasts who want to turn raw public data into stories — automatically, every day.
+## Introduction
+
+Open data portals host thousands of datasets on weather, mobility, environment, economics, and more. The problem is not a lack of data — it’s that users are **drowning in it**. Most open data is raw, low-level, and requires filtering, querying, and analysis before it becomes meaningful. Keeping track of what actually matters over time is hard, even for experts.
+
+**Open Data Insights** is a thin, opinionated layer on top of open data portals that turns selected datasets into **actionable stories** instead of raw tables.
+
+Rather than asking every user to write their own queries, the platform:
+
+* **Synchronizes selected datasets** from open data portals onto the ODI platform.
+* Uses **insight templates** that describe *what story should be told* (via a prompt) and *which numbers matter* (via a set of predefined queries).
+* Optionally attaches **tables and charts** to each story to support the narrative.
+* Uses **time frames and triggers** so that stories are generated only when they are relevant:
+
+  * Monthly stories are created as soon as a full month of data is available.
+  * Daily or event-based stories are generated only when certain conditions are met (e.g. extreme weather, bad air quality, dry spells).
+* Lets users **subscribe** to specific story types and receive **email notifications** when new stories are published.
+
+For example, for a weather dataset you might define several insight templates:
+
+* **Very hot weather** – generated when the daily maximum temperature exceeds the 95th percentile for that month.
+* **Bad air quality** – triggered when the air quality index rises above a configured threshold.
+* **Heat or drought spells** – published when there are a given number of consecutive days with high temperatures, no precipitation, or both.
+
+In other words, instead of forcing users to monitor dashboards or query raw data, Open Data Insights sends them **curated, narrative summaries** only when something noteworthy happens — helping them **avoid drowning in data** by focusing on the stories that matter. 
+
+While insight templates provide strong contextual grounding — forcing the language model to use the actual reported numbers — the quality of the generated narratives naturally varies. Hallucinations are rare, but the stories are not intended to be polished news articles. Instead, they serve as lightweight, automatically produced summaries that can inspire further reporting or support deeper personal analysis. Every story includes a prominent link back to the underlying dataset, encouraging users to explore the raw data themselves and dig deeper into the trends behind the narrative.
+
 
 ## 🌐 Live Demo
 
-Hosted on Heroku:  
-👉 [https://ogd-data-insights-d6c65d72da95.herokuapp.com/](https://ogd-data-insights-d6c65d72da95.herokuapp.com/)
+👉 [https://ogd-data-insights.org](https://ogd-data-insights.org/)
 
 ## 📦 Features
 
 - ✅ **Automated Data Pipeline**: Daily data synchronization from public APIs (e.g., OpenDataSoft)
 - ✅ **AI-Powered Insights**: Automatic generation of natural-language reports using OpenAI GPT
 - ✅ **Email Notifications**: Automated email delivery to subscribed users
-- ✅ **Modular Architecture**: Clean separation of concerns: sync → analyze → publish
 - ✅ **Template-Based Stories**: Configurable story templates for different data types
 - ✅ **Multi-Dataset Support**: Handles various data sources (weather, tourism, economics, etc.)
 - ✅ **Extensible Design**: New datasets and story types can be added easily

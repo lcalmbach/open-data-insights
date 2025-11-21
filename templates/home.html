@@ -22,18 +22,13 @@
     </h1>
     <p class="lead text-muted" style="font-size: 1.05rem;"></p>
 
-    <!-- Under construction badge -->
-    <div class="text-center mb-3">
-      <span class="badge bg-warning text-dark">🚧 Under construction — work in progress</span>
-    </div>
-
     {% if user.is_authenticated %}
         Welcome back {{ user.first_name }}!
         You have subscribed to {{ user.story_template_subscriptions.count }} of {{ available_subscriptions }} available insights.
         <a href="{% url 'account:profile' %}">Click here to manage subscriptions</a>
     {% else %}
         Data Insights are generated from a wide range of open-data sources—on daily, monthly, and yearly schedules, or whenever predefined conditions are met (for example, pollutant limits exceeded or values rising above the historical 95th percentile).
-<a href="{% url 'account:register' %}">Register</a> as a user to subscribe to your preferred insights and receive notifications so you never miss a noteworthy change.
+<a href="{% url 'account:register' %}">Register</a> as a user or <a href="{% url 'account:login' %}">Login</a> to subscribe to your preferred insights and receive notifications by mail so you never miss a noteworthy change.
 If you are not registered, you can still explore all published insights on this site via Explore > <a href="{% url 'stories' %}">Published Insights</a>.
     {% endif %}
     </p><br>
