@@ -24,7 +24,7 @@ class StorySubscriptionService:
 
         # default to published templates
         if templates is None:
-            templates_qs = StoryTemplate.objects.filter(is_published=True)
+            templates_qs = StoryTemplate.objects.filter(is_published=True, active=True)
         else:
             templates_qs = templates
 
