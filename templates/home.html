@@ -34,13 +34,13 @@ If you are not registered, you can still explore all published insights on this 
     </p><br>
     {% if prev_story_id %}
     <a href="{% url 'view_story' prev_story_id %}" title="Previous Insight"
-        class="btn btn-primary btn-lg rounded-pill d-inline-flex align-items-center">
+        class="btn btn-powder btn-lg rounded-pill d-inline-flex align-items-center">
         <i class="fas fa-arrow-left fa-lg me-2"></i> Previous
     </a>
     {% endif %}
     {% if next_story_id %}
     <a href="{% url 'view_story' next_story_id %}" title="Next Insight"
-        class="btn btn-primary btn-lg rounded-pill d-inline-flex align-items-center ms-2">
+        class="btn btn-powder btn-lg rounded-pill d-inline-flex align-items-center ms-2">
         Next <i class="fas fa-arrow-right fa-lg ms-2"></i>
     </a>
     {% endif %}

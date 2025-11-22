@@ -8,34 +8,38 @@
     (<span id="templates-count">{{ templates|length }}</span>)
   </h2>
   <p>
-    Insight templates are the blueprints for generating insights from your data. The list below can be filtered by period or by a search term in the title or description. Select a template to view its details, and use the link below the description to access all insights that have been generated with that template.
+    Insight templates are the blueprints for generating insights (short stories) from your data. The list below can be filtered by period or by a search term in the title or description. Select a template to view its details, and use the link below the description to access all insights that have been generated with that template.
   </p>
-
   <!-- Filter Form (GET) -->
-  <form id="filter-form" method="get" class="row g-3 mb-4" autocomplete="off">
-    <div class="col-md-3">
-      <label for="period" class="form-label">Period</label>
-      <select id="period" name="period" class="form-select">
-        <option value="">All periods</option>
-        {% for p in periods %}
-          <option value="{{ p.id }}" {% if request.GET.period == p.id|stringformat:"s" %}selected{% endif %}>
-            {{ p.value }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title mb-3">Filter Templates</h5>
+      <form id="filter-form" method="get" class="row g-3" autocomplete="off">
+        <div class="col-md-3">
+          <label for="period" class="form-label">Period</label>
+          <select id="period" name="period" class="form-select">
+            <option value="">All periods</option>
+            {% for p in periods %}
+              <option value="{{ p.id }}" {% if request.GET.period == p.id|stringformat:"s" %}selected{% endif %}>
+                {{ p.value }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
 
-    <div class="col-md-9">
-      <label for="search" class="form-label">Title contains...</label>
-      <input id="search" name="search" class="form-control"
-             placeholder="Type to filter templates..."
-             value="{{ request.GET.search|default:'' }}">
-    </div>
+        <div class="col-md-9">
+          <label for="search" class="form-label">Title contains...</label>
+          <input id="search" name="search" class="form-control"
+                 placeholder="Type to filter templates..."
+                 value="{{ request.GET.search|default:'' }}">
+        </div>
 
-    <div class="col-12 d-flex justify-content-end">
-      <button type="submit" class="btn btn-primary visually-hidden">Apply</button>
+        <div class="col-12 d-flex justify-content-end">
+          <button type="submit" class="btn btn-primary visually-hidden">Apply</button>
+        </div>
+      </form>
     </div>
-  </form>
+  </div>
 
   <!-- Ergebnisliste (nur eine Select-Liste) -->
   <div class="row mb-3">

@@ -237,9 +237,9 @@ class StoryProcessor:
         result = result.replace(
             ":reference_period_end", str(self.story.reference_period_end)
         )
-        result = result.replace(
-            ":reference_period_month", str(calendar.month_name[self.month])
-        )
+        # Safe month name lookup
+        month_name = calendar.month_name[self.month] if 1 <= self.month <= 12 else "Unknown"
+        result = result.replace(":reference_period_month", month_name)
         result = result.replace(":reference_period_year", str(self.year))
         result = result.replace(":reference_period_previous_year", str(self.year - 1))
         result = result.replace(":reference_period_season", self._season_name())
@@ -337,22 +337,26 @@ class StoryProcessor:
 
     def _generate_tables(self):
         """Generate tables for the story"""
+        from django.db import transaction
+        
         table_templates = self.story.template.story_template_tables.all()
         self.logger.info(f"Found {table_templates.count()} table templates to process")
 
         for table_template in table_templates:
-            tables = StoryTable.objects.filter(
-                story=self.story, table_template=table_template
-            )
-            if not tables.exists():
-                table = StoryTable(story=self.story, table_template=table_template)
-            else:
-                if tables.count() > 1:
-                    # delete all but the last table
-                    for t in tables[:-1]:
-                        t.delete()
-                table = tables.first()
-            self.generate_table(table)
+            with transaction.atomic():
+                tables = StoryTable.objects.filter(
+                    story=self.story, table_template=table_template
+                )
+                if not tables.exists():
+                    table = StoryTable(story=self.story, table_template=table_template)
+                else:
+                    if tables.count() > 1:
+                        # Keep only the first, delete the rest
+                        table = tables.first()
+                        tables.exclude(id=table.id).delete()
+                    else:
+                        table = tables.first()
+                self.generate_table(table)
 
     def generate_graphic(self, graphic: Graphic):
         try:

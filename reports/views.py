@@ -14,6 +14,7 @@ import pandas as pd
 from django.conf import settings
 from django.views.generic import TemplateView
 from django.db.models import Q
+from django.utils.dateparse import parse_date
 from .forms import StoryRatingForm
 
 from .models.graphic import Graphic
@@ -165,6 +166,14 @@ def stories_view(request):
         stories = stories.filter(
             Q(title__icontains=search) | Q(content__icontains=search)
         )
+
+    # Filter by published date range
+    published_from = parse_date(request.GET.get("published_from") or "")
+    published_to = parse_date(request.GET.get("published_to") or "")
+    if published_from:
+        stories = stories.filter(published_date__gte=published_from)
+    if published_to:
+        stories = stories.filter(published_date__lte=published_to)
 
     # Selected story (for detail view)
     story_id = request.GET.get("story")
@@ -361,4 +370,3 @@ def get_tables(selected_story):
             print(f"Error processing table {t.id}: {e}")
 
     return tables
-
