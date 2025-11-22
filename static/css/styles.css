@@ -73,3 +73,16 @@
 }
 
 h1.headline { text-align: center !important; }
+
+.btn-powder {
+  background-color: #b0c4de;
+  border-color: #a0b7d3;
+  color: #0f2a3d;
+}
+
+.btn-powder:hover,
+.btn-powder:focus {
+  background-color: #a0b7d3;
+  border-color: #90aac8;
+  color: #0f2a3d;
+}
