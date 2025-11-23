@@ -149,9 +149,14 @@ class StoryProcessor:
         else:
             self.most_recent_day = self._get_most_recent_day(published_date, template)
             if self.most_recent_day:
-                reference_period_start, reference_period_end = (
-                    self._get_reference_period(self.most_recent_day, template)
-                )
+                if template.period_direction_id == PeriodDirectionEnum.Backward.value:
+                    reference_period_start, reference_period_end = (
+                        self._get_reference_period(self.most_recent_day, template)
+                    )
+                else:
+                    reference_period_start, reference_period_end = (
+                        self._get_reference_period(published_date, template)
+                    )
                 self.season, self.season_year = self._get_season(
                     reference_period_start, template
                 )

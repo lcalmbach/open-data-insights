@@ -12500,3 +12500,13 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2025-11-23 09:33:17,889 - EmailService - INFO - Starting sending mails for 2025-11-23...
 2025-11-23 10:20:22,512 - StoryGeneration - INFO - Skipping template 11 - not due
 2025-11-23 10:25:06,373 - StoryGeneration - INFO - Skipping template 11 - not due
+2025-11-23 15:57:51,105 - StoryGeneration - ERROR - Error processing template 35: 'bool' object has no attribute 'get'
+2025-11-23 16:04:06,348 - StoryGeneration - ERROR - Error processing template 35: 'bool' object has no attribute 'get'
+2025-11-23 16:04:13,162 - StoryGeneration - ERROR - Error processing template 35: 'bool' object has no attribute 'get'
+2025-11-23 16:04:26,717 - StoryGeneration - INFO - Skipping template 35 - not due
+2025-11-23 16:04:36,998 - StoryGeneration - ERROR - Error processing template 35: 'bool' object has no attribute 'get'
+2025-11-23 16:04:54,823 - StoryGeneration - ERROR - Error processing template 35: 'bool' object has no attribute 'get'
+2025-11-23 16:33:29,322 - StoryGeneration - ERROR - Error processing template 35: 'bool' object has no attribute 'get'
+2025-11-23 16:37:10,037 - StoryGeneration - ERROR - Error processing template 35: 'bool' object has no attribute 'get'
+2025-11-23 17:52:57,169 - StoryGeneration - ERROR - Error processing template 35: 'bool' object has no attribute 'get'
+2025-11-23 18:25:50,877 - StoryGeneration - ERROR - Error processing template 35: 'bool' object has no attribute 'get'
