@@ -1,71 +1,84 @@
+import base64
+import logging
+from io import BytesIO
+from typing import List
+
 import pandas as pd
 import altair as alt
-import logging
-from typing import List
+
+try:
+    from wordcloud import WordCloud
+except ImportError:  # pragma: no cover - optional dependency handled at runtime
+    WordCloud = None
 
 logger = logging.getLogger(__name__)
 
 def generate_chart(data, settings, chart_id):
     """
-    Generate an Altair chart based on data and settings
-    
-    Args:
-        data (pd.DataFrame or list): Data for the chart, will be converted to DataFrame if needed
-        settings (dict): Chart configuration settings
-        chart_id (str): Unique identifier for the chart element
-        
-    Returns:
-        str: HTML representation of the chart
+    Generate a chart based on data and settings and return HTML.
+    Uses Altair for most chart types and `wordcloud` for word clouds.
     """
     try:
-        # Process date columns
-        #for col in data.columns:
-        #    if data[col].dtype == 'object' and pd.to_datetime(data[col], errors='coerce').notna().all():
-        #        data[col] = pd.to_datetime(data[col])
-        
-        # Determine chart type and call appropriate function.
-        # Accept either a plain string in settings['type'] or a GraphType model/PK.
-    
-        
-        chart_functions = {
-            'line': create_line_chart,
-            'bar': create_bar_chart,
-            'bar_stacked': create_bar_stacked_chart,
-            'area': create_area_chart,
-            'point': create_point_chart,
-            'scatter': create_point_chart,
-            'pie': create_pie_chart,
-            'heatmap': create_heatmap,
-            'histogram': create_histogram,
-        }
-        
-        chart_type = settings.get('type').value.lower()
-        chart_func = chart_functions.get(chart_type, create_line_chart)
-        
-        # Create the chart
-        chart = chart_func(data, settings)
-        
-        # Convert to HTML
-        html = chart.to_html(
-            embed_options={
-                'actions': False,  # Hide download buttons
-                'renderer': 'svg',  # SVG is better for print/static content
-                'theme': settings.get('theme', 'default')
-            }
+        chart_type_raw = settings.get("type")
+        chart_type = (
+            chart_type_raw.value.lower()
+            if hasattr(chart_type_raw, "value")
+            else str(chart_type_raw).lower()
         )
-        
-        # Replace default "vis" id with custom chart_id
-        html = html.replace('id="vis"', f'id="{chart_id}"')
-        html = html.replace('vegaEmbed("#vis"', f'vegaEmbed("#{chart_id}"')
-        
-        return html
-    
+
+        chart_functions = {
+            "line": create_line_chart,
+            "bar": create_bar_chart,
+            "bar_stacked": create_bar_stacked_chart,
+            "area": create_area_chart,
+            "point": create_point_chart,
+            "scatter": create_point_chart,
+            "pie": create_pie_chart,
+            "heatmap": create_heatmap,
+            "histogram": create_histogram,
+            "word_cloud": create_word_cloud,
+            "word cloud": create_word_cloud,
+            "wordcloud": create_word_cloud,
+        }
+
+        chart_func = chart_functions.get(chart_type, create_line_chart)
+        chart = chart_func(data, settings, chart_id)
+
+        # Word cloud (and any other) may already return HTML
+        if isinstance(chart, str):
+            return chart
+
+        if isinstance(chart, alt.Chart):
+            return _chart_to_html(chart, settings, chart_id)
+
+        logger.error(f"Unsupported chart return type: {type(chart)}")
+        return _error_html("Unsupported chart return type", chart_id)
+
     except Exception as e:
         logger.error(f"Error generating chart: {str(e)}")
-        return f'<div id="{chart_id}" class="chart-error">Error generating chart: {str(e)}</div>'
+        return f'<div id=\"{chart_id}\" class=\"chart-error\">Error generating chart: {str(e)}</div>'
 
 
-def create_line_chart(data, settings):
+def _chart_to_html(chart: alt.Chart, settings: dict, chart_id: str) -> str:
+    """Render an Altair chart to HTML and inject the provided chart_id."""
+    html = chart.to_html(
+        embed_options={
+            "actions": False,  # Hide download buttons
+            "renderer": "svg",  # SVG is better for print/static content
+            "theme": settings.get("theme", "default"),
+        }
+    )
+    html = html.replace('id="vis"', f'id="{chart_id}"')
+    html = html.replace('vegaEmbed("#vis"', f'vegaEmbed("#{chart_id}"')
+    return html
+
+
+def _error_html(message: str, chart_id: str) -> str:
+    """Return a simple error div with the provided chart id."""
+    return f'<div id="{chart_id}" class="chart-error">{message}</div>'
+
+
+def create_line_chart(data, settings, chart_id):
     """Create a line chart with the given data and settings"""
     
     if settings.get('x_type') == "T":
@@ -81,11 +94,11 @@ def create_line_chart(data, settings):
     # Line-specific settings
     if 'stroke_width' in settings:
         chart = chart.mark_line(strokeWidth=settings['stroke_width'])
-        
+
     return chart
 
 
-def create_bar_chart(data, settings):
+def create_bar_chart(data, settings, chart_id):
     """Create a bar chart with the given data and settings"""
     # Determine fields
     x_field = settings.get('x')
@@ -192,7 +205,7 @@ def create_bar_chart(data, settings):
     return chart
 
 
-def create_bar_stacked_chart(data, settings):
+def create_bar_stacked_chart(data, settings, chart_id):
     """Create a stacked bar chart with the given data and settings"""
     # Decide bar pixel size based on number of distinct bars (x values)
     x_field = settings.get('x')
@@ -225,7 +238,7 @@ def create_bar_stacked_chart(data, settings):
     
     if not x_field or not y_field or not color_field:
         logger.error("Stacked bar chart requires 'x', 'y', and 'color' fields")
-        return alt.Chart(data).mark_point()  # Return empty chart
+        return _error_html("Stacked bar chart requires x, y, and color fields", chart_id)
     
     # decide x axis type (O for ordinal, O for quantitative)
     x_type = (settings.get('x_type') or 'O').upper()
@@ -281,7 +294,7 @@ def create_bar_stacked_chart(data, settings):
     return chart
 
 
-def create_area_chart(data, settings):
+def create_area_chart(data, settings, chart_id):
     """Create an area chart with the given data and settings"""
     # Create base chart
     chart = alt.Chart(data).mark_area(
@@ -302,7 +315,7 @@ def create_area_chart(data, settings):
     return chart
 
 
-def create_point_chart(data, settings):
+def create_point_chart(data, settings, chart_id):
     """Create a scatter/point chart with the given data and settings"""
     # Create base chart
     chart = alt.Chart(data).mark_point(
@@ -328,7 +341,7 @@ def create_point_chart(data, settings):
     return chart
 
 
-def create_pie_chart(data, settings):
+def create_pie_chart(data, settings, chart_id):
     """Create a pie chart with the given data and settings"""
     # For pie charts, we need theta and color encodings
     theta_field = settings.get('theta', settings.get('y'))
@@ -336,7 +349,7 @@ def create_pie_chart(data, settings):
     
     if not theta_field or not color_field:
         logger.error("Pie chart requires 'theta' (or 'y') and 'color' (or 'x') fields")
-        return alt.Chart(data).mark_point()  # Return empty chart
+        return _error_html("Pie chart requires theta/y and color/x fields", chart_id)
     
     # Create the pie chart
     chart = alt.Chart(data).mark_arc(
@@ -359,7 +372,7 @@ def create_pie_chart(data, settings):
     return chart
 
 
-def create_heatmap(data, settings):
+def create_heatmap(data, settings, chart_id):
     """Create a heatmap with the given data and settings"""
     # Create base chart
     chart = alt.Chart(data).mark_rect()
@@ -371,7 +384,7 @@ def create_heatmap(data, settings):
     
     if not x_field or not y_field or not color_field:
         logger.error("Heatmap requires 'x', 'y', and 'color' (or 'z') fields")
-        return alt.Chart(data).mark_point()  # Return empty chart
+        return _error_html("Heatmap requires x, y, and color/z fields", chart_id)
     
     # build x encoding as ORDINAL with an explicit sort/domain so Altair won't render
     # numeric axis ticks like 2020, 2020.5, 2021. Convert categories to ints when
@@ -451,13 +464,13 @@ def create_heatmap(data, settings):
     return chart
 
 
-def create_histogram(data, settings):
+def create_histogram(data, settings, chart_id):
     """Create a histogram with the given data and settings"""
     # Get the field to bin
     x_field = settings.get('x')
     if not x_field:
         logger.error("Histogram requires 'x' field to bin")
-        return alt.Chart(data).mark_point()  # Return empty chart
+        return _error_html("Histogram requires an x field to bin", chart_id)
     
     # Create histogram chart
     bin_params = {}
@@ -486,6 +499,89 @@ def create_histogram(data, settings):
     chart = chart.properties(**props)
     
     return chart
+
+
+def create_word_cloud(data, settings, chart_id):
+    """Create a word cloud using the `wordcloud` library and return an HTML <img>."""
+    if WordCloud is None:
+        logger.error("wordcloud library is not installed; cannot render word cloud.")
+        return _error_html("wordcloud library is not installed", chart_id)
+
+    df = pd.DataFrame(data).copy()
+
+    # Determine text and weight fields with sensible fallbacks
+    text_field = settings.get("text") or settings.get("word") or settings.get("x")
+    weight_field = settings.get("weight") or settings.get("count") or settings.get("y")
+
+    if not text_field and len(df.columns) > 0:
+        text_field = df.columns[0]
+    if not text_field or text_field not in df.columns:
+        logger.error("Word cloud requires a text field in the data")
+        return _error_html("Word cloud requires a text/text column", chart_id)
+
+    if not weight_field or weight_field not in df.columns:
+        remaining_cols = [col for col in df.columns if col != text_field]
+        if remaining_cols:
+            weight_field = remaining_cols[0]
+        else:
+            weight_field = "_weight"
+            df[weight_field] = 1
+
+    df = df[[text_field, weight_field]].dropna(subset=[text_field])
+    df[weight_field] = pd.to_numeric(df[weight_field], errors="coerce").fillna(1)
+    df[text_field] = df[text_field].astype(str)
+
+    max_words_raw = settings.get("max_words")
+    max_words_val = None
+    if max_words_raw is not None:
+        try:
+            max_words_val = int(max_words_raw)
+        except Exception:
+            max_words_val = None
+
+    try:
+        if max_words_val:
+            df = df.sort_values(weight_field, ascending=False).head(max_words_val)
+    except Exception:
+        pass
+
+    frequencies = {}
+    for word, weight in zip(df[text_field], df[weight_field]):
+        if not word:
+            continue
+        try:
+            w = float(weight)
+        except Exception:
+            w = 1.0
+        if w <= 0:
+            continue
+        frequencies[word] = frequencies.get(word, 0) + w
+
+    if not frequencies:
+        logger.warning("No data available for word cloud chart")
+        return _error_html("No data available for word cloud", chart_id)
+
+    wc = WordCloud(
+        width=int(settings.get("width", 700)),
+        height=int(settings.get("height", 500)),
+        background_color=settings.get("background_color", "white"),
+        colormap=settings.get("color_scheme", "viridis"),
+        max_words=max_words_val,
+        prefer_horizontal=settings.get("prefer_horizontal", 0.9),
+        stopwords=set(settings.get("stopwords", [])) if settings.get("stopwords") else None,
+    ).generate_from_frequencies(frequencies)
+
+    buffer = BytesIO()
+    wc.to_image().save(buffer, format="PNG")
+    img_b64 = base64.b64encode(buffer.getvalue()).decode("ascii")
+
+    title = settings.get("title", settings.get("chart_title", "Word Cloud"))
+    img_style = settings.get("img_style", "width:100%;height:auto;display:block;")
+
+    return (
+        f'<div id="{chart_id}" class="word-cloud-chart" aria-label="{title}">'
+        f'<img src="data:image/png;base64,{img_b64}" alt="{title}" style="{img_style}"/></div>'
+    )
 
 
 def apply_common_settings(chart, settings):

@@ -14,7 +14,7 @@ from decimal import Decimal
 from enum import Enum
 from django.conf import settings
 from openai import OpenAI
-from ..visualizations.altair_charts import generate_chart
+from ..visualizations.plotting import generate_chart
 from django.db.models import Max
 
 from reports.services.database_client import DjangoPostgresClient
@@ -389,8 +389,9 @@ class StoryProcessor:
 
             # Generate chart HTML
             self.logger.info(f"Generating chart for: {graphic_template.title}")
-            col = settings["y"]
-            data[col] = pd.to_numeric(data[col], errors="coerce")
+            if "y" in settings:
+                col = settings["y"]
+                data[col] = pd.to_numeric(data[col], errors="coerce")
             chart_html = generate_chart(data=data, settings=settings, chart_id=chart_id)
 
             graphic.title = self._replace_reference_period_expression(
