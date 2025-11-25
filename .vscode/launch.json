@@ -26,9 +26,7 @@
             "args": [
                 "generate_stories",
                 "--id",
-                "35",
-                "--date",
-                "2025-11-20",
+                "47",
                 "--force",
                 "-v",
                 "2"

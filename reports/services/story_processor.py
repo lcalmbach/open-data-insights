@@ -602,7 +602,12 @@ class StoryProcessor:
             base_end = anchor_dt
             unit = 'days'
 
-        shift = 1 if template.period_direction_id == PeriodDirectionEnum.Forward.value else 0
+        if template.period_direction_id == PeriodDirectionEnum.Forward.value: 
+            shift = 1
+        elif template.period_direction_id == PeriodDirectionEnum.Backward.value:
+            shift = -1
+        else:
+            shift = 0
 
         # Apply the shift
         if unit == 'days':
@@ -738,17 +743,17 @@ class StoryProcessor:
 
             # Initialize OpenAI client
             client = OpenAI(api_key=api_key)
-
+            message = self._replace_reference_period_expression(self.story.template.prompt_text)# Prepare messages for chat completion
             if self.is_data_based:
                 messages = [
                     {
                         "role": "system",
-                        "content": f"{self.story.template.prompt_text}\n\n{LLM_FORMATTING_INSTRUCTIONS}",
+                        "content": f"{message}\n\n{LLM_FORMATTING_INSTRUCTIONS}",
                     },
                     {
                         "role": "user",
                         "content": (
-                            "Below is the statistical data in JSON format.\n\n"
+                            "Write an insight about the following data in JSON format.\n\n"
                             "```json\n" + self.story.context_values + "\n```"
                         ),
                     },
@@ -777,7 +782,7 @@ class StoryProcessor:
                 max_tokens=3000,
             )
             self.story.content = (response.choices[0].message.content or "").strip()
-            self.story.prompt_text = messages[1]
+            self.story.prompt_text = messages
             if not self.story.content:
                 self.logger.warning(
                     f"Empty content generated for story {self.story.template.title}"
