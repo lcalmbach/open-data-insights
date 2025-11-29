@@ -151,7 +151,7 @@ class StoryProcessor:
             if self.most_recent_day:
                 if template.period_direction_id == PeriodDirectionEnum.Backward.value:
                     reference_period_start, reference_period_end = (
-                        self._get_reference_period(self.most_recent_day, template)
+                        self._get_reference_period(published_date, template)
                     )
                 else:
                     reference_period_start, reference_period_end = (
@@ -548,7 +548,9 @@ class StoryProcessor:
         return season, season_year
 
     def _get_reference_period(
-        self, published_date: datetime, template: StoryTemplate
+        self, 
+        published_date: datetime, 
+        template: StoryTemplate
     ) -> Tuple[datetime, datetime]:
         """Get the reference period start and end dates relative to published_date.
 
@@ -602,12 +604,14 @@ class StoryProcessor:
             base_end = anchor_dt
             unit = 'days'
 
+        shift = 0
         if template.period_direction_id == PeriodDirectionEnum.Forward.value: 
             shift = 1
         elif template.period_direction_id == PeriodDirectionEnum.Backward.value:
-            shift = -1
-        else:
-            shift = 0
+            if template.reference_period_id == ReferencePeriod.MONTHLY.value and published_date.year == base_start.year and published_date.year == base_start.year:
+                shift = -1
+            elif template.reference_period_id == ReferencePeriod.YEARLY.value and published_date.year == base_start.year:
+                shift = -1
 
         # Apply the shift
         if unit == 'days':
@@ -674,6 +678,7 @@ class StoryProcessor:
 
             cmd = context_item.sql_command
             params = self._get_sql_command_params(cmd)
+            self.logger.info(f"Running context query for key: {key}")
             df = self.dbclient.run_query(cmd, params)
             if df.empty:
                 self.logger.warning(

@@ -147,8 +147,9 @@ class StoryTemplateGraphicAdmin(admin.ModelAdmin):
         "id",
         "title",
         "story_template",
+        "sort_order",
     )
-    sortable_by = ("id", "title")
+    sortable_by = ("id", "title","sort_order")
     search_fields = ("title",)
     list_filter = ("story_template",)
 

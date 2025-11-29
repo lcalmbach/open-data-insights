@@ -26,7 +26,7 @@
             "args": [
                 "generate_stories",
                 "--id",
-                "47",
+                "49",
                 "--force",
                 "-v",
                 "2"
@@ -179,9 +179,9 @@
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "sync_prod",
+                "synch_prod",
                 "--id", 
-                "45",
+                "49",
                 "--story_template",
                 "--direction",
                 "push"
@@ -197,4 +197,3 @@
 
     ]
 }
---id 44 --story_template --direction push

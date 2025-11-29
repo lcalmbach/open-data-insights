@@ -218,9 +218,9 @@ class Command(BaseCommand):
             if parent is None:
                 return
             # If we detected a Subscription model, sync that user's subscriptions
-            if Subscription:
-                # use parent.pk to sync only that user's child rows
-                self._sync_children_of_parent_pk(Subscription, Subscription_parent_field or "user", parent.pk, src_alias, dst_alias, dry)
+            #if Subscription:
+            #    # use parent.pk to sync only that user's child rows
+            #    self._sync_children_of_parent_pk(Subscription, Subscription_parent_field or "user", parent.pk, src_alias, dst_alias, dry)
 
     def _sync_one_parent_by_id(self, model, pk: int, src_alias: str, dst_alias: str, dry: bool):
         name = MODEL_NAME[model]
@@ -442,7 +442,20 @@ class Command(BaseCommand):
 
         src_qs = child_model.objects.using(src_alias).select_related(parent_field).filter(**{parent_field + "__slug": parent_slug})
         dst_child = child_model.objects.using(dst_alias)
-        dst_parent = StoryTemplate.objects.using(dst_alias)
+        dst_parent_mgr = StoryTemplate.objects.using(dst_alias)
+
+        # Ensure the parent exists exactly once before touching children.
+        dst_parent_obj = None
+        try:
+            dst_parent_obj = dst_parent_mgr.get(slug=parent_slug)
+        except StoryTemplate.DoesNotExist:
+            try:
+                src_parent_obj = StoryTemplate.objects.using(src_alias).get(slug=parent_slug)
+            except StoryTemplate.DoesNotExist:
+                self.stdout.write(self.style.WARNING(f"      · Parent not found in src for slug={parent_slug}, skipping children"))
+                return
+            self._sync_one_parent_by_id(StoryTemplate, src_parent_obj.pk, src_alias, dst_alias, dry=False)
+            dst_parent_obj = dst_parent_mgr.get(slug=parent_slug)
 
         exclude = set(EXCLUDE_FIELDS_BY_MODEL.get(child_model, set())) | {"id", parent_field + "_id"}
 
@@ -451,10 +464,6 @@ class Command(BaseCommand):
             defaults = _values_dict_from_instance(obj, exclude=exclude)
 
             if dry:
-                exists_parent = dst_parent.filter(slug=parent_slug).exists()
-                if not exists_parent:
-                    self.stdout.write(self.style.WARNING(f"      · Parent missing in dst: StoryTemplate slug={parent_slug}"))
-                    continue
                 exists = dst_child.filter(**{parent_field + "__slug": parent_slug, "slug": slug}).exists()
                 self.stdout.write(self.style.SUCCESS(
                     f"      -> {'UPDATE' if exists else 'CREATE'} {name} slug={slug}"
@@ -462,15 +471,18 @@ class Command(BaseCommand):
                 continue
 
             with transaction.atomic(using=dst_alias):
-                dst_parent_obj = dst_parent.get(slug=parent_slug)
                 try:
                     dst_obj = dst_child.get(**{parent_field: dst_parent_obj, "slug": slug})
+                    # Always ensure the FK points at the freshly synced parent
+                    setattr(dst_obj, parent_field, dst_parent_obj)
                     for k, v in defaults.items():
                         setattr(dst_obj, k, v)
-                    dst_obj.save(update_fields=list(defaults.keys()))
+                    update_fields = list(defaults.keys()) + [f"{parent_field}_id"]
+                    dst_obj.save(using=dst_alias, update_fields=update_fields)
                     self.stdout.write(self.style.SUCCESS(f"      -> UPDATED {name} slug={slug}"))
                 except child_model.DoesNotExist:
                     dst_obj = child_model(**defaults, **{parent_field: dst_parent_obj}, slug=slug)
+                    setattr(dst_obj, parent_field + "_id", dst_parent_obj.pk)
                     dst_obj.save(using=dst_alias)
                     self.stdout.write(self.style.SUCCESS(f"      -> CREATED {name} slug={slug}"))
 

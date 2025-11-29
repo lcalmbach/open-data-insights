@@ -131,6 +131,10 @@ if SYNC_DB_URL:
         conn_max_age=600,
         ssl_require=True,  # set to True if your remote Postgres requires SSL (Heroku etc.)
     )
+    # Ensure we target the same schema as the default DB
+    DATABASES["prod"]["OPTIONS"] = {
+        "options": "-c search_path=report_generator"
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

@@ -54,7 +54,7 @@ class DjangoPostgresClient:
                 rows = cursor.fetchall()
                 return pd.DataFrame(rows, columns=cols)
         except Exception:
-            self.logger.exception("Error executing SQL")
+            self.logger.exception(f"Error executing SQL: {clean_query} with params: {params}")
             raise
 
     def run_action_query(self, query: str, params: Optional[Dict] = None) -> None:
