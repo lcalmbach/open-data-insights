@@ -42,7 +42,7 @@ def profile_view(request):
 
             # Für den unteren Bereich nur "anzeigefähig" initialisieren
             current_subscriptions = StoryTemplateSubscription.objects.filter(
-                user=user, cancellation_date__isnull=True
+                user=user, cancellation_date__isnull=True, story_template__active=True
             ).values_list("story_template_id", flat=True)
             subscriptions_form = SubscriptionForm(initial={"subscriptions": current_subscriptions})
 
@@ -63,7 +63,7 @@ def profile_view(request):
                 with transaction.atomic():
                     # Bestehende Subscriptions beenden, die nicht mehr ausgewählt sind
                     StoryTemplateSubscription.objects.filter(
-                        user=user, cancellation_date__isnull=True
+                        user=user, cancellation_date__isnull=True, story_template__active=True
                     ).exclude(
                         story_template__in=selected_templates
                     ).update(
@@ -105,7 +105,7 @@ def profile_view(request):
         profile_form = CustomUserUpdateForm(instance=user)
 
         current_subscriptions = StoryTemplateSubscription.objects.filter(
-            user=user, cancellation_date__isnull=True
+            user=user, cancellation_date__isnull=True, story_template__active=True
         ).values_list("story_template_id", flat=True)
         subscriptions_form = SubscriptionForm(initial={"subscriptions": current_subscriptions})
 

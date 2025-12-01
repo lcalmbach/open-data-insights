@@ -65,8 +65,8 @@
   <hr>
 
   <h3>Data Insights Subscriptions</h3>
+  <p>Choose the insights you’d like to be notified about by email when they are published. The terms in brackets (e.g., “month”) indicate how often each insight is released. Daily insights are generated only when new data is available, and most of them include filters, so they are sent exclusively when extreme values occur.</p>
 
-  {# Dein bestehendes Subscriptions-Formular bleibt separat #}
   <form method="post">
     {% csrf_token %}
     {% if form.toggle_control %}

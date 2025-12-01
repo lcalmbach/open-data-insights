@@ -45,7 +45,7 @@ class RegistrationForm(UserCreationForm):
 
 class SubscriptionForm(forms.Form):
     subscriptions = forms.ModelMultipleChoiceField(
-        queryset=StoryTemplate.objects.all(),
+        queryset=StoryTemplate.objects.filter(active=True),
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label="Your subscriptions",
