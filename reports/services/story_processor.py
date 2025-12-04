@@ -143,7 +143,7 @@ class StoryProcessor:
             template = story.template
             published_date = story.published_date
             self.most_recent_day = self._get_most_recent_day(published_date, template)
-            self.season, self.season_year = self._get_season(published_date, template)
+            self.season, self.season_year = self._get_season(story.reference_period_start, template)
             reference_period_start = story.reference_period_start
             reference_period_end = story.reference_period_end
         else:
