@@ -26,7 +26,7 @@
             "args": [
                 "generate_stories",
                 "--id",
-                "49",
+                "46",
                 "--force",
                 "-v",
                 "2"
@@ -65,7 +65,7 @@
             "args": [
                 "synch_data",
                 "--id",
-                "11",
+                "46",
                 "-v",
                 "2"
             ],
@@ -121,7 +121,7 @@
             "args": [
                 "generate_appendices",
                 "--graphic_template_id",
-                "16",
+                "43",
                 "--graphics",
                 "-v",
                 "2"
@@ -192,8 +192,26 @@
                 "DJANGO_SETTINGS_MODULE": "report_generator.settings"
             },
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}/work/gva"
         },
+        {
+            "name": "wiki article summarizer",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}//work/gva/article-extractor.py",
+            "console": "integratedTerminal",
+
+            // Load environment variables from your .env file
+            "envFile": "${workspaceFolder}/work/gva/.env",
+
+            // Optional extra settings
+            "env": {
+                "PYTHONUNBUFFERED": "1"
+            },
+
+            // If you want arguments, add them here:
+            // "args": ["--limit", "5"]
+        }
 
     ]
 }

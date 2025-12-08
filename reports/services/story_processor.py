@@ -366,7 +366,7 @@ class StoryProcessor:
     def generate_graphic(self, graphic: Graphic):
         try:
             graphic_template = graphic.graphic_template
-            sql_command = graphic_template.sql_command
+            sql_command = self._replace_reference_period_expression(graphic_template.sql_command)
             if not sql_command:
                 self.logger.warning(
                     f"Empty SQL command for graphic template: {graphic_template.title}"

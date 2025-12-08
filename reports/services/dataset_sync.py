@@ -182,10 +182,13 @@ class DatasetProcessor:
         try:
             self.ods_records, self.ods_last_record = self.get_ods_last_record()
             self.ods_last_record_date, self.ods_last_record_identifier = None, None
+            
             if self.ods_last_record and self.dataset.source_timestamp_field:
-                self.ods_last_record_date = datetime.fromisoformat(
-                    self.ods_last_record[self.dataset.source_timestamp_field]
-                )
+                raw_timestamp = self.ods_last_record[self.dataset.source_timestamp_field]
+                # Add default day if only year-month is provided so fromisoformat succeeds
+                if isinstance(raw_timestamp, str) and len(raw_timestamp) == 7 and raw_timestamp.count("-") == 1:
+                    raw_timestamp = f"{raw_timestamp}-01"
+                self.ods_last_record_date = datetime.fromisoformat(raw_timestamp)
             elif self.ods_last_record and self.dataset.record_identifier_field:
                 self.ods_last_record_identifier = self.ods_last_record[self.dataset.record_identifier_field]
             

@@ -1,2 +1,0 @@
-id;name;description;active;source_identifier;base_url;source_timestamp_field;db_timestamp_field;target_table_name;add_time_aggregation_fields;add_is_weekend_field;delete_records_with_missing_values;last_import_date
-1;weather_nbcn_binningen;Weather data for Binningen, Switzerland;1;100254;data.bs.ch;date;date;ds_100254;TRUE;1;[];
