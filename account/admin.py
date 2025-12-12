@@ -1,6 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser
+from .models import CustomUser, Organisation
+
+
+@admin.register(Organisation)
+class OrganisationAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug")
+    search_fields = ("name",)
 
 
 @admin.register(CustomUser)
@@ -14,7 +20,10 @@ class CustomUserAdmin(UserAdmin):
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        ("Personal info", {"fields": ("first_name", "last_name")}),
+        (
+            "Personal info",
+            {"fields": ("first_name", "last_name", "country", "organisation")},
+        ),
         ("Permissions", {
             "fields": ("is_active", "is_staff", "is_superuser", "is_confirmed", "groups", "user_permissions")
         }),

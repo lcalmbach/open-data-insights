@@ -32,7 +32,9 @@ User = get_user_model()
 @login_required
 def profile_view(request):
     user = request.user
-
+    current_subscriptions = StoryTemplateSubscription.objects.filter(
+            user=user, cancellation_date__isnull=True, story_template__active=True
+        ).values_list("story_template_id", flat=True)
     if request.method == "POST":
         action = request.POST.get("action")
 
@@ -44,7 +46,7 @@ def profile_view(request):
             current_subscriptions = StoryTemplateSubscription.objects.filter(
                 user=user, cancellation_date__isnull=True, story_template__active=True
             ).values_list("story_template_id", flat=True)
-            subscriptions_form = SubscriptionForm(initial={"subscriptions": current_subscriptions})
+            subscriptions_form = SubscriptionForm(initial={"subscriptions": current_subscriptions}, user=user)
 
             if profile_form.is_valid():
                 profile_form.save()
@@ -55,7 +57,7 @@ def profile_view(request):
         elif action == "save_subscriptions":
             profile_form = CustomUserUpdateForm(instance=user)
 
-            subscriptions_form = SubscriptionForm(request.POST)
+            subscriptions_form = SubscriptionForm(request.POST, user=user)
             if subscriptions_form.is_valid():
                 selected_templates = subscriptions_form.cleaned_data["subscriptions"]
 
@@ -98,16 +100,12 @@ def profile_view(request):
         else:
             # Fallback: beide Formulare binden, damit Fehler sichtbar sind
             profile_form = CustomUserUpdateForm(request.POST, instance=user)
-            subscriptions_form = SubscriptionForm(request.POST)
+            subscriptions_form = SubscriptionForm(request.POST, user=user)
 
     else:
         # GET: beide Formulare befüllen
         profile_form = CustomUserUpdateForm(instance=user)
-
-        current_subscriptions = StoryTemplateSubscription.objects.filter(
-            user=user, cancellation_date__isnull=True, story_template__active=True
-        ).values_list("story_template_id", flat=True)
-        subscriptions_form = SubscriptionForm(initial={"subscriptions": current_subscriptions})
+        subscriptions_form = SubscriptionForm(initial={"subscriptions": current_subscriptions}, user=user)
 
     return render(
         request,
@@ -115,6 +113,7 @@ def profile_view(request):
         {
             "profile_form": profile_form,    # oben im Template verwenden
             "form": subscriptions_form,      # dein bestehender Name unten
+            "active_subscriptions": current_subscriptions.count()
         },
     )
 
@@ -210,7 +209,7 @@ def confirm_email(request, uidb64, token):
             try:
                 domain = get_current_site(request).domain
                 protocol = "https" if request.is_secure() else "http"
-                templates = StoryTemplate.objects.all()
+                templates = StoryTemplate.objects.accessible_to(user)
                 if templates.exists():
                     # build absolute profile URL at runtime (no hardcoded host)
                     profile_url = request.build_absolute_uri(reverse("account:profile"))

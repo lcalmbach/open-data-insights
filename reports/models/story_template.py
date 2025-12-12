@@ -1,13 +1,29 @@
 import uuid
 from django.db import models
-from django.conf import settings
+from django.db.models import Q
 
 from .managers import NaturalKeyManager
 from .lookups import Period, PeriodDirection
 
 
+class StoryTemplateQuerySet(models.QuerySet):
+    def accessible_to(self, user):
+        qs = self.filter(active=True)
+        if user and getattr(user, "is_authenticated", False):
+            org = getattr(user, "organisation", None)
+            if org:
+                return qs.filter(Q(organisation__isnull=True) | Q(organisation=org))
+        return qs.filter(organisation__isnull=True)
+
+
 class StoryTemplateManager(NaturalKeyManager):
     lookup_fields = ('slug',)
+
+    def get_queryset(self):
+        return StoryTemplateQuerySet(self.model, using=self._db)
+
+    def accessible_to(self, user):
+        return self.get_queryset().accessible_to(user)
 
 class StoryTemplate(models.Model):
     slug = models.SlugField(unique=True, blank=True, null=True, editable=False)
@@ -110,6 +126,14 @@ class StoryTemplate(models.Model):
     is_published = models.BooleanField(
         default=False,
         help_text="Indicates if the story has been made public to the users.",
+    )
+    organisation = models.ForeignKey(
+        "account.Organisation",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="story_templates",
+        help_text="Limit this template to members of a single organisation.",
     )
 
     class Meta:

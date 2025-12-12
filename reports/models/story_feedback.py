@@ -1,6 +1,6 @@
 from django.db import models
 from account.models import CustomUser
-from story import Story
+from .story import Story
 
 
 class StoryFeedback(models.Model):
@@ -27,4 +27,3 @@ class StoryFeedback(models.Model):
 
     def __str__(self):
         return f"Feedback for {self.story.title} by {self.user_id}"
-

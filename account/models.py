@@ -15,6 +15,25 @@ class NaturalKeyManager(models.Manager):
         return self.get(**dict(zip(self.lookup_fields, args)))
 
 
+class Organisation(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(unique=True, blank=True, null=True, editable=False)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Organisation"
+        verbose_name_plural = "Organisations"
+        ordering = ("name",)
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = uuid.uuid4().hex[:10]
+        super().save(*args, **kwargs)
+
+
 class CustomUserManager(BaseUserManager, NaturalKeyManager):
     lookup_fields = ("slug",)
     use_in_migrations = True
@@ -55,6 +74,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30)
     last_name  = models.CharField(max_length=30)
     country = CountryField(blank_label="(select country)")
+    organisation = models.ForeignKey(
+        "account.Organisation",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="members",
+        help_text="Assign this user to an organisation to unlock organisation-specific insights.",
+    )
     is_confirmed = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_active = models.DateTimeField(auto_now=True)

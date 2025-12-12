@@ -23,6 +23,7 @@ from .models.story import Story
 from .models.story_table import StoryTable
 from .models.lookups import Period
 from .models.story_rating import StoryRating
+from .models.quote import Quote
 from account.models import CustomUser
 
 
@@ -66,11 +67,31 @@ def generate_fake_graphic(chart_id):
     return f"{container_html}{script_html}"
 
 
+def _get_random_quote() -> Quote | None:
+    """Return one random quote that is not authored by ChatGPT."""
+    return Quote.objects.exclude(author__iexact="chatgpt").order_by("?").first()
+
+
+def _accessible_template_ids(user):
+    """Return the story template IDs accessible to the current user."""
+    return list(
+        StoryTemplate.objects.accessible_to(user).values_list("id", flat=True)
+    )
+
+
 @never_cache
 def home_view(request):
-    stories = list(Story.objects.order_by("-published_date"))
+    random_quote = _get_random_quote()
+    template_ids = _accessible_template_ids(request.user)
+    stories = list(
+        Story.objects.filter(template_id__in=template_ids).order_by("-published_date")
+    )
     if not stories:
-        return render(request, "home.html", {"story": None})
+        return render(
+            request,
+            "home.html",
+            {"story": None, "random_quote": random_quote},
+        )
     selected_story = stories[0]
     next_story_id = stories[1].id if len(stories) > 1 else None
     selected_story.content_html = markdown2.markdown(
@@ -82,7 +103,7 @@ def home_view(request):
     other_ressources = (
         selected_story.template.other_ressources if selected_story else None
     )
-    available_subscriptions = StoryTemplate.objects.filter(active=True).count()
+    available_subscriptions = len(template_ids)
     return render(
         request,
         "home.html",
@@ -95,6 +116,7 @@ def home_view(request):
             "data_source": data_source,
             "other_ressources": other_ressources,
             "available_subscriptions": available_subscriptions,
+            "random_quote": random_quote,
         },
     )
 
@@ -107,7 +129,8 @@ def templates_view(request):
     story_count = 0
 
     # Gefilterte Ergebnisliste
-    qs = StoryTemplate.objects.select_related("reference_period").order_by("title")
+    accessible_templates = StoryTemplate.objects.accessible_to(request.user)
+    qs = accessible_templates.select_related("reference_period").order_by("title")
 
     if period_id:
         qs = qs.filter(reference_period_id=period_id)
@@ -132,16 +155,19 @@ def templates_view(request):
         story_count = 0
     periods = Period.objects.order_by("value")
 
+    subscribed_count = (
+        selected_template.subscriptions.all().count() if selected_template else 0
+    )
     return render(
         request,
         "reports/templates_list.html",
         {
-            "templates": qs,                  # gefilterte Liste
+            "templates": qs,  # gefilterte Liste
             "selected_template": selected_template,
-            "periods": periods,               # für Perioden-Select
+            "periods": periods,  # für Perioden-Select
             "story_count": story_count,
             "total_users": CustomUser.objects.all().count(),
-            "subscribed_count": selected_template.subscriptions.all().count(),
+            "subscribed_count": subscribed_count,
         },
     )
 
@@ -149,14 +175,21 @@ def templates_view(request):
 
 
 def stories_view(request):
-    # Fetch all templates
-    templates = StoryTemplate.objects.order_by("title")
+    accessible_templates = StoryTemplate.objects.accessible_to(request.user)
+    template_ids = list(accessible_templates.values_list("id", flat=True))
+    templates = accessible_templates.order_by("title")
 
     # Base queryset
-    stories = Story.objects.select_related("template").order_by("-published_date")
+    stories = (
+        Story.objects.select_related("template")
+        .filter(template_id__in=template_ids)
+        .order_by("-published_date")
+    )
     periods = Period.objects.order_by("value")
     # Filter by selected template
     template_id = request.GET.get("template")
+    if template_id and template_id.isdigit() and int(template_id) not in template_ids:
+        template_id = None
     if template_id:
         stories = stories.filter(template_id=template_id)
 
@@ -216,7 +249,9 @@ def stories_view(request):
 
 @login_required
 def storytemplate_detail_view(request, pk):
-    template = get_object_or_404(StoryTemplate, pk=pk)
+    template = get_object_or_404(
+        StoryTemplate.objects.accessible_to(request.user), pk=pk
+    )
     template.description_html = markdown2.markdown(
         template.description, extras=["tables"]
     )
@@ -262,14 +297,25 @@ class AboutView(TemplateView):
 
 
 def view_story(request, story_id=None):
-    stories = list(Story.objects.order_by("-published_date"))
+    random_quote = _get_random_quote()
+    template_ids = _accessible_template_ids(request.user)
+    stories = list(
+        Story.objects.filter(template_id__in=template_ids).order_by("-published_date")
+    )
     if not stories:
-        return render(request, "home.html", {"story": None})
+        return render(
+            request,
+            "home.html",
+            {"story": None, "random_quote": random_quote},
+        )
 
     if story_id is None:
         selected_story = stories[0]  # Default to the first story
     else:
-        selected_story = get_object_or_404(Story, id=story_id)
+        selected_story = get_object_or_404(
+            Story.objects.filter(template_id__in=template_ids),
+            id=story_id,
+        )
     index = stories.index(selected_story)
     prev_story_id = stories[index - 1].id if index > 0 else None
     next_story_id = stories[index + 1].id if index < len(stories) - 1 else None
@@ -279,7 +325,7 @@ def view_story(request, story_id=None):
     other_ressources = (
         selected_story.template.other_ressources if selected_story else None
     )
-    available_subscriptions = StoryTemplate.objects.filter(active=True).count()
+    available_subscriptions = len(template_ids)
     selected_story.content_html = markdown2.markdown(
         selected_story.content, extras=["tables"]
     )
@@ -295,12 +341,17 @@ def view_story(request, story_id=None):
             "other_ressources": other_ressources,
             "data_source": data_source,
             "available_subscriptions": available_subscriptions,
+            "random_quote": random_quote,
         },
     )
 
 
 def story_detail(request, story_id=None):
-    selected_story = get_object_or_404(Story, id=story_id)
+    template_ids = _accessible_template_ids(request.user)
+    selected_story = get_object_or_404(
+        Story.objects.filter(template_id__in=template_ids),
+        id=story_id,
+    )
     tables = get_tables(selected_story) if selected_story else []
     graphics = selected_story.story_graphics.all() if selected_story else []
     data_source = selected_story.template.data_source if selected_story else None

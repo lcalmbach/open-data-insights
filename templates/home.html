@@ -11,6 +11,26 @@
         style="max-width: 600px; height: auto;">
 </div>
 
+{% if random_quote %}
+<div class="text-center mb-4">
+    <p class="fst-italic mb-0">
+        "{{ random_quote.quote }}"
+        (
+        {% if random_quote.author_wiki_url %}
+            <a href="{{ random_quote.author_wiki_url }}" target="_blank" rel="noopener noreferrer">
+                {{ random_quote.author }}
+            </a>
+        {% else %}
+            {{ random_quote.author }}
+        {% endif %}
+        {% if random_quote.lifespan %}
+            , {{ random_quote.lifespan }}
+        {% endif %}
+        )
+    </p>
+</div>
+{% endif %}
+
 <hr class="mb-4">
 
 <!-- Headline and description -->

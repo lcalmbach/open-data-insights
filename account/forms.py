@@ -45,14 +45,16 @@ class RegistrationForm(UserCreationForm):
 
 class SubscriptionForm(forms.Form):
     subscriptions = forms.ModelMultipleChoiceField(
-        queryset=StoryTemplate.objects.filter(active=True),
+        queryset=StoryTemplate.objects.none(),
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label="Your subscriptions",
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
+        self.user = user
         super().__init__(*args, **kwargs)
+        self.fields["subscriptions"].queryset = StoryTemplate.objects.accessible_to(user)
         self.fields["subscriptions"].label_from_instance = self.custom_label
 
     def custom_label(self, obj):
