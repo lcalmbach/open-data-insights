@@ -17,13 +17,14 @@ class StoryTemplateQuerySet(models.QuerySet):
 
 
 class StoryTemplateManager(NaturalKeyManager):
-    lookup_fields = ('slug',)
+    lookup_fields = ("slug",)
 
     def get_queryset(self):
         return StoryTemplateQuerySet(self.model, using=self._db)
 
     def accessible_to(self, user):
         return self.get_queryset().accessible_to(user)
+
 
 class StoryTemplate(models.Model):
     slug = models.SlugField(unique=True, blank=True, null=True, editable=False)
@@ -140,7 +141,7 @@ class StoryTemplate(models.Model):
         verbose_name = "Story Template"
         verbose_name_plural = "Story Templates"
         ordering = ["title"]  # or any other field
-    
+
     def __str__(self):
         return f"{self.title} ({self.reference_period})"
 
@@ -148,8 +149,9 @@ class StoryTemplate(models.Model):
         if not self.slug:
             self.slug = uuid.uuid4().hex[:8]  # or shortuuid.uuid()[:10]
         super().save(*args, **kwargs)
-        
+
     def natural_key(self):
         return (self.slug,)
+
     natural_key.dependencies = []
     objects = StoryTemplateManager()

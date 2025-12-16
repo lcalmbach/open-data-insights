@@ -3,6 +3,7 @@ Dataset Synchronization Service
 Handles importing and synchronizing datasets from external sources
 """
 
+import json
 import logging
 import pandas as pd
 import numpy as np
@@ -12,7 +13,7 @@ import time
 import urllib.parse
 from datetime import date, timedelta, datetime, timezone
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
 from django.db import transaction
 from django.utils import timezone as django_timezone
 from django.conf import settings
@@ -24,7 +25,8 @@ from reports.services.utils import (
     get_parquet_row_count,
     make_utc,
 )
-from reports.models.dataset import Dataset
+from reports.models.dataset import Dataset, ImportTypeEnum
+
 
 
 class DatasetSyncService(ETLBaseService):
@@ -181,7 +183,7 @@ class DatasetProcessor:
         # Get ODS metadata and last record
         try:
             self.ods_records, self.ods_last_record = self.get_ods_last_record()
-            self.ods_last_record_date, self.ods_last_record_identifier = None, None
+            # self.ods_last_record_date, self.ods_last_record_identifier = None, None
             
             if self.ods_last_record and self.dataset.source_timestamp_field:
                 raw_timestamp = self.ods_last_record[self.dataset.source_timestamp_field]
@@ -189,8 +191,8 @@ class DatasetProcessor:
                 if isinstance(raw_timestamp, str) and len(raw_timestamp) == 7 and raw_timestamp.count("-") == 1:
                     raw_timestamp = f"{raw_timestamp}-01"
                 self.ods_last_record_date = datetime.fromisoformat(raw_timestamp)
-            elif self.ods_last_record and self.dataset.record_identifier_field:
-                self.ods_last_record_identifier = self.ods_last_record[self.dataset.record_identifier_field]
+            # elif self.ods_last_record and self.dataset.record_identifier_field:
+            #    self.ods_last_record_identifier = self.ods_last_record[self.dataset.record_identifier_field]
             
         except Exception as e:
             self.logger.warning(f"Could not get ODS last record: {e}")
@@ -287,6 +289,17 @@ class DatasetProcessor:
             self.logger.error(f"Failed to fetch DB identifiers: {e}")
             return []
 
+
+    @staticmethod
+    def _safe_float(value: Any) -> Optional[float]:
+        """Convert a value to float if possible, otherwise return None."""
+        if value is None or pd.isna(value):
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
     def synchronize(self) -> bool:
         """
         Main synchronization method - migrated from original Dataset.synchronize()
@@ -300,8 +313,14 @@ class DatasetProcessor:
             self.logger.info(f"Starting import for {identifier}")
             start_time = time.time()
 
-            if self.target_table_exists:
-                success = self._sync_existing_table(
+            if self.dataset.import_type.id == ImportTypeEnum.DAILY_RELOAD.value:
+                self.logger.info(f"Performing full reload for {identifier}")
+                self.dbclient.delete_table(
+                    self.dataset.target_table_name, schema="opendata"
+                )
+                success = self._sync_new_table(filename, agg_filename, remote_table)
+            elif self.target_table_exists: 
+                success = self._sync(
                     filename, agg_filename, remote_table
                 )
             else:
@@ -316,181 +335,234 @@ class DatasetProcessor:
                         command = command.strip()
                         if command:
                             self.dbclient.run_action_query(command)
-                            
+
                 elapsed = time.time() - start_time
                 self.logger.info(
                     f"Synchronization for {identifier} completed in {elapsed:.2f} seconds."
                 )
+
             return success
 
         except Exception as e:
             self.logger.error(f"Error in dataset synchronization: {str(e)}")
             return False
 
-    def _sync_existing_table(
+    def _sync(
         self, filename: Path, agg_filename: Path, remote_table: str
     ) -> bool:
-        """Synchronize when target table already exists"""
+        """Synchronize when target table already exists."""
         try:
-            if self.has_timestamp and self.ods_last_record_date:
-                ods_date = make_utc(self.ods_last_record_date).date()
-                last_db_record = self.dbclient.get_target_last_record(
-                    self.dataset.target_table_name, self.dataset.db_timestamp_field
-                )
+            handler = self._get_existing_table_handler()
+            if handler:
+                return handler(filename, agg_filename, remote_table)
 
-                if last_db_record:
-                    raw_ts = (
-                        last_db_record.get(self.dataset.db_timestamp_field)
-                        if isinstance(last_db_record, dict)
-                        else last_db_record[self.dataset.db_timestamp_field]
-                    )
-
-                    parsed_ts = None
-                    # Already a datetime
-                    if isinstance(raw_ts, datetime):
-                        parsed_ts = raw_ts
-                    # pandas Timestamp
-                    elif isinstance(raw_ts, pd.Timestamp):
-                        parsed_ts = raw_ts.to_pydatetime()
-                    # date only -> convert to datetime at midnight
-                    elif isinstance(raw_ts, date):
-                        parsed_ts = datetime(raw_ts.year, raw_ts.month, raw_ts.day)
-                    # string -> try ISO parse then pandas fallback
-                    elif isinstance(raw_ts, str):
-                        try:
-                            parsed_ts = datetime.fromisoformat(raw_ts)
-                        except Exception:
-                            parsed = pd.to_datetime(raw_ts, errors="coerce")
-                            if not pd.isna(parsed):
-                                parsed_ts = parsed.to_pydatetime()
-
-                    if parsed_ts is None:
-                        self.logger.warning(
-                            f"Could not parse last DB record timestamp for {remote_table}: {raw_ts!r}"
-                        )
-                        return False
-
-                    target_db_date = make_utc(parsed_ts).date()
-
-                    # Check if new data is available
-                    if ods_date - target_db_date >= timedelta(days=1):
-                        self.logger.info(
-                            f"New data available in ODS. Last record date: {ods_date}"
-                        )
-
-                        # Download incremental data
-                        where_clause = (
-                            f"{self.dataset.source_timestamp_field} > '{target_db_date.strftime('%Y-%m-%d')}' "
-                            f"and {self.dataset.source_timestamp_field} < '{datetime.now(timezone.utc).strftime('%Y-%m-%d')}'"
-                        )
-
-                        df = self.download_ods_data(
-                            filename,
-                            where_clause=where_clause,
-                            fields=(
-                                self.dataset.fields_selection
-                                if self.dataset.fields_selection
-                                else None
-                            ),
-                        )
-
-                        if df is not False and not df.empty:
-                            df = self.transform_ods_data(df)
-                            df.to_parquet(agg_filename)
-                            self.dbclient.upload_to_db(
-                                str(agg_filename), self.dataset.target_table_name
-                            )
-
-                            count = get_parquet_row_count(str(agg_filename))
-                            self.logger.info(
-                                f"{count} records added to target database table {remote_table}."
-                            )
-
-                            self.post_process_data()
-                            return True
-                        if df.empty:
-                            self.logger.info(
-                                f"No new data found for dataset {remote_table}."
-                            )
-                            return True
-                        else:
-                            self.logger.warning(
-                                "Failed to download data new data available"
-                            )
-                            return False
-                    else:
-                        self.logger.info(
-                            f"No new data for dataset {remote_table} was found."
-                        )
-                        return True
-                else:
-                    self.logger.warning(
-                        f"No new recorords detected in table {remote_table}"
-                    )
-                    return False
-            elif self.has_record_identifier_field and self.ods_last_record_identifier:
-                ods_identifers = self.get_ods_identifiers()
-                db_identifiers = self.get_db_identifiers(remote_table)
-                # unique indentifiers only
-                ods_identifers = sorted(set(ods_identifers))
-                db_identifiers = sorted(set(db_identifiers))
-                new_identifiers = list(set(ods_identifers) - set(db_identifiers))
-                if new_identifiers:
-                    self.logger.info(
-                        f"New data available in ODS. New record IDs: {new_identifiers}"
-                    )
-
-                    # Download incremental data
-                    where_clause = (
-                        f"{self.dataset.record_identifier_field} IN ({', '.join([f'\'{id}\'' for id in new_identifiers])})"
-                    )
-
-                    df = self.download_ods_data(
-                        filename,
-                        where_clause=where_clause,
-                        fields=(
-                            self.dataset.fields_selection
-                            if self.dataset.fields_selection
-                            else None
-                        ),
-                    )
-
-                    if df is not False and not df.empty:
-                        df = self.transform_ods_data(df)
-                        df.to_parquet(agg_filename)
-                        self.dbclient.upload_to_db(
-                            str(agg_filename), self.dataset.target_table_name
-                        )
-
-                        count = get_parquet_row_count(str(agg_filename))
-                        self.logger.info(
-                            f"{count} records added to target database table {remote_table}."
-                        )
-
-                        self.post_process_data()
-                        return True
-                    if df.empty:
-                        self.logger.info(
-                            f"No new data found for dataset {remote_table}."
-                        )
-                        return True
-                    else:
-                        self.logger.warning("Failed to download data new data available")
-                        return False
-                else:
-                    self.logger.warning(
-                        f"no new records detected in table {remote_table}"
-                    )
-                    return True
-            else:
-                self.logger.info(
-                    f"No timestamp field configured or no last record available"
-                )
-                return True
+            return self._sync_default(remote_table)
 
         except Exception as e:
             self.logger.error(f"Error in existing table sync: {e}")
             return False
+
+    def _get_existing_table_handler(self):
+        """Return the handler for the configured import type."""
+        import_type_value = getattr(self.dataset.import_type, "value", self.dataset.import_type)
+        handlers = {
+            ImportTypeEnum.NEW_TIMESTAMP.value: self._sync_new_timestamp,
+            ImportTypeEnum.NEW_PK.value: self._sync_new_identifier,
+            ImportTypeEnum.NEW_YEAR.value: self._sync_new_year,
+            ImportTypeEnum.NEW_YEAR_MONTH.value: self._sync_new_year_month,
+            ImportTypeEnum.SPECIFIED_DATE.value: self._sync_on_specified_date,
+
+        }
+        return handlers.get(import_type_value)
+
+    def _sync_new_timestamp(
+        self, filename: Path, agg_filename: Path, remote_table: str
+    ) -> bool:
+        """Handle incremental sync when import type is based on timestamps."""
+        ods_date = make_utc(self.ods_last_record_date).date()
+        last_db_record = self.dbclient.get_target_last_record(
+            self.dataset.target_table_name, self.dataset.db_timestamp_field
+        )
+
+        if not last_db_record:
+            self.logger.warning(
+                f"No new recorords detected in table {remote_table}"
+            )
+            return False
+
+        raw_ts = (
+            last_db_record.get(self.dataset.db_timestamp_field)
+            if isinstance(last_db_record, dict)
+            else last_db_record[self.dataset.db_timestamp_field]
+        )
+
+        parsed_ts = None
+        if isinstance(raw_ts, datetime):
+            parsed_ts = raw_ts
+        elif isinstance(raw_ts, pd.Timestamp):
+            parsed_ts = raw_ts.to_pydatetime()
+        elif isinstance(raw_ts, date):
+            parsed_ts = datetime(raw_ts.year, raw_ts.month, raw_ts.day)
+        elif isinstance(raw_ts, str):
+            try:
+                parsed_ts = datetime.fromisoformat(raw_ts)
+            except Exception:
+                parsed = pd.to_datetime(raw_ts, errors="coerce")
+                if not pd.isna(parsed):
+                    parsed_ts = parsed.to_pydatetime()
+
+        if parsed_ts is None:
+            self.logger.warning(
+                f"Could not parse last DB record timestamp for {remote_table}: {raw_ts!r}"
+            )
+            return False
+
+        target_db_date = make_utc(parsed_ts).date()
+        if ods_date - target_db_date < timedelta(days=1):
+            self.logger.info(
+                f"No new data for dataset {remote_table} was found."
+            )
+            return True
+
+        self.logger.info(
+            f"New data available in ODS. Last record date: {ods_date}"
+        )
+
+        where_clause = (
+            f"{self.dataset.source_timestamp_field} > '{target_db_date.strftime('%Y-%m-%d')}' "
+            f"and {self.dataset.source_timestamp_field} < '{datetime.now(timezone.utc).strftime('%Y-%m-%d')}'"
+        )
+        df = self.download_ods_data(
+            filename,
+            where_clause=where_clause,
+            fields=(
+                self.dataset.fields_selection
+                if self.dataset.fields_selection
+                else None
+            ),
+        )
+
+        if df is False:
+            self.logger.warning("Failed to download data new data available")
+            return False
+
+        if df.empty:
+            self.logger.info(
+                f"No new data found for dataset {remote_table}."
+            )
+            return True
+
+        df = self.transform_ods_data(df)
+        df.to_parquet(agg_filename)
+        self.dbclient.upload_to_db(
+            str(agg_filename), self.dataset.target_table_name
+        )
+
+        count = get_parquet_row_count(str(agg_filename))
+        self.logger.info(
+            f"{count} records added to target database table {remote_table}."
+        )
+        self.post_process_data()
+        return True
+
+    def _sync_new_identifier(
+        self, filename: Path, agg_filename: Path, remote_table: str
+    ) -> bool:
+        """Handle incremental sync when import type is based on new identifiers."""
+        ods_identifers = self.get_ods_identifiers()
+        db_identifiers = self.get_db_identifiers(remote_table)
+        ods_identifers = sorted(set(ods_identifers))
+        db_identifiers = sorted(set(db_identifiers))
+        new_identifiers = list(set(ods_identifers) - set(db_identifiers))
+
+        if not new_identifiers:
+            self.logger.warning(
+                f"no new records detected in table {remote_table}"
+            )
+            return True
+
+        self.logger.info(
+            f"New data available in ODS. New record IDs: {new_identifiers}"
+        )
+
+        identifiers_clause = self._format_identifier_clause(new_identifiers)
+        where_clause = (
+            f"{self.dataset.record_identifier_field} IN ({identifiers_clause})"
+        )
+
+        df = self.download_ods_data(
+            filename,
+            where_clause=where_clause,
+            fields=(
+                self.dataset.fields_selection
+                if self.dataset.fields_selection
+                else None
+            ),
+        )
+
+        if df is False:
+            self.logger.warning("Failed to download data new data available")
+            return False
+
+        if df.empty:
+            self.logger.info(
+                f"No new data found for dataset {remote_table}."
+            )
+            return True
+
+        df = self.transform_ods_data(df)
+        df.to_parquet(agg_filename)
+        self.dbclient.upload_to_db(
+            str(agg_filename), self.dataset.target_table_name
+        )
+
+        count = get_parquet_row_count(str(agg_filename))
+        self.logger.info(
+            f"{count} records added to target database table {remote_table}."
+        )
+        self.post_process_data()
+        return True
+
+    def _sync_on_specified_date(
+        self, filename: Path, agg_filename: Path, remote_table: str
+    ) -> bool:
+        """Handle incremental sync when import type is based on new years."""
+        self.logger.warning(
+            "NEW_YEAR import type handler has not been implemented yet."
+        )
+        return False
+
+    
+    def _sync_new_year(
+        self, filename: Path, agg_filename: Path, remote_table: str
+    ) -> bool:
+        """Handle incremental sync when import type is based on new years."""
+        self.logger.warning(
+            "NEW_YEAR import type handler has not been implemented yet."
+        )
+        return False
+
+    def _sync_new_year_month(
+        self, filename: Path, agg_filename: Path, remote_table: str
+    ) -> bool:
+        """Handle incremental sync when import type is based on new year/month combinations."""
+        self.logger.warning(
+            "NEW_YEAR_MONTH import type handler has not been implemented yet."
+        )
+        return False
+
+    def _sync_default(self, remote_table: str) -> bool:
+        """Fallback when no import type handler is configured."""
+        self.logger.info(
+            f"No timestamp field configured or no last record available"
+        )
+        df = None
+        if self.dataset.fill_shape_names:
+            df = self.dbclient.run_query(
+                f'SELECT * FROM "{self.dbclient.schema}"."{self.dataset.target_table_name}" WHERE "{self.dataset.fill_shape_names["target_field_name"]}" IS NULL'
+            )
+        self._fill_shape_names(df)
+        return True
 
     def _sync_new_table(
         self, filename: Path, agg_filename: Path, remote_table: str
@@ -674,7 +746,7 @@ class DatasetProcessor:
                 df[self.dataset.source_timestamp_field], errors="coerce"
             )
 
-        return df
+        return self._fill_shape_names(df)
 
     def _apply_aggregations(self, df: pd.DataFrame) -> pd.DataFrame:
         """Apply aggregations to the data"""
@@ -728,6 +800,13 @@ class DatasetProcessor:
                         self.logger.info(f"Post-import command executed: {cmd}")
                     except Exception as e:
                         self.logger.error(f"Error executing post-import command: {e}")
+
+    def _format_identifier_clause(self, identifiers: list) -> str:
+        """Return a SQL IN-clause string for identifier values with safe escaping."""
+        safe_identifiers = [
+            str(identifier).replace("'", "''") for identifier in identifiers
+        ]
+        return ", ".join(f"'{identifier}'" for identifier in safe_identifiers)
 
     def get_time_limit_where_clause(self) -> Optional[str]:
         """Construct WHERE clause for time limits"""

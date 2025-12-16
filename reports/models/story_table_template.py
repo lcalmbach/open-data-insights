@@ -5,7 +5,8 @@ from .managers import NaturalKeyManager
 
 
 class StoryTemplateTableManager(NaturalKeyManager):
-    lookup_fields = ('story_template__slug', 'slug')  # must match natural_key order
+    lookup_fields = ("story_template__slug", "slug")  # must match natural_key order
+
 
 class StoryTemplateTable(models.Model):
     story_template = models.ForeignKey(
@@ -31,13 +32,14 @@ class StoryTemplateTable(models.Model):
 
     def __str__(self):
         return self.title
-    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = uuid.uuid4().hex[:8]  # or shortuuid.uuid()[:10]
         super().save(*args, **kwargs)
-        
+
     def natural_key(self):
         return (self.story_template.slug, self.slug)
-    natural_key.dependencies = ['reports.storytemplate']
+
+    natural_key.dependencies = ["reports.storytemplate"]
     objects = StoryTemplateTableManager()

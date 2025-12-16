@@ -19,7 +19,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         dataset_id = options.get('id')
-        
         service = DatasetSyncService()
         result = service.synchronize_datasets(dataset_id=dataset_id)
         

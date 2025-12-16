@@ -1,7 +1,7 @@
-
 from django.db import models
 from .story import Story
 from .story_table_template import StoryTemplateTable
+
 
 class StoryTable(models.Model):
     story = models.ForeignKey(

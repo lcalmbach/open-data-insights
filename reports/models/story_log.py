@@ -28,4 +28,3 @@ class StoryLog(models.Model):
 
     def __str__(self):
         return f"Report {self.story.title} - {self.reference_period_start}"
-

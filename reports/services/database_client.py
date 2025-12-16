@@ -73,6 +73,15 @@ class DjangoPostgresClient:
                     params = {k: v for k, v in params.items() if v is not None}
                 cursor.execute(clean_query, params)
 
+    def delete_table(self, table_name: str, schema: str = None) -> None:
+        """Delete a table from the database"""
+        if schema is None:
+            schema = self.schema
+
+        query = f'DROP TABLE IF EXISTS "{schema}"."{table_name}" CASCADE'
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            
     def table_exists(self, table_name: str, schema: str = None) -> bool:
         """Check if a table exists in the database"""
         if schema is None:

@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class NaturalKeyManager(models.Manager):
     """
     Generic manager that lets you define which fields make up
@@ -8,6 +9,7 @@ class NaturalKeyManager(models.Manager):
         class StoryTemplateManager(NaturalKeyManager):
             lookup_fields = ('slug',)
     """
+
     lookup_fields = ()
 
     def get_by_natural_key(self, *args):

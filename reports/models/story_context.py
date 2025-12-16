@@ -3,8 +3,9 @@ from django.db import models
 from .story_template import StoryTemplate
 from .managers import NaturalKeyManager
 
+
 class StoryTemplateContextManager(NaturalKeyManager):
-    lookup_fields = ('story_template__slug', 'slug')
+    lookup_fields = ("story_template__slug", "slug")
 
 
 class StoryTemplateContext(models.Model):
@@ -35,17 +36,17 @@ class StoryTemplateContext(models.Model):
         verbose_name = "Story Template Context"
         verbose_name_plural = "Story Template Contexts"
         ordering = ["sort_order"]
-    
+
     def __str__(self):
         return self.key
-    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = uuid.uuid4().hex[:8]  # or shortuuid.uuid()[:10]
         super().save(*args, **kwargs)
-    
+
     def natural_key(self):
         return (self.story_template.slug, self.slug)
-    
-    natural_key.dependencies = ['reports.storytemplate']
+
+    natural_key.dependencies = ["reports.storytemplate"]
     objects = StoryTemplateContextManager()

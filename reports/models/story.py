@@ -139,4 +139,3 @@ class Story(models.Model):
 
     def get_email_list_entry(self):
         return f"<b>{self.title}:</b></br><p>{self.summary}<p>"
-

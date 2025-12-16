@@ -9,18 +9,17 @@ class Quote(models.Model):
         blank=True,
         null=True,
         help_text="URL to the author's Wikipedia page.",
-    )   
+    )
     lifespan = models.CharField(
         max_length=255,
         blank=True,
         null=True,
-        help_text="Lifespan of the author, e.g., '1900-1988'.",)
-    
+        help_text="Lifespan of the author, e.g., '1900-1988'.",
+    )
+
     class Meta:
         verbose_name = "Quote"
         verbose_name_plural = "Quotes"
 
     def __str__(self):
         return self.quote
-
-                            

@@ -8,10 +8,13 @@ CONTEXT_PERIOD_CATEGORY_ID = 4
 DAY_PERIOD_CATEGORY_ID = 5
 GRAPH_TYPE_CATEGORY_ID = 6
 PERIOD_DIRECTION_CATEGORY_ID = 7
+IMPORT_TYPE_CATEGORY_ID = 8
+
 
 class PeriodDirectionEnum(Enum):
     Backward = 72
     Forward = 71
+
 
 class LookupCategory(models.Model):
     name = models.CharField(max_length=255, help_text="Name of the lookup category.")
@@ -78,6 +81,20 @@ class PeriodDirection(LookupValue):
         verbose_name_plural = "PeriodDirections"
 
 
+class ImportTypeManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(category_id=IMPORT_TYPE_CATEGORY_ID)
+
+
+class ImportType(LookupValue):
+    objects = ImportTypeManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "ImportType"
+        verbose_name_plural = "ImportTypes"
+
+
 class GraphTypeManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(category_id=GRAPH_TYPE_CATEGORY_ID)
@@ -122,7 +139,9 @@ class Theme(LookupValue):
 
 class AggregationFunctionManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(category_id=AGGREGATION_FUNCTION_CATEGORY_ID)
+        return (
+            super().get_queryset().filter(category_id=AGGREGATION_FUNCTION_CATEGORY_ID)
+        )
 
 
 class AggregationFunction(LookupValue):

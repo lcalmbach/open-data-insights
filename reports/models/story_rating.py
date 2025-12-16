@@ -1,8 +1,7 @@
-
-
 from django.db import models
 from account.models import CustomUser
 from .story import Story
+
 
 class StoryRating(models.Model):
     story = models.ForeignKey(

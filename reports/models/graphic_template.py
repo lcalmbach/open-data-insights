@@ -6,7 +6,8 @@ from .managers import NaturalKeyManager
 
 
 class StoryTemplateGraphicManager(NaturalKeyManager):
-    lookup_fields = ('story_template__slug', 'slug')
+    lookup_fields = ("story_template__slug", "slug")
+
 
 class StoryTemplateGraphic(models.Model):
     story_template = models.ForeignKey(
@@ -36,21 +37,18 @@ class StoryTemplateGraphic(models.Model):
     class Meta:
         verbose_name = "Graphic Template"
         verbose_name_plural = "Graphics Templates"
-        ordering = ["sort_order"]  
+        ordering = ["sort_order"]
 
     def __str__(self):
         return self.title
-    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = uuid.uuid4().hex[:8]  # or shortuuid.uuid()[:10]
         super().save(*args, **kwargs)
-        
+
     def natural_key(self):
         return (self.story_template.slug, self.slug)
-    natural_key.dependencies = ['reports.storytemplate']
+
+    natural_key.dependencies = ["reports.storytemplate"]
     objects = StoryTemplateGraphicManager()
-
-
-
-
