@@ -11,7 +11,6 @@ import pandas as pd
 from datetime import datetime, date, timedelta
 from typing import Optional, Dict, Any, Tuple
 from decimal import Decimal
-from enum import Enum
 from django.conf import settings
 from openai import OpenAI
 from ..visualizations.plotting import generate_chart
@@ -26,6 +25,7 @@ from reports.models.story_table import StoryTable
 from reports.models.graphic import Graphic
 from dateutil.relativedelta import relativedelta
 from reports.models.lookups import PeriodDirectionEnum
+from reports.constants.reference_period import ReferencePeriod
 
 
 LLM_FORMATTING_INSTRUCTIONS = """
@@ -73,15 +73,12 @@ month_to_season = {
     1: 4,
     2: 4,
     12: 4,  # Winter
-    
     3: 1,
     4: 1,
     5: 1,  # Spring
-    
     6: 2,
     7: 2,
     8: 2,  # Summer
-    
     9: 3,
     10: 3,
     11: 3,  # Fall
@@ -95,26 +92,6 @@ season_dates = {
 }
 
 
-class ReferencePeriod(Enum):
-    """Enum for reference period types"""
-
-    DAILY = 35
-    MONTHLY = 36
-    SEASONAL = 37
-    YEARLY = 38
-    ALLTIME = 39
-    DECADAL = 44  # For backward compatibility
-    IRREGULAR = 56  # For backward compatibility
-    WEEKLY = 70  # For backward compatibility
-
-    @classmethod
-    def get_name(cls, value: int) -> str:
-        """Get the name of the period from its value"""
-        for period in cls:
-            if period.value == value:
-                return period.name.lower()
-        return "unknown"
-
 
 class StoryProcessor:
     """
@@ -124,8 +101,8 @@ class StoryProcessor:
 
     def __init__(
         self,
+        anchor_date: date,
         template: StoryTemplate = None,
-        published_date: date = None,
         force_generation: bool = False,
         story: Story = None,
     ):
@@ -133,106 +110,65 @@ class StoryProcessor:
         if not template and not story:
             raise ValueError("Either template or story must be provided")
         # verify that published_date is provided if template is provided
-        if template and not published_date:
+        if template and not anchor_date:
             raise ValueError("published_date must be provided if template is provided")
 
         self.dbclient = DjangoPostgresClient()
         self.force_generation = force_generation
+        self.anchor_date = anchor_date or date.today()
+        # if there is a existing story set, use it an d overwrite its content
         if story:
             self.story = story
             template = story.template
-            published_date = story.published_date
-            self.most_recent_day = self._get_most_recent_day(published_date, template)
-            self.season, self.season_year = self._get_season(story.reference_period_start, template)
-            reference_period_start = story.reference_period_start
-            reference_period_end = story.reference_period_end
         else:
-            self.most_recent_day = self._get_most_recent_day(published_date, template)
-            if self.most_recent_day:
-                if template.period_direction_id == PeriodDirectionEnum.Backward.value:
-                    reference_period_start, reference_period_end = (
-                        self._get_reference_period(published_date, template)
-                    )
-                else:
-                    reference_period_start, reference_period_end = (
-                        self._get_reference_period(published_date, template)
-                    )
-                self.season, self.season_year = self._get_season(
-                    reference_period_start, template
-                )
-                self.story = (
-                    Story.objects.filter(
-                        template=template,
-                        reference_period_start=reference_period_start,
-                        reference_period_end=reference_period_end,
-                    ).first()
-                    or Story()  # creates a new, empty instance if no match
-                )
-                if self.story.id is None:
-                    self.story.template = template
+            reference_period_start, reference_period_end = (
+                self._get_reference_period(self.anchor_date, template)
+            )
+            self.season, self.season_year = self._get_season(
+                reference_period_start, template
+            )
+            self.story = (
+                Story.objects.filter(
+                    template=template,
+                    reference_period_start=reference_period_start,
+                    reference_period_end=reference_period_end,
+                ).first()
+                or Story()  # creates a new, empty instance if no match
+            )
+            if self.story.id is None:
+                self.story.template = template
 
-                    (
-                        self.story.reference_period_start,
-                        self.story.reference_period_end,
-                    ) = self._get_reference_period(published_date, template)
+                (
+                    self.story.reference_period_start,
+                    self.story.reference_period_end,
+                ) = self._get_reference_period(self.anchor_date, template)
 
-                self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
-                self.story.published_date = published_date
+            self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
+            self.story.published_date = date.today()
 
         # Ensure reference period fields are set to avoid AttributeError later
-        self.logger = logging.getLogger(f"StoryProcessor.{template.id} {template.title}")
-        self.reference_period = template.reference_period.id
-        # make sure reference_period_start/end are present; compute from published_date if missing
-        if not getattr(self.story, 'reference_period_start', None) or not getattr(self.story, 'reference_period_end', None):
-            try:
-                rs, re = self._get_reference_period(published_date, template)
-                self.story.reference_period_start = rs
-                self.story.reference_period_end = re
-            except Exception:
-                # fallback: use published_date as single-day period
-                pd_date = published_date.date() if isinstance(published_date, datetime) else published_date
-                self.story.reference_period_start = pd_date
-                self.story.reference_period_end = pd_date
-
+        self.logger = logging.getLogger(
+            f"StoryProcessor.{self.story.template.id} {template.title}"
+        )
+        self.season, self.season_year = self._get_season(
+            self.story.reference_period_start, template
+        )   
         # safe access to year/month
-        self.year = self.story.reference_period_start.year if self.story.reference_period_start else datetime.now().year
-        self.month = self.story.reference_period_start.month if self.story.reference_period_start else datetime.now().month
-        self.reference_period_expression = self._get_reference_period_expression()
-        self.last_reference_period_start_date = self._get_last_published_date()
+        self.year = (
+            self.story.reference_period_start.year
+            if self.story.reference_period_start
+            else datetime.now().year
+        )
+        self.month = (
+            self.story.reference_period_start.month
+            if self.story.reference_period_start
+            else datetime.now().month
+        )
+        # self.last_reference_period_start_date = self._get_last_published_date()
         self.is_data_based = StoryTemplateContext.objects.filter(
             story_template=template
         ).exists()
 
-    def _get_reference_period_expression(self) -> str:
-        """
-        Generates a human-readable string representation of the reference period for the story.
-
-        Returns:
-            str: A formatted string describing the reference period, which may be:
-                - "YYYY-MM-DD" for daily periods,
-                - "Month YYYY" for monthly periods,
-                - "Season YYYY" for seasonal periods,
-                - "YYYY" for yearly periods,
-                - "All Time" for all-time periods,
-                - "Decadal YYYYs" for decadal periods,
-                or an empty string if the reference period does not match any known type.
-        """
-        if self.reference_period == ReferencePeriod.DAILY.value:
-            return self.story.reference_period_start.strftime("%Y-%m-%d")
-        elif self.reference_period == ReferencePeriod.WEEKLY.value:
-            return f'{self.story.reference_period_start.strftime("%Y-%m-%d")} - {self.story.reference_period_end.strftime("%Y-%m-%d")}'
-        elif self.reference_period == ReferencePeriod.MONTHLY.value:
-            month_id = self.story.reference_period_start.month
-            return f"{calendar.month_name[month_id]} {self.year}"
-        elif self.reference_period == ReferencePeriod.SEASONAL.value:
-            return f"{self._season_name()} {self.season_year}"
-        elif self.reference_period == ReferencePeriod.YEARLY.value:
-            return str(self.year)
-        elif self.reference_period == ReferencePeriod.ALLTIME.value:
-            return "All Time"
-        elif self.reference_period == ReferencePeriod.DECADAL.value:
-            return f"Decadal {self.year // 10 * 10}s"
-        return ""
 
     def _replace_reference_period_expression(self, expression: str) -> str:
         """Replace reference period expression in SQL command"""
@@ -243,12 +179,14 @@ class StoryProcessor:
             ":reference_period_end", str(self.story.reference_period_end)
         )
         # Safe month name lookup
-        month_name = calendar.month_name[self.month] if 1 <= self.month <= 12 else "Unknown"
+        month_name = (
+            calendar.month_name[self.month] if 1 <= self.month <= 12 else "Unknown"
+        )
         result = result.replace(":reference_period_month", month_name)
         result = result.replace(":reference_period_year", str(self.year))
         result = result.replace(":reference_period_previous_year", str(self.year - 1))
         result = result.replace(":reference_period_season", self._season_name())
-        result = result.replace(":reference_period", self.reference_period_expression)
+        result = result.replace(":reference_period", self.story.reference_period_expression)
         result = result.replace(
             ":published_date", self.story.published_date.strftime("%Y-%m-%d")
         )
@@ -343,7 +281,7 @@ class StoryProcessor:
     def _generate_tables(self):
         """Generate tables for the story"""
         from django.db import transaction
-        
+
         table_templates = self.story.template.story_template_tables.all()
         self.logger.info(f"Found {table_templates.count()} table templates to process")
 
@@ -366,7 +304,9 @@ class StoryProcessor:
     def generate_graphic(self, graphic: Graphic):
         try:
             graphic_template = graphic.graphic_template
-            sql_command = self._replace_reference_period_expression(graphic_template.sql_command)
+            sql_command = self._replace_reference_period_expression(
+                graphic_template.sql_command
+            )
             if not sql_command:
                 self.logger.warning(
                     f"Empty SQL command for graphic template: {graphic_template.title}"
@@ -503,7 +443,7 @@ class StoryProcessor:
             self.logger.error(traceback.format_exc())
             return False
 
-    def _get_most_recent_day(self, published_date, template) -> Optional[datetime]:
+    def _get_most_recent_day(self, template) -> Optional[datetime]:
         """
         Retrieves the most recent day related to the current story from the database.
         Executes a SQL query defined in the template to fetch the most recent date,
@@ -517,7 +457,7 @@ class StoryProcessor:
         most_recent_day_sql = template.most_recent_day_sql
         if most_recent_day_sql:
             try:
-                params = {"published_date": published_date}
+                params = {"published_date": self.anchor_date}
                 df = self.dbclient.run_query(most_recent_day_sql, params)
                 if not df.empty and df.iloc[0, 0] is not None:
                     # return a date object for consistency with DB DateFields
@@ -548,9 +488,7 @@ class StoryProcessor:
         return season, season_year
 
     def _get_reference_period(
-        self, 
-        published_date: datetime, 
-        template: StoryTemplate
+        self, anchor_date: datetime, template: StoryTemplate
     ) -> Tuple[datetime, datetime]:
         """Get the reference period start and end dates relative to published_date.
 
@@ -561,31 +499,30 @@ class StoryProcessor:
         Returns date objects (period_start, period_end).
         """
 
-        # choose anchor: most_recent_day (if present) or published_date
-        if template.period_direction_id == PeriodDirectionEnum.Backward.value:
-            anchor = self.most_recent_day if self.most_recent_day is not None else (published_date - timedelta(days=1))
-        else:
-            anchor = published_date
-        # normalize anchor to datetime for period arithmetic
-        anchor_dt = to_datetime_obj(anchor) or to_datetime_obj(published_date)
-
-        # Determine the base period that contains anchor_dt
-        if template.reference_period_id in (ReferencePeriod.DAILY.value, ReferencePeriod.IRREGULAR.value):
-            base_start = anchor_dt
-            base_end = anchor_dt
-            unit = 'days'
+        # Determine the base period that contains anchor_date
+        if template.reference_period_id in (
+            ReferencePeriod.DAILY.value,
+            ReferencePeriod.IRREGULAR.value,
+        ):
+            base_start = anchor_date
+            base_end = anchor_date
+            unit = "days"
         elif template.reference_period_id == ReferencePeriod.WEEKLY.value:
             # week starting on Monday that contains anchor
-            week_start = anchor_dt - pd.DateOffset(days=anchor_dt.weekday())
+            week_start = anchor_date - pd.DateOffset(days=anchor_date.weekday())
             base_start = week_start
             base_end = week_start + pd.DateOffset(days=6)
-            unit = 'weeks'
+            unit = "weeks"
         elif template.reference_period_id == ReferencePeriod.MONTHLY.value:
-            base_start = datetime(anchor_dt.year, anchor_dt.month, 1)
-            base_end = datetime(anchor_dt.year, anchor_dt.month, calendar.monthrange(anchor_dt.year, anchor_dt.month)[1])
-            unit = 'months'
+            base_start = datetime(anchor_date.year, anchor_date.month, 1)
+            base_end = datetime(
+                anchor_date.year,
+                anchor_date.month,
+                calendar.monthrange(anchor_date.year, anchor_date.month)[1],
+            )
+            unit = "months"
         elif template.reference_period_id == ReferencePeriod.SEASONAL.value:
-            season_idx, season_year = self._get_season(anchor_dt, template)
+            season_idx, season_year = self._get_season(anchor_date, template)
             sm, sd = season_dates[season_idx][0]
             em, ed = season_dates[season_idx][1]
             start_year = season_year
@@ -593,40 +530,51 @@ class StoryProcessor:
             base_start = datetime(start_year, sm, sd)
             base_end = datetime(end_year, em, ed)
             base_end += pd.DateOffset(days=1)
-            unit = 'season'
+            unit = "season"
         elif template.reference_period_id == ReferencePeriod.YEARLY.value:
-            base_start = datetime(anchor_dt.year, 1, 1)
-            base_end = datetime(anchor_dt.year, 12, 31)
-            unit = 'years'
+            base_start = datetime(anchor_date.year, 1, 1)
+            base_end = datetime(anchor_date.year, 12, 31)
+            unit = "years"
         else:
             # fallback: single-day period at anchor
-            base_start = anchor_dt
-            base_end = anchor_dt
-            unit = 'days'
+            base_start = anchor_date
+            base_end = anchor_date
+            unit = "days"
 
         shift = 0
-        if template.period_direction_id == PeriodDirectionEnum.Forward.value: 
+        if template.period_direction_id == PeriodDirectionEnum.Forward.value:
             shift = 1
         elif template.period_direction_id == PeriodDirectionEnum.Backward.value:
-            if template.reference_period_id == ReferencePeriod.MONTHLY.value and published_date.year == base_start.year and published_date.year == base_start.year:
+            if (
+                template.reference_period_id == ReferencePeriod.MONTHLY.value
+                and anchor_date.year == base_start.year
+                and anchor_date.year == base_start.year
+            ):
                 shift = -1
-            elif template.reference_period_id == ReferencePeriod.YEARLY.value and published_date.year == base_start.year:
+            elif (
+                template.reference_period_id == ReferencePeriod.YEARLY.value
+                and anchor_date.year == base_start.year
+            ):
                 shift = -1
 
         # Apply the shift
-        if unit == 'days':
+        if unit == "days":
             period_start = base_start + pd.DateOffset(days=shift)
             period_end = base_end + pd.DateOffset(days=shift)
-        elif unit == 'weeks':
+        elif unit == "weeks":
             period_start = base_start + pd.DateOffset(days=7 * shift)
             period_end = base_end + pd.DateOffset(days=7 * shift)
-        elif unit == 'months':
+        elif unit == "months":
             period_start = base_start + relativedelta(months=shift)
             # recompute end as last day of the target month
-            period_end = datetime(period_start.year, period_start.month, calendar.monthrange(period_start.year, period_start.month)[1])
-        elif unit == 'season':
+            period_end = datetime(
+                period_start.year,
+                period_start.month,
+                calendar.monthrange(period_start.year, period_start.month)[1],
+            )
+        elif unit == "season":
             # compute new season index/year
-            cur_season, cur_season_year = self._get_season(anchor_dt, template)
+            cur_season, cur_season_year = self._get_season(anchor_date, template)
             new_index = cur_season - 1 + shift
             new_year = cur_season_year + (new_index // 4)
             new_season = (new_index % 4) + 1
@@ -637,7 +585,7 @@ class StoryProcessor:
             period_start = datetime(start_year, sm, sd)
             period_end = datetime(end_year, em, ed)
             period_end += pd.DateOffset(days=1)
-        elif unit == 'years':
+        elif unit == "years":
             period_start = base_start + relativedelta(years=shift)
             period_end = datetime(period_start.year, 12, 31)
         else:
@@ -707,6 +655,12 @@ class StoryProcessor:
                 if self.story.reference_period_start
                 else self.story.published_date.strftime("%Y-%m-%d")
             )
+        if "%(period_end_date)s" in cmd:
+            params["period_end_date"] = (
+                self.story.reference_period_end.strftime("%Y-%m-%d")
+                if self.story.reference_period_end
+                else self.story.published_date.strftime("%Y-%m-%d")
+            )
         if "%(published_date)s" in cmd:
             params["published_date"] = self.story.published_date.strftime("%Y-%m-%d")
         if "%(month)s" in cmd:
@@ -748,7 +702,9 @@ class StoryProcessor:
 
             # Initialize OpenAI client
             client = OpenAI(api_key=api_key)
-            message = self._replace_reference_period_expression(self.story.template.prompt_text)# Prepare messages for chat completion
+            message = self._replace_reference_period_expression(
+                self.story.template.prompt_text
+            )  # Prepare messages for chat completion
             if self.is_data_based:
                 messages = [
                     {
@@ -765,10 +721,7 @@ class StoryProcessor:
                 ]
             else:
                 messages = [
-                    {
-                        "role": "system", 
-                        "content": self.story.template.system_prompt
-                    },
+                    {"role": "system", "content": self.story.template.system_prompt},
                     {
                         "role": "user",
                         "content": (

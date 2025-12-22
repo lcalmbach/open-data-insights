@@ -19,6 +19,7 @@ class Command(BaseCommand):
         parser.add_argument('--story_template_id', type=int, help='StoryTemplate ID: all stories of this template')
         parser.add_argument('--tables', action='store_true', help='Generate tables')
         parser.add_argument('--graphics', action='store_true', help='Generate graphics')
+        parser.add_argument('--stories', action='store_true', help='Regenerate stories')
         parser.add_argument('--all', action='store_true', help='Process all story templates')
 
     def handle(self, *args, **options):
@@ -30,9 +31,10 @@ class Command(BaseCommand):
         all_flag = options.get('all', False)
         graphics_flag = options.get('graphics', False)
         tables_flag = options.get('tables', False)
+        stories_flag = options.get('stories', False)
         
-        if not options.get('tables') and not options.get('graphics'):
-            self.stdout.write(self.style.WARNING("No action specified. Use --tables and/or --graphics."))
+        if not options.get('tables') and not options.get('graphics') and not options.get('stories'):
+            self.stdout.write(self.style.WARNING("No action specified. Use --tables, --graphics, and/or --stories."))
             return
 
         # Validate mutually exclusive selection: only one of template_id / story_id / id / all
@@ -45,6 +47,7 @@ class Command(BaseCommand):
         # Handle single graphic id (best-effort; requires a Graphic model / regenerate API)
         graphics = []
         tables = []
+        stories = []
         if id and graphics_flag:
             graphics = [Graphic.objects.get(id=id)]
             template = graphics[0].story.template
@@ -60,35 +63,45 @@ class Command(BaseCommand):
         elif story_id:
             graphics = Graphic.objects.filter(story_id=story_id)
             tables = StoryTable.objects.filter(story_id=story_id)
+            stories = Story.objects.filter(id=story_id)
         elif story_template_id:
             template = StoryTemplate.objects.get(id=story_template_id)
             graphics = Graphic.objects.filter(story__template=template)
             tables = StoryTable.objects.filter(story__template=template)
-        elif all_flag and graphics_flag:
-            graphics = Graphic.objects.all()
-        elif all_flag and tables_flag:
-            tables = StoryTable.objects.all()   
+            stories = Story.objects.filter(template=template)
         elif all_flag:
-            graphics = Graphic.objects.all()
-            tables = StoryTable.objects.all()
+            if graphics_flag:
+                graphics = Graphic.objects.all()
+            if tables_flag:
+                tables = StoryTable.objects.all()
+            if stories_flag:
+                stories = Story.objects.all()
 
         total, processed, errors = 0,0,0
         if options.get('graphics'):
             total = len(graphics)
         if options.get('tables'):
             total += len(tables)
+        if options.get('stories'):
+            total += len(stories)
         
         
         if options.get('graphics'):
             for graphic in graphics:
-                processor = StoryProcessor(template=None, published_date=None, force_generation=False, story=graphic.story)
+                processor = StoryProcessor(anchor_date=None, template=None, force_generation=False, story=graphic.story)
                 if not processor.generate_graphic(graphic):
                     errors += 1
                 processed += 1
         if options.get('tables'):            
             for table in tables:
-                processor = StoryProcessor(template=None, published_date=None, force_generation=False, story=table.story)
+                processor = StoryProcessor(anchor_date=None, template=None, force_generation=False, story=table.story)
                 if not processor.generate_table(table):
+                    errors += 1
+                processed += 1
+        if options.get('stories'):
+            for story in stories:
+                processor = StoryProcessor(anchor_date=None, template=None, force_generation=True, story=story)
+                if not processor.generate_story():
                     errors += 1
                 processed += 1
 

@@ -1,3 +1,4 @@
+
 import uuid
 from django.db import models
 from django.db.models import Q
@@ -141,6 +142,7 @@ class StoryTemplate(models.Model):
         verbose_name = "Story Template"
         verbose_name_plural = "Story Templates"
         ordering = ["title"]  # or any other field
+
 
     def __str__(self):
         return f"{self.title} ({self.reference_period})"

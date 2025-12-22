@@ -86,6 +86,7 @@ class DatasetAdmin(admin.ModelAdmin):
     sortable_by = ("name", "source_identifier", "id")
     sorted_by = ("name",)
     search_fields = ["name", "source_identifier"]  # shows a filter sidebar
+    list_filter = ("import_type",)
 
 
 @admin.register(StoryTemplateSubscription)

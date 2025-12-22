@@ -10,6 +10,7 @@ from django.db import connection, transaction
 from django.conf import settings
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
+from tqdm import tqdm
 from .utils import normalize_sql_query
 
 
@@ -25,10 +26,11 @@ class DjangoPostgresClient:
 
         # Create SQLAlchemy engine for bulk operations (where Django ORM might be slower)
         db_config = settings.DATABASES["default"]
+        schemas = f"{self.schema},public"
         connection_string = (
             f"postgresql+psycopg2://{db_config['USER']}:{db_config['PASSWORD']}"
             f"@{db_config['HOST']}:{db_config['PORT']}/{db_config['NAME']}"
-            f"?options=-csearch_path%3D{self.schema}"
+            f"?options=-csearch_path%3D{schemas}"
         )
         self.engine = create_engine(connection_string)
 
@@ -54,14 +56,15 @@ class DjangoPostgresClient:
                 rows = cursor.fetchall()
                 return pd.DataFrame(rows, columns=cols)
         except Exception:
-            self.logger.exception(f"Error executing SQL: {clean_query} with params: {params}")
+            self.logger.exception(
+                f"Error executing SQL: {clean_query} with params: {params}"
+            )
             raise
 
     def run_action_query(self, query: str, params: Optional[Dict] = None) -> None:
         """Execute an action query (INSERT, UPDATE, DELETE) - uses Django connection"""
         # Normalize the query using our utility function
         clean_query = normalize_sql_query(query)
-
         with connection.cursor() as cursor:
             # Only pass params when provided; passing an empty mapping causes
             # psycopg2 to attempt formatting and breaks on literal '%' in SQL.
@@ -75,13 +78,20 @@ class DjangoPostgresClient:
 
     def delete_table(self, table_name: str, schema: str = None) -> None:
         """Delete a table from the database"""
+        success = True
         if schema is None:
             schema = self.schema
 
         query = f'DROP TABLE IF EXISTS "{schema}"."{table_name}" CASCADE'
-        with connection.cursor() as cursor:
-            cursor.execute(query)
-            
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(query)
+            connection.commit()
+        except Exception as e:
+            self.logger.error(f"Error deleting table {schema}.{table_name}: {e}")
+            success = False
+        return success
+
     def table_exists(self, table_name: str, schema: str = None) -> bool:
         """Check if a table exists in the database"""
         if schema is None:
@@ -144,8 +154,6 @@ class DjangoPostgresClient:
             self.logger.info(f"{len(df)} records were read from {file_path}.")
 
             # Use SQLAlchemy for bulk operations (more efficient than Django ORM)
-            from tqdm import tqdm
-
             for start in tqdm(range(0, len(df), chunksize), desc="Uploading"):
                 chunk = df.iloc[start : start + chunksize]
                 chunk.to_sql(

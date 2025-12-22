@@ -4,6 +4,7 @@ Handles importing and synchronizing datasets from external sources
 """
 
 import json
+from io import StringIO
 import logging
 import pandas as pd
 import numpy as np
@@ -14,7 +15,7 @@ import urllib.parse
 from datetime import date, timedelta, datetime, timezone
 from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple
-from django.db import transaction
+# from django.db import transaction
 from django.utils import timezone as django_timezone
 from django.conf import settings
 from tqdm import tqdm
@@ -25,8 +26,7 @@ from reports.services.utils import (
     get_parquet_row_count,
     make_utc,
 )
-from reports.models.dataset import Dataset, ImportTypeEnum
-
+from reports.models.dataset import Dataset, ImportTypeEnum, PeriodEnum
 
 
 class DatasetSyncService(ETLBaseService):
@@ -43,11 +43,9 @@ class DatasetSyncService(ETLBaseService):
             self.logger.info(
                 f"Starting synchronization for dataset ID {dataset.id}: {dataset.name}"
             )
-
             # Create dataset processor
             processor = DatasetProcessor(dataset)
             result = processor.synchronize()
-
             if result:
                 # Update last import date
                 dataset.last_import_date = django_timezone.now()
@@ -70,9 +68,9 @@ class DatasetSyncService(ETLBaseService):
 
     def synchronize_datasets(self, dataset_id: Optional[int] = None) -> Dict[str, Any]:
         """Synchronize multiple datasets"""
-        
+
         if dataset_id:
-            datasets = Dataset.objects.filter(id=dataset_id)
+            datasets = Dataset.objects.filter(active=True, id=dataset_id)
         else:
             datasets = Dataset.objects.filter(active=True, source="ods").order_by("id")
 
@@ -83,7 +81,7 @@ class DatasetSyncService(ETLBaseService):
             "failed": 0,
             "details": [],
         }
-        
+
         if not datasets.exists():
             self.logger.error(f"No active dataset found with ID: {dataset_id}")
             results["failed"] += 1
@@ -98,23 +96,23 @@ class DatasetSyncService(ETLBaseService):
             )
 
         for dataset in datasets:
-            print(f"Synchronizing dataset ID {dataset.id}: {dataset.name}")
-            try:
-                with transaction.atomic():
-                    success = self.synchronize_dataset(dataset)
-                    if success:
-                        results["successful"] += 1
-                    else:
-                        results["failed"] += 1
-                        results["success"] = False
+            self.logger.info(f"Synchronizing dataset ID {dataset.id}: {dataset.name}")
 
-                    results["details"].append(
-                        {
-                            "dataset_id": dataset.id,
-                            "dataset_name": dataset.name,
-                            "success": success,
-                        }
-                    )
+            try:
+                success = self.synchronize_dataset(dataset)
+                if success:
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["success"] = False
+
+                results["details"].append(
+                    {
+                        "dataset_id": dataset.id,
+                        "dataset_name": dataset.name,
+                        "success": success,
+                    }
+                )
 
             except Exception as e:
                 self.logger.error(
@@ -184,16 +182,22 @@ class DatasetProcessor:
         try:
             self.ods_records, self.ods_last_record = self.get_ods_last_record()
             # self.ods_last_record_date, self.ods_last_record_identifier = None, None
-            
+
             if self.ods_last_record and self.dataset.source_timestamp_field:
-                raw_timestamp = self.ods_last_record[self.dataset.source_timestamp_field]
+                raw_timestamp = self.ods_last_record[
+                    self.dataset.source_timestamp_field
+                ]
                 # Add default day if only year-month is provided so fromisoformat succeeds
-                if isinstance(raw_timestamp, str) and len(raw_timestamp) == 7 and raw_timestamp.count("-") == 1:
+                if (
+                    isinstance(raw_timestamp, str)
+                    and len(raw_timestamp) == 7
+                    and raw_timestamp.count("-") == 1
+                ):
                     raw_timestamp = f"{raw_timestamp}-01"
                 self.ods_last_record_date = datetime.fromisoformat(raw_timestamp)
             # elif self.ods_last_record and self.dataset.record_identifier_field:
             #    self.ods_last_record_identifier = self.ods_last_record[self.dataset.record_identifier_field]
-            
+
         except Exception as e:
             self.logger.warning(f"Could not get ODS last record: {e}")
             self.ods_records = 0
@@ -261,23 +265,29 @@ class DatasetProcessor:
                 return 0, None
         else:
             return 0, None
-    
+
     def get_ods_identifiers(self) -> List[Any]:
         """Get all record identifiers from ODS"""
-        if self.has_record_identifier_field:
-            # url = f"https://{self.dataset.base_url}/api/explore/v2.1/catalog/datasets/{self.dataset.source_identifier}/exports/json?lang=de&timezone=Europe%2FBerlin&use_labels=false"
-            url = f"https://{self.dataset.base_url}/api/explore/v2.1/catalog/datasets/{self.dataset.source_identifier}/exports/csv?lang=de&timezone=Europe%2FBerlin&use_labels=false&delimiter=%3B&select={self.dataset.record_identifier_field}"
-            try:
-                response = requests.get(url, timeout=60)
-                response.raise_for_status()
-                ids = sorted({int(s) for s in response.content.decode("utf-8-sig").splitlines()[1:] if s.strip()})
-                return ids
-            except Exception as e:
-                self.logger.error(f"Failed to fetch ODS identifiers: {e}")
-                return []
-        else:
+        if not self.has_record_identifier_field:
             return []
-    
+
+        url = f"https://{self.dataset.base_url}/api/explore/v2.1/catalog/datasets/{self.dataset.source_identifier}/exports/csv?lang=de&timezone=Europe%2FBerlin&use_labels=false&delimiter=%3B&select={self.dataset.record_identifier_field}&group_by={self.dataset.record_identifier_field}"
+        try:
+            response = requests.get(url, timeout=60)
+            response.raise_for_status()
+            raw_lines = response.content.decode("utf-8-sig").splitlines()
+            if len(raw_lines) <= 1:  # Only header or empty
+                self.logger.warning(
+                    "ODS returned no identifier records (header only or empty)."
+                )
+                return []
+            ids = sorted({s.strip() for s in raw_lines[1:] if s.strip()})
+            self.logger.info(f"Retrieved {len(ids)} unique identifiers from ODS.")
+            return ids
+        except Exception as e:
+            self.logger.error(f"Failed to fetch ODS identifiers: {e}")
+            return []
+
     def get_db_identifiers(self, table_name: str) -> List[Any]:
         """Get all record identifiers from the target database table"""
         try:
@@ -289,7 +299,6 @@ class DatasetProcessor:
             self.logger.error(f"Failed to fetch DB identifiers: {e}")
             return []
 
-
     @staticmethod
     def _safe_float(value: Any) -> Optional[float]:
         """Convert a value to float if possible, otherwise return None."""
@@ -299,6 +308,77 @@ class DatasetProcessor:
             return float(value)
         except (TypeError, ValueError):
             return None
+
+    def dataset_covers_period(self) -> bool:
+        freq_id = getattr(self.dataset.data_update_frequency, "id", None)
+        if freq_id not in {PeriodEnum.YEARLY.value, PeriodEnum.MONTHLY.value}:
+            return False
+
+        url = self._build_period_url(freq_id)
+        if not url:
+            return False
+
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            record = self._extract_first_record(response.json())
+            if not record:
+                return False
+
+            return self._record_matches_period(record, freq_id)
+        except Exception as e:
+            self.logger.error(f"Failed to fetch ODS last record: {e}")
+            return False
+
+    def _build_period_url(self, freq_id: int) -> Optional[str]:
+        if not self.dataset.year_field:
+            return None
+
+        if freq_id == PeriodEnum.YEARLY.value:
+            field_selection = self.dataset.year_field
+        elif freq_id == PeriodEnum.MONTHLY.value:
+            if not self.dataset.month_field:
+                return None
+            field_selection = f"{self.dataset.year_field}, {self.dataset.month_field}"
+        else:
+            return None
+
+        return self.url_last_record.format(
+            self.dataset.base_url,
+            self.dataset.source_identifier,
+            field_selection,
+        )
+
+    def _extract_first_record(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        results = data.get("results", [])
+        if not results:
+            return None
+        return results[0]
+
+    def _record_matches_period(self, record: Dict[str, Any], freq_id: int) -> bool:
+        year_field = self.dataset.year_field
+        record_year = record.get(year_field)
+        try:
+            record_year = int(record_year)
+        except (TypeError, ValueError):
+            return False
+
+        now = datetime.now(timezone.utc)
+        if freq_id == PeriodEnum.YEARLY.value:
+            return record_year >= now.year
+
+        record_month = record.get(self.dataset.month_field)
+        if record_month is None:
+            return False
+
+        try:
+            record_month = int(record_month)
+        except (TypeError, ValueError):
+            return False
+
+        last_month = now.month - 1 if now.month > 1 else 12
+        return record_year == now.year and record_month >= last_month
+
 
     def synchronize(self) -> bool:
         """
@@ -313,30 +393,55 @@ class DatasetProcessor:
             self.logger.info(f"Starting import for {identifier}")
             start_time = time.time()
 
-            if self.dataset.import_type.id == ImportTypeEnum.DAILY_RELOAD.value:
+            # master data is not reloaded each time and these tables are skipped
+            if self.dataset.import_type.id == ImportTypeEnum.SKIP.value:
+                self.logger.info(
+                    f"Dataset {identifier} skipped, change import type to manually import if import required."
+                )
+                return True
+
+            elif self.dataset.source == 'ods' and self.dataset.data_update_frequency.id == PeriodEnum.YEARLY.value and self.dataset.year_field:
+                if self.dataset_covers_period():
+                    self.logger.info(
+                        f"Dataset {identifier} is already up to date."
+                    )
+                return True
+            
+            elif self.dataset.import_month or self.dataset.import_day:
+                month, day = self.dataset.import_month, self.dataset.import_day
+                today = datetime.now(timezone.utc)
+                import_is_due = (month == today.month and day == today.day) or (
+                    month == None and day == today.day
+                )
+                if not import_is_due:
+                    self.logger.info(
+                        f"Reload for {identifier} is not due today ({today.date()}). Skipping synchronization."
+                    )
+                    return True
+            
+            elif self.dataset.import_type.id == ImportTypeEnum.FULL_RELOAD.value:
                 self.logger.info(f"Performing full reload for {identifier}")
                 self.dbclient.delete_table(
                     self.dataset.target_table_name, schema="opendata"
                 )
-                success = self._sync_new_table(filename, agg_filename, remote_table)
-            elif self.target_table_exists: 
-                success = self._sync(
-                    filename, agg_filename, remote_table
-                )
+
+            if self.target_table_exists:
+                success = self._sync(filename, agg_filename, remote_table)
             else:
                 success = self._sync_new_table(filename, agg_filename, remote_table)
-            
-            if success:
-                if self.dataset.post_import_sql_commands:
-                    self.logger.info(
-                        f"Executing post-import SQL commands for dataset {identifier}"
-                    )
-                    for command in self.dataset.post_import_sql_commands.split(";"):
-                        command = command.strip()
-                        if command:
-                            self.dbclient.run_action_query(command)
 
-                elapsed = time.time() - start_time
+            if success and self.dataset.post_import_sql_commands:
+                self.logger.info(f"Executing post-import SQL commands")
+                for command in self.dataset.post_import_sql_commands.split(";"):
+                    command = command.strip()
+                    if command:
+                        self.dbclient.run_action_query(command)
+
+            elapsed = time.time() - start_time
+
+            if success:
+                self.dataset.last_import_date = django_timezone.now()
+                self.dataset.save()
                 self.logger.info(
                     f"Synchronization for {identifier} completed in {elapsed:.2f} seconds."
                 )
@@ -347,9 +452,7 @@ class DatasetProcessor:
             self.logger.error(f"Error in dataset synchronization: {str(e)}")
             return False
 
-    def _sync(
-        self, filename: Path, agg_filename: Path, remote_table: str
-    ) -> bool:
+    def _sync(self, filename: Path, agg_filename: Path, remote_table: str) -> bool:
         """Synchronize when target table already exists."""
         try:
             handler = self._get_existing_table_handler()
@@ -364,16 +467,13 @@ class DatasetProcessor:
 
     def _get_existing_table_handler(self):
         """Return the handler for the configured import type."""
-        import_type_value = getattr(self.dataset.import_type, "value", self.dataset.import_type)
         handlers = {
             ImportTypeEnum.NEW_TIMESTAMP.value: self._sync_new_timestamp,
             ImportTypeEnum.NEW_PK.value: self._sync_new_identifier,
             ImportTypeEnum.NEW_YEAR.value: self._sync_new_year,
             ImportTypeEnum.NEW_YEAR_MONTH.value: self._sync_new_year_month,
-            ImportTypeEnum.SPECIFIED_DATE.value: self._sync_on_specified_date,
-
         }
-        return handlers.get(import_type_value)
+        return handlers.get(self.dataset.import_type.id)
 
     def _sync_new_timestamp(
         self, filename: Path, agg_filename: Path, remote_table: str
@@ -385,9 +485,7 @@ class DatasetProcessor:
         )
 
         if not last_db_record:
-            self.logger.warning(
-                f"No new recorords detected in table {remote_table}"
-            )
+            self.logger.warning(f"No new recorords detected in table {remote_table}")
             return False
 
         raw_ts = (
@@ -419,14 +517,10 @@ class DatasetProcessor:
 
         target_db_date = make_utc(parsed_ts).date()
         if ods_date - target_db_date < timedelta(days=1):
-            self.logger.info(
-                f"No new data for dataset {remote_table} was found."
-            )
+            self.logger.info(f"No new data for dataset {remote_table} was found.")
             return True
 
-        self.logger.info(
-            f"New data available in ODS. Last record date: {ods_date}"
-        )
+        self.logger.info(f"New data available in ODS. Last record date: {ods_date}")
 
         where_clause = (
             f"{self.dataset.source_timestamp_field} > '{target_db_date.strftime('%Y-%m-%d')}' "
@@ -436,9 +530,7 @@ class DatasetProcessor:
             filename,
             where_clause=where_clause,
             fields=(
-                self.dataset.fields_selection
-                if self.dataset.fields_selection
-                else None
+                self.dataset.fields_selection if self.dataset.fields_selection else None
             ),
         )
 
@@ -447,16 +539,12 @@ class DatasetProcessor:
             return False
 
         if df.empty:
-            self.logger.info(
-                f"No new data found for dataset {remote_table}."
-            )
+            self.logger.info(f"No new data found for dataset {remote_table}.")
             return True
 
         df = self.transform_ods_data(df)
         df.to_parquet(agg_filename)
-        self.dbclient.upload_to_db(
-            str(agg_filename), self.dataset.target_table_name
-        )
+        self.dbclient.upload_to_db(str(agg_filename), self.dataset.target_table_name)
 
         count = get_parquet_row_count(str(agg_filename))
         self.logger.info(
@@ -469,21 +557,42 @@ class DatasetProcessor:
         self, filename: Path, agg_filename: Path, remote_table: str
     ) -> bool:
         """Handle incremental sync when import type is based on new identifiers."""
-        ods_identifers = self.get_ods_identifiers()
+        ods_identifiers = self.get_ods_identifiers()
         db_identifiers = self.get_db_identifiers(remote_table)
-        ods_identifers = sorted(set(ods_identifers))
-        db_identifiers = sorted(set(db_identifiers))
-        new_identifiers = list(set(ods_identifers) - set(db_identifiers))
+        db_identifiers = list(set(db_identifiers))
+
+        # Check for type mismatch
+        if ods_identifiers and db_identifiers:
+            ods_type = type(ods_identifiers[0]).__name__
+            db_type = type(db_identifiers[0]).__name__
+            if ods_type != db_type:
+                self.logger.warning(
+                    f"Type mismatch detected: ODS returns {ods_type}, DB returns {db_type}. "
+                    "Normalizing both to strings for comparison."
+                )
+
+                ods_identifiers = sorted(
+                    {str(x).strip() for x in ods_identifiers if x is not None}
+                )
+                db_identifiers = sorted(
+                    {str(x).strip() for x in db_identifiers if x is not None}
+                )
+
+        new_identifiers = list(set(ods_identifiers) - set(db_identifiers))
 
         if not new_identifiers:
-            self.logger.warning(
-                f"no new records detected in table {remote_table}"
+            self.logger.info(
+                f"No new records detected in table {remote_table}. "
+                f"ODS: {len(ods_identifiers)} records, DB: {len(db_identifiers)} records."
             )
             return True
 
         self.logger.info(
-            f"New data available in ODS. New record IDs: {new_identifiers}"
+            f"New data available in ODS. Found {len(new_identifiers)} new record(s)."
         )
+        self.logger.debug(
+            f"New record IDs: {new_identifiers[:10]}..."
+        )  # Log first 10 for brevity
 
         identifiers_clause = self._format_identifier_clause(new_identifiers)
         where_clause = (
@@ -494,9 +603,7 @@ class DatasetProcessor:
             filename,
             where_clause=where_clause,
             fields=(
-                self.dataset.fields_selection
-                if self.dataset.fields_selection
-                else None
+                self.dataset.fields_selection if self.dataset.fields_selection else None
             ),
         )
 
@@ -505,16 +612,12 @@ class DatasetProcessor:
             return False
 
         if df.empty:
-            self.logger.info(
-                f"No new data found for dataset {remote_table}."
-            )
+            self.logger.info(f"No new data found for dataset {remote_table}.")
             return True
 
         df = self.transform_ods_data(df)
         df.to_parquet(agg_filename)
-        self.dbclient.upload_to_db(
-            str(agg_filename), self.dataset.target_table_name
-        )
+        self.dbclient.upload_to_db(str(agg_filename), self.dataset.target_table_name)
 
         count = get_parquet_row_count(str(agg_filename))
         self.logger.info(
@@ -523,16 +626,6 @@ class DatasetProcessor:
         self.post_process_data()
         return True
 
-    def _sync_on_specified_date(
-        self, filename: Path, agg_filename: Path, remote_table: str
-    ) -> bool:
-        """Handle incremental sync when import type is based on new years."""
-        self.logger.warning(
-            "NEW_YEAR import type handler has not been implemented yet."
-        )
-        return False
-
-    
     def _sync_new_year(
         self, filename: Path, agg_filename: Path, remote_table: str
     ) -> bool:
@@ -553,54 +646,64 @@ class DatasetProcessor:
 
     def _sync_default(self, remote_table: str) -> bool:
         """Fallback when no import type handler is configured."""
-        self.logger.info(
-            f"No timestamp field configured or no last record available"
-        )
-        df = None
-        if self.dataset.fill_shape_names:
-            df = self.dbclient.run_query(
-                f'SELECT * FROM "{self.dbclient.schema}"."{self.dataset.target_table_name}" WHERE "{self.dataset.fill_shape_names["target_field_name"]}" IS NULL'
-            )
-        self._fill_shape_names(df)
+        self.logger.info(f"No timestamp field configured or no last record available")
         return True
 
     def _sync_new_table(
         self, filename: Path, agg_filename: Path, remote_table: str
     ) -> bool:
         """Synchronize when target table doesn't exist (full download)"""
+        success = False
         try:
             self.logger.warning(
                 f"Target table {remote_table} does not exist. Uploading full dataset."
             )
 
             # Download full dataset
-            where_clause = self.get_time_limit_where_clause()
-            df = self.download_ods_data(
-                filename,
-                where_clause=where_clause,
-                fields=(
-                    self.dataset.fields_selection
-                    if self.dataset.fields_selection
-                    else None
-                ),
-            )
-    
+            if self.dataset.source.lower() == "url":
+                url = self.dataset.base_url
+                response = requests.get(url)
+                response.raise_for_status()  # Ensure it worked
+                df = pd.read_csv(StringIO(response.text))
+
+            elif self.dataset.source.lower() == "ods":
+                where_clause = self.get_time_limit_where_clause()
+                df = self.download_ods_data(
+                    filename,
+                    where_clause=where_clause,
+                    fields=(
+                        self.dataset.fields_selection
+                        if self.dataset.fields_selection
+                        else None
+                    ),
+                )
+
             if df is not False and not df.empty:
                 df = self.transform_ods_data(df)
                 df.to_parquet(agg_filename)
                 self.dbclient.upload_to_db(str(agg_filename), remote_table)
                 # check if data-time column is of type date, if not force it
-                if not pd.api.types.is_datetime64_any_dtype(df[self.dataset.db_timestamp_field]):
-                    df[self.dataset.db_timestamp_field] = pd.to_datetime(df[self.dataset.db_timestamp_field], errors="coerce")
+                if self.dataset.db_timestamp_field:
+                    df[self.dataset.db_timestamp_field] = pd.to_datetime(
+                        df[self.dataset.db_timestamp_field], errors="coerce"
+                    )
                 self.post_process_data()
-                return True
+                success = True
             else:
                 self.logger.error("Failed to download full dataset")
-                return False
+                success = False
+
+            if success and self.dataset.post_create_sql_commands:
+                self.logger.info(f"Executing post-import SQL commands")
+                for command in self.dataset.post_create_sql_commands.split(";"):
+                    command = command.strip()
+                    if command:
+                        self.dbclient.run_action_query(command)
 
         except Exception as e:
             self.logger.error(f"Error in new table sync: {e}")
-            return False
+
+        return success
 
     def download_ods_data(
         self, filename: Path, where_clause: str = None, fields: list = None
@@ -746,7 +849,7 @@ class DatasetProcessor:
                 df[self.dataset.source_timestamp_field], errors="coerce"
             )
 
-        return self._fill_shape_names(df)
+        return df
 
     def _apply_aggregations(self, df: pd.DataFrame) -> pd.DataFrame:
         """Apply aggregations to the data"""
@@ -810,7 +913,6 @@ class DatasetProcessor:
 
     def get_time_limit_where_clause(self) -> Optional[str]:
         """Construct WHERE clause for time limits"""
-        
         if self.dataset.source_timestamp_field:
             today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
             return f"{self.dataset.source_timestamp_field} < '{today}'"

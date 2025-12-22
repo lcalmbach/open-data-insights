@@ -8,7 +8,6 @@ import pandas as pd
 from datetime import date, timedelta, datetime
 from typing import Optional, Dict, Any
 
-from reports.models.story_template import StoryTemplate
 from reports.services.base import ETLBaseService
 from reports.services.story_processor import StoryProcessor
 from reports.models.story_template import StoryTemplate
@@ -23,7 +22,7 @@ class StoryGenerationService(ETLBaseService):
     def generate_story(
         self,  # This is the first argument (self)
         template: StoryTemplate,  # Second argument
-        run_date: Optional[date] = None,  # Third argument with default
+        anchor_date: Optional[date] = None,  # Third argument with default
         force: bool = False,  # Fourth argument with default
     ) -> Dict[str, Any]:
         """Generate a single story from a template"""
@@ -31,14 +30,14 @@ class StoryGenerationService(ETLBaseService):
             self.logger.info(f"Generating story for template: {template.title}")
 
             # Use provided date or default to yesterday
-            if not run_date:
-                run_date = date.today() - timedelta(days=1)
+            if not anchor_date:
+                anchor_date = date.today() - timedelta(days=1)
 
-            # Ensure run_date is a date object, not a datetime
-            if isinstance(run_date, datetime):
-                run_date = run_date.date()
+            # Ensure anchor_date is a date object, not a datetime
+            if isinstance(anchor_date, datetime):
+                anchor_date = anchor_date.date()
 
-            story_processor = StoryProcessor(template, run_date, force)
+            story_processor = StoryProcessor(anchor_date, template, force)
 
             # Check if story should be generated
             if not force and not story_processor.story_is_due():
@@ -78,7 +77,7 @@ class StoryGenerationService(ETLBaseService):
     def generate_stories(
         self,
         template_id: Optional[int] = None,
-        run_date: Optional[date] = None,
+        anchor_date: Optional[date] = None,
         force: bool = False,
     ) -> Dict[str, Any]:
         """Generate multiple stories from templates"""
@@ -112,7 +111,8 @@ class StoryGenerationService(ETLBaseService):
 
         for template in templates:
             print(f"Processing template ID {template.id}: {template.title}")
-            service = StoryProcessor(template, run_date, force)
+            service = StoryProcessor(anchor_date, template, force)
+
             if service.story_is_due():
                 try:
                     result = service.generate_story()

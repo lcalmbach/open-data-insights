@@ -236,7 +236,7 @@ def create_bar_stacked_chart(data, settings):
     
     # Add tooltip
     if settings.get('show_tooltip', True):
-        encodings['tooltip'] = [x_field, y_field, color_field]
+        encodings['tooltip'] = settings.get('tooltips')
     
     # Apply encodings
     chart = chart.encode(**encodings)

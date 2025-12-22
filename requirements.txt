@@ -16,6 +16,7 @@ markdown2
 django-markdownify
 pyarrow
 requests
+beautifulsoup4
 openai
 sqlalchemy
 pillow

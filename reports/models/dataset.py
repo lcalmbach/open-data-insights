@@ -11,8 +11,14 @@ class ImportTypeEnum(Enum):
     NEW_YEAR = 76
     NEW_YEAR_MONTH = 77
     NEW_PK = 78
-    DAILY_RELOAD = 79
-    SPECIFIED_DATE = 81
+    FULL_RELOAD = 79
+    SKIP = 82
+
+class PeriodEnum(Enum):
+    DAILY = 35
+    WEEKLY = 70
+    MONTHLY = 36
+    YEARLY = 38
 
 def default_yesterday():
     return date.today() - timedelta(days=1)

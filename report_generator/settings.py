@@ -120,7 +120,7 @@ else:
             "HOST": os.environ.get("DB_HOST"),
             "PORT": int(os.environ.get("DB_PORT", "5432")),
             "OPTIONS": {
-                "options": "-c search_path=report_generator"
+                "options": "-c search_path=report_generator,public"
             }
         }
     }
@@ -133,7 +133,7 @@ if SYNC_DB_URL:
     )
     # Ensure we target the same schema as the default DB
     DATABASES["prod"]["OPTIONS"] = {
-        "options": "-c search_path=report_generator"
+        "options": "-c search_path=report_generator,public"
     }
 
 # Password validation
@@ -197,8 +197,8 @@ MARKDOWNIFY = {
 }
 
 APP_INFO = {
-    "version": "0.1.3",
-    "version_date": "2025-12-12",
+    "version": "0.1.4",
+    "version_date": "2025-12-22",
     "author_name": "Lukas Calmbach",
     "author_email": "lcalmbach@gmail.com",
     "repo_url": "https://github.com/lcalmbach/open-data-insights",

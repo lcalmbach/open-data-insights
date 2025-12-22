@@ -28,10 +28,10 @@ class Command(BaseCommand):
         force = options.get('force', False)
         
         # Parse the date if provided
-        run_date = None
+        anchor_date = None
         if options.get('date'):
             try:
-                run_date = datetime.strptime(options['date'], '%Y-%m-%d').date()
+                anchor_date = datetime.strptime(options['date'], '%Y-%m-%d').date()
             except ValueError:
                 self.stdout.write(
                     self.style.ERROR(
@@ -40,9 +40,9 @@ class Command(BaseCommand):
                 )
                 return
         else:
-            run_date = date.today() 
+            anchor_date = date.today() 
         service = StoryGenerationService()
-        result = service.generate_stories(template_id=template_id, run_date=run_date, force=force)
+        result = service.generate_stories(template_id=template_id, anchor_date=anchor_date, force=force)
         
         if result.get('success', False):
             self.stdout.write(

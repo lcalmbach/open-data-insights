@@ -1,217 +1,163 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Django: Runserver",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": [
-                "runserver",
-                "0.0.0.0:8000"
-            ],
-            "django": true,
-            "justMyCode": false,
-            "env": {
-                "PYTHONUNBUFFERED": "1",
-                "DEBUG": "True"
-            },
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Django: Generate Stories id=x",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": [
-                "generate_stories",
-                "--id",
-                "46",
-                "--force",
-                "-v",
-                "2"
-            ],
-            "django": true,
-            "justMyCode": true,
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "report_generator.settings"
-            },
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "name": "Django: Generate Stories",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": [
-                "generate_stories",
-                "-v",
-                "2"
-            ],
-            "django": true,
-            "justMyCode": true,
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "report_generator.settings"
-            },
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "name": "Django: Sync Data",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": [
-                "synch_data",
-                "--id",
-                "26",
-                "-v",
-                "2"
-            ],
-            "django": true,
-            "justMyCode": true,
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "report_generator.settings"
-            },
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "name": "Django: Run ETL Pipeline",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": [
-                "run_etl_pipeline",
-                "-v",
-                "2"
-            ],
-            "django": true,
-            "justMyCode": true,
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "report_generator.settings"
-            },
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "name": "Django: Send Stories",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": [
-                "send_stories",
-                "-v",
-                "2"
-            ],
-            "django": true,
-            "justMyCode": true,
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "report_generator.settings"
-            },
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "name": "Django: generate appendices",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": [
-                "generate_appendices",
-                "--graphic_template_id",
-                "43",
-                "--graphics",
-                "-v",
-                "2"
-            ],
-            "django": true,
-            "justMyCode": true,
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "report_generator.settings"
-            },
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "name": "Django: ETL Pipeline",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": [
-                "run_etl_pipeline",
-                "-v",
-                "2"
-            ],
-            "django": true,
-            "justMyCode": true,
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "report_generator.settings"
-            },
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "name": "Django: Generate summary",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": [
-                "generate_summary",
-                "--story_id",
-                "955",
-                "--title",
-                "-v",
-                "2"
-            ],
-            "django": true,
-            "justMyCode": true,
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "report_generator.settings"
-            },
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "name": "Django: Synch local > prod",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": [
-                "synch_prod",
-                "--id", 
-                "49",
-                "--story_template",
-                "--direction",
-                "push"
-            ],
-            "django": true,
-            "justMyCode": true,
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "report_generator.settings"
-            },
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/work/gva"
-        },
-        {
-            "name": "wiki article summarizer",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}//work/gva/article-extractor.py",
-            "console": "integratedTerminal",
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Django: Runserver",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${command:python.interpreterPath}",
+      "program": "${workspaceFolder}/manage.py",
+      "args": [
+        "runserver",
+        "0.0.0.0:8000"
+      ],
+      "django": true,
+      "justMyCode": false,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "report_generator.settings",
+        "PYTHONPATH": "${workspaceFolder}",
+        "PYTHONUNBUFFERED": "1",
+        "DEBUG": "True"
+      },
+      "console": "integratedTerminal"
+    },
 
-            // Load environment variables from your .env file
-            "envFile": "${workspaceFolder}/work/gva/.env",
+    {
+      "name": "Django: Generate Stories id=x",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${command:python.interpreterPath}",
+      "program": "${workspaceFolder}/manage.py",
+      "args": [
+        "generate_stories",
+        "--id",
+        "35",
+        "--force",
+        "-v",
+        "2"
+      ],
+      "django": true,
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "report_generator.settings",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    },
 
-            // Optional extra settings
-            "env": {
-                "PYTHONUNBUFFERED": "1"
-            },
+    {
+      "name": "Django: Sync Data",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${command:python.interpreterPath}",
+      "program": "${workspaceFolder}/manage.py",
+      "args": [
+        "synch_data",
+        "--id",
+        "48",
+        "-v",
+        "2"
+      ],
+      "django": true,
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "report_generator.settings",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    },
 
-            // If you want arguments, add them here:
-            // "args": ["--limit", "5"]
-        }
+    {
+      "name": "Django: Run ETL Pipeline",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${command:python.interpreterPath}",
+      "program": "${workspaceFolder}/manage.py",
+      "args": [
+        "run_etl_pipeline",
+        "-v",
+        "2"
+      ],
+      "django": true,
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "report_generator.settings",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    },
 
-    ]
+    {
+      "name": "Django: Send Stories",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${command:python.interpreterPath}",
+      "program": "${workspaceFolder}/manage.py",
+      "args": [
+        "send_stories",
+        "-v",
+        "2"
+      ],
+      "django": true,
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "report_generator.settings",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    },
+
+    {
+      "name": "Django: Generate appendices",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${command:python.interpreterPath}",
+      "program": "${workspaceFolder}/manage.py",
+      "args": [
+        "generate_appendices",
+        "--story_template_id",
+        "35",
+        "--stories",
+        "-v",
+        "2"
+      ],
+      "django": true,
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "report_generator.settings",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    },
+
+    {
+      "name": "Django: Generate summary",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${command:python.interpreterPath}",
+      "program": "${workspaceFolder}/manage.py",
+      "args": [
+        "generate_summary",
+        "--story_id",
+        "955",
+        "--title",
+        "-v",
+        "2"
+      ],
+      "django": true,
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "report_generator.settings",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    }
+  ]
 }

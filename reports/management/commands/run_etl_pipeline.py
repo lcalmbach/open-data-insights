@@ -40,10 +40,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Parse the date if provided
-        run_date = None
+        anchor_date = None
         if options.get('date'):
             try:
-                run_date = datetime.strptime(options['date'], '%Y-%m-%d').date()
+                anchor_date = datetime.strptime(options['date'], '%Y-%m-%d').date()
             except ValueError:
                 self.stdout.write(
                     self.style.ERROR(
@@ -52,14 +52,14 @@ class Command(BaseCommand):
                 )
                 return
         else:
-            run_date = date.today() 
+            anchor_date = date.today() 
             
         force = options.get('force', False)
         continue_on_error = options.get('continue_on_error', False)
         
         self.stdout.write(
             self.style.SUCCESS(
-                f"Starting ETL pipeline for date: {run_date or 'yesterday'}"
+                f"Starting ETL pipeline for date: {anchor_date or 'yesterday'}"
             )
         )
         
@@ -95,7 +95,7 @@ class Command(BaseCommand):
         if not options.get('skip_generation'):
             self.stdout.write("Step 2: Generating stories...")
             story_service = StoryGenerationService()
-            story_result = story_service.generate_stories(run_date=run_date, force=force)
+            story_result = story_service.generate_stories(anchor_date=anchor_date, force=force)
             
             if story_result['success']:
                 self.stdout.write(
@@ -144,7 +144,7 @@ class Command(BaseCommand):
         if not options.get('skip_email'):
             self.stdout.write("Step 3: Sending emails...")
             email_service = EmailService()
-            email_result = email_service.send_stories_for_date(send_date=run_date)
+            email_result = email_service.send_stories_for_date(send_date=anchor_date)
             
             if email_result['success']:
                 self.stdout.write(

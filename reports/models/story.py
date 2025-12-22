@@ -1,10 +1,32 @@
 import json
+import calendar
+from datetime import datetime
+
 from django.db import models
 from django.urls import reverse
 from pydantic import ValidationError
+
 from report_generator import settings
 from base.utils import default_yesterday
 from .story_template import StoryTemplate
+from reports.constants.reference_period import ReferencePeriod
+
+month_to_season = {
+    1: 4,
+    2: 4,
+    12: 4,  # Winter wraps into the next year
+    3: 1,
+    4: 1,
+    5: 1,  # Spring
+    6: 2,
+    7: 2,
+    8: 2,  # Summer
+    9: 3,
+    10: 3,
+    11: 3,  # Fall
+}
+
+season_names = {1: "Spring", 2: "Summer", 3: "Fall", 4: "Winter"}
 
 
 class Story(models.Model):
@@ -133,6 +155,61 @@ class Story(models.Model):
                     "ai_model": f'Invalid AI model. Choose from: {", ".join(valid_ai_models)}'
                 }
             )
+
+    @property
+    def reference_period_expression(self) -> str:
+        """
+        Generates a human-readable string representation of the reference period for the story.
+
+        Returns:
+            str: A formatted string describing the reference period, which may be:
+                - "YYYY-MM-DD" for daily periods,
+                - "Month YYYY" for monthly periods,
+                - "Season YYYY" for seasonal periods,
+                - "YYYY" for yearly periods,
+                - "All Time" for all-time periods,
+                - "Decadal YYYYs" for decadal periods,
+                or an empty string if the reference period does not match any known type.
+        """
+        period_id = getattr(self.template.reference_period, "id", None)
+        if not period_id or self.reference_period_start is None:
+            return ""
+
+        start = self.reference_period_start
+        end = self.reference_period_end or start
+
+        if period_id == ReferencePeriod.DAILY.value:
+            return start.strftime("%Y-%m-%d")
+        if period_id == ReferencePeriod.WEEKLY.value:
+            return f"{start.strftime('%Y-%m-%d')} - {end.strftime('%Y-%m-%d')}"
+        if period_id == ReferencePeriod.MONTHLY.value:
+            return f"{calendar.month_name[start.month]} {start.year}"
+        if period_id == ReferencePeriod.SEASONAL.value:
+            return f"{self._season_name()} {self._season_year()}"
+        if period_id == ReferencePeriod.YEARLY.value:
+            return str(start.year)
+        if period_id == ReferencePeriod.ALLTIME.value:
+            return "All Time"
+        if period_id == ReferencePeriod.DECADAL.value:
+            return f"Decadal {start.year // 10 * 10}s"
+        return ""
+
+    def _season_name(self) -> str:
+        """Return the season name based on the reference period start."""
+        if not self.reference_period_start:
+            return "Unknown Season"
+        season_id = month_to_season.get(self.reference_period_start.month)
+        return season_names.get(season_id, "Unknown Season")
+
+    def _season_year(self) -> int:
+        """Return the seasonal year for the reference period."""
+        if not self.reference_period_start:
+            return datetime.now().year
+        return (
+            self.reference_period_start.year
+            if self.reference_period_start.month >= 3
+            else self.reference_period_start.year - 1
+        )
 
     def get_absolute_url(self):
         return settings.APP_ROOT.rstrip("/") + reverse("story_detail", args=[self.id])

@@ -23,6 +23,7 @@ class ETLBaseService:
         """Setup logging configuration"""
         if not self.logger.handlers:
             # Ensure logs directory exists
+
             log_dir = Path(settings.BASE_DIR) / "logs"
             log_dir.mkdir(exist_ok=True)
 
@@ -30,6 +31,7 @@ class ETLBaseService:
             formatter = logging.Formatter(
                 "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             )
+
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
             self.logger.setLevel(logging.INFO)
