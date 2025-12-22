@@ -107,7 +107,7 @@ if DATABASE_URL:
     }
     # Manually inject the search_path into OPTIONS
     DATABASES["default"]["OPTIONS"] = {
-        "options": "-c search_path=report_generator"
+        "options": "-c search_path=report_generator,public"
     }
 
 else:
