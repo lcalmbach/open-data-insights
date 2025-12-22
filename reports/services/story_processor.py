@@ -544,19 +544,9 @@ class StoryProcessor:
         shift = 0
         if template.period_direction_id == PeriodDirectionEnum.Forward.value:
             shift = 1
-        elif template.period_direction_id == PeriodDirectionEnum.Backward.value:
-            if (
-                template.reference_period_id == ReferencePeriod.MONTHLY.value
-                and anchor_date.year == base_start.year
-                and anchor_date.year == base_start.year
-            ):
-                shift = -1
-            elif (
-                template.reference_period_id == ReferencePeriod.YEARLY.value
-                and anchor_date.year == base_start.year
-            ):
-                shift = -1
-
+        elif template.period_direction_id == PeriodDirectionEnum.Backward.value:    
+            shift = -1
+        
         # Apply the shift
         if unit == "days":
             period_start = base_start + pd.DateOffset(days=shift)

@@ -15550,3 +15550,9 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2025-12-22 04:54:39,006 - DatasetSync - INFO - Cleaned up temporary files in: files
 2025-12-22 04:54:39,006 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
 2025-12-22 06:00:14,028 - StoryGeneration - INFO - Skipping template 55 - not due
+2025-12-22 07:52:06,643 - StoryGeneration - INFO - Skipping template 43 - not due
+2025-12-22 08:00:42,187 - StoryGeneration - INFO - Skipping template 25 - not due
+2025-12-22 08:01:09,957 - StoryGeneration - INFO - Skipping template 25 - not due
+2025-12-22 08:05:45,863 - StoryGeneration - INFO - Skipping template 19 - not due
+2025-12-22 08:06:33,599 - StoryGeneration - INFO - Skipping template 13 - not due
+2025-12-22 08:08:23,120 - StoryGeneration - INFO - Skipping template 19 - not due

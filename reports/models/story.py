@@ -45,7 +45,6 @@ class Story(models.Model):
         help_text="Summary of the story template. This is used to provide a brief overview of the story.",
     )
     published_date = models.DateField(
-        auto_now_add=True,
         help_text="Date when the story was published.",
         blank=True,
         null=True,
