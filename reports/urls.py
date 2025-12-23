@@ -8,6 +8,7 @@ urlpatterns = [
     path("story/<int:story_id>/", views.view_story, name="view_story"),
     path("story_detail/<int:story_id>/", views.story_detail, name="story_detail"),
     path("stories/", views.stories_view, name="stories"),
+    path("datasets/", views.datasets_view, name="datasets"),
     path("templates/", views.templates_view, name="templates"),
     path(
         "templates/<int:pk>/", views.storytemplate_detail_view, name="template_detail"

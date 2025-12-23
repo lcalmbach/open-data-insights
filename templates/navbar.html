@@ -19,6 +19,7 @@
           <ul class="dropdown-menu" aria-labelledby="exploreDropdown">
             <li><a class="dropdown-item" href="{% url 'templates' %}">Insight Templates</a></li>
             <li><a class="dropdown-item" href="{% url 'stories' %}">Published Insights</a></li>
+            <li><a class="dropdown-item" href="{% url 'datasets' %}">Datasets</a></li>
           </ul>
         </li>
         {% if user.is_authenticated %}

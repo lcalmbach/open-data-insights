@@ -76,6 +76,8 @@ def create_bar_chart(data, settings):
     # Determine fields
     x_field = settings.get('x')
     y_field = settings.get('y')
+    x_format = settings.get('x_format')
+    x_label_angle = settings.get('x_label_angle')
     color_field = settings.get('color')
 
     # sensible defaults for bar sizing
@@ -120,36 +122,63 @@ def create_bar_chart(data, settings):
             x_sort = None
 
     # Build encodings, force x to ordinal categories to avoid numeric fractional ticks for years
+    # Build X axis (format belongs to Axis, NOT to alt.X)
     encodings = {}
-    if x_field:
-        if x_sort:
-            encodings['x'] = alt.X(f"{x_field}:O", title=settings.get('x_title', x_field), sort=x_sort, axis=alt.Axis(labelAngle=0))
-        else:
-            encodings['x'] = alt.X(f"{x_field}:O", title=settings.get('x_title', x_field), axis=alt.Axis(labelAngle=0))
-    # y: use provided y or count()
-    if y_field:
-        encodings['y'] = alt.Y(y_field, title=settings.get('y_title', y_field))
+    axis_kwargs = {}
+    if x_label_angle is not None:
+        axis_kwargs["labelAngle"] = x_label_angle
+        axis_kwargs["labelOverlap"] = False
     else:
-        encodings['y'] = alt.Y('count()', title=settings.get('y_title', 'count'))
+        axis_kwargs["labelAngle"] = 0
 
+    if x_format:
+        axis_kwargs["format"] = x_format  # e.g. "%Y-%m" for temporal dates
+
+    axis = alt.Axis(**axis_kwargs)
+
+    x_encoding_kwargs = {
+        "title": settings.get("x_title", x_field),
+        "axis": axis,
+    }
+    if x_sort:
+        x_encoding_kwargs["sort"] = x_sort
+
+    # Decide type: use temporal when formatting dates; otherwise keep ordinal behavior
+    x_type = settings.get("x_type")  # optional explicit override: "T", "O", "Q", "N"
+    if not x_type:
+        x_type = "T" if x_format else "O"
+
+    encodings["x"] = alt.X(f"{x_field}:{x_type}", **x_encoding_kwargs)
+
+    # Y axis
+    if y_field:
+        encodings["y"] = alt.Y(y_field, title=settings.get("y_title", y_field))
+    else:
+        encodings["y"] = alt.Y("count()", title=settings.get("y_title", "count"))
+
+    # Color
     if color_field:
-        encodings['color'] = alt.Color(color_field, scale=alt.Scale(scheme=settings.get('color_scheme', 'category10')))
+        encodings["color"] = alt.Color(
+            color_field,
+            scale=alt.Scale(scheme=settings.get("color_scheme", "category10")),
+        )
 
     # Tooltip support
-    tooltip = settings.get('tooltip')
+    tooltip = settings.get("tooltip")
     if tooltip:
-        encodings['tooltip'] = tooltip
+        encodings["tooltip"] = tooltip
     else:
-        # include sensible defaults
         tt = []
         if x_field:
+            # if x is temporal and you want the same formatting in tooltip, you can do:
+            # tt.append(alt.Tooltip(f"{x_field}:T", format=x_format) if x_type == "T" and x_format else x_field)
             tt.append(x_field)
         if y_field:
             tt.append(y_field)
         if color_field:
             tt.append(color_field)
         if tt:
-            encodings['tooltip'] = tt
+            encodings["tooltip"] = tt
 
     chart = chart.encode(**encodings)
 

@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'markdownify',
     'django_countries',
-    "base"
+    "base",
+    "iommi",
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = ["bootstrap5"]

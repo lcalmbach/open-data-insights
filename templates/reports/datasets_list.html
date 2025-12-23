@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Explore Datasets{% endblock %}
+{% block content %}
+
+<h2 class="mb-3">Explore Datasets ({{ dataset_count }})</h2>
+<p class="text-muted">
+  The datasets listed here supply the numbers that power the automatically generated insights. Metadata lives in Django, but the data itself is stored in the <code>{{ data_schema }}</code> schema, so this view shows a schema-level preview for every dataset.
+</p>
+
+<div class="card mb-4 shadow-sm">
+  <div class="card-body">
+    <h5 class="card-title mb-3">Filter datasets</h5>
+    <form id="datasets-filter-form" method="get" class="row g-3" autocomplete="off">
+      <div class="col-md-4">
+        <label for="dataset-search" class="form-label">Keyword</label>
+        <input class="form-control" id="dataset-search" name="search" placeholder="Name, description, identifier" value="{{ filters.search }}">
+      </div>
+      <div class="col-md-3">
+        <label for="dataset-source" class="form-label">Source</label>
+        <select id="dataset-source" name="source" class="form-select">
+          <option value="">All sources</option>
+          {% for src in sources %}
+          <option value="{{ src }}" {% if filters.source == src %}selected{% endif %}>{{ src }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="dataset-frequency" class="form-label">Update frequency</label>
+        <select id="dataset-frequency" name="frequency" class="form-select">
+          <option value="">Any frequency</option>
+          {% for period in frequencies %}
+          <option value="{{ period.id }}" {% if filters.frequency == period.id|stringformat:"s" %}selected{% endif %}>{{ period.value }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="dataset-limit" class="form-label">Preview rows</label>
+        <input type="number" min="25" max="1000" step="25" class="form-control" id="dataset-limit" name="limit" value="{{ filters.limit }}">
+      </div>
+      <div class="col-md-2">
+        <label for="dataset-page-size" class="form-label">Rows per page</label>
+        <input type="number" min="5" max="200" step="5" class="form-control" id="dataset-page-size" name="page_size" value="{{ filters.page_size }}">
+      </div>
+      <input type="hidden" name="dataset" value="{{ filters.dataset }}">
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary">Apply filters</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-12">
+    <label for="dataset-select" class="form-label">Select dataset</label>
+    <select id="dataset-select" class="form-select">
+      {% for dataset in datasets %}
+      <option
+        value="{{ dataset.id }}"
+        {% if selected_dataset and selected_dataset.id == dataset.id %}selected{% endif %}
+        {% if forloop.first and not selected_dataset %}selected{% endif %}
+      >
+        {{ dataset.name }} — {{ dataset.source }} ({{ dataset.target_table_name }})
+      </option>
+      {% empty %}
+      <option disabled>No datasets match the current filters.</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+{% if selected_dataset %}
+<div class="card mb-3 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-start mb-2">
+      <h5 class="card-title mb-0">{{ selected_dataset.name }}</h5>
+      {% if selected_dataset.active %}
+      <span class="badge bg-success">Active</span>
+      {% else %}
+      <span class="badge bg-secondary">Inactive</span>
+      {% endif %}
+    </div>
+    <p class="card-text text-muted mb-2">
+      {{ selected_dataset.description|default:"No description provided."|linebreaksbr }}
+    </p>
+    <div class="row row-cols-1 row-cols-md-2 g-3">
+      <div class="col">
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <span class="small text-uppercase text-muted">Source:</span>
+          <span class="text-dark">{{ selected_dataset.source }}</span>
+        </div>
+        <div class="small text-muted">Identifier: {{ selected_dataset.source_identifier }}</div>
+      </div>
+      <div class="col">
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <span class="small text-uppercase text-muted">Update frequency:</span>
+          <span class="text-dark">{{ selected_dataset.data_update_frequency.value|default:"—" }}</span>
+        </div>
+        <div class="small text-muted">Previewing {{ preview_rows }} of {{ preview_limit }} rows</div>
+      </div>
+      <div class="col">
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <span class="small text-uppercase text-muted">Target table:</span>
+          <span class="text-dark"><code>{{ selected_dataset.target_table_name }}</code></span>
+        </div>
+        <div class="small d-flex align-items-center gap-1">
+          <span class="text-uppercase text-muted">Schema:</span>
+          <span class="text-dark">{{ data_schema }}</span>
+        </div>
+      </div>
+      <div class="col">
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <span class="small text-uppercase text-muted">Last import:</span>
+          <span class="text-dark">{{ selected_dataset.last_import_date|date:"Y-m-d H:i"|default:"—" }}</span>
+        </div>
+        <div class="small d-flex flex-wrap align-items-center gap-3">
+          <span class="text-uppercase text-muted">Fields:</span>
+          <span class="text-dark">
+            {% if selected_dataset.fields_selection %}
+              {{ selected_dataset.fields_selection|length }}
+            {% else %}
+              all
+            {% endif %}
+          </span>
+          <span class="text-uppercase text-muted">Rows:</span>
+          <span class="text-dark">{{ dataset_row_count|default:"—" }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-secondary">No dataset is selected. Adjust the filters above to populate the list.</div>
+{% endif %}
+
+<div class="row">
+  <div class="col-12">
+    {% if table_error %}
+    <div class="alert alert-warning">{{ table_error }}</div>
+    {% endif %}
+    {% if table %}
+    {{ table }}
+    {% elif selected_dataset and not table_error %}
+    <div class="alert alert-secondary">No data could be loaded for this dataset.</div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('datasets-filter-form');
+  const datasetSelect = document.getElementById('dataset-select');
+  if (datasetSelect && form) {
+    datasetSelect.addEventListener('change', function () {
+      let hidden = form.querySelector('input[name="dataset"]');
+      if (!hidden) {
+        hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'dataset';
+        form.appendChild(hidden);
+      }
+      hidden.value = this.value;
+      form.requestSubmit();
+    });
+  }
+});
+</script>
+
+{% endblock %}

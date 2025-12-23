@@ -120,8 +120,8 @@
       "args": [
         "generate_appendices",
         "--story_template_id",
-        "35",
-        "--stories",
+        "30",
+        "--graphics",
         "-v",
         "2"
       ],

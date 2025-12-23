@@ -1,22 +1,22 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import never_cache
-from django.shortcuts import render, get_object_or_404
-import markdown2
 import json
 import random
 
 import altair as alt
+import markdown2
 import pandas as pd
+from iommi import Column, Table
 
 from django.conf import settings
-from django.views.generic import TemplateView
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.shortcuts import get_object_or_404, render
 from django.utils.dateparse import parse_date
-from .forms import StoryRatingForm
+from django.views.decorators.cache import never_cache
+from django.views.generic import TemplateView
 
+from account.models import CustomUser
+from .forms import StoryRatingForm
+from .models.dataset import Dataset
 from .models.graphic import Graphic
 from .models.story_template import StoryTemplate
 from .models.story import Story
@@ -24,7 +24,43 @@ from .models.story_table import StoryTable
 from .models.lookups import Period
 from .models.story_rating import StoryRating
 from .models.quote import Quote
-from account.models import CustomUser
+from .services.database_client import DjangoPostgresClient
+
+
+class _RequestWithFilteredQuery:
+    """Lightweight request proxy that drops a handful of query keys."""
+
+    def __init__(self, request, *, exclude_keys=()):
+        object.__setattr__(self, "_request", request)
+        filtered_get = request.GET.copy()
+        for key in exclude_keys:
+            filtered_get.pop(key, None)
+        object.__setattr__(self, "GET", filtered_get)
+
+    def __getattr__(self, name):
+        return getattr(self._request, name)
+
+    def __setattr__(self, name, value):
+        if name in {"_request", "GET"}:
+            object.__setattr__(self, name, value)
+        else:
+            setattr(self._request, name, value)
+
+
+class _DatasetRow:
+    """Wrap a record so sorting via ``col_n`` works even for plain dict data."""
+
+    def __init__(self, data, column_names):
+        self._data = data
+        self._column_names = column_names
+        for idx, column_name in enumerate(column_names):
+            setattr(self, f"col_{idx}", data.get(column_name))
+
+    def get(self, key, default=None):
+        return self._data.get(key, default)
+
+    def __getitem__(self, item):
+        return self._data[item]
 
 
 def generate_fake_graphic(chart_id):
@@ -243,6 +279,158 @@ def stories_view(request):
             "other_ressources": other_ressources,
             "data_source": data_source,
             "periods": periods,
+        },
+    )
+
+
+def datasets_view(request):
+    search = (request.GET.get("search") or "").strip()
+    source_filter = (request.GET.get("source") or "").strip()
+    frequency_filter = (request.GET.get("frequency") or "").strip()
+    selected_dataset_id = request.GET.get("dataset")
+    try:
+        preview_limit = int(request.GET.get("limit") or 200)
+    except (TypeError, ValueError):
+        preview_limit = 200
+    preview_limit = max(25, min(preview_limit, 1000))
+
+    try:
+        page_size = int(request.GET.get("page_size") or 50)
+    except (TypeError, ValueError):
+        page_size = 50
+    page_size = max(5, min(page_size, 200))
+
+    dataset_qs = (
+        Dataset.objects.filter(active=True)
+        .select_related("data_update_frequency")
+        .order_by("name")
+    )
+    if source_filter:
+        dataset_qs = dataset_qs.filter(source__iexact=source_filter)
+    if frequency_filter.isdigit():
+        dataset_qs = dataset_qs.filter(data_update_frequency_id=int(frequency_filter))
+    if search:
+        dataset_qs = dataset_qs.filter(
+            Q(name__icontains=search)
+            | Q(description__icontains=search)
+            | Q(source_identifier__icontains=search)
+            | Q(target_table_name__icontains=search)
+        )
+
+    filtered_datasets = list(dataset_qs)
+    dataset_count = len(filtered_datasets)
+    selected_dataset = None
+    if selected_dataset_id:
+        for dataset in filtered_datasets:
+            if str(dataset.id) == selected_dataset_id:
+                selected_dataset = dataset
+                break
+    if not selected_dataset and filtered_datasets:
+        selected_dataset = filtered_datasets[0]
+
+    sources = (
+        Dataset.objects.filter(active=True)
+        .order_by("source")
+        .values_list("source", flat=True)
+        .distinct()
+    )
+    frequency_options = (
+        Period.objects.filter(datasets_by_update_frequency__active=True)
+        .distinct()
+        .order_by("value")
+    )
+
+    table = None
+    table_error = None
+    preview_rows = 0
+    dataset_row_count = None
+    data_schema = getattr(settings, "DB_DATA_SCHEMA", "opendata")
+
+    if selected_dataset:
+        try:
+            client = DjangoPostgresClient()
+            table_full_name = (
+                f'"{client.schema}"."{selected_dataset.target_table_name}"'
+            )
+            if not client.table_exists(selected_dataset.target_table_name):
+                table_error = (
+                    f"Target table {selected_dataset.target_table_name!r} is not available "
+                    f"in the {client.schema} schema."
+                )
+            else:
+                try:
+                    count_df = client.run_query(
+                        f"SELECT COUNT(*) AS total FROM {table_full_name}"
+                    )
+                    if not count_df.empty:
+                        dataset_row_count = int(count_df.iloc[0, 0])
+                except Exception:
+                    dataset_row_count = None
+
+                query = (
+                    f"SELECT * FROM {table_full_name} LIMIT {preview_limit}"
+                )
+                df = client.run_query(query)
+                columns = df.columns.tolist()
+                if not columns:
+                    table_error = (
+                        "The selected dataset table has no columns to render."
+                    )
+                else:
+                    records = df.to_dict("records")
+                    column_kwargs = {}
+                    for idx, column_name in enumerate(columns):
+                        column_kwargs[f"columns__col_{idx}"] = Column(
+                            display_name=column_name,
+                            cell__value=lambda row, column_name=column_name, **_: row.get(
+                                column_name
+                            ),
+                        )
+                    # IOMMI will try to refine a stray `paginator` query parameter even though
+                    # this preview table does not expose it, so strip it before binding.
+                    request_for_table = (
+                        request
+                        if "paginator" not in request.GET
+                        else _RequestWithFilteredQuery(
+                            request, exclude_keys=("paginator",)
+                        )
+                    )
+                    rows = [_DatasetRow(record, columns) for record in records]
+                    table = (
+                        Table(
+                            rows=rows,
+                            page_size=page_size,
+                            **column_kwargs,
+                        )
+                        .bind(request=request_for_table)
+                    )
+                    preview_rows = len(records)
+        except Exception as exc:  # noqa: BLE001
+            table_error = f"Unable to load dataset data: {exc}"
+
+    return render(
+        request,
+        "reports/datasets_list.html",
+        {
+            "datasets": filtered_datasets,
+            "selected_dataset": selected_dataset,
+            "dataset_count": dataset_count,
+            "sources": sources,
+            "frequencies": frequency_options,
+            "table": table,
+            "table_error": table_error,
+            "preview_rows": preview_rows,
+            "preview_limit": preview_limit,
+            "dataset_row_count": dataset_row_count,
+            "data_schema": data_schema,
+            "filters": {
+                "search": search,
+                "source": source_filter,
+                "frequency": frequency_filter,
+                "dataset": selected_dataset_id or "",
+                "limit": preview_limit,
+                "page_size": page_size,
+            },
         },
     )
 
