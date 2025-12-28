@@ -157,3 +157,13 @@ class StoryTemplate(models.Model):
 
     natural_key.dependencies = []
     objects = StoryTemplateManager()
+
+class StoryTemplateDataset(models.Model):
+    story_template = models.ForeignKey(StoryTemplate, on_delete=models.CASCADE, related_name='datasets')
+    dataset = models.ForeignKey('Dataset', on_delete=models.CASCADE, related_name='story_templates')
+    
+    class Meta:
+        unique_together = ('story_template', 'dataset')
+
+    def __str__(self):
+        return f"{self.story_template.title} - {self.dataset.name}"

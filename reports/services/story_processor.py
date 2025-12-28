@@ -753,7 +753,7 @@ class StoryProcessor:
             if kind == "title":
                 system = "You are a concise editorial assistant producing sharp, data-driven insight titles"
                 user_instruction = (
-                    self.story.template.title_prompt
+                    self._replace_reference_period_expression(self.story.template.title_prompt)
                     if self.story.template.title_prompt
                     else (
                         f""".Write a single-line analytical headline (max 10–12 words). 

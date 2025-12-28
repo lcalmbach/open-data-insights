@@ -712,7 +712,8 @@ def apply_common_settings(chart, settings):
                 f"{y_field}:Q",
                 title=settings.get("y_title", y_field),
                 axis=axis_obj,
-                scale=alt.Scale(zero=settings.get('y_zero', True)),
+                # scale=alt.Scale(zero=settings.get('y_zero', True)),
+                scale=scale_obj if scale_obj is not None else None,
                 sort=settings.get("y_sort", None),
             )
 

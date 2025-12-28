@@ -9,7 +9,8 @@ DAY_PERIOD_CATEGORY_ID = 5
 GRAPH_TYPE_CATEGORY_ID = 6
 PERIOD_DIRECTION_CATEGORY_ID = 7
 IMPORT_TYPE_CATEGORY_ID = 8
-
+TAG_CATEGORY_ID = 9
+from account.models import CustomUser
 
 class PeriodDirectionEnum(Enum):
     Backward = 72
@@ -65,6 +66,20 @@ class LookupValue(models.Model):
 
     def __str__(self):
         return self.value
+
+
+class TagManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(category_id=TAG_CATEGORY_ID)
+
+
+class Tag(LookupValue):
+    objects = TagManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Tag"
+        verbose_name_plural = "Tags"
 
 
 class PeriodDirectionManager(models.Manager):
@@ -165,3 +180,51 @@ class ContextPeriod(LookupValue):
         proxy = True
         verbose_name = "Context Period"
         verbose_name_plural = "Context Periods"
+
+class TagDataset(models.Model):
+    tag = models.ForeignKey(
+        Tag, on_delete=models.CASCADE, related_name="dataset_assignments"
+    )
+    dataset = models.ForeignKey(
+        "Dataset", on_delete=models.CASCADE, related_name="tag_assignments"
+    )
+
+    class Meta:
+        verbose_name = "Dataset Tag Assignment"
+        verbose_name_plural = "Dataset Tag Assignments"
+        unique_together = ("tag", "dataset")
+
+    def __str__(self):
+        return f"{self.tag.value} - {self.dataset.name}"
+
+class TagStoryTemplate(models.Model):
+    tag = models.ForeignKey(
+        Tag, on_delete=models.CASCADE, related_name="story_template_assignments"
+    )
+    story_template = models.ForeignKey(
+        "StoryTemplate", on_delete=models.CASCADE, related_name="tag_assignments"
+    )
+
+    class Meta:
+        verbose_name = "Story Template Tag Assignment"
+        verbose_name_plural = "Story Template Tag Assignments"
+        unique_together = ("tag", "story_template")
+    
+    def __str__(self):
+        return f"{self.tag.value} - {self.story_template.title}"
+
+class TagUser(models.Model):
+    tag = models.ForeignKey(
+        Tag, on_delete=models.CASCADE, related_name="user_assignments"
+    )
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="tag_assignments"
+    )
+
+    class Meta:
+        verbose_name = "User Tag Assignment"
+        verbose_name_plural = "User Tag Assignments"
+        unique_together = ("tag", "user")
+
+    def __str__(self):
+        return f"{self.tag.value} - {self.user.username}"

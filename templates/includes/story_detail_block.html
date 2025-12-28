@@ -3,12 +3,32 @@
 <!-- templates/includes/story_detail_block.html -->
 <div class="card mt-2 shadow-sm">
   <div class="card-header bg-light">
-    <h2 class="card-title mb-0 text-primary">{{ selected_story.title|safe }}</h2>
-    <small class="d-block text-muted mt-1">
-      Published: {{ selected_story.published_date|date:"F j, Y" }}
-      &nbsp;&middot;&nbsp;
-      Period: {{ selected_story.reference_period }}
-    </small>
+    <div class="d-flex justify-content-between align-items-start gap-3">
+      <div>
+        <h2 class="card-title mb-0 text-primary">{{ selected_story.title|safe }}</h2>
+        <small class="d-block text-muted mt-1">
+          Published: {{ selected_story.published_date|date:"F j, Y" }}
+          &nbsp;&middot;&nbsp;
+          Period: {{ selected_story.reference_period }}
+        </small>
+      </div>
+      {% if user.is_staff %}
+      <form
+        class="mb-0"
+        method="post"
+        action="{% url 'delete_story' selected_story.id %}"
+      >
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="btn btn-outline-danger btn-sm"
+          onclick="return confirm('Are you sure you want to delete this story?');"
+        >
+          Delete story
+        </button>
+      </form>
+      {% endif %}
+    </div>
   </div>
   <div class="card-body text-start">
     <b>

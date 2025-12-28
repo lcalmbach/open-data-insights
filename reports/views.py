@@ -7,9 +7,9 @@ import pandas as pd
 from iommi import Column, Table
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.dateparse import parse_date
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
@@ -561,6 +561,20 @@ def story_detail(request, story_id=None):
             "data_source": data_source,
         },
     )
+
+
+@login_required
+@user_passes_test(lambda user: user.is_staff)
+def delete_story(request, story_id):
+    template_ids = _accessible_template_ids(request.user)
+    story_to_delete = get_object_or_404(
+        Story.objects.filter(template_id__in=template_ids),
+        id=story_id,
+    )
+    if request.method != "POST":
+        return redirect("story_detail", story_id=story_id)
+    story_to_delete.delete()
+    return redirect("stories")
 
 
 def get_tables(selected_story):

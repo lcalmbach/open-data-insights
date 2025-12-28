@@ -47,8 +47,9 @@ class StoryTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(StoryTemplateContext)
 class StoryTemplateContextAdmin(admin.ModelAdmin):
-    list_display = ("story_template", "key", "sort_order")
+    list_display = ("id", "key", "story_template", "sort_order")
     sortable_by = (
+        "id",
         "story_template",
         "sort_order",
     )
