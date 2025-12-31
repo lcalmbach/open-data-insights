@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.dateparse import parse_date
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
@@ -194,6 +195,12 @@ def templates_view(request):
     subscribed_count = (
         selected_template.subscriptions.all().count() if selected_template else 0
     )
+    admin_template_edit_url = None
+    if request.user.is_staff and selected_template:
+        admin_template_edit_url = reverse(
+            "admin:reports_storytemplate_change", args=(selected_template.id,)
+        )
+    
     return render(
         request,
         "reports/templates_list.html",
@@ -204,6 +211,7 @@ def templates_view(request):
             "story_count": story_count,
             "total_users": CustomUser.objects.all().count(),
             "subscribed_count": subscribed_count,
+            "admin_template_edit_url": admin_template_edit_url,
         },
     )
 
@@ -346,6 +354,7 @@ def datasets_view(request):
     dataset_row_count = None
     data_schema = getattr(settings, "DB_DATA_SCHEMA", "opendata")
 
+    insight_templates = []
     if selected_dataset:
         try:
             client = DjangoPostgresClient()
@@ -404,9 +413,15 @@ def datasets_view(request):
                         )
                         .bind(request=request_for_table)
                     )
-                    preview_rows = len(records)
+            preview_rows = len(records)
         except Exception as exc:  # noqa: BLE001
             table_error = f"Unable to load dataset data: {exc}"
+        insight_templates = list(
+            StoryTemplate.objects.accessible_to(request.user)
+            .filter(datasets__dataset=selected_dataset)
+            .distinct()
+            .order_by("title")
+        )
 
     return render(
         request,
@@ -431,6 +446,7 @@ def datasets_view(request):
                 "limit": preview_limit,
                 "page_size": page_size,
             },
+            "insight_templates": insight_templates,
         },
     )
 
@@ -444,12 +460,18 @@ def storytemplate_detail_view(request, pk):
         template.description, extras=["tables"]
     )
     back_url = request.META.get("HTTP_REFERER", "/")  # fallback: Startseite
+    admin_template_edit_url = None
+    if request.user.is_staff:
+        admin_template_edit_url = reverse(
+            "admin:reports_storytemplate_change", args=(template.id,)
+        )
     return render(
         request,
         "reports/storytemplate_detail.html",
         {
             "template": template,
             "back_url": back_url,
+            "admin_template_edit_url": admin_template_edit_url,
         },
     )
 

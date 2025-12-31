@@ -4,7 +4,9 @@
 
 <h2 class="mb-3">Explore Datasets ({{ dataset_count }})</h2>
 <p class="text-muted">
-  The datasets listed here supply the numbers that power the automatically generated insights. Metadata lives in Django, but the data itself is stored in the <code>{{ data_schema }}</code> schema, so this view shows a schema-level preview for every dataset.
+  The datasets listed here provide the numbers behind the automatically generated insights. Most of them are imported from public data portals — in particular data.bs.ch — while a small number are compiled specifically for this app (marked with source = odi).
+<br><br>
+This page is intended as a preview only: it shows at most 2,000 records and offers no filtering. To explore the full datasets and all available features, please visit the original data portal. This app focuses on the story — the source has the full data.
 </p>
 
 <div class="card mb-4 shadow-sm">
@@ -84,36 +86,40 @@
     </p>
     <div class="row row-cols-1 row-cols-md-2 g-3">
       <div class="col">
-        <div class="d-flex align-items-baseline gap-2 mb-1">
-          <span class="small text-uppercase text-muted">Source:</span>
-          <span class="text-dark">{{ selected_dataset.source }}</span>
-        </div>
         <div class="small text-muted">Identifier: {{ selected_dataset.source_identifier }}</div>
+        {% if selected_dataset.source_url and selected_dataset.source_url != "NA" %}
+        <div class="small">
+          <span class="text-muted me-1">Original source:</span>
+          <a href="{{ selected_dataset.source_url }}" target="_blank" rel="noopener">
+            {{ selected_dataset.source_url_label|default:selected_dataset.source_url }}
+          </a>
+        </div>
+        {% endif %}
       </div>
       <div class="col">
         <div class="d-flex align-items-baseline gap-2 mb-1">
-          <span class="small text-uppercase text-muted">Update frequency:</span>
+          <span class="small text-muted">Update frequency:</span>
           <span class="text-dark">{{ selected_dataset.data_update_frequency.value|default:"—" }}</span>
         </div>
         <div class="small text-muted">Previewing {{ preview_rows }} of {{ preview_limit }} rows</div>
       </div>
       <div class="col">
         <div class="d-flex align-items-baseline gap-2 mb-1">
-          <span class="small text-uppercase text-muted">Target table:</span>
+          <span class="small text-muted">Target table:</span>
           <span class="text-dark"><code>{{ selected_dataset.target_table_name }}</code></span>
         </div>
         <div class="small d-flex align-items-center gap-1">
-          <span class="text-uppercase text-muted">Schema:</span>
+          <span class="text-muted">Schema:</span>
           <span class="text-dark">{{ data_schema }}</span>
         </div>
       </div>
       <div class="col">
         <div class="d-flex align-items-baseline gap-2 mb-1">
-          <span class="small text-uppercase text-muted">Last import:</span>
+          <span class="small text-muted">Last import:</span>
           <span class="text-dark">{{ selected_dataset.last_import_date|date:"Y-m-d H:i"|default:"—" }}</span>
         </div>
         <div class="small d-flex flex-wrap align-items-center gap-3">
-          <span class="text-uppercase text-muted">Fields:</span>
+          <span class="text-muted">Fields:</span>
           <span class="text-dark">
             {% if selected_dataset.fields_selection %}
               {{ selected_dataset.fields_selection|length }}
@@ -121,9 +127,23 @@
               all
             {% endif %}
           </span>
-          <span class="text-uppercase text-muted">Rows:</span>
+          <span class="text-muted">Rows:</span>
           <span class="text-dark">{{ dataset_row_count|default:"—" }}</span>
         </div>
+      </div>
+      <div class="col-12">
+        <div class="small text-muted mb-1">Used for insights:</div>
+        {% if insight_templates %}
+        <div class="small">
+          {% for template in insight_templates %}
+            <a href="{% url 'template_detail' template.id %}">
+              {{ template.title }}
+            </a>{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="small text-dark">Not currently used in any insights.</div>
+        {% endif %}
       </div>
     </div>
   </div>

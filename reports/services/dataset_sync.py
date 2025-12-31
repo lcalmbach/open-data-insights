@@ -550,7 +550,6 @@ class DatasetProcessor:
         self.logger.info(
             f"{count} records added to target database table {remote_table}."
         )
-        self.post_process_data()
         return True
 
     def _sync_new_identifier(
@@ -795,12 +794,6 @@ class DatasetProcessor:
         if self.dataset.fields_selection:
             df = df[self.dataset.fields_selection]
 
-        # Add constants if configured
-        if self.dataset.constants:
-            for item in self.dataset.constants:
-                if isinstance(item, dict) and "field_name" in item:
-                    df[item["field_name"]] = item.get("value", "")
-
         # Apply aggregations if configured
         if self.dataset.aggregations:
             df = self._apply_aggregations(df)
@@ -891,18 +884,6 @@ class DatasetProcessor:
             self.logger.error(f"Error applying aggregations: {e}")
 
         return df
-
-    def post_process_data(self):
-        """Execute post-processing commands"""
-        if self.dataset.calculated_fields:
-            for item in self.dataset.calculated_fields:
-                if isinstance(item, dict) and item.get("command"):
-                    cmd = item["command"]
-                    try:
-                        self.dbclient.run_action_query(cmd)
-                        self.logger.info(f"Post-import command executed: {cmd}")
-                    except Exception as e:
-                        self.logger.error(f"Error executing post-import command: {e}")
 
     def _format_identifier_clause(self, identifiers: list) -> str:
         """Return a SQL IN-clause string for identifier values with safe escaping."""

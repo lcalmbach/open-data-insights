@@ -67,7 +67,15 @@
   <!-- Detailbereich -->
   <div id="template-details" class="mt-4">
     {% if selected_template %}
-      <h3 id="details-title">{{ selected_template.title }} ({{ selected_template.reference_period }})</h3>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 id="details-title" class="mb-0">{{ selected_template.title }} ({{ selected_template.reference_period }})</h3>
+        {% if admin_template_edit_url %}
+          <a href="{{ admin_template_edit_url }}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-pencil"></i>
+            Edit template
+          </a>
+        {% endif %}
+      </div>
       <hr>
       <div id="details-body">{{ selected_template.description_html|safe }}</div>
       <hr>

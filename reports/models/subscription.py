@@ -3,7 +3,9 @@ from .story_template import StoryTemplate
 from account.models import CustomUser
 
 
+
 class StoryTemplateSubscription(models.Model):
+    """Track a user subscription to a story template and its status."""
     story_template = models.ForeignKey(
         StoryTemplate,
         on_delete=models.CASCADE,

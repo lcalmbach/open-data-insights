@@ -8,6 +8,8 @@ from .lookups import Period, PeriodDirection
 
 
 class StoryTemplateQuerySet(models.QuerySet):
+    """QuerySet helpers for story templates, primarily filtering by access."""
+
     def accessible_to(self, user):
         qs = self.filter(active=True)
         if user and getattr(user, "is_authenticated", False):
@@ -18,6 +20,8 @@ class StoryTemplateQuerySet(models.QuerySet):
 
 
 class StoryTemplateManager(NaturalKeyManager):
+    """Manager providing natural key lookups and scoped querysets for story templates."""
+
     lookup_fields = ("slug",)
 
     def get_queryset(self):
@@ -28,6 +32,7 @@ class StoryTemplateManager(NaturalKeyManager):
 
 
 class StoryTemplate(models.Model):
+    """Model representing a configurable template for generating stories."""
     slug = models.SlugField(unique=True, blank=True, null=True, editable=False)
     active = models.BooleanField(
         default=True,
@@ -159,10 +164,13 @@ class StoryTemplate(models.Model):
     objects = StoryTemplateManager()
 
 class StoryTemplateDataset(models.Model):
+    """Join table linking story templates to datasets they rely on."""
     story_template = models.ForeignKey(StoryTemplate, on_delete=models.CASCADE, related_name='datasets')
     dataset = models.ForeignKey('Dataset', on_delete=models.CASCADE, related_name='story_templates')
     
     class Meta:
+        verbose_name = "StoryTemplate-Dataset relation"
+        verbose_name_plural = "StoryTemplate-Dataset relations"
         unique_together = ('story_template', 'dataset')
 
     def __str__(self):

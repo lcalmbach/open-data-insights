@@ -49,23 +49,65 @@ class StorySubscriptionService:
         else:
             templates_qs = templates
 
+        return self.subscribe_users_to_templates(users=users, templates=templates_qs)
+
+    def subscribe_users_to_templates(
+        self,
+        users: Optional[Iterable[Any]] = None,
+        templates: Optional[Iterable[StoryTemplate]] = None,
+    ) -> Dict[str, Any]:
+        """Subscribe (optionally filtered) users to the provided templates."""
+        User = get_user_model()
+        if users is None:
+            users_iterable = User.objects.filter(is_active=True)
+        else:
+            users_iterable = users
+
+        users_list = list(users_iterable)
+        if not users_list:
+            logger.info("No users provided for subscription request.")
+            return {
+                "success": True,
+                "successful": 0,
+                "created": 0,
+                "skipped": 0,
+                "failed": 0,
+                "details": [],
+            }
+
+        if templates is None:
+            templates_iterable = StoryTemplate.objects.filter(active=True)
+        else:
+            templates_iterable = templates
+
+        if hasattr(templates_iterable, "prefetch_related"):
+            templates_iterable = templates_iterable.prefetch_related("subscriptions")
+
+        templates_list = list(templates_iterable)
+        if not templates_list:
+            logger.info("No story templates provided for subscription request.")
+            return {
+                "success": True,
+                "successful": 0,
+                "created": 0,
+                "skipped": 0,
+                "failed": 0,
+                "details": [],
+            }
+
         total_created = 0
         total_skipped = 0
         total_failed = 0
         details = []
 
-        # Prefetch existing subscriptions to reduce queries
-        templates_qs = templates_qs.prefetch_related("subscriptions")
-
-        for template in templates_qs:
-            # Get existing active subscriptions for this template
+        for template in templates_list:
             existing_user_ids = set(
-                template.subscriptions.filter(
-                    cancellation_date__isnull=True
-                ).values_list("user_id", flat=True)
+                template.subscriptions.filter(cancellation_date__isnull=True).values_list(
+                    "user_id", flat=True
+                )
             )
 
-            for user in users:
+            for user in users_list:
                 try:
                     if user.id in existing_user_ids:
                         total_skipped += 1
@@ -90,7 +132,6 @@ class StorySubscriptionService:
                             }
                         )
                 except IntegrityError as e:
-                    # Race condition or unique constraint violation
                     logger.warning(
                         "Subscription already exists for user %s, template %s: %s",
                         user,

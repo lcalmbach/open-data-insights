@@ -54,6 +54,20 @@ class Dataset(models.Model):
         help_text="Source of the dataset, e.g., 'ods', 'worldbank",
         verbose_name="Dataset Source",
     )
+    source_url = models.URLField(
+        max_length=500,
+        help_text="URL of the original data source",
+        verbose_name="Dataset source URL",
+        blank=True,
+        null=True,
+    )
+    source_url_label = models.CharField(
+        max_length=100,
+        help_text="Label shown for the source link",
+        verbose_name="Source link label",
+        blank=True,
+        null=True,
+    )
     fields_selection = models.JSONField(
         blank=True,
         null=True,
@@ -79,13 +93,7 @@ class Dataset(models.Model):
         help_text="Indicates if the dataset is active. Only active datasets will be imported and synchronized.",
         verbose_name="Active Dataset",
     )
-    constants = models.JSONField(
-        default=list,
-        blank=True,
-        null=True,
-        help_text="List of constants to be added to the dataset. format: [{'field_name': 'station', 'type': 'int', 'value': 1}]. These constants will be added to each record during import.",
-        verbose_name="Constants",
-    )
+    
     source_identifier = models.CharField(
         max_length=255,
         help_text="Unique identifier for the source dataset.",
@@ -138,14 +146,6 @@ class Dataset(models.Model):
         auto_now=True,
         help_text="Timestamp of the last import for this dataset.",
         verbose_name="Last Import Date",
-    )
-    # format for calculated fields: [{'field_name': 'new_field', 'type': 'int', 'command': 'update script'}]
-    calculated_fields = models.JSONField(
-        default=list,
-        null=True,
-        blank=True,
-        help_text="List of fields to be calculated by the commnds defined in post_import_commands.",
-        verbose_name="Calculated Fields",
     )
     post_import_sql_commands = models.TextField(
         blank=True,

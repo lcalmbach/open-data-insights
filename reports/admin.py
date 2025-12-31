@@ -1,15 +1,14 @@
 from django.contrib import admin
 from .models.story import Story
-from .models.story import StoryTemplate
+from .models.story_template import StoryTemplateDataset, StoryTemplate
 from .models.story_context import StoryTemplateContext
 from .models.lookups import LookupCategory, LookupValue
 from .models.dataset import Dataset
 from .models.subscription import StoryTemplateSubscription
 from .models.story_log import StoryLog
 from .models.story_table import StoryTable
-from .models.graphic import Graphic
+from .models.graphic import Graphic, StoryTemplateGraphic
 from .models.story_table_template import StoryTemplateTable
-from .models.graphic import StoryTemplateGraphic
 
 
 @admin.register(Story)
@@ -97,6 +96,26 @@ class StoryTemplateSubscriptionAdmin(admin.ModelAdmin):
     sorted_by = ("user",)
     search_fields = ["user"]  # shows a filter sidebar
     list_filter = ("user", "story_template")
+
+
+@admin.register(StoryTemplateDataset)
+class StoryTemplateDatasetAdmin(admin.ModelAdmin):
+    list_display = ("story_template_id", "story_template", "dataset", "dataset_source_url")
+    list_filter = ("story_template", "dataset")
+    ordering = ("story_template__title",)
+    list_select_related = ("story_template", "dataset")
+
+    def story_template_id(self, obj):
+        return obj.story_template_id
+
+    story_template_id.admin_order_field = "story_template__id"
+    story_template_id.short_description = "Story Template ID"
+
+    def dataset_source_url(self, obj):
+        return getattr(obj.dataset, "source_url", None)
+
+    dataset_source_url.admin_order_field = "dataset__source_url"
+    dataset_source_url.short_description = "Dataset Source URL"
 
 
 @admin.register(StoryLog)

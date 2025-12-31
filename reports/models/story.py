@@ -146,7 +146,6 @@ class Story(models.Model):
         valid_ai_models = [
             "gpt-4o",
             "gpt-4",
-            "gpt-3.5-turbo",
         ]  # Update with your valid models
         if self.ai_model and self.ai_model not in valid_ai_models:
             raise ValidationError(

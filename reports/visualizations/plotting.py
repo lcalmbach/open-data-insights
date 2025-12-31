@@ -53,9 +53,10 @@ def generate_chart(data, settings, chart_id):
 
 def create_line_chart(data, settings):
     """Create a line chart with the given data and settings"""
-    
+    data[settings['y']] = pd.to_numeric(data[settings['y']], errors='coerce')
     if settings.get('x_type') == "T":
         data[settings.get('x')] = pd.to_datetime(data[settings.get('x')], errors='coerce')
+    
     # Create base chart
     chart = alt.Chart(data).mark_line(
         point=settings.get('show_points', False),
@@ -699,13 +700,6 @@ def apply_common_settings(chart, settings):
                 title=settings.get("y_title", y_field),
                 axis=axis_obj,
                 sort=settings.get("y_sort", None),
-            )
-        elif y_type == "T":
-            encodings["y"] = alt.Y(
-                f"{y_field}:T",
-                title=settings.get("y_title", y_field),
-                axis=axis_obj,
-                scale=scale_obj if scale_obj is not None else None,
             )
         else:
             encodings['y'] = alt.Y(
