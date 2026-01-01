@@ -32,7 +32,7 @@
       "args": [
         "generate_stories",
         "--id",
-        "52",
+        "36",
         "-v",
         "2"
       ],
@@ -55,7 +55,7 @@
       "args": [
         "synch_data",
         "--id",
-        "20",
+        "57",
         "-v",
         "2"
       ],
@@ -119,8 +119,8 @@
       "program": "${workspaceFolder}/manage.py",
       "args": [
         "generate_appendices",
-        "--story_template_id",
-        "62",
+        "--graphic_template_id",
+        "43",
         "--graphics",
         "-v",
         "2"

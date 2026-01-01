@@ -6,7 +6,7 @@ Handles generating data insights and stories from templates
 import logging
 import pandas as pd
 from datetime import date, timedelta, datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from reports.services.base import ETLBaseService
 from reports.services.story_processor import StoryProcessor
@@ -79,13 +79,14 @@ class StoryGenerationService(ETLBaseService):
         template_id: Optional[int] = None,
         anchor_date: Optional[date] = None,
         force: bool = False,
+        exclude_template_ids: Optional[List[int]] = None,
     ) -> Dict[str, Any]:
         """Generate multiple stories from templates"""
-        # Use Django ORM to fetch templates
+        templates = StoryTemplate.objects.filter(active=True).order_by("id")
         if template_id:
-            templates = StoryTemplate.objects.filter(id=template_id, active=True)
-        else:
-            templates = StoryTemplate.objects.filter(active=True).order_by("id")
+            templates = templates.filter(id=template_id)
+        if exclude_template_ids:
+            templates = templates.exclude(id__in=exclude_template_ids)
 
         if not templates.exists():
             if template_id:
@@ -95,11 +96,25 @@ class StoryGenerationService(ETLBaseService):
                 return {
                     "success": False,
                     "message": f"Template ID {template_id} not found",
+                    "total_templates": 0,
+                    "successful": 0,
+                    "failed": 0,
+                    "skipped": 0,
+                    "details": [],
                 }
             else:
                 self.logger.info("No active story templates found")
-                return {"success": True, "message": "No active templates to process"}
+                return {
+                    "success": True,
+                    "message": "No active templates to process",
+                    "total_templates": 0,
+                    "successful": 0,
+                    "failed": 0,
+                    "skipped": 0,
+                    "details": [],
+                }
 
+        templates = templates.prefetch_related("datasets__dataset")
         results = {
             "success": True,
             "total_templates": templates.count(),
@@ -110,50 +125,40 @@ class StoryGenerationService(ETLBaseService):
         }
 
         for template in templates:
-            print(f"Processing template ID {template.id}: {template.title}")
-            service = StoryProcessor(anchor_date, template, force)
+            dataset_names = []
+            for relation in template.datasets.all():
+                if relation.dataset and getattr(relation.dataset, "name", None):
+                    dataset_names.append(relation.dataset.name)
 
-            if service.story_is_due():
-                try:
-                    result = service.generate_story()
+            result = self.generate_story(
+                template=template, anchor_date=anchor_date, force=force
+            )
+            detail = {
+                "template_id": template.id,
+                "template_title": template.title,
+                "dataset_names": dataset_names,
+            }
 
-                    if result:
-                        results["successful"] += 1
-                        results["details"].append(
-                            {
-                                "template_id": template.id,
-                                "status": "success",
-                            }
-                        )
-                    else:
-                        results["failed"] += 1
-                        results["details"].append(
-                            {
-                                "template_id": template.id,
-                                "status": "failed",
-                                "error": result.get("error", "Unknown error"),
-                            }
-                        )
-                except Exception as e:
-                    self.logger.error(
-                        f"Error processing template {template.id}: {str(e)}"
-                    )
-                    results["failed"] += 1
-                    results["details"].append(
-                        {
-                            "template_id": template.id,
-                            "status": "error",
-                            "error": str(e),
-                        }
-                    )
-            else:
-                self.logger.info(f"Skipping template {template.id} - not due")
+            if result.get("skipped"):
                 results["skipped"] += 1
-                results["details"].append(
+                detail.update(
                     {
-                        "template_id": template.id,
                         "status": "skipped",
-                        "message": "Story generation conditions not met",
+                        "message": result.get("message"),
                     }
                 )
+            elif result.get("success"):
+                results["successful"] += 1
+                detail["status"] = "success"
+            else:
+                results["failed"] += 1
+                detail.update(
+                    {
+                        "status": "failed",
+                        "error": result.get("error", "Unknown error"),
+                    }
+                )
+            results["details"].append(detail)
+
+        results["success"] = results["failed"] == 0
         return results

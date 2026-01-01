@@ -221,6 +221,27 @@ class EmailService(ETLBaseService):
 
         return "\n".join(lines)
 
+    def send_admin_alert(self, subject: str, body: str) -> Dict[str, Any]:
+        """Send a plain-text alert to all active staff admins."""
+        User = get_user_model()
+        recipients = list(
+            User.objects.filter(is_active=True, is_staff=True).values_list("email", flat=True)
+        )
+        if not recipients:
+            self.logger.warning("No admin recipients found for alert email")
+            return {"success": False, "message": "No admin recipients available"}
+
+        if hasattr(settings, "EMAIL_REDIRECT_TO"):
+            recipients = settings.EMAIL_REDIRECT_TO
+
+        try:
+            send_mail(subject, body, self.from_email, recipients)
+            self.logger.info("Sent admin alert email to %s recipients", len(recipients))
+            return {"success": True, "recipients": recipients}
+        except Exception as exc:
+            self.logger.error("Error sending admin alert: %s", exc)
+            return {"success": False, "error": str(exc)}
+
     def _cleanup_empty_stories(self):
         """Remove stories with empty content"""
         try:

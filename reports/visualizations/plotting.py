@@ -702,15 +702,21 @@ def apply_common_settings(chart, settings):
                 sort=settings.get("y_sort", None),
             )
         else:
-            encodings['y'] = alt.Y(
-                f"{y_field}:Q",
-                title=settings.get("y_title", y_field),
-                axis=axis_obj,
-                # scale=alt.Scale(zero=settings.get('y_zero', True)),
-                scale=scale_obj if scale_obj is not None else None,
-                sort=settings.get("y_sort", None),
-            )
-
+            if scale_obj:
+                encodings['y'] = alt.Y(
+                    f"{y_field}:Q",
+                    title=settings.get("y_title", y_field),
+                    axis=axis_obj,
+                    scale=scale_obj if scale_obj is not None else None,
+                    sort=settings.get("y_sort", None),
+                )
+            else:
+                encodings['y'] = alt.Y(
+                    f"{y_field}:Q",
+                    title=settings.get("y_title", y_field),
+                    axis=axis_obj,
+                    sort=settings.get("y_sort", None),
+                )
     # Color encoding (optional)
     color_field = settings.get('color')
     if color_field:
