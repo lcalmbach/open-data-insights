@@ -200,7 +200,7 @@ class Command(BaseCommand):
 
         # Step 4: Send emails
         if not options.get('skip_email'):
-            self.stdout.write("Step 3: Sending emails...")
+            self.stdout.write("Step 4: Sending emails...")
             email_result = email_service.send_stories_for_date(send_date=anchor_date)
             
             if email_result['success']:

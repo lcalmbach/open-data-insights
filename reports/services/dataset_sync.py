@@ -622,7 +622,6 @@ class DatasetProcessor:
         self.logger.info(
             f"{count} records added to target database table {remote_table}."
         )
-        self.post_process_data()
         return True
 
     def _sync_new_year(
@@ -686,7 +685,6 @@ class DatasetProcessor:
                     df[self.dataset.db_timestamp_field] = pd.to_datetime(
                         df[self.dataset.db_timestamp_field], errors="coerce"
                     )
-                self.post_process_data()
                 success = True
             else:
                 self.logger.error("Failed to download full dataset")

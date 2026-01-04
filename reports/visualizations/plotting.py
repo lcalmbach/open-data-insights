@@ -7,6 +7,11 @@ import pandas as pd
 import altair as alt
 from wordcloud import WordCloud
 
+try:
+    import folium
+except ImportError:  # pragma: no cover - folium only needed when map types are requested
+    folium = None
+
 logger = logging.getLogger(__name__)
 
 def generate_chart(data, settings, chart_id):
@@ -19,19 +24,25 @@ def generate_chart(data, settings, chart_id):
             "line": create_line_chart,
             "bar": create_bar_chart,
             "bar_stacked": create_bar_stacked_chart,
+            "horizontal_bar": create_horizontal_bar_chart,
+            "bar_horizontal": create_horizontal_bar_chart,
             "area": create_area_chart,
             "point": create_point_chart,
             "scatter": create_point_chart,
             "pie": create_pie_chart,
             "heatmap": create_heatmap,
             "histogram": create_histogram,
+            "map_markers": create_map_markers,
+            "map-markers": create_map_markers,
             "wordcloud": create_word_cloud
         }
-        chart_type = settings.get('type').value.lower()
+        chart_settings = settings.copy() if hasattr(settings, "copy") else dict(settings)
+        chart_settings.setdefault("chart_id", chart_id)
+        chart_type = chart_settings.get("type").value.lower()
         chart_func = chart_functions.get(chart_type, create_line_chart)
-        chart = chart_func(data, settings)
+        chart = chart_func(data, chart_settings)
 
-        if chart_type not in ("wordcloud",):
+        if chart_type not in ("wordcloud", "map_markers", "map-markers"):
             html = chart.to_html(
                 embed_options={
                     "actions": False,  # Hide download buttons
@@ -206,6 +217,16 @@ def create_bar_chart(data, settings):
     chart = chart.properties(**props)
 
     return chart
+
+
+def create_horizontal_bar_chart(data, settings):
+    """Create a horizontal bar chart by forcing the horizontal flag before delegating."""
+    if hasattr(settings, "copy"):
+        horizontal_settings = settings.copy()
+    else:
+        horizontal_settings = dict(settings)
+    horizontal_settings["horizontal"] = True
+    return create_bar_chart(data, horizontal_settings)
 
 
 def create_bar_stacked_chart(data, settings):
@@ -465,6 +486,163 @@ def create_heatmap(data, settings):
     chart = chart.properties(**props)
     
     return chart
+
+
+def create_map_markers(data, settings):
+    """Create a Folium map populated with markers or circle markers."""
+    if folium is None:
+        logger.error("folium library is not installed; cannot render map markers.")
+        return '<div class="chart-error">folium library is not installed</div>'
+
+    df = pd.DataFrame(data).copy()
+
+    lat_field = (
+        settings.get("latitude")
+        or settings.get("lat")
+        or settings.get("y")
+    )
+    lon_field = (
+        settings.get("longitude")
+        or settings.get("lon")
+        or settings.get("x")
+    )
+
+    if not lat_field or not lon_field:
+        logger.error("Map markers requires 'latitude' and 'longitude' fields.")
+        return '<div class="chart-error">Map markers require latitude/longitude fields.</div>'
+
+    if lat_field not in df.columns or lon_field not in df.columns:
+        logger.error("Map markers data missing latitude or longitude columns.")
+        return '<div class="chart-error">Map markers data missing latitude/longitude fields.</div>'
+
+    df[lat_field] = pd.to_numeric(df[lat_field], errors="coerce")
+    df[lon_field] = pd.to_numeric(df[lon_field], errors="coerce")
+
+    df = df.dropna(subset=[lat_field, lon_field])
+    if df.empty:
+        logger.warning("Map markers chart has no valid coordinates.")
+        return '<div class="chart-error">No valid coordinates for map markers.</div>'
+
+    center_lat = settings.get("center_lat")
+    center_lon = settings.get("center_lon")
+    if center_lat is None or pd.isna(center_lat):
+        center_lat = df[lat_field].mean()
+    if center_lon is None or pd.isna(center_lon):
+        center_lon = df[lon_field].mean()
+
+    width = settings.get("width", 700)
+    if width == "container":
+        width = "100%"
+    height = settings.get("height", 400)
+    if height == "container":
+        height = "100%"
+
+    map_kwargs = {
+        "location": [center_lat, center_lon],
+        "zoom_start": settings.get("zoom_start", 10),
+        "tiles": settings.get("tiles", "OpenStreetMap"),
+        "width": width,
+        "height": height,
+        "control_scale": settings.get("control_scale", True),
+    }
+    extra_map_options = settings.get("map_options") or {}
+    if isinstance(extra_map_options, dict):
+        map_kwargs.update(extra_map_options)
+
+    map_obj = folium.Map(**map_kwargs)
+    map_id = settings.get("map_id") or settings.get("chart_id")
+    if map_id:
+        map_obj._name = map_id
+
+    cluster_layer = None
+    if settings.get("cluster", False):
+        try:
+            from folium.plugins import MarkerCluster
+
+            cluster_layer = MarkerCluster()
+            cluster_layer.add_to(map_obj)
+        except ImportError:
+            logger.warning(
+                "folium.plugins.MarkerCluster not available; rendering without clustering."
+            )
+
+    def _format_text(record, fields):
+        if not fields:
+            return None
+        keys = fields if isinstance(fields, (list, tuple)) else [fields]
+        values = []
+        for key in keys:
+            if not key:
+                continue
+            val = record.get(key)
+            if pd.isna(val):
+                continue
+            values.append(str(val))
+        if not values:
+            return None
+        return "<br>".join(values)
+
+    marker_style = (settings.get("marker_style") or "marker").lower()
+    marker_color_field = settings.get("marker_color") or settings.get("color")
+    tooltip_spec = settings.get("tooltip")
+    popup_spec = settings.get("popup")
+
+    for record in df.to_dict(orient="records"):
+        lat = record.get(lat_field)
+        lon = record.get(lon_field)
+        if lat is None or lon is None:
+            continue
+
+        popup_text = _format_text(record, popup_spec)
+        tooltip_text = _format_text(record, tooltip_spec)
+
+        parent_target = map_obj
+        if marker_style != "circle" and cluster_layer is not None:
+            parent_target = cluster_layer
+
+        if marker_style == "circle":
+            circle_kwargs = {
+                "radius": settings.get("radius", 6),
+                "fill": True,
+                "fill_opacity": settings.get("fill_opacity", 0.7),
+                "opacity": settings.get("line_opacity", 0.9),
+            }
+            coord_color = record.get(marker_color_field) if marker_color_field else None
+            if coord_color and not pd.isna(coord_color):
+                circle_kwargs["color"] = str(coord_color)
+                circle_kwargs["fill_color"] = str(coord_color)
+            elif settings.get("circle_color"):
+                circle_kwargs["color"] = settings["circle_color"]
+                circle_kwargs["fill_color"] = settings["circle_color"]
+            if popup_text:
+                circle_kwargs["popup"] = popup_text
+            if tooltip_text:
+                circle_kwargs["tooltip"] = tooltip_text
+
+            folium.CircleMarker(location=[lat, lon], **circle_kwargs).add_to(
+                parent_target
+            )
+        else:
+            marker_kwargs = {}
+            if popup_text:
+                marker_kwargs["popup"] = popup_text
+            if tooltip_text:
+                marker_kwargs["tooltip"] = tooltip_text
+
+            icon_kwargs = {}
+            icon_name = settings.get("icon") or settings.get("icon_name")
+            icon_color = settings.get("icon_color")
+            if icon_name or icon_color:
+                if icon_name:
+                    icon_kwargs["icon"] = icon_name
+                if icon_color:
+                    icon_kwargs["color"] = icon_color
+                icon_kwargs["prefix"] = settings.get("icon_prefix", "glyphicon")
+                marker_kwargs["icon"] = folium.Icon(**icon_kwargs)
+
+            folium.Marker(location=[lat, lon], **marker_kwargs).add_to(parent_target)
+
+    return map_obj.get_root().render()
 
 
 def create_histogram(data, settings):

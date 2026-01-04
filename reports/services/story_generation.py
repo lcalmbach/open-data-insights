@@ -59,7 +59,9 @@ class StoryGenerationService(ETLBaseService):
                 )
                 return {
                     "success": True,
-                    "story_id": story_processor.id,
+                    "story_id": story_processor.story.id
+                    if story_processor.story
+                    else None,
                     "message": "Story generated successfully",
                 }
             else:
