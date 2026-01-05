@@ -2,6 +2,7 @@ import base64
 import logging
 from io import BytesIO
 from typing import List
+import re
 
 import numpy as np
 import pandas as pd
@@ -489,6 +490,19 @@ def create_heatmap(data, settings):
     return chart
 
 
+def _sanitize_map_identifier(identifier):
+    """Turn an arbitrary identifier into a JS-friendly map name."""
+    if not identifier:
+        return None
+    identifier = str(identifier)
+    sanitized = re.sub(r"[^0-9a-zA-Z_]", "_", identifier)
+    if not sanitized:
+        return None
+    if not (sanitized[0].isalpha() or sanitized[0] == "_"):
+        sanitized = "_" + sanitized
+    return sanitized
+
+
 def create_map_markers(data, settings):
     """Create a Folium map populated with markers or circle markers."""
     if folium is None:
@@ -540,7 +554,7 @@ def create_map_markers(data, settings):
 
     map_kwargs = {
         "location": [center_lat, center_lon],
-        "zoom_start": settings.get("zoom_start", 10),
+        "zoom_start": settings.get("zoom_start", 11),
         "tiles": settings.get("tiles", "OpenStreetMap"),
         "width": width,
         "height": height,
@@ -552,8 +566,10 @@ def create_map_markers(data, settings):
 
     map_obj = folium.Map(**map_kwargs)
     map_id = settings.get("map_id") or settings.get("chart_id")
-    if map_id:
-        map_obj._name = map_id
+    sanitized_map_id = _sanitize_map_identifier(map_id)
+    if sanitized_map_id:
+        map_obj._name = sanitized_map_id
+        map_obj._id = sanitized_map_id
 
     cluster_layer = None
     if settings.get("cluster", False):
@@ -570,22 +586,36 @@ def create_map_markers(data, settings):
     def _format_text(record, fields):
         if not fields:
             return None
-        keys = fields if isinstance(fields, (list, tuple)) else [fields]
+        entries = fields if isinstance(fields, (list, tuple)) else [fields]
         values = []
-        for key in keys:
+        for entry in entries:
+            label = None
+            key = None
+            if isinstance(entry, dict):
+                key = entry.get("field") or entry.get("key")
+                label = entry.get("label")
+            elif isinstance(entry, (list, tuple)) and len(entry) >= 2:
+                label = entry[0]
+                key = entry[1]
+            else:
+                key = entry
             if not key:
                 continue
             val = record.get(key)
             if pd.isna(val):
                 continue
-            values.append(str(val))
+            text = str(val)
+            if label:
+                values.append(f"{label}: {text}")
+            else:
+                values.append(text)
         if not values:
             return None
         return "<br>".join(values)
 
     marker_style = (settings.get("marker_style") or "marker").lower()
     marker_color_field = settings.get("marker_color") or settings.get("color")
-    tooltip_spec = settings.get("tooltip")
+    tooltip_spec = settings.get("tooltips") or settings.get("tooltip")
     popup_spec = settings.get("popup")
 
     for record in df.to_dict(orient="records"):
