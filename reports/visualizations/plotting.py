@@ -3,6 +3,7 @@ import logging
 from io import BytesIO
 from typing import List
 
+import numpy as np
 import pandas as pd
 import altair as alt
 from wordcloud import WordCloud
@@ -24,15 +25,15 @@ def generate_chart(data, settings, chart_id):
             "line": create_line_chart,
             "bar": create_bar_chart,
             "bar_stacked": create_bar_stacked_chart,
+            "bar-stacked": create_bar_stacked_chart,
             "horizontal_bar": create_horizontal_bar_chart,
-            "bar_horizontal": create_horizontal_bar_chart,
+            "bar-horizontal": create_horizontal_bar_chart,
             "area": create_area_chart,
             "point": create_point_chart,
             "scatter": create_point_chart,
             "pie": create_pie_chart,
             "heatmap": create_heatmap,
             "histogram": create_histogram,
-            "map_markers": create_map_markers,
             "map-markers": create_map_markers,
             "wordcloud": create_word_cloud
         }
@@ -646,40 +647,129 @@ def create_map_markers(data, settings):
 
 
 def create_histogram(data, settings):
-    """Create a histogram with the given data and settings"""
-    # Get the field to bin
-    x_field = settings.get('x')
+    """Create a histogram by pre-binning the data with numpy."""
+    x_field = settings.get("x")
     if not x_field:
-        logger.error("Histogram requires 'x' field to bin")
-        return alt.Chart(data).mark_point()  # Return empty chart
-    
-    # Create histogram chart
-    bin_params = {}
-    if 'bin_step' in settings:
-        bin_params['step'] = settings['bin_step']
-    if 'max_bins' in settings:
-        bin_params['maxbins'] = settings['max_bins']
-    
-    chart = alt.Chart(data).mark_bar().encode(
-        x=alt.X(f"{x_field}:Q", bin=alt.Bin(**bin_params)),
-        y='count()'
+        logger.error("Histogram requires an 'x' field to bin.")
+        return alt.Chart(pd.DataFrame({"count": []})).mark_bar()
+
+    df = pd.DataFrame(data).copy()
+    if x_field not in df.columns:
+        logger.error("Histogram field '%s' not in data columns.", x_field)
+        return alt.Chart(pd.DataFrame({"count": []})).mark_bar()
+
+    x_values = pd.to_numeric(df[x_field], errors="coerce").dropna().to_numpy()
+    if x_values.size == 0:
+        logger.warning("Histogram has no valid numeric data for '%s'.", x_field)
+        return alt.Chart(pd.DataFrame({"count": []})).mark_bar()
+
+    bin_edges = settings.get("bin_edges")
+    counts = edges = None
+
+    def _normalize_edges(edge_array):
+        edge_array = np.asarray(edge_array, dtype=float)
+        if edge_array.ndim != 1 or edge_array.size < 2 or not np.all(np.diff(edge_array) > 0):
+            raise ValueError("bin_edges must be a strictly increasing list with at least two numbers.")
+        return edge_array
+
+    if bin_edges is not None:
+        try:
+            edges = _normalize_edges(bin_edges)
+            counts, edges = np.histogram(x_values, bins=edges)
+        except Exception as exc:
+            logger.warning("Invalid bin_edges provided for histogram: %s", exc)
+            edges = None
+
+    if edges is None:
+        bin_step = settings.get("bin_step")
+        hist_range = None
+        bin_min = settings.get("bin_min")
+        bin_max = settings.get("bin_max")
+        if bin_min is not None or bin_max is not None:
+            min_val = float(bin_min) if bin_min is not None else float(np.min(x_values))
+            max_val = float(bin_max) if bin_max is not None else float(np.max(x_values))
+            if max_val <= min_val:
+                max_val = min_val + 1
+            hist_range = (min_val, max_val)
+
+        if bin_step:
+            try:
+                step = float(bin_step)
+                if step <= 0:
+                    raise ValueError("bin_step must be positive.")
+                start = float(hist_range[0]) if hist_range else float(np.min(x_values))
+                stop = float(hist_range[1]) if hist_range else float(np.max(x_values))
+                edges = np.arange(start, stop + step, step)
+                if edges.size < 2:
+                    edges = np.array([start, stop + step], dtype=float)
+                counts, edges = np.histogram(x_values, bins=edges)
+            except Exception as exc:
+                logger.warning("Invalid bin_step provided for histogram: %s", exc)
+                edges = None
+
+        if edges is None:
+            bins = settings.get("bins") or settings.get("max_bins") or settings.get("bin_count") or 40
+            try:
+                bins = int(bins)
+            except Exception:
+                bins = 40
+            counts, edges = np.histogram(x_values, bins=bins, range=hist_range)
+
+    hist_df = pd.DataFrame(
+        {
+            "bin_start": edges[:-1],
+            "bin_end": edges[1:],
+            "count": counts,
+            "count_start": 0,
+        }
     )
-    
-    # Apply color if specified
-    color_field = settings.get('color')
-    if color_field:
-        chart = chart.encode(color=color_field)
-    
-    # Set properties
-    props = {}
-    if 'title' in settings:
-        props['title'] = settings['title']
-    props['height'] = settings.get('height', 300)
-    props['width'] = settings.get('width', 'container')
-    
-    chart = chart.properties(**props)
-    
-    return chart
+
+    tooltip = settings.get("tooltip")
+    if not tooltip:
+        tooltip = ["bin_start:Q", "bin_end:Q", "count:Q"]
+    y_domain = settings.get("y_domain")
+    y_scale_kwargs = {}
+    if y_domain is not None:
+        y_scale_kwargs["domain"] = y_domain
+    else:
+        y_scale_kwargs["domainMin"] = 0
+    y_scale = alt.Scale(**y_scale_kwargs)
+    fill_color = settings.get("fill_color")
+    stroke_color = settings.get("stroke_color", "#0a2b63")
+    stroke_width = settings.get("stroke_width", 1)
+
+    bar_mark = dict(
+        opacity=settings.get("opacity", 0.5),
+        stroke=stroke_color,
+        strokeWidth=stroke_width,
+    )
+    if fill_color:
+        bar_mark["color"] = fill_color
+
+    chart = (
+        alt.Chart(hist_df)
+        .mark_bar(**bar_mark)
+        .encode(
+            x=alt.X("bin_start:Q", title=settings.get("x_title", x_field)),
+            x2="bin_end:Q",
+            y=alt.Y(
+                "count:Q",
+                title=settings.get("y_title", "Count"),
+                scale=y_scale,
+            ),
+            y2="count_start:Q",
+            tooltip=tooltip,
+        )
+    )
+
+    props = {
+        "height": settings.get("height", 300),
+        "width": settings.get("width", "container"),
+    }
+    if "title" in settings:
+        props["title"] = settings["title"]
+
+    return chart.properties(**props)
 
 
 def create_word_cloud(data, settings):

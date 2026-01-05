@@ -25,3 +25,4 @@ wordcloud==1.9.4
 shapely
 iommi
 folium==0.20.0
+numpy

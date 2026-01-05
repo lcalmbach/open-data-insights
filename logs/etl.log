@@ -20504,3 +20504,23 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2026-01-04 09:16:44,787 - StoryGeneration - INFO - Story generation skipped for template: Tree Inventory Basel-Stadt
 2026-01-04 09:16:51,558 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
 2026-01-04 09:16:51,630 - StoryGeneration - ERROR - Failed to generate story for template: Tree Inventory Basel-Stadt
+2026-01-04 10:14:49,556 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
+2026-01-04 10:14:49,575 - StoryGeneration - INFO - Story generation skipped for template: Tree Inventory Basel-Stadt
+2026-01-04 10:14:59,136 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
+2026-01-04 10:15:14,743 - StoryGeneration - INFO - Successfully generated story for template: Tree Inventory Basel-Stadt
+2026-01-04 10:29:52,519 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
+2026-01-04 10:30:05,431 - StoryGeneration - INFO - Successfully generated story for template: Tree Inventory Basel-Stadt
+2026-01-04 14:43:38,465 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
+2026-01-04 14:43:45,208 - StoryGeneration - INFO - Successfully generated story for template: Tree Inventory Basel-Stadt
+2026-01-04 15:15:36,554 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
+2026-01-04 15:15:36,757 - StoryGeneration - ERROR - Failed to generate story for template: Tree Inventory Basel-Stadt
+2026-01-04 15:17:21,623 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
+2026-01-04 15:17:30,275 - StoryGeneration - INFO - Successfully generated story for template: Tree Inventory Basel-Stadt
+2026-01-04 15:41:24,001 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
+2026-01-04 15:41:34,965 - StoryGeneration - INFO - Successfully generated story for template: Tree Inventory Basel-Stadt
+2026-01-04 15:42:16,498 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
+2026-01-04 15:42:23,073 - StoryGeneration - INFO - Successfully generated story for template: Tree Inventory Basel-Stadt
+2026-01-04 15:50:42,850 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
+2026-01-04 15:50:50,872 - StoryGeneration - INFO - Successfully generated story for template: Tree Inventory Basel-Stadt
+2026-01-04 16:55:13,729 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
+2026-01-04 16:55:21,609 - StoryGeneration - INFO - Successfully generated story for template: Tree Inventory Basel-Stadt
