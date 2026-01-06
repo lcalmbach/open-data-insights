@@ -86,6 +86,7 @@ class EmailService(ETLBaseService):
             User = get_user_model()
             users = User.objects.filter(is_active=True)
             total_sent = 0
+            total_errors = 0
             details = []
 
             # fetch templates that are not yet published for creation (one query)
@@ -149,6 +150,8 @@ class EmailService(ETLBaseService):
                 )
                 if result.get("success"):
                     total_sent += 1
+                else:
+                    total_errors += 1
 
             # mark templates as published if we sent at least one email
             if new_templates_qs.exists() and total_sent > 0:
@@ -163,6 +166,7 @@ class EmailService(ETLBaseService):
             return {
                 "success": True,
                 "total_sent": total_sent,
+                "failed": total_errors,
                 "details": details,
             }
 

@@ -49,19 +49,19 @@ class Command(BaseCommand):
         
         service = EmailService()
         result = service.send_stories_for_date(send_date=send_date)
-        
+        print(result)
         if result['success']:
             self.stdout.write(
                 self.style.SUCCESS(
                     f"Email sending completed successfully. "
-                    f"Sent: {result.get('successful', 0)}, Failed: {result.get('failed', 0)}"
+                    f"Sent: {result.get('total_sent', 0)}, Failed: {result.get('failed', 0)}"
                 )
             )
         else:
             self.stdout.write(
                 self.style.ERROR(
                     f"Email sending completed with errors. "
-                    f"Sent: {result.get('successful', 0)}, Failed: {result.get('failed', 0)}"
+                    f"Sent: {result.get('total_sent', 0)}, Failed: {result.get('failed', 0)}"
                 )
             )
             

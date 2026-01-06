@@ -951,27 +951,15 @@ def apply_common_settings(chart, settings):
 
         axis_obj = alt.Axis(**axis_kwargs) if axis_kwargs else alt.Axis()
 
-        if x_type == "O":
-            encodings["x"] = alt.X(
-                f"{x_field}:O",
-                title=settings.get("x_title", x_field),
-                sort=x_sort,
-                axis=axis_obj,
-            )
-        elif x_type == "T":
-            encodings["x"] = alt.X(
-                f"{x_field}:T",
-                title=settings.get("x_title", x_field),
-                axis=axis_obj,
-                # scale=scale_obj if scale_obj is not None else None,
-            )
-        else:  # quantitative
-            encodings["x"] = alt.X(
-                f"{x_field}:Q",
-                title=settings.get("x_title", x_field),
-                axis=axis_obj,
-                #scale=scale_obj if scale_obj is not None else None,
-            )
+        encodings["x"] = alt.X(
+            f"{x_field}:{x_type}",
+            title=settings.get("x_title", x_field),
+            axis=axis_obj,
+        )
+        if scale_obj:
+            encodings["x"].scale=scale_obj
+        if x_sort:
+            encodings["x"].sort=x_sort
 
     # Y-axis
     y_field = settings.get('y')
@@ -981,7 +969,7 @@ def apply_common_settings(chart, settings):
         y_integer = bool(settings.get("y_tick_integer", False))
         y_domain = settings.get("y_domain", None)
         y_axis_labels = settings.get("y_axis_labels")
-
+        y_sort = settings.get("y_sort", None)
         axis_opts = _build_axis(y_axis_settings, y_integer)
         scale_obj = _build_scale(y_domain)
 
@@ -992,29 +980,17 @@ def apply_common_settings(chart, settings):
             axis_kwargs["labelExpr"] = _label_expr_for_labels(y_axis_labels)
         axis_obj = alt.Axis(**axis_kwargs) if axis_kwargs else alt.Axis()
 
-        if y_type == "O":
-            encodings["y"] = alt.Y(
-                f"{y_field}:O",
-                title=settings.get("y_title", y_field),
-                axis=axis_obj,
-                sort=settings.get("y_sort", None),
-            )
-        else:
-            if scale_obj:
-                encodings['y'] = alt.Y(
-                    f"{y_field}:Q",
-                    title=settings.get("y_title", y_field),
-                    axis=axis_obj,
-                    scale=scale_obj if scale_obj is not None else None,
-                    sort=settings.get("y_sort", None),
-                )
-            else:
-                encodings['y'] = alt.Y(
-                    f"{y_field}:Q",
-                    title=settings.get("y_title", y_field),
-                    axis=axis_obj,
-                    sort=settings.get("y_sort", None),
-                )
+        encodings["y"] = alt.Y(
+            f"{y_field}:{y_type}",
+            title=settings.get("y_title", y_field),
+            axis=axis_obj,
+            sort=settings.get("y_sort", None),
+        )
+        if scale_obj:
+            encodings["y"].scale=scale_obj
+        if y_sort:
+            encodings["y"].sort=y_sort
+               
     # Color encoding (optional)
     color_field = settings.get('color')
     if color_field:
