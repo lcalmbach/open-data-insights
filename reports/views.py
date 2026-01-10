@@ -1,5 +1,8 @@
 import json
 import random
+import shlex
+import subprocess
+import sys
 
 import altair as alt
 import markdown2
@@ -597,6 +600,44 @@ def delete_story(request, story_id):
         return redirect("story_detail", story_id=story_id)
     story_to_delete.delete()
     return redirect("stories")
+
+
+@login_required
+@user_passes_test(lambda user: user.is_staff)
+def run_commands_view(request):
+    command = ""
+    result = None
+    if request.method == "POST":
+        command = (request.POST.get("command") or "").strip()
+        if command:
+            try:
+                args = shlex.split(command)
+                manage_py = settings.BASE_DIR / "manage.py"
+                completed = subprocess.run(
+                    [sys.executable, str(manage_py), *args],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    cwd=settings.BASE_DIR,
+                    timeout=60,
+                )
+                result = {
+                    "returncode": completed.returncode,
+                    "stdout": completed.stdout,
+                    "stderr": completed.stderr,
+                }
+            except ValueError as exc:
+                result = {"error": f"Invalid command: {exc}"}
+            except subprocess.TimeoutExpired as exc:
+                result = {"error": f"Command timed out after {exc.timeout} seconds."}
+        else:
+            result = {"error": "Enter a management command to run."}
+
+    return render(
+        request,
+        "reports/run_commands.html",
+        {"command": command, "result": result},
+    )
 
 
 def get_tables(selected_story):

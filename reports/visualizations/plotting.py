@@ -70,13 +70,50 @@ def create_line_chart(data, settings):
     if settings.get('x_type') == "T":
         data[settings.get('x')] = pd.to_datetime(data[settings.get('x')], errors='coerce')
     
-    # Create base chart
-    chart = alt.Chart(data).mark_line(
-        point=settings.get('show_points', False),
-        interpolate=settings.get('interpolate', 'linear')
-    )
-    # Apply encodings and properties
-    chart = apply_common_settings(chart, settings)
+    if "focus_line" in settings:
+        focus_year = settings["focus_line"]["color_value"]
+        settings["x_type"] = 'N'
+        base = alt.Chart().encode(
+            #x=alt.X("month:O", title="Monat", sort=list(range(1, 13))),
+            #y=alt.Y("avg_temp:Q", title="Monatsmittel Temperatur (°C)"),
+            x=alt.X(f'{settings["x"]}:{settings["x_type"]}'),
+            y=alt.Y(settings["y"]),
+            tooltip=settings["tooltips"],
+        )
+        
+        ref_lines = base.transform_filter(
+            alt.datum.Year != focus_year
+        ).mark_line(
+            color=settings["bg_line"]["line_color"],
+            strokeWidth=1,
+            opacity=0.6
+        ).encode(
+            detail="Year:N"     # sorgt für eine Linie pro Jahr, ohne Legend
+        )
+
+        # Fokusjahr: rot + fett
+        focus_line = base.transform_filter(
+            alt.datum.Year == focus_year
+        ).mark_line(
+            color=settings["focus_line"]["line_color"],
+            strokeWidth=settings["focus_line"]["line_width"],
+        )
+
+        chart = alt.layer(
+            ref_lines,
+            focus_line,
+            data=data   # df = Ergebnis deines SQL-Queries als DataFrame
+        ).properties(
+            width=700,
+            height=380
+        )
+    else:
+        chart = alt.Chart(data).mark_line(
+            point=settings.get('show_points', False),
+            interpolate=settings.get('interpolate', 'linear')
+        )
+        # Apply encodings and properties
+        chart = apply_common_settings(chart, settings)
 
     # Line-specific settings
     if 'stroke_width' in settings:

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Run Commands{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h1 class="h3 mb-3">Run Management Commands</h1>
+    <form method="post" class="card shadow-sm" id="run-command-form">
+      {% csrf_token %}
+      <div class="card-body">
+        <label for="command" class="form-label">Command</label>
+        <input type="text" class="form-control" id="command" name="command"
+          placeholder="e.g. run_etl_pipeline --help" value="{{ command }}">
+        <div class="form-text">Runs: <code>manage.py &lt;command&gt;</code></div>
+      </div>
+      <div class="card-footer text-end">
+        <button type="submit" class="btn btn-primary">Run</button>
+      </div>
+    </form>
+
+    {% if result %}
+    <div class="card mt-4" id="run-command-result">
+      <div class="card-header">Result</div>
+      <div class="card-body">
+        {% if result.error %}
+        <div class="alert alert-danger mb-0">{{ result.error }}</div>
+        {% else %}
+        <div class="mb-2"><strong>Exit code:</strong> {{ result.returncode }}</div>
+        {% if result.stdout %}
+        <div class="mb-3">
+          <div class="fw-semibold">Stdout</div>
+          <pre class="bg-light p-3 border rounded">{{ result.stdout }}</pre>
+        </div>
+        {% endif %}
+        {% if result.stderr %}
+        <div>
+          <div class="fw-semibold">Stderr</div>
+          <pre class="bg-light p-3 border rounded">{{ result.stderr }}</pre>
+        </div>
+        {% endif %}
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  const runForm = document.getElementById("run-command-form");
+  const resultBox = document.getElementById("run-command-result");
+  if (runForm && resultBox) {
+    runForm.addEventListener("submit", () => {
+      resultBox.remove();
+    });
+  }
+</script>
+{% endblock %}
