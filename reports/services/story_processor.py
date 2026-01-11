@@ -43,6 +43,8 @@ class DecimalEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Decimal):
             return float(obj)
+        if isinstance(obj, (date, datetime)):
+            return obj.isoformat()   # 'YYYY-MM-DD' or ISO datetime
         return super().default(obj)
 
 
@@ -220,7 +222,10 @@ class StoryProcessor:
                     df = self.dbclient.run_query(
                         self.story.template.publish_conditions, params
                     )
-                    return df.iloc[0, 0] == 1
+                    if df is not None:
+                        return df.iloc[0, 0] == 1
+                    else:
+                        return False    
                 else:
                     return True  # no conditions defined, so we assume they are met
 
@@ -232,7 +237,10 @@ class StoryProcessor:
             if self.story.template.has_data_sql:
                 params = self._get_sql_command_params(self.story.template.has_data_sql)
                 df = self.dbclient.run_query(self.story.template.has_data_sql, params)
-                has_data = df.iloc[0, 0] > 0
+                if df is not None:
+                    has_data = df.iloc[0, 0] > 0
+                else:
+                    has_data = False
             if self.force_generation:
                 result = has_data
             elif not self.is_data_based:

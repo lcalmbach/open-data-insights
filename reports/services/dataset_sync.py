@@ -72,7 +72,7 @@ class DatasetSyncService(ETLBaseService):
         if dataset_id:
             datasets = Dataset.objects.filter(active=True, id=dataset_id)
         else:
-            datasets = Dataset.objects.filter(active=True, source="ods").order_by("id")
+            datasets = Dataset.objects.filter(active=True).order_by("id")
 
         results = {
             "success": True,

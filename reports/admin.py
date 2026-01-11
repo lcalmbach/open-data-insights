@@ -82,11 +82,11 @@ class LookupValueAdmin(admin.ModelAdmin):
 
 @admin.register(Dataset)
 class DatasetAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "import_type", "last_import_date","source_identifier")
+    list_display = ("id", "name", "import_type", "source", "last_import_date","source_identifier")
     sortable_by = ("name", "source_identifier", "id")
     sorted_by = ("name",)
     search_fields = ["name", "source_identifier"]  # shows a filter sidebar
-    list_filter = ("import_type",)
+    list_filter = ("import_type", "source")
 
 
 @admin.register(StoryTemplateSubscription)

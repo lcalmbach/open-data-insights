@@ -32,7 +32,30 @@
       "args": [
         "generate_stories",
         "--id",
-        "36",
+        "46",
+        "-v",
+        "2"
+      ],
+      "django": true,
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "report_generator.settings",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    },
+
+    {
+      "name": "Django: Sync Data id=x",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${command:python.interpreterPath}",
+      "program": "${workspaceFolder}/manage.py",
+      "args": [
+        "synch_data",
+        "--id",
+        "69",
         "-v",
         "2"
       ],
@@ -54,8 +77,6 @@
       "program": "${workspaceFolder}/manage.py",
       "args": [
         "synch_data",
-        "--id",
-        "69",
         "-v",
         "2"
       ],

@@ -49,7 +49,6 @@ class Command(BaseCommand):
         
         service = EmailService()
         result = service.send_stories_for_date(send_date=send_date)
-        print(result)
         if result['success']:
             self.stdout.write(
                 self.style.SUCCESS(
