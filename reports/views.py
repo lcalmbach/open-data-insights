@@ -1,5 +1,7 @@
+import csv
 import json
 import random
+import re
 import shlex
 import subprocess
 import sys
@@ -12,9 +14,11 @@ from iommi import Column, Table
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.dateparse import parse_date
+from django.utils.text import slugify
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
 
@@ -119,6 +123,21 @@ def _accessible_template_ids(user):
     )
 
 
+def _extract_chart_id(content_html: str | None) -> str | None:
+    if not content_html:
+        return None
+    match = re.search(r'vegaEmbed\([\"\']#([^\"\']+)[\"\']', content_html)
+    if match:
+        return match.group(1)
+    match = re.search(r'id=[\"\\\']([^\"\\\']+)[\"\\\']', content_html)
+    return match.group(1) if match else None
+
+
+def _attach_graphic_chart_ids(graphics):
+    for graphic in graphics:
+        graphic.chart_id = _extract_chart_id(graphic.content_html)
+
+
 @never_cache
 def home_view(request):
     random_quote = _get_random_quote()
@@ -139,6 +158,7 @@ def home_view(request):
     )
     tables = get_tables(selected_story) if selected_story else []
     graphics = selected_story.story_graphics.all() if selected_story else []
+    _attach_graphic_chart_ids(graphics)
     data_source = selected_story.template.data_source if selected_story else None
     other_ressources = (
         selected_story.template.other_ressources if selected_story else None
@@ -263,6 +283,7 @@ def stories_view(request):
     # Process story content
     if selected_story:
         graphics = selected_story.story_graphics.all() if selected_story else []
+        _attach_graphic_chart_ids(graphics)
         data_source = selected_story.template.data_source if selected_story else None
         other_ressources = (
             selected_story.template.other_ressources if selected_story else None
@@ -506,6 +527,11 @@ class AboutView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["app_info"] = settings.APP_INFO
+        context["num_insights"] = Story.objects.count()
+        context["num_datasets"] = Dataset.objects.filter(active=True).count()
+        context["num_story_templates"] = StoryTemplate.objects.count()
+        context["num_odi_datasets"] = Dataset.objects.filter(active=True, source = 'odi').count()
+        context["num_non_odi_datasets"] = context["num_datasets"] - context["num_odi_datasets"] 
         return context
 
 
@@ -534,6 +560,7 @@ def view_story(request, story_id=None):
     next_story_id = stories[index + 1].id if index < len(stories) - 1 else None
     tables = get_tables(selected_story) if selected_story else []
     graphics = selected_story.story_graphics.all() if selected_story else []
+    _attach_graphic_chart_ids(graphics)
     data_source = selected_story.template.data_source if selected_story else None
     other_ressources = (
         selected_story.template.other_ressources if selected_story else None
@@ -567,6 +594,7 @@ def story_detail(request, story_id=None):
     )
     tables = get_tables(selected_story) if selected_story else []
     graphics = selected_story.story_graphics.all() if selected_story else []
+    _attach_graphic_chart_ids(graphics)
     data_source = selected_story.template.data_source if selected_story else None
     other_ressources = (
         selected_story.template.other_ressources if selected_story else None
@@ -674,6 +702,7 @@ def get_tables(selected_story):
 
             tables.append(
                 {
+                    "id": t.id,
                     "table_id": f"table-{t.id}",
                     "rows": data,
                     "columns": columns,
@@ -686,3 +715,46 @@ def get_tables(selected_story):
             print(f"Error processing table {t.id}: {e}")
 
     return tables
+
+
+def download_story_table_csv(request, table_id):
+    table = get_object_or_404(StoryTable, pk=table_id)
+    raw_data = table.data or []
+    if isinstance(raw_data, str):
+        try:
+            raw_data = json.loads(raw_data)
+        except json.JSONDecodeError:
+            raw_data = []
+
+    if isinstance(raw_data, list):
+        rows = raw_data
+        columns = list(rows[0].keys()) if rows else []
+    elif isinstance(raw_data, dict):
+        columns = list(raw_data.keys())
+        row_count = max(
+            (len(values) for values in raw_data.values() if isinstance(values, list)),
+            default=0,
+        )
+        rows = []
+        for i in range(row_count):
+            row = {}
+            for column in columns:
+                values = raw_data[column]
+                if isinstance(values, list):
+                    row[column] = values[i] if i < len(values) else ""
+                else:
+                    row[column] = values
+            rows.append(row)
+    else:
+        rows = []
+        columns = []
+
+    filename = slugify(table.title) or f"table-{table.id}"
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{filename}.csv"'
+    writer = csv.writer(response)
+    if columns:
+        writer.writerow(columns)
+    for row in rows:
+        writer.writerow([row.get(column, "") for column in columns])
+    return response

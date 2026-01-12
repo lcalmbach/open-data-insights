@@ -63,6 +63,16 @@
       {% endfor %}
     </tbody>
   </table>
+  <div class="d-flex justify-content-end mb-2">
+    <a
+      class="btn btn-sm btn-link text-decoration-none"
+      href="{% url 'story_table_download' table.id %}"
+      title="download data to csv file"
+      aria-label="download data to csv file"
+    >
+      <i class="bi bi-download"></i>
+    </a>
+  </div>
   <br>
   {% endfor %}
   </div>
@@ -72,10 +82,62 @@
     {% for graphic in graphics %}
     <h5>Figure {{ graphic.graphic_template.sort_order|default:0|add:"1" }}: {{ graphic.title }}</h5>
     {{ graphic.content_html|safe }}
+    <!-- 
+    {% if graphic.chart_id %}
+    <div class="d-flex justify-content-end mb-2">
+      <a
+        class="btn btn-sm btn-link text-decoration-none"
+        href="#"
+        data-chart-id="{{ graphic.chart_id }}"
+        data-download-name="graphic-{{ graphic.id }}.png"
+        title="Download plot as PNG"
+        aria-label="Download plot as PNG"
+      >
+        <i class="bi bi-download"></i>
+      </a>
+    </div>
+    {% endif %}
+    -->
+    <br>
     <!-- debug: graphic ids
 cal    {{ graphic.id}} {{graphic.graphic_template.id}}
     -->
     {% endfor %}
+    <script>
+      (function () {
+        function downloadChart(chartId, filename) {
+          if (!chartId || !window.__vegaViews || !window.__vegaViews[chartId]) {
+            return;
+          }
+          var view = window.__vegaViews[chartId];
+          view
+            .toImageURL("png")
+            .then(function (url) {
+              var link = document.createElement("a");
+              link.href = url;
+              link.download = filename || (chartId + ".png");
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+            })
+            .catch(function (err) {
+              console.warn("Unable to export chart", err);
+            });
+        }
+
+        document.addEventListener("click", function (event) {
+          var target = event.target.closest("[data-chart-id]");
+          if (!target) {
+            return;
+          }
+          event.preventDefault();
+          downloadChart(
+            target.getAttribute("data-chart-id"),
+            target.getAttribute("data-download-name")
+          );
+        });
+      })();
+    </script>
   {% endif %}
   
   <div class="mb-3 p-3 bg-light rounded">

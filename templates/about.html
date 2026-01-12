@@ -31,6 +31,17 @@ To receive tailored stories that match your interests, simply register and subsc
 All stories are based on data from publicly available, official Open Data platforms. The goal is to help everyone – from engaged citizens to decision-makers – better understand the world through data.
 </p>
 
+<p>
+  As of today {{ num_insights }} insights have been generated from {{ num_story_templates }} insight templates.
+  These insights are based on {{ num_datasets }} datasets. Of these
+  {{ num_odi_datasets }} are compiled and curated for this app and
+  {{ num_non_odi_datasets }} are daily synchronized from an open data portal. 
+  Where needed, the synchronized datasets are further enriched with derived indicators—for example, weather data such as temperature and precipitation are extended with metrics like the number of ice days, heatwave duration, consecutive rain periods, or drought phases. To explore the available insights, click
+  <a href="{% url 'stories' %}">here</a>.
+</p>
+
+
+
 <br>
 <div class="card mt-4 mx-auto" style="max-width: 400px; font-size: 0.9rem;">
   <div class="card-header bg-light py-2 px-3">
@@ -48,5 +59,7 @@ All stories are based on data from publicly available, official Open Data platfo
     </p>
   </div>
 </div>
+
+
 
 {% endblock %}

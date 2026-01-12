@@ -55,6 +55,13 @@ def generate_chart(data, settings, chart_id):
 
             html = html.replace('id="vis"', f'id="{chart_id}"')
             html = html.replace('vegaEmbed("#vis"', f'vegaEmbed("#{chart_id}"')
+            embed_hook = ".then(function(result) {"
+            if embed_hook in html:
+                store_view = (
+                    "window.__vegaViews = window.__vegaViews || {};\n"
+                    f'window.__vegaViews["{chart_id}"] = result.view;'
+                )
+                html = html.replace(embed_hook, f"{embed_hook}\n{store_view}")
         else:
             html = chart  # wordcloud returns HTML directly
         return html

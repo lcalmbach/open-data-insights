@@ -19,5 +19,10 @@ urlpatterns = [
         "templates/<int:pk>/", views.storytemplate_detail_view, name="template_detail"
     ),
     path("stories/<int:story_id>/rate/", views.rate_story, name="rate_story"),
+    path(
+        "tables/<int:table_id>/download/",
+        views.download_story_table_csv,
+        name="story_table_download",
+    ),
     path("management/commands/", views.run_commands_view, name="run_commands"),
 ]
