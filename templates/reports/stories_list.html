@@ -79,7 +79,7 @@
   <div class="col-12">
     <div class="mb-3">
       <label for="story-select" class="form-label">
-        Select Insight
+        <b>Select Insight</b>
         <small class="text-muted">(<span id="story-select-count">{{ stories|length }}</span> found)</small>
       </label>
       <select id="story-select" class="form-select" data-selected="{{ selected_story.id|default:'' }}">
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   if (templateSelect) {
-    templateSelect.addEventListener('change', function () {
+    templateSelect.addEventListener('change',mar function () {
       form.requestSubmit();
     });
   }

@@ -17,6 +17,9 @@
   <div class="markdown-body">
     {{ template.description_html|safe }}
   </div>
+  {% for dataset in datasets %}
+    {{dataset.name}}
+  {% endfor %%}
   <a href="{{ back_url }}" class="btn btn-secondary mt-3">
   <i class="bi bi-arrow-left-circle"></i> Back
 </a>

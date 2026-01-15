@@ -104,8 +104,12 @@ class EmailService(ETLBaseService):
             for user in users:
                 # Find subscriptions for this user
                 subscriptions = StoryTemplateSubscription.objects.filter(user=user)
-                # Get all templates the user is subscribed to
-                template_ids = subscriptions.values_list("story_template_id", flat=True)
+                # Get subscribed templates the user can access based on organisation
+                template_ids = (
+                    StoryTemplate.objects.accessible_to(user)
+                    .filter(id__in=subscriptions.values_list("story_template_id", flat=True))
+                    .values_list("id", flat=True)
+                )
                 # Find stories published on send_date for these templates
                 stories = Story.objects.filter(
                     template_id__in=template_ids, published_date=send_date

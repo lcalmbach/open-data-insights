@@ -79,6 +79,14 @@
       <hr>
       <div id="details-body">{{ selected_template.description_html|safe }}</div>
       <hr>
+      Datasets used in this template
+      <ul>
+        {% for rel in datasets %}
+            <li><a href="{{ rel.dataset.source_url }}">{{ rel.dataset.source_url_label}}</a></li>
+        {% endfor %%}
+      </ul>
+      <br>
+      <hr>
       <p class="text-muted mb-2">
         {{ subscribed_count|default:"0" }} of {{ total_users|default:"0" }} users have subscribed to this template
       </p>

@@ -26,7 +26,7 @@ from account.models import CustomUser
 from .forms import StoryRatingForm
 from .models.dataset import Dataset
 from .models.graphic import Graphic
-from .models.story_template import StoryTemplate
+from .models.story_template import StoryTemplate, StoryTemplateDataset
 from .models.story import Story
 from .models.story_table import StoryTable
 from .models.lookups import Period
@@ -34,6 +34,7 @@ from .models.story_rating import StoryRating
 from .models.quote import Quote
 from .services.database_client import DjangoPostgresClient
 
+MARKDOWN_EXTRAS = ["tables", "fenced-code-blocks"]
 
 class _RequestWithFilteredQuery:
     """Lightweight request proxy that drops a handful of query keys."""
@@ -69,46 +70,6 @@ class _DatasetRow:
 
     def __getitem__(self, item):
         return self._data[item]
-
-
-def generate_fake_graphic(chart_id):
-    """Generate a fake graphic as HTML."""
-    # Fake DataFrame simulating data retrieved from the database
-    data = {
-        "date": pd.date_range(start="2025-07-01", periods=5, freq="D"),
-        "value": [
-            random.randint(5, 25) for _ in range(5)
-        ],  # Random values between 5 and 25
-    }
-    df = pd.DataFrame(data)
-
-    # Fake settings simulating settings stored in the database
-    settings = {
-        "x": "date",
-        "y": "value",
-        "x_title": "Date",
-        "y_title": "Value",
-        "type": "line",  # Graphic type (e.g., bar, line, scatter)
-    }
-
-    # Generate the graphic using Altair
-    chart = (
-        alt.Chart(df)
-        .mark_line()
-        .encode(
-            x=alt.X(settings["x"], title=settings["x_title"]),
-            y=alt.Y(settings["y"], title=settings["y_title"]),
-        )
-    )
-
-    # Convert the chart to HTML
-    chart_html = chart.to_html(embed_options={"actions": False, "renderer": "canvas"})
-
-    # Wrap the chart HTML in a div with a unique ID
-    container_html = f'<div id="{chart_id}"></div>'
-    script_html = chart_html.replace('vegaEmbed("#vis"', f'vegaEmbed("#{chart_id}"')
-
-    return f"{container_html}{script_html}"
 
 
 def _get_random_quote() -> Quote | None:
@@ -154,7 +115,7 @@ def home_view(request):
     selected_story = stories[0]
     next_story_id = stories[1].id if len(stories) > 1 else None
     selected_story.content_html = markdown2.markdown(
-        selected_story.content, extras=["tables"]
+        selected_story.content, extras=MARKDOWN_EXTRAS
     )
     tables = get_tables(selected_story) if selected_story else []
     graphics = selected_story.story_graphics.all() if selected_story else []
@@ -177,6 +138,7 @@ def home_view(request):
             "other_ressources": other_ressources,
             "available_subscriptions": available_subscriptions,
             "random_quote": random_quote,
+            "num_insights": Story.objects.count()
         },
     )
 
@@ -204,11 +166,11 @@ def templates_view(request):
         selected_template = qs.filter(id=selected_template_id).first()
     if not selected_template:
         selected_template = qs.first()
-
+    datasets = StoryTemplateDataset.objects.filter(story_template=selected_template)
     # Markdown nur für das ausgewählte Template rendern
     if selected_template and selected_template.description:
         selected_template.description_html = markdown2.markdown(
-            selected_template.description, extras=["tables"]
+            selected_template.description, extras=MARKDOWN_EXTRAS
         )
         story_count = Story.objects.filter(template=selected_template).count()
     else:
@@ -235,8 +197,10 @@ def templates_view(request):
             "total_users": CustomUser.objects.all().count(),
             "subscribed_count": subscribed_count,
             "admin_template_edit_url": admin_template_edit_url,
+            "datasets":datasets,
         },
     )
+    
 
 
 
@@ -291,7 +255,7 @@ def stories_view(request):
         # Get tables and convert directly to DataFrames
         tables = get_tables(selected_story) if selected_story else []
         selected_story.content_html = markdown2.markdown(
-            selected_story.content, extras=["tables"]
+            selected_story.content, extras=MARKDOWN_EXTRAS
         )
     else:
         graphics = []
@@ -481,9 +445,10 @@ def storytemplate_detail_view(request, pk):
         StoryTemplate.objects.accessible_to(request.user), pk=pk
     )
     template.description_html = markdown2.markdown(
-        template.description, extras=["tables"]
+        template.description, extras=MARKDOWN_EXTRAS
     )
     back_url = request.META.get("HTTP_REFERER", "/")  # fallback: Startseite
+    
     admin_template_edit_url = None
     if request.user.is_staff:
         admin_template_edit_url = reverse(
@@ -567,7 +532,7 @@ def view_story(request, story_id=None):
     )
     available_subscriptions = len(template_ids)
     selected_story.content_html = markdown2.markdown(
-        selected_story.content, extras=["tables"]
+        selected_story.content, extras=MARKDOWN_EXTRAS
     )
     return render(
         request,
@@ -601,7 +566,7 @@ def story_detail(request, story_id=None):
     )
 
     selected_story.content_html = markdown2.markdown(
-        selected_story.content, extras=["tables"]
+        selected_story.content, extras=MARKDOWN_EXTRAS
     )
     return render(
         request,
