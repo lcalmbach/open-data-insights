@@ -23876,3 +23876,635 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2026-01-15 07:27:49,998 - EmailService - INFO - Email sent successfully to 1 recipients
 2026-01-15 07:27:50,545 - EmailService - INFO - Email sent successfully to 1 recipients
 2026-01-15 07:27:51,090 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-16 06:13:12,166 - DatasetSync - INFO - Synchronizing dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-01-16 06:13:12,166 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-01-16 06:13:14,217 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-01-16 06:13:14,217 - DatasetSync - INFO - Synchronizing dataset ID 2: Virus Wastewater Monitoring
+2026-01-16 06:13:14,217 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2026-01-16 06:13:14,916 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2026-01-16 06:13:14,916 - DatasetSync - INFO - Synchronizing dataset ID 4: Rhine River Discharge and Water Level
+2026-01-16 06:13:14,916 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine River Discharge and Water Level
+2026-01-16 06:13:15,628 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine River Discharge and Water Level
+2026-01-16 06:13:15,628 - DatasetSync - INFO - Synchronizing dataset ID 6: Dog Population in Basel by Breed
+2026-01-16 06:13:15,628 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog Population in Basel by Breed
+2026-01-16 06:13:16,962 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog Population in Basel by Breed
+2026-01-16 06:13:16,962 - DatasetSync - INFO - Synchronizing dataset ID 9: Dognames in Basel-Stadt
+2026-01-16 06:13:16,962 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2026-01-16 06:13:17,787 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2026-01-16 06:13:17,788 - DatasetSync - INFO - Synchronizing dataset ID 10: Dog Population since 1970
+2026-01-16 06:13:17,788 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2026-01-16 06:13:18,456 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2026-01-16 06:13:18,456 - DatasetSync - INFO - Synchronizing dataset ID 13: Air Quality at NCBN station Binningen
+2026-01-16 06:13:18,456 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2026-01-16 06:13:19,145 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2026-01-16 06:13:19,145 - DatasetSync - INFO - Synchronizing dataset ID 14: Air Traffic at Airport Basel/Mulhouse
+2026-01-16 06:13:19,145 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air Traffic at Airport Basel/Mulhouse
+2026-01-16 06:13:19,992 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air Traffic at Airport Basel/Mulhouse
+2026-01-16 06:13:19,992 - DatasetSync - INFO - Synchronizing dataset ID 15: kGWR Baselland
+2026-01-16 06:13:19,992 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2026-01-16 06:13:20,398 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2026-01-16 06:13:20,398 - DatasetSync - INFO - Synchronizing dataset ID 16: Land Price by Community in Baselland
+2026-01-16 06:13:20,398 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land Price by Community in Baselland
+2026-01-16 06:13:21,100 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land Price by Community in Baselland
+2026-01-16 06:13:21,100 - DatasetSync - INFO - Synchronizing dataset ID 17: Population of Basel-Stadt by Nationality
+2026-01-16 06:13:21,100 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel-Stadt by Nationality
+2026-01-16 06:13:21,824 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel-Stadt by Nationality
+2026-01-16 06:13:21,824 - DatasetSync - INFO - Synchronizing dataset ID 18: Population of Baselland by Age, Sex and Nationality
+2026-01-16 06:13:21,824 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by Age, Sex and Nationality
+2026-01-16 06:13:22,562 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by Age, Sex and Nationality
+2026-01-16 06:13:22,563 - DatasetSync - INFO - Synchronizing dataset ID 19: Population of Basel-Stadt by Residential District
+2026-01-16 06:13:22,563 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by Residential District
+2026-01-16 06:13:23,338 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by Residential District
+2026-01-16 06:13:23,338 - DatasetSync - INFO - Synchronizing dataset ID 20: Daily Arrivals and Overnight Stays by Origin in Basel-Stadt
+2026-01-16 06:13:23,338 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily Arrivals and Overnight Stays by Origin in Basel-Stadt
+2026-01-16 06:13:23,791 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily Arrivals and Overnight Stays by Origin in Basel-Stadt
+2026-01-16 06:13:23,791 - DatasetSync - INFO - Synchronizing dataset ID 21: Daily Arrivals, Overnight Stays, Rooms by Hotel Category in Basel-Stadt
+2026-01-16 06:13:23,791 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily Arrivals, Overnight Stays, Rooms by Hotel Category in Basel-Stadt
+2026-01-16 06:13:24,237 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily Arrivals, Overnight Stays, Rooms by Hotel Category in Basel-Stadt
+2026-01-16 06:13:24,237 - DatasetSync - INFO - Synchronizing dataset ID 22: Daily Overnight Stays, available and occupied Rooms in Basel-Stadt
+2026-01-16 06:13:24,237 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily Overnight Stays, available and occupied Rooms in Basel-Stadt
+2026-01-16 06:13:24,567 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily Overnight Stays, available and occupied Rooms in Basel-Stadt
+2026-01-16 06:13:24,567 - DatasetSync - INFO - Synchronizing dataset ID 23: Electricity Consumption in Basel
+2026-01-16 06:13:24,567 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity Consumption in Basel
+2026-01-16 06:13:25,163 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity Consumption in Basel
+2026-01-16 06:13:25,163 - DatasetSync - INFO - Synchronizing dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2026-01-16 06:13:25,163 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2026-01-16 06:13:25,852 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2026-01-16 06:13:25,852 - DatasetSync - INFO - Synchronizing dataset ID 25: Dwellings Basel-Stadt (GWR)
+2026-01-16 06:13:25,852 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2026-01-16 06:13:25,981 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2026-01-16 06:13:25,981 - DatasetSync - INFO - Synchronizing dataset ID 26: Addresses in Basel-Stadt
+2026-01-16 06:13:25,981 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel-Stadt
+2026-01-16 06:13:26,260 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel-Stadt
+2026-01-16 06:13:26,260 - DatasetSync - INFO - Synchronizing dataset ID 27: Opendata Datasets Basel-Stadt
+2026-01-16 06:13:26,260 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2026-01-16 06:13:26,650 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2026-01-16 06:13:26,650 - DatasetSync - INFO - Synchronizing dataset ID 28: Noise Monitoring in Basel
+2026-01-16 06:13:26,650 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2026-01-16 06:13:27,366 - DatasetSync - INFO - Successfully synchronized dataset ID 28: Noise Monitoring in Basel
+2026-01-16 06:13:27,366 - DatasetSync - INFO - Synchronizing dataset ID 29: Noise Monitoring Stations in Basel
+2026-01-16 06:13:27,366 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2026-01-16 06:13:27,489 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2026-01-16 06:13:27,489 - DatasetSync - INFO - Synchronizing dataset ID 30: Traffic Accidents in Basel-Stadt
+2026-01-16 06:13:27,489 - DatasetSync - INFO - Starting synchronization for dataset ID 30: Traffic Accidents in Basel-Stadt
+2026-01-16 06:13:27,943 - DatasetSync - INFO - Successfully synchronized dataset ID 30: Traffic Accidents in Basel-Stadt
+2026-01-16 06:13:27,943 - DatasetSync - INFO - Synchronizing dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2026-01-16 06:13:27,943 - DatasetSync - INFO - Starting synchronization for dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2026-01-16 06:13:28,554 - DatasetSync - INFO - Successfully synchronized dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2026-01-16 06:13:28,554 - DatasetSync - INFO - Synchronizing dataset ID 32: Population Baselland
+2026-01-16 06:13:28,554 - DatasetSync - INFO - Starting synchronization for dataset ID 32: Population Baselland
+2026-01-16 06:13:29,153 - DatasetSync - INFO - Successfully synchronized dataset ID 32: Population Baselland
+2026-01-16 06:13:29,153 - DatasetSync - INFO - Synchronizing dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2026-01-16 06:13:29,153 - DatasetSync - INFO - Starting synchronization for dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2026-01-16 06:13:29,595 - DatasetSync - INFO - Successfully synchronized dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2026-01-16 06:13:29,595 - DatasetSync - INFO - Synchronizing dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2026-01-16 06:13:29,595 - DatasetSync - INFO - Starting synchronization for dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2026-01-16 06:13:30,092 - DatasetSync - INFO - Successfully synchronized dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2026-01-16 06:13:30,092 - DatasetSync - INFO - Synchronizing dataset ID 35: Newborns in the Canton of Basel-Stadt by Sex and Origin
+2026-01-16 06:13:30,092 - DatasetSync - INFO - Starting synchronization for dataset ID 35: Newborns in the Canton of Basel-Stadt by Sex and Origin
+2026-01-16 06:13:30,603 - DatasetSync - INFO - Successfully synchronized dataset ID 35: Newborns in the Canton of Basel-Stadt by Sex and Origin
+2026-01-16 06:13:30,603 - DatasetSync - INFO - Synchronizing dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2026-01-16 06:13:30,603 - DatasetSync - INFO - Starting synchronization for dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2026-01-16 06:13:31,218 - DatasetSync - INFO - Successfully synchronized dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2026-01-16 06:13:31,219 - DatasetSync - INFO - Synchronizing dataset ID 37: Population of Basel-Stadt by Country of Origin
+2026-01-16 06:13:31,219 - DatasetSync - INFO - Starting synchronization for dataset ID 37: Population of Basel-Stadt by Country of Origin
+2026-01-16 06:13:32,010 - DatasetSync - INFO - Successfully synchronized dataset ID 37: Population of Basel-Stadt by Country of Origin
+2026-01-16 06:13:32,010 - DatasetSync - INFO - Synchronizing dataset ID 38: Fishing Statistics Basel-Stadt
+2026-01-16 06:13:32,010 - DatasetSync - INFO - Starting synchronization for dataset ID 38: Fishing Statistics Basel-Stadt
+2026-01-16 06:13:32,348 - DatasetSync - INFO - Successfully synchronized dataset ID 38: Fishing Statistics Basel-Stadt
+2026-01-16 06:13:32,348 - DatasetSync - INFO - Synchronizing dataset ID 39: Mortality in the Canton of Basel-Stadt by Date and Age Group
+2026-01-16 06:13:32,348 - DatasetSync - INFO - Starting synchronization for dataset ID 39: Mortality in the Canton of Basel-Stadt by Date and Age Group
+2026-01-16 06:13:33,055 - DatasetSync - INFO - Successfully synchronized dataset ID 39: Mortality in the Canton of Basel-Stadt by Date and Age Group
+2026-01-16 06:13:33,055 - DatasetSync - INFO - Synchronizing dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2026-01-16 06:13:33,055 - DatasetSync - INFO - Starting synchronization for dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2026-01-16 06:13:33,520 - DatasetSync - INFO - Successfully synchronized dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2026-01-16 06:13:33,521 - DatasetSync - INFO - Synchronizing dataset ID 41: Traffic-Relevant Events in Basel
+2026-01-16 06:13:33,521 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2026-01-16 06:13:34,011 - DatasetSync - INFO - Successfully synchronized dataset ID 41: Traffic-Relevant Events in Basel
+2026-01-16 06:13:34,011 - DatasetSync - INFO - Synchronizing dataset ID 42: Cantonal Votes in Basel-Stadt
+2026-01-16 06:13:34,011 - DatasetSync - INFO - Starting synchronization for dataset ID 42: Cantonal Votes in Basel-Stadt
+2026-01-16 06:13:35,033 - DatasetSync - INFO - Successfully synchronized dataset ID 42: Cantonal Votes in Basel-Stadt
+2026-01-16 06:13:35,033 - DatasetSync - INFO - Synchronizing dataset ID 43: National Votations: Basel-Stadt Votes
+2026-01-16 06:13:35,033 - DatasetSync - INFO - Starting synchronization for dataset ID 43: National Votations: Basel-Stadt Votes
+2026-01-16 06:13:35,439 - DatasetSync - INFO - Successfully synchronized dataset ID 43: National Votations: Basel-Stadt Votes
+2026-01-16 06:13:35,439 - DatasetSync - INFO - Synchronizing dataset ID 44: Degrees of Students in Baselland
+2026-01-16 06:13:35,439 - DatasetSync - INFO - Starting synchronization for dataset ID 44: Degrees of Students in Baselland
+2026-01-16 06:13:35,888 - DatasetSync - INFO - Successfully synchronized dataset ID 44: Degrees of Students in Baselland
+2026-01-16 06:13:35,888 - DatasetSync - INFO - Synchronizing dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2026-01-16 06:13:35,888 - DatasetSync - INFO - Starting synchronization for dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2026-01-16 06:13:36,369 - DatasetSync - INFO - Successfully synchronized dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2026-01-16 06:13:36,369 - DatasetSync - INFO - Synchronizing dataset ID 46: Illegal Waste dumps
+2026-01-16 06:13:36,369 - DatasetSync - INFO - Starting synchronization for dataset ID 46: Illegal Waste dumps
+2026-01-16 06:13:37,136 - DatasetSync - INFO - Successfully synchronized dataset ID 46: Illegal Waste dumps
+2026-01-16 06:13:37,136 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-01-16 06:13:37,136 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-01-16 06:13:37,142 - DatasetSync - INFO - Successfully synchronized dataset ID 47: CO2 Emissions (Worldwide)
+2026-01-16 06:13:37,142 - DatasetSync - INFO - Synchronizing dataset ID 48: Groundwater Quality in Basel-Stadt
+2026-01-16 06:13:37,142 - DatasetSync - INFO - Starting synchronization for dataset ID 48: Groundwater Quality in Basel-Stadt
+2026-01-16 06:13:37,694 - DatasetSync - INFO - Successfully synchronized dataset ID 48: Groundwater Quality in Basel-Stadt
+2026-01-16 06:13:37,694 - DatasetSync - INFO - Synchronizing dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2026-01-16 06:13:37,694 - DatasetSync - INFO - Starting synchronization for dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2026-01-16 06:13:38,369 - DatasetSync - INFO - Successfully synchronized dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2026-01-16 06:13:38,369 - DatasetSync - INFO - Synchronizing dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2026-01-16 06:13:38,369 - DatasetSync - INFO - Starting synchronization for dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2026-01-16 06:13:39,078 - DatasetSync - INFO - Successfully synchronized dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2026-01-16 06:13:39,078 - DatasetSync - INFO - Synchronizing dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2026-01-16 06:13:39,078 - DatasetSync - INFO - Starting synchronization for dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2026-01-16 06:13:40,532 - DatasetSync - INFO - Successfully synchronized dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2026-01-16 06:13:40,532 - DatasetSync - INFO - Synchronizing dataset ID 52: Environmental Travel Pass Basel Area
+2026-01-16 06:13:40,532 - DatasetSync - INFO - Starting synchronization for dataset ID 52: Environmental Travel Pass Basel Area
+2026-01-16 06:13:41,373 - DatasetSync - INFO - Successfully synchronized dataset ID 52: Environmental Travel Pass Basel Area
+2026-01-16 06:13:41,373 - DatasetSync - INFO - Synchronizing dataset ID 53: Motor Vehicle Stock in Baselland
+2026-01-16 06:13:41,373 - DatasetSync - INFO - Starting synchronization for dataset ID 53: Motor Vehicle Stock in Baselland
+2026-01-16 06:13:41,763 - DatasetSync - INFO - Successfully synchronized dataset ID 53: Motor Vehicle Stock in Baselland
+2026-01-16 06:13:41,764 - DatasetSync - INFO - Synchronizing dataset ID 54: Sprayereien in Basel-Stadt
+2026-01-16 06:13:41,764 - DatasetSync - INFO - Starting synchronization for dataset ID 54: Sprayereien in Basel-Stadt
+2026-01-16 06:13:42,433 - DatasetSync - INFO - Successfully synchronized dataset ID 54: Sprayereien in Basel-Stadt
+2026-01-16 06:13:42,433 - DatasetSync - INFO - Synchronizing dataset ID 55: Divorces in Basel-Stadt
+2026-01-16 06:13:42,433 - DatasetSync - INFO - Starting synchronization for dataset ID 55: Divorces in Basel-Stadt
+2026-01-16 06:13:43,254 - DatasetSync - ERROR - Failed to synchronize dataset ID 55: Divorces in Basel-Stadt
+2026-01-16 06:13:43,254 - DatasetSync - INFO - Synchronizing dataset ID 56: Marriages by Date of Wedding Ceremony in Basel-Stadt
+2026-01-16 06:13:43,254 - DatasetSync - INFO - Starting synchronization for dataset ID 56: Marriages by Date of Wedding Ceremony in Basel-Stadt
+2026-01-16 06:13:43,736 - DatasetSync - INFO - Successfully synchronized dataset ID 56: Marriages by Date of Wedding Ceremony in Basel-Stadt
+2026-01-16 06:13:43,736 - DatasetSync - INFO - Synchronizing dataset ID 57: Cleanliness Index in Basel-Stadt
+2026-01-16 06:13:43,736 - DatasetSync - INFO - Starting synchronization for dataset ID 57: Cleanliness Index in Basel-Stadt
+2026-01-16 06:13:44,419 - DatasetSync - INFO - Successfully synchronized dataset ID 57: Cleanliness Index in Basel-Stadt
+2026-01-16 06:13:44,419 - DatasetSync - INFO - Synchronizing dataset ID 58: Geoshapes Communities of Basel-Stadt
+2026-01-16 06:13:44,420 - DatasetSync - INFO - Starting synchronization for dataset ID 58: Geoshapes Communities of Basel-Stadt
+2026-01-16 06:13:44,761 - DatasetSync - INFO - Successfully synchronized dataset ID 58: Geoshapes Communities of Basel-Stadt
+2026-01-16 06:13:44,762 - DatasetSync - INFO - Synchronizing dataset ID 59: Opendata Datasets Baselland
+2026-01-16 06:13:44,762 - DatasetSync - INFO - Starting synchronization for dataset ID 59: Opendata Datasets Baselland
+2026-01-16 06:13:45,535 - DatasetSync - INFO - Successfully synchronized dataset ID 59: Opendata Datasets Baselland
+2026-01-16 06:13:45,535 - DatasetSync - INFO - Synchronizing dataset ID 60: Daylight in Basel
+2026-01-16 06:13:45,535 - DatasetSync - INFO - Starting synchronization for dataset ID 60: Daylight in Basel
+2026-01-16 06:13:45,543 - DatasetSync - INFO - Successfully synchronized dataset ID 60: Daylight in Basel
+2026-01-16 06:13:45,543 - DatasetSync - INFO - Synchronizing dataset ID 61: Relocations from and to Basel-Stadt
+2026-01-16 06:13:45,543 - DatasetSync - INFO - Starting synchronization for dataset ID 61: Relocations from and to Basel-Stadt
+2026-01-16 06:13:47,194 - DatasetSync - INFO - Successfully synchronized dataset ID 61: Relocations from and to Basel-Stadt
+2026-01-16 06:13:47,194 - DatasetSync - INFO - Synchronizing dataset ID 62: Summary Fines in Basel-Stadt
+2026-01-16 06:13:47,194 - DatasetSync - INFO - Starting synchronization for dataset ID 62: Summary Fines in Basel-Stadt
+2026-01-16 06:13:48,813 - DatasetSync - INFO - Successfully synchronized dataset ID 62: Summary Fines in Basel-Stadt
+2026-01-16 06:13:48,813 - DatasetSync - INFO - Synchronizing dataset ID 63: Basel-Stadt Neighbourhoods: Key Figures
+2026-01-16 06:13:48,813 - DatasetSync - INFO - Starting synchronization for dataset ID 63: Basel-Stadt Neighbourhoods: Key Figures
+2026-01-16 06:13:49,214 - DatasetSync - INFO - Successfully synchronized dataset ID 63: Basel-Stadt Neighbourhoods: Key Figures
+2026-01-16 06:13:49,214 - DatasetSync - INFO - Synchronizing dataset ID 64: Air Quality Station St. Johannplatz
+2026-01-16 06:13:49,214 - DatasetSync - INFO - Starting synchronization for dataset ID 64: Air Quality Station St. Johannplatz
+2026-01-16 06:13:49,821 - DatasetSync - INFO - Successfully synchronized dataset ID 64: Air Quality Station St. Johannplatz
+2026-01-16 06:13:49,821 - DatasetSync - INFO - Synchronizing dataset ID 65: GVA Incidents
+2026-01-16 06:13:49,821 - DatasetSync - INFO - Starting synchronization for dataset ID 65: GVA Incidents
+2026-01-16 06:13:49,828 - DatasetSync - INFO - Successfully synchronized dataset ID 65: GVA Incidents
+2026-01-16 06:13:49,829 - DatasetSync - INFO - Synchronizing dataset ID 66: Awareness Days
+2026-01-16 06:13:49,829 - DatasetSync - INFO - Starting synchronization for dataset ID 66: Awareness Days
+2026-01-16 06:13:49,837 - DatasetSync - INFO - Successfully synchronized dataset ID 66: Awareness Days
+2026-01-16 06:13:49,837 - DatasetSync - INFO - Synchronizing dataset ID 67: Personalities from Basel
+2026-01-16 06:13:49,837 - DatasetSync - INFO - Starting synchronization for dataset ID 67: Personalities from Basel
+2026-01-16 06:13:49,845 - DatasetSync - INFO - Successfully synchronized dataset ID 67: Personalities from Basel
+2026-01-16 06:13:49,845 - DatasetSync - INFO - Synchronizing dataset ID 68: Historic Events
+2026-01-16 06:13:49,845 - DatasetSync - INFO - Starting synchronization for dataset ID 68: Historic Events
+2026-01-16 06:13:49,855 - DatasetSync - INFO - Successfully synchronized dataset ID 68: Historic Events
+2026-01-16 06:13:49,855 - DatasetSync - INFO - Synchronizing dataset ID 69: Tree Cadastre: Tree Felling and Replacement List
+2026-01-16 06:13:49,855 - DatasetSync - INFO - Starting synchronization for dataset ID 69: Tree Cadastre: Tree Felling and Replacement List
+2026-01-16 06:13:50,387 - DatasetSync - INFO - Successfully synchronized dataset ID 69: Tree Cadastre: Tree Felling and Replacement List
+2026-01-16 06:13:50,387 - DatasetSync - INFO - Synchronizing dataset ID 71: Tree register: tree inventory
+2026-01-16 06:13:50,387 - DatasetSync - INFO - Starting synchronization for dataset ID 71: Tree register: tree inventory
+2026-01-16 06:13:50,600 - DatasetSync - INFO - Successfully synchronized dataset ID 71: Tree register: tree inventory
+2026-01-16 06:13:50,601 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-01-16 06:13:50,601 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 64, Failed: 1, Failed dataset IDs: [55]
+2026-01-16 06:13:51,434 - EmailService - INFO - Sent admin alert email to 1 recipients
+2026-01-16 06:13:51,446 - StoryGeneration - INFO - Generating story for template: Dog Population in Basel
+2026-01-16 06:13:51,456 - StoryGeneration - INFO - Story generation skipped for template: Dog Population in Basel
+2026-01-16 06:13:51,456 - StoryGeneration - INFO - Generating story for template: Hot Day Report for Basel
+2026-01-16 06:13:51,492 - StoryGeneration - INFO - Story generation skipped for template: Hot Day Report for Basel
+2026-01-16 06:13:51,492 - StoryGeneration - INFO - Generating story for template: Weather Report
+2026-01-16 06:13:51,507 - StoryGeneration - INFO - Story generation skipped for template: Weather Report
+2026-01-16 06:13:51,507 - StoryGeneration - INFO - Generating story for template: Rhine Discharge
+2026-01-16 06:13:51,509 - StoryGeneration - INFO - Story generation skipped for template: Rhine Discharge
+2026-01-16 06:13:51,509 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2026-01-16 06:13:51,513 - StoryGeneration - INFO - Story generation skipped for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2026-01-16 06:13:51,513 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel
+2026-01-16 06:13:51,515 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel
+2026-01-16 06:13:51,515 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse
+2026-01-16 06:13:51,519 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse
+2026-01-16 06:13:51,519 - StoryGeneration - INFO - Generating story for template: Building Stock of Canton Baselland
+2026-01-16 06:13:51,546 - StoryGeneration - INFO - Story generation skipped for template: Building Stock of Canton Baselland
+2026-01-16 06:13:51,546 - StoryGeneration - INFO - Generating story for template: Weather report
+2026-01-16 06:13:51,560 - StoryGeneration - INFO - Story generation skipped for template: Weather report
+2026-01-16 06:13:51,560 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland
+2026-01-16 06:13:51,574 - StoryGeneration - INFO - Story generation skipped for template: Tourism Insights – Basel, Switzerland
+2026-01-16 06:13:51,574 - StoryGeneration - INFO - Generating story for template: Electricity Consumption in Basel
+2026-01-16 06:13:51,577 - StoryGeneration - INFO - Story generation skipped for template: Electricity Consumption in Basel
+2026-01-16 06:13:51,577 - StoryGeneration - INFO - Generating story for template: Rent Prices in the Canton of Baselland
+2026-01-16 06:13:51,579 - StoryGeneration - INFO - Story generation skipped for template: Rent Prices in the Canton of Baselland
+2026-01-16 06:13:51,579 - StoryGeneration - INFO - Generating story for template: New Metadata published on OGD Basel-Stadt
+2026-01-16 06:13:51,582 - StoryGeneration - INFO - Story generation skipped for template: New Metadata published on OGD Basel-Stadt
+2026-01-16 06:13:51,582 - StoryGeneration - INFO - Generating story for template: Traffic Accidents
+2026-01-16 06:13:51,585 - StoryGeneration - INFO - Story generation skipped for template: Traffic Accidents
+2026-01-16 06:13:51,585 - StoryGeneration - INFO - Generating story for template: Noise Monitoring in the Canton of Basel-Stadt
+2026-01-16 06:13:51,592 - StoryGeneration - INFO - Story generation skipped for template: Noise Monitoring in the Canton of Basel-Stadt
+2026-01-16 06:13:51,592 - StoryGeneration - INFO - Generating story for template: Temperatures of Public Outdoor Swimming Pools in Basel
+2026-01-16 06:13:51,594 - StoryGeneration - INFO - Story generation skipped for template: Temperatures of Public Outdoor Swimming Pools in Basel
+2026-01-16 06:13:51,594 - StoryGeneration - INFO - Generating story for template: Dry Spells at NBCN Station Basel/Binningen
+2026-01-16 06:13:51,642 - StoryGeneration - INFO - Story generation skipped for template: Dry Spells at NBCN Station Basel/Binningen
+2026-01-16 06:13:51,642 - StoryGeneration - INFO - Generating story for template: Basel-Stadt Mortality by Sex and Age Group
+2026-01-16 06:13:51,646 - StoryGeneration - INFO - Story generation skipped for template: Basel-Stadt Mortality by Sex and Age Group
+2026-01-16 06:13:51,646 - StoryGeneration - INFO - Generating story for template: Extreme Rainfall Events in Basel
+2026-01-16 06:13:51,662 - StoryGeneration - INFO - Story generation skipped for template: Extreme Rainfall Events in Basel
+2026-01-16 06:13:51,662 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse
+2026-01-16 06:13:51,665 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse
+2026-01-16 06:13:51,665 - StoryGeneration - INFO - Generating story for template: Newborns in the Canton of Basel-Stadt
+2026-01-16 06:13:51,671 - StoryGeneration - INFO - Story generation skipped for template: Newborns in the Canton of Basel-Stadt
+2026-01-16 06:13:51,671 - StoryGeneration - INFO - Generating story for template: Fishing Statistics in the Canton of Basel-Stadt
+2026-01-16 06:13:51,673 - StoryGeneration - INFO - Story generation skipped for template: Fishing Statistics in the Canton of Basel-Stadt
+2026-01-16 06:13:51,673 - StoryGeneration - INFO - Generating story for template: Air Traffic at Basel-Mulhouse Airport
+2026-01-16 06:13:51,678 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Basel-Mulhouse Airport
+2026-01-16 06:13:51,678 - StoryGeneration - INFO - Generating story for template: On This Day in History
+2026-01-16 06:13:55,722 - StoryGeneration - INFO - Successfully generated story for template: On This Day in History
+2026-01-16 06:13:55,722 - StoryGeneration - INFO - Generating story for template: This Month’s Anniversaries of Historic Events and Notable Personalities from Basel
+2026-01-16 06:13:55,726 - StoryGeneration - INFO - Story generation skipped for template: This Month’s Anniversaries of Historic Events and Notable Personalities from Basel
+2026-01-16 06:13:55,726 - StoryGeneration - INFO - Generating story for template: Votations in Basel-Stadt
+2026-01-16 06:13:55,728 - StoryGeneration - INFO - Story generation skipped for template: Votations in Basel-Stadt
+2026-01-16 06:13:55,728 - StoryGeneration - INFO - Generating story for template: Graduates from Baselland at Swiss Universities by Type, Field, Sex and Level
+2026-01-16 06:13:55,730 - StoryGeneration - INFO - Story generation skipped for template: Graduates from Baselland at Swiss Universities by Type, Field, Sex and Level
+2026-01-16 06:13:55,730 - StoryGeneration - INFO - Generating story for template: Landuse in the Canton of Baselland
+2026-01-16 06:13:55,733 - StoryGeneration - INFO - Story generation skipped for template: Landuse in the Canton of Baselland
+2026-01-16 06:13:55,733 - StoryGeneration - INFO - Generating story for template: Illegal Waste Disposal in Basel-Stadt
+2026-01-16 06:13:55,739 - StoryGeneration - INFO - Story generation skipped for template: Illegal Waste Disposal in Basel-Stadt
+2026-01-16 06:13:55,739 - StoryGeneration - INFO - Generating story for template: CO2 Emissions
+2026-01-16 06:13:55,755 - StoryGeneration - INFO - Story generation skipped for template: CO2 Emissions
+2026-01-16 06:13:55,755 - StoryGeneration - INFO - Generating story for template: Groundwater Quality
+2026-01-16 06:13:55,780 - StoryGeneration - INFO - Story generation skipped for template: Groundwater Quality
+2026-01-16 06:13:55,780 - StoryGeneration - INFO - Generating story for template: Parliament: Political Proceedings
+2026-01-16 06:13:55,790 - StoryGeneration - INFO - Story generation skipped for template: Parliament: Political Proceedings
+2026-01-16 06:13:55,790 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel
+2026-01-16 06:13:55,794 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel
+2026-01-16 06:13:55,794 - StoryGeneration - INFO - Generating story for template: Use of Environmental Travel Pass in Basel Area
+2026-01-16 06:13:55,797 - StoryGeneration - INFO - Story generation skipped for template: Use of Environmental Travel Pass in Basel Area
+2026-01-16 06:13:55,797 - StoryGeneration - INFO - Generating story for template: Motor Vehicle Stock by Vehicle Type, Fuel and Municipality
+2026-01-16 06:13:55,807 - StoryGeneration - INFO - Story generation skipped for template: Motor Vehicle Stock by Vehicle Type, Fuel and Municipality
+2026-01-16 06:13:55,807 - StoryGeneration - INFO - Generating story for template: Graffiti Removals in Basel-Stadt
+2026-01-16 06:13:55,810 - StoryGeneration - INFO - Story generation skipped for template: Graffiti Removals in Basel-Stadt
+2026-01-16 06:13:55,810 - StoryGeneration - INFO - Generating story for template: Awareness Days
+2026-01-16 06:13:55,815 - StoryGeneration - INFO - Story generation skipped for template: Awareness Days
+2026-01-16 06:13:55,815 - StoryGeneration - INFO - Generating story for template: How Basel-Stadt Married Last Year
+2026-01-16 06:13:55,826 - StoryGeneration - INFO - Story generation skipped for template: How Basel-Stadt Married Last Year
+2026-01-16 06:13:55,826 - StoryGeneration - INFO - Generating story for template: A Day to Remember Lives Lost to Gun Violence in the USA
+2026-01-16 06:13:55,831 - StoryGeneration - INFO - Story generation skipped for template: A Day to Remember Lives Lost to Gun Violence in the USA
+2026-01-16 06:13:55,831 - StoryGeneration - INFO - Generating story for template: Motorfahrzeuge nach Fahrzeugart, Treibstoff und Gemeinde ("Speckgürtel")
+2026-01-16 06:13:55,842 - StoryGeneration - INFO - Story generation skipped for template: Motorfahrzeuge nach Fahrzeugart, Treibstoff und Gemeinde ("Speckgürtel")
+2026-01-16 06:13:55,842 - StoryGeneration - INFO - Generating story for template: Building Land Prices in Baselland
+2026-01-16 06:13:55,845 - StoryGeneration - INFO - Story generation skipped for template: Building Land Prices in Baselland
+2026-01-16 06:13:55,845 - StoryGeneration - INFO - Generating story for template: New Metadata published on OGD Baselland
+2026-01-16 06:13:55,847 - StoryGeneration - INFO - Story generation skipped for template: New Metadata published on OGD Baselland
+2026-01-16 06:13:55,847 - StoryGeneration - INFO - Generating story for template: Daylight in Basel
+2026-01-16 06:13:55,850 - StoryGeneration - INFO - Story generation skipped for template: Daylight in Basel
+2026-01-16 06:13:55,850 - StoryGeneration - INFO - Generating story for template: Cleanliness of Basel's Streets
+2026-01-16 06:13:55,867 - StoryGeneration - INFO - Story generation skipped for template: Cleanliness of Basel's Streets
+2026-01-16 06:13:55,868 - StoryGeneration - INFO - Generating story for template: Summary Fines in Basel-Stadt
+2026-01-16 06:13:55,937 - StoryGeneration - INFO - Story generation skipped for template: Summary Fines in Basel-Stadt
+2026-01-16 06:13:55,937 - StoryGeneration - INFO - Generating story for template: Impact of Fireworks on Air Quality in Basel-Stadt
+2026-01-16 06:13:55,940 - StoryGeneration - INFO - Story generation skipped for template: Impact of Fireworks on Air Quality in Basel-Stadt
+2026-01-16 06:13:55,940 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
+2026-01-16 06:13:55,941 - StoryGeneration - INFO - Story generation skipped for template: Tree Inventory Basel-Stadt
+2026-01-16 06:13:55,941 - StoryGeneration - INFO - Generating story for template: Record Weather Events
+2026-01-16 06:13:56,012 - StoryGeneration - INFO - Story generation skipped for template: Record Weather Events
+2026-01-16 06:13:56,012 - StoryGeneration - INFO - Generating story for template: Cold Day Report
+2026-01-16 06:13:56,027 - StoryGeneration - INFO - Story generation skipped for template: Cold Day Report
+2026-01-16 06:13:56,027 - StoryGeneration - INFO - Generating story for template: Weather Report
+2026-01-16 06:13:56,030 - StoryGeneration - INFO - Story generation skipped for template: Weather Report
+2026-01-16 06:13:56,031 - EmailService - INFO - Starting sending mails for 2026-01-16...
+2026-01-16 06:13:56,577 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-16 06:13:57,097 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-16 06:13:57,697 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-16 06:13:58,504 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-16 06:13:59,312 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-16 06:14:00,136 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-16 06:14:00,788 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-16 06:14:01,311 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-16 06:21:18,314 - DatasetSync - INFO - Synchronizing dataset ID 72: Traffic Count Data for motorized individual Transport (MIT)
+2026-01-16 06:21:18,314 - DatasetSync - INFO - Starting synchronization for dataset ID 72: Traffic Count Data for motorized individual Transport (MIT)
+2026-01-16 06:42:51,167 - DatasetSync - INFO - Successfully synchronized dataset ID 72: Traffic Count Data for motorized individual Transport (MIT)
+2026-01-16 06:42:51,215 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-01-16 06:42:51,215 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-01-16 18:26:40,597 - DatasetSync - INFO - Synchronizing dataset ID 55: Divorces in Basel-Stadt
+2026-01-16 18:26:40,598 - DatasetSync - INFO - Starting synchronization for dataset ID 55: Divorces in Basel-Stadt
+2026-01-16 18:26:47,107 - DatasetSync - INFO - Successfully synchronized dataset ID 55: Divorces in Basel-Stadt
+2026-01-16 18:26:47,107 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-01-16 18:26:47,107 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-01-16 18:29:52,463 - DatasetSync - INFO - Synchronizing dataset ID 55: Divorces in Basel-Stadt
+2026-01-16 18:29:52,463 - DatasetSync - INFO - Starting synchronization for dataset ID 55: Divorces in Basel-Stadt
+2026-01-16 18:29:53,158 - DatasetSync - INFO - Successfully synchronized dataset ID 55: Divorces in Basel-Stadt
+2026-01-16 18:29:53,158 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-01-16 18:29:53,158 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-01-17 07:57:34,302 - DatasetSync - INFO - Synchronizing dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-01-17 07:57:34,303 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-01-17 07:57:36,536 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-01-17 07:57:36,536 - DatasetSync - INFO - Synchronizing dataset ID 2: Virus Wastewater Monitoring
+2026-01-17 07:57:36,536 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2026-01-17 07:57:37,128 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2026-01-17 07:57:37,128 - DatasetSync - INFO - Synchronizing dataset ID 4: Rhine River Discharge and Water Level
+2026-01-17 07:57:37,128 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine River Discharge and Water Level
+2026-01-17 07:57:37,891 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine River Discharge and Water Level
+2026-01-17 07:57:37,892 - DatasetSync - INFO - Synchronizing dataset ID 6: Dog Population in Basel by Breed
+2026-01-17 07:57:37,892 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog Population in Basel by Breed
+2026-01-17 07:57:38,626 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog Population in Basel by Breed
+2026-01-17 07:57:38,626 - DatasetSync - INFO - Synchronizing dataset ID 9: Dognames in Basel-Stadt
+2026-01-17 07:57:38,626 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2026-01-17 07:57:39,418 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2026-01-17 07:57:39,418 - DatasetSync - INFO - Synchronizing dataset ID 10: Dog Population since 1970
+2026-01-17 07:57:39,418 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2026-01-17 07:57:40,320 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2026-01-17 07:57:40,320 - DatasetSync - INFO - Synchronizing dataset ID 13: Air Quality at NCBN station Binningen
+2026-01-17 07:57:40,320 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2026-01-17 07:57:41,072 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2026-01-17 07:57:41,072 - DatasetSync - INFO - Synchronizing dataset ID 14: Air Traffic at Airport Basel/Mulhouse
+2026-01-17 07:57:41,072 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air Traffic at Airport Basel/Mulhouse
+2026-01-17 07:57:42,188 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air Traffic at Airport Basel/Mulhouse
+2026-01-17 07:57:42,188 - DatasetSync - INFO - Synchronizing dataset ID 15: kGWR Baselland
+2026-01-17 07:57:42,188 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2026-01-17 07:57:42,550 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2026-01-17 07:57:42,550 - DatasetSync - INFO - Synchronizing dataset ID 16: Land Price by Community in Baselland
+2026-01-17 07:57:42,550 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land Price by Community in Baselland
+2026-01-17 07:57:43,135 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land Price by Community in Baselland
+2026-01-17 07:57:43,135 - DatasetSync - INFO - Synchronizing dataset ID 17: Population of Basel-Stadt by Nationality
+2026-01-17 07:57:43,135 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel-Stadt by Nationality
+2026-01-17 07:57:43,890 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel-Stadt by Nationality
+2026-01-17 07:57:43,890 - DatasetSync - INFO - Synchronizing dataset ID 18: Population of Baselland by Age, Sex and Nationality
+2026-01-17 07:57:43,890 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by Age, Sex and Nationality
+2026-01-17 07:57:44,631 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by Age, Sex and Nationality
+2026-01-17 07:57:44,631 - DatasetSync - INFO - Synchronizing dataset ID 19: Population of Basel-Stadt by Residential District
+2026-01-17 07:57:44,631 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by Residential District
+2026-01-17 07:57:45,409 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by Residential District
+2026-01-17 07:57:45,409 - DatasetSync - INFO - Synchronizing dataset ID 20: Daily Arrivals and Overnight Stays by Origin in Basel-Stadt
+2026-01-17 07:57:45,409 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily Arrivals and Overnight Stays by Origin in Basel-Stadt
+2026-01-17 07:57:46,656 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily Arrivals and Overnight Stays by Origin in Basel-Stadt
+2026-01-17 07:57:46,656 - DatasetSync - INFO - Synchronizing dataset ID 21: Daily Arrivals, Overnight Stays, Rooms by Hotel Category in Basel-Stadt
+2026-01-17 07:57:46,656 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily Arrivals, Overnight Stays, Rooms by Hotel Category in Basel-Stadt
+2026-01-17 07:57:47,216 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily Arrivals, Overnight Stays, Rooms by Hotel Category in Basel-Stadt
+2026-01-17 07:57:47,216 - DatasetSync - INFO - Synchronizing dataset ID 22: Daily Overnight Stays, available and occupied Rooms in Basel-Stadt
+2026-01-17 07:57:47,216 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily Overnight Stays, available and occupied Rooms in Basel-Stadt
+2026-01-17 07:57:47,692 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily Overnight Stays, available and occupied Rooms in Basel-Stadt
+2026-01-17 07:57:47,692 - DatasetSync - INFO - Synchronizing dataset ID 23: Electricity Consumption in Basel
+2026-01-17 07:57:47,692 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity Consumption in Basel
+2026-01-17 07:57:48,340 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity Consumption in Basel
+2026-01-17 07:57:48,340 - DatasetSync - INFO - Synchronizing dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2026-01-17 07:57:48,340 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2026-01-17 07:57:49,469 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2026-01-17 07:57:49,469 - DatasetSync - INFO - Synchronizing dataset ID 25: Dwellings Basel-Stadt (GWR)
+2026-01-17 07:57:49,469 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2026-01-17 07:57:49,668 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2026-01-17 07:57:49,668 - DatasetSync - INFO - Synchronizing dataset ID 26: Addresses in Basel-Stadt
+2026-01-17 07:57:49,668 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel-Stadt
+2026-01-17 07:57:49,885 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel-Stadt
+2026-01-17 07:57:49,885 - DatasetSync - INFO - Synchronizing dataset ID 27: Opendata Datasets Basel-Stadt
+2026-01-17 07:57:49,886 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2026-01-17 07:57:50,125 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2026-01-17 07:57:50,125 - DatasetSync - INFO - Synchronizing dataset ID 28: Noise Monitoring in Basel
+2026-01-17 07:57:50,125 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2026-01-17 07:57:50,848 - DatasetSync - INFO - Successfully synchronized dataset ID 28: Noise Monitoring in Basel
+2026-01-17 07:57:50,848 - DatasetSync - INFO - Synchronizing dataset ID 29: Noise Monitoring Stations in Basel
+2026-01-17 07:57:50,848 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2026-01-17 07:57:51,061 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2026-01-17 07:57:51,061 - DatasetSync - INFO - Synchronizing dataset ID 30: Traffic Accidents in Basel-Stadt
+2026-01-17 07:57:51,061 - DatasetSync - INFO - Starting synchronization for dataset ID 30: Traffic Accidents in Basel-Stadt
+2026-01-17 07:57:51,520 - DatasetSync - INFO - Successfully synchronized dataset ID 30: Traffic Accidents in Basel-Stadt
+2026-01-17 07:57:51,520 - DatasetSync - INFO - Synchronizing dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2026-01-17 07:57:51,520 - DatasetSync - INFO - Starting synchronization for dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2026-01-17 07:57:56,340 - DatasetSync - INFO - Successfully synchronized dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2026-01-17 07:57:56,340 - DatasetSync - INFO - Synchronizing dataset ID 32: Population Baselland
+2026-01-17 07:57:56,340 - DatasetSync - INFO - Starting synchronization for dataset ID 32: Population Baselland
+2026-01-17 07:57:56,855 - DatasetSync - INFO - Successfully synchronized dataset ID 32: Population Baselland
+2026-01-17 07:57:56,855 - DatasetSync - INFO - Synchronizing dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2026-01-17 07:57:56,855 - DatasetSync - INFO - Starting synchronization for dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2026-01-17 07:57:57,176 - DatasetSync - INFO - Successfully synchronized dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2026-01-17 07:57:57,176 - DatasetSync - INFO - Synchronizing dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2026-01-17 07:57:57,176 - DatasetSync - INFO - Starting synchronization for dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2026-01-17 07:57:57,880 - DatasetSync - INFO - Successfully synchronized dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2026-01-17 07:57:57,880 - DatasetSync - INFO - Synchronizing dataset ID 35: Newborns in the Canton of Basel-Stadt by Sex and Origin
+2026-01-17 07:57:57,880 - DatasetSync - INFO - Starting synchronization for dataset ID 35: Newborns in the Canton of Basel-Stadt by Sex and Origin
+2026-01-17 07:57:58,217 - DatasetSync - INFO - Successfully synchronized dataset ID 35: Newborns in the Canton of Basel-Stadt by Sex and Origin
+2026-01-17 07:57:58,217 - DatasetSync - INFO - Synchronizing dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2026-01-17 07:57:58,217 - DatasetSync - INFO - Starting synchronization for dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2026-01-17 07:57:59,915 - DatasetSync - INFO - Successfully synchronized dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2026-01-17 07:57:59,915 - DatasetSync - INFO - Synchronizing dataset ID 37: Population of Basel-Stadt by Country of Origin
+2026-01-17 07:57:59,915 - DatasetSync - INFO - Starting synchronization for dataset ID 37: Population of Basel-Stadt by Country of Origin
+2026-01-17 07:58:02,180 - DatasetSync - INFO - Successfully synchronized dataset ID 37: Population of Basel-Stadt by Country of Origin
+2026-01-17 07:58:02,180 - DatasetSync - INFO - Synchronizing dataset ID 38: Fishing Statistics Basel-Stadt
+2026-01-17 07:58:02,180 - DatasetSync - INFO - Starting synchronization for dataset ID 38: Fishing Statistics Basel-Stadt
+2026-01-17 07:58:02,664 - DatasetSync - INFO - Successfully synchronized dataset ID 38: Fishing Statistics Basel-Stadt
+2026-01-17 07:58:02,664 - DatasetSync - INFO - Synchronizing dataset ID 39: Mortality in the Canton of Basel-Stadt by Date and Age Group
+2026-01-17 07:58:02,664 - DatasetSync - INFO - Starting synchronization for dataset ID 39: Mortality in the Canton of Basel-Stadt by Date and Age Group
+2026-01-17 07:58:03,228 - DatasetSync - INFO - Successfully synchronized dataset ID 39: Mortality in the Canton of Basel-Stadt by Date and Age Group
+2026-01-17 07:58:03,228 - DatasetSync - INFO - Synchronizing dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2026-01-17 07:58:03,228 - DatasetSync - INFO - Starting synchronization for dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2026-01-17 07:58:03,803 - DatasetSync - INFO - Successfully synchronized dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2026-01-17 07:58:03,803 - DatasetSync - INFO - Synchronizing dataset ID 41: Traffic-Relevant Events in Basel
+2026-01-17 07:58:03,803 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2026-01-17 07:58:04,223 - DatasetSync - INFO - Successfully synchronized dataset ID 41: Traffic-Relevant Events in Basel
+2026-01-17 07:58:04,223 - DatasetSync - INFO - Synchronizing dataset ID 42: Cantonal Votes in Basel-Stadt
+2026-01-17 07:58:04,223 - DatasetSync - INFO - Starting synchronization for dataset ID 42: Cantonal Votes in Basel-Stadt
+2026-01-17 07:58:04,622 - DatasetSync - INFO - Successfully synchronized dataset ID 42: Cantonal Votes in Basel-Stadt
+2026-01-17 07:58:04,622 - DatasetSync - INFO - Synchronizing dataset ID 43: National Votations: Basel-Stadt Votes
+2026-01-17 07:58:04,622 - DatasetSync - INFO - Starting synchronization for dataset ID 43: National Votations: Basel-Stadt Votes
+2026-01-17 07:58:05,618 - DatasetSync - INFO - Successfully synchronized dataset ID 43: National Votations: Basel-Stadt Votes
+2026-01-17 07:58:05,618 - DatasetSync - INFO - Synchronizing dataset ID 44: Degrees of Students in Baselland
+2026-01-17 07:58:05,618 - DatasetSync - INFO - Starting synchronization for dataset ID 44: Degrees of Students in Baselland
+2026-01-17 07:58:06,811 - DatasetSync - INFO - Successfully synchronized dataset ID 44: Degrees of Students in Baselland
+2026-01-17 07:58:06,811 - DatasetSync - INFO - Synchronizing dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2026-01-17 07:58:06,811 - DatasetSync - INFO - Starting synchronization for dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2026-01-17 07:58:07,607 - DatasetSync - INFO - Successfully synchronized dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2026-01-17 07:58:07,607 - DatasetSync - INFO - Synchronizing dataset ID 46: Illegal Waste dumps
+2026-01-17 07:58:07,607 - DatasetSync - INFO - Starting synchronization for dataset ID 46: Illegal Waste dumps
+2026-01-17 07:58:09,065 - DatasetSync - INFO - Successfully synchronized dataset ID 46: Illegal Waste dumps
+2026-01-17 07:58:09,065 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-01-17 07:58:09,065 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-01-17 07:58:09,069 - DatasetSync - INFO - Successfully synchronized dataset ID 47: CO2 Emissions (Worldwide)
+2026-01-17 07:58:09,069 - DatasetSync - INFO - Synchronizing dataset ID 48: Groundwater Quality in Basel-Stadt
+2026-01-17 07:58:09,069 - DatasetSync - INFO - Starting synchronization for dataset ID 48: Groundwater Quality in Basel-Stadt
+2026-01-17 07:58:09,495 - DatasetSync - INFO - Successfully synchronized dataset ID 48: Groundwater Quality in Basel-Stadt
+2026-01-17 07:58:09,495 - DatasetSync - INFO - Synchronizing dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2026-01-17 07:58:09,495 - DatasetSync - INFO - Starting synchronization for dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2026-01-17 07:58:11,321 - DatasetSync - INFO - Successfully synchronized dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2026-01-17 07:58:11,321 - DatasetSync - INFO - Synchronizing dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2026-01-17 07:58:11,321 - DatasetSync - INFO - Starting synchronization for dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2026-01-17 07:58:12,842 - DatasetSync - INFO - Successfully synchronized dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2026-01-17 07:58:12,842 - DatasetSync - INFO - Synchronizing dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2026-01-17 07:58:12,842 - DatasetSync - INFO - Starting synchronization for dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2026-01-17 07:58:13,542 - DatasetSync - INFO - Successfully synchronized dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2026-01-17 07:58:13,542 - DatasetSync - INFO - Synchronizing dataset ID 52: Environmental Travel Pass Basel Area
+2026-01-17 07:58:13,542 - DatasetSync - INFO - Starting synchronization for dataset ID 52: Environmental Travel Pass Basel Area
+2026-01-17 07:58:14,238 - DatasetSync - INFO - Successfully synchronized dataset ID 52: Environmental Travel Pass Basel Area
+2026-01-17 07:58:14,238 - DatasetSync - INFO - Synchronizing dataset ID 53: Motor Vehicle Stock in Baselland
+2026-01-17 07:58:14,238 - DatasetSync - INFO - Starting synchronization for dataset ID 53: Motor Vehicle Stock in Baselland
+2026-01-17 07:58:14,582 - DatasetSync - INFO - Successfully synchronized dataset ID 53: Motor Vehicle Stock in Baselland
+2026-01-17 07:58:14,582 - DatasetSync - INFO - Synchronizing dataset ID 54: Sprayereien in Basel-Stadt
+2026-01-17 07:58:14,582 - DatasetSync - INFO - Starting synchronization for dataset ID 54: Sprayereien in Basel-Stadt
+2026-01-17 07:58:15,190 - DatasetSync - INFO - Successfully synchronized dataset ID 54: Sprayereien in Basel-Stadt
+2026-01-17 07:58:15,190 - DatasetSync - INFO - Synchronizing dataset ID 55: Divorces in Basel-Stadt
+2026-01-17 07:58:15,190 - DatasetSync - INFO - Starting synchronization for dataset ID 55: Divorces in Basel-Stadt
+2026-01-17 07:58:15,546 - DatasetSync - INFO - Successfully synchronized dataset ID 55: Divorces in Basel-Stadt
+2026-01-17 07:58:15,546 - DatasetSync - INFO - Synchronizing dataset ID 56: Marriages by Date of Wedding Ceremony in Basel-Stadt
+2026-01-17 07:58:15,546 - DatasetSync - INFO - Starting synchronization for dataset ID 56: Marriages by Date of Wedding Ceremony in Basel-Stadt
+2026-01-17 07:58:15,782 - DatasetSync - INFO - Successfully synchronized dataset ID 56: Marriages by Date of Wedding Ceremony in Basel-Stadt
+2026-01-17 07:58:15,782 - DatasetSync - INFO - Synchronizing dataset ID 57: Cleanliness Index in Basel-Stadt
+2026-01-17 07:58:15,782 - DatasetSync - INFO - Starting synchronization for dataset ID 57: Cleanliness Index in Basel-Stadt
+2026-01-17 07:58:16,427 - DatasetSync - INFO - Successfully synchronized dataset ID 57: Cleanliness Index in Basel-Stadt
+2026-01-17 07:58:16,427 - DatasetSync - INFO - Synchronizing dataset ID 58: Geoshapes Communities of Basel-Stadt
+2026-01-17 07:58:16,427 - DatasetSync - INFO - Starting synchronization for dataset ID 58: Geoshapes Communities of Basel-Stadt
+2026-01-17 07:58:16,900 - DatasetSync - INFO - Successfully synchronized dataset ID 58: Geoshapes Communities of Basel-Stadt
+2026-01-17 07:58:16,900 - DatasetSync - INFO - Synchronizing dataset ID 59: Opendata Datasets Baselland
+2026-01-17 07:58:16,900 - DatasetSync - INFO - Starting synchronization for dataset ID 59: Opendata Datasets Baselland
+2026-01-17 07:58:17,711 - DatasetSync - INFO - Successfully synchronized dataset ID 59: Opendata Datasets Baselland
+2026-01-17 07:58:17,712 - DatasetSync - INFO - Synchronizing dataset ID 60: Daylight in Basel
+2026-01-17 07:58:17,712 - DatasetSync - INFO - Starting synchronization for dataset ID 60: Daylight in Basel
+2026-01-17 07:58:17,718 - DatasetSync - INFO - Successfully synchronized dataset ID 60: Daylight in Basel
+2026-01-17 07:58:17,718 - DatasetSync - INFO - Synchronizing dataset ID 61: Relocations from and to Basel-Stadt
+2026-01-17 07:58:17,718 - DatasetSync - INFO - Starting synchronization for dataset ID 61: Relocations from and to Basel-Stadt
+2026-01-17 07:58:19,066 - DatasetSync - INFO - Successfully synchronized dataset ID 61: Relocations from and to Basel-Stadt
+2026-01-17 07:58:19,066 - DatasetSync - INFO - Synchronizing dataset ID 62: Summary Fines in Basel-Stadt
+2026-01-17 07:58:19,066 - DatasetSync - INFO - Starting synchronization for dataset ID 62: Summary Fines in Basel-Stadt
+2026-01-17 07:58:20,777 - DatasetSync - INFO - Successfully synchronized dataset ID 62: Summary Fines in Basel-Stadt
+2026-01-17 07:58:20,777 - DatasetSync - INFO - Synchronizing dataset ID 63: Basel-Stadt Neighbourhoods: Key Figures
+2026-01-17 07:58:20,777 - DatasetSync - INFO - Starting synchronization for dataset ID 63: Basel-Stadt Neighbourhoods: Key Figures
+2026-01-17 07:58:21,253 - DatasetSync - INFO - Successfully synchronized dataset ID 63: Basel-Stadt Neighbourhoods: Key Figures
+2026-01-17 07:58:21,253 - DatasetSync - INFO - Synchronizing dataset ID 64: Air Quality Station St. Johannplatz
+2026-01-17 07:58:21,253 - DatasetSync - INFO - Starting synchronization for dataset ID 64: Air Quality Station St. Johannplatz
+2026-01-17 07:58:22,033 - DatasetSync - INFO - Successfully synchronized dataset ID 64: Air Quality Station St. Johannplatz
+2026-01-17 07:58:22,033 - DatasetSync - INFO - Synchronizing dataset ID 65: GVA Incidents
+2026-01-17 07:58:22,033 - DatasetSync - INFO - Starting synchronization for dataset ID 65: GVA Incidents
+2026-01-17 07:58:22,039 - DatasetSync - INFO - Successfully synchronized dataset ID 65: GVA Incidents
+2026-01-17 07:58:22,039 - DatasetSync - INFO - Synchronizing dataset ID 66: Awareness Days
+2026-01-17 07:58:22,040 - DatasetSync - INFO - Starting synchronization for dataset ID 66: Awareness Days
+2026-01-17 07:58:22,045 - DatasetSync - INFO - Successfully synchronized dataset ID 66: Awareness Days
+2026-01-17 07:58:22,045 - DatasetSync - INFO - Synchronizing dataset ID 67: Personalities from Basel
+2026-01-17 07:58:22,045 - DatasetSync - INFO - Starting synchronization for dataset ID 67: Personalities from Basel
+2026-01-17 07:58:22,050 - DatasetSync - INFO - Successfully synchronized dataset ID 67: Personalities from Basel
+2026-01-17 07:58:22,050 - DatasetSync - INFO - Synchronizing dataset ID 68: Historic Events
+2026-01-17 07:58:22,050 - DatasetSync - INFO - Starting synchronization for dataset ID 68: Historic Events
+2026-01-17 07:58:22,056 - DatasetSync - INFO - Successfully synchronized dataset ID 68: Historic Events
+2026-01-17 07:58:22,056 - DatasetSync - INFO - Synchronizing dataset ID 69: Tree Cadastre: Tree Felling and Replacement List
+2026-01-17 07:58:22,056 - DatasetSync - INFO - Starting synchronization for dataset ID 69: Tree Cadastre: Tree Felling and Replacement List
+2026-01-17 07:58:22,221 - DatasetSync - INFO - Successfully synchronized dataset ID 69: Tree Cadastre: Tree Felling and Replacement List
+2026-01-17 07:58:22,221 - DatasetSync - INFO - Synchronizing dataset ID 71: Tree register: tree inventory
+2026-01-17 07:58:22,221 - DatasetSync - INFO - Starting synchronization for dataset ID 71: Tree register: tree inventory
+2026-01-17 07:58:22,427 - DatasetSync - INFO - Successfully synchronized dataset ID 71: Tree register: tree inventory
+2026-01-17 07:58:22,427 - DatasetSync - INFO - Synchronizing dataset ID 72: Traffic Count Data for motorized individual Transport (MIT)
+2026-01-17 07:58:22,428 - DatasetSync - INFO - Starting synchronization for dataset ID 72: Traffic Count Data for motorized individual Transport (MIT)
+2026-01-17 07:58:25,250 - DatasetSync - ERROR - Failed to synchronize dataset ID 72: Traffic Count Data for motorized individual Transport (MIT)
+2026-01-17 07:58:25,251 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-01-17 07:58:25,251 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 65, Failed: 1, Failed dataset IDs: [72]
+2026-01-17 07:58:26,189 - EmailService - INFO - Sent admin alert email to 1 recipients
+2026-01-17 07:58:26,280 - StoryGeneration - INFO - Generating story for template: Dog Population in Basel
+2026-01-17 07:58:26,286 - StoryGeneration - INFO - Story generation skipped for template: Dog Population in Basel
+2026-01-17 07:58:26,286 - StoryGeneration - INFO - Generating story for template: Hot Day Report for Basel
+2026-01-17 07:58:26,311 - StoryGeneration - INFO - Story generation skipped for template: Hot Day Report for Basel
+2026-01-17 07:58:26,311 - StoryGeneration - INFO - Generating story for template: Weather Report
+2026-01-17 07:58:26,326 - StoryGeneration - INFO - Story generation skipped for template: Weather Report
+2026-01-17 07:58:26,327 - StoryGeneration - INFO - Generating story for template: Rhine Discharge
+2026-01-17 07:58:26,329 - StoryGeneration - INFO - Story generation skipped for template: Rhine Discharge
+2026-01-17 07:58:26,329 - StoryGeneration - INFO - Generating story for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2026-01-17 07:58:26,331 - StoryGeneration - INFO - Story generation skipped for template: Wastewater Monitoring for Viral RNA – ARA Basel
+2026-01-17 07:58:26,331 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel
+2026-01-17 07:58:26,333 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel
+2026-01-17 07:58:26,333 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse
+2026-01-17 07:58:26,336 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse
+2026-01-17 07:58:26,336 - StoryGeneration - INFO - Generating story for template: Building Stock of Canton Baselland
+2026-01-17 07:58:26,365 - StoryGeneration - INFO - Story generation skipped for template: Building Stock of Canton Baselland
+2026-01-17 07:58:26,365 - StoryGeneration - INFO - Generating story for template: Weather report
+2026-01-17 07:58:26,381 - StoryGeneration - INFO - Story generation skipped for template: Weather report
+2026-01-17 07:58:26,381 - StoryGeneration - INFO - Generating story for template: Tourism Insights – Basel, Switzerland
+2026-01-17 07:58:26,397 - StoryGeneration - INFO - Story generation skipped for template: Tourism Insights – Basel, Switzerland
+2026-01-17 07:58:26,397 - StoryGeneration - INFO - Generating story for template: Electricity Consumption in Basel
+2026-01-17 07:58:26,400 - StoryGeneration - INFO - Story generation skipped for template: Electricity Consumption in Basel
+2026-01-17 07:58:26,400 - StoryGeneration - INFO - Generating story for template: Rent Prices in the Canton of Baselland
+2026-01-17 07:58:26,402 - StoryGeneration - INFO - Story generation skipped for template: Rent Prices in the Canton of Baselland
+2026-01-17 07:58:26,402 - StoryGeneration - INFO - Generating story for template: New Metadata published on OGD Basel-Stadt
+2026-01-17 07:58:26,404 - StoryGeneration - INFO - Story generation skipped for template: New Metadata published on OGD Basel-Stadt
+2026-01-17 07:58:26,404 - StoryGeneration - INFO - Generating story for template: Traffic Accidents
+2026-01-17 07:58:26,408 - StoryGeneration - INFO - Story generation skipped for template: Traffic Accidents
+2026-01-17 07:58:26,408 - StoryGeneration - INFO - Generating story for template: Noise Monitoring in the Canton of Basel-Stadt
+2026-01-17 07:58:26,415 - StoryGeneration - INFO - Story generation skipped for template: Noise Monitoring in the Canton of Basel-Stadt
+2026-01-17 07:58:26,415 - StoryGeneration - INFO - Generating story for template: Temperatures of Public Outdoor Swimming Pools in Basel
+2026-01-17 07:58:26,417 - StoryGeneration - INFO - Story generation skipped for template: Temperatures of Public Outdoor Swimming Pools in Basel
+2026-01-17 07:58:26,417 - StoryGeneration - INFO - Generating story for template: Dry Spells at NBCN Station Basel/Binningen
+2026-01-17 07:58:26,471 - StoryGeneration - INFO - Story generation skipped for template: Dry Spells at NBCN Station Basel/Binningen
+2026-01-17 07:58:26,471 - StoryGeneration - INFO - Generating story for template: Basel-Stadt Mortality by Sex and Age Group
+2026-01-17 07:58:26,475 - StoryGeneration - INFO - Story generation skipped for template: Basel-Stadt Mortality by Sex and Age Group
+2026-01-17 07:58:26,475 - StoryGeneration - INFO - Generating story for template: Extreme Rainfall Events in Basel
+2026-01-17 07:58:26,495 - StoryGeneration - INFO - Story generation skipped for template: Extreme Rainfall Events in Basel
+2026-01-17 07:58:26,495 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse
+2026-01-17 07:58:26,498 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse
+2026-01-17 07:58:26,498 - StoryGeneration - INFO - Generating story for template: Newborns in the Canton of Basel-Stadt
+2026-01-17 07:58:26,505 - StoryGeneration - INFO - Story generation skipped for template: Newborns in the Canton of Basel-Stadt
+2026-01-17 07:58:26,505 - StoryGeneration - INFO - Generating story for template: Fishing Statistics in the Canton of Basel-Stadt
+2026-01-17 07:58:26,508 - StoryGeneration - INFO - Story generation skipped for template: Fishing Statistics in the Canton of Basel-Stadt
+2026-01-17 07:58:26,508 - StoryGeneration - INFO - Generating story for template: Air Traffic at Basel-Mulhouse Airport
+2026-01-17 07:58:26,514 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Basel-Mulhouse Airport
+2026-01-17 07:58:26,514 - StoryGeneration - INFO - Generating story for template: On This Day in History
+2026-01-17 07:58:26,519 - StoryGeneration - INFO - Story generation skipped for template: On This Day in History
+2026-01-17 07:58:26,519 - StoryGeneration - INFO - Generating story for template: This Month’s Anniversaries of Historic Events and Notable Personalities from Basel
+2026-01-17 07:58:26,522 - StoryGeneration - INFO - Story generation skipped for template: This Month’s Anniversaries of Historic Events and Notable Personalities from Basel
+2026-01-17 07:58:26,522 - StoryGeneration - INFO - Generating story for template: Votations in Basel-Stadt
+2026-01-17 07:58:26,524 - StoryGeneration - INFO - Story generation skipped for template: Votations in Basel-Stadt
+2026-01-17 07:58:26,524 - StoryGeneration - INFO - Generating story for template: Graduates from Baselland at Swiss Universities by Type, Field, Sex and Level
+2026-01-17 07:58:26,527 - StoryGeneration - INFO - Story generation skipped for template: Graduates from Baselland at Swiss Universities by Type, Field, Sex and Level
+2026-01-17 07:58:26,527 - StoryGeneration - INFO - Generating story for template: Landuse in the Canton of Baselland
+2026-01-17 07:58:26,530 - StoryGeneration - INFO - Story generation skipped for template: Landuse in the Canton of Baselland
+2026-01-17 07:58:26,531 - StoryGeneration - INFO - Generating story for template: Illegal Waste Disposal in Basel-Stadt
+2026-01-17 07:58:26,537 - StoryGeneration - INFO - Story generation skipped for template: Illegal Waste Disposal in Basel-Stadt
+2026-01-17 07:58:26,537 - StoryGeneration - INFO - Generating story for template: CO2 Emissions
+2026-01-17 07:58:26,555 - StoryGeneration - INFO - Story generation skipped for template: CO2 Emissions
+2026-01-17 07:58:26,555 - StoryGeneration - INFO - Generating story for template: Groundwater Quality
+2026-01-17 07:58:26,580 - StoryGeneration - INFO - Story generation skipped for template: Groundwater Quality
+2026-01-17 07:58:26,580 - StoryGeneration - INFO - Generating story for template: Parliament: Political Proceedings
+2026-01-17 07:58:26,588 - StoryGeneration - INFO - Story generation skipped for template: Parliament: Political Proceedings
+2026-01-17 07:58:26,588 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel
+2026-01-17 07:58:26,592 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel
+2026-01-17 07:58:26,592 - StoryGeneration - INFO - Generating story for template: Use of Environmental Travel Pass in Basel Area
+2026-01-17 07:58:26,595 - StoryGeneration - INFO - Story generation skipped for template: Use of Environmental Travel Pass in Basel Area
+2026-01-17 07:58:26,595 - StoryGeneration - INFO - Generating story for template: Motor Vehicle Stock by Vehicle Type, Fuel and Municipality
+2026-01-17 07:58:26,605 - StoryGeneration - INFO - Story generation skipped for template: Motor Vehicle Stock by Vehicle Type, Fuel and Municipality
+2026-01-17 07:58:26,605 - StoryGeneration - INFO - Generating story for template: Graffiti Removals in Basel-Stadt
+2026-01-17 07:58:26,608 - StoryGeneration - INFO - Story generation skipped for template: Graffiti Removals in Basel-Stadt
+2026-01-17 07:58:26,608 - StoryGeneration - INFO - Generating story for template: Awareness Days
+2026-01-17 07:58:26,612 - StoryGeneration - INFO - Story generation skipped for template: Awareness Days
+2026-01-17 07:58:26,612 - StoryGeneration - INFO - Generating story for template: How Basel-Stadt Married Last Year
+2026-01-17 07:58:26,622 - StoryGeneration - INFO - Story generation skipped for template: How Basel-Stadt Married Last Year
+2026-01-17 07:58:26,622 - StoryGeneration - INFO - Generating story for template: Divorces in Basel-Stadt Last Year
+2026-01-17 07:58:26,625 - StoryGeneration - INFO - Story generation skipped for template: Divorces in Basel-Stadt Last Year
+2026-01-17 07:58:26,625 - StoryGeneration - INFO - Generating story for template: A Day to Remember Lives Lost to Gun Violence in the USA
+2026-01-17 07:58:26,629 - StoryGeneration - INFO - Story generation skipped for template: A Day to Remember Lives Lost to Gun Violence in the USA
+2026-01-17 07:58:26,629 - StoryGeneration - INFO - Generating story for template: Motorfahrzeuge nach Fahrzeugart, Treibstoff und Gemeinde ("Speckgürtel")
+2026-01-17 07:58:26,638 - StoryGeneration - INFO - Story generation skipped for template: Motorfahrzeuge nach Fahrzeugart, Treibstoff und Gemeinde ("Speckgürtel")
+2026-01-17 07:58:26,638 - StoryGeneration - INFO - Generating story for template: Building Land Prices in Baselland
+2026-01-17 07:58:26,641 - StoryGeneration - INFO - Story generation skipped for template: Building Land Prices in Baselland
+2026-01-17 07:58:26,641 - StoryGeneration - INFO - Generating story for template: New Metadata published on OGD Baselland
+2026-01-17 07:58:26,643 - StoryGeneration - INFO - Story generation skipped for template: New Metadata published on OGD Baselland
+2026-01-17 07:58:26,643 - StoryGeneration - INFO - Generating story for template: Daylight in Basel
+2026-01-17 07:58:33,434 - StoryGeneration - INFO - Successfully generated story for template: Daylight in Basel
+2026-01-17 07:58:33,434 - StoryGeneration - INFO - Generating story for template: Cleanliness of Basel's Streets
+2026-01-17 07:58:33,453 - StoryGeneration - INFO - Story generation skipped for template: Cleanliness of Basel's Streets
+2026-01-17 07:58:33,453 - StoryGeneration - INFO - Generating story for template: Summary Fines in Basel-Stadt
+2026-01-17 07:58:33,529 - StoryGeneration - INFO - Story generation skipped for template: Summary Fines in Basel-Stadt
+2026-01-17 07:58:33,529 - StoryGeneration - INFO - Generating story for template: Impact of Fireworks on Air Quality in Basel-Stadt
+2026-01-17 07:58:33,532 - StoryGeneration - INFO - Story generation skipped for template: Impact of Fireworks on Air Quality in Basel-Stadt
+2026-01-17 07:58:33,532 - StoryGeneration - INFO - Generating story for template: Tree Inventory Basel-Stadt
+2026-01-17 07:58:33,534 - StoryGeneration - INFO - Story generation skipped for template: Tree Inventory Basel-Stadt
+2026-01-17 07:58:33,534 - StoryGeneration - INFO - Generating story for template: Record Weather Events
+2026-01-17 07:58:33,613 - StoryGeneration - INFO - Story generation skipped for template: Record Weather Events
+2026-01-17 07:58:33,613 - StoryGeneration - INFO - Generating story for template: Cold Day Report
+2026-01-17 07:58:33,632 - StoryGeneration - INFO - Story generation skipped for template: Cold Day Report
+2026-01-17 07:58:33,633 - StoryGeneration - INFO - Generating story for template: Weather Report
+2026-01-17 07:58:33,636 - StoryGeneration - INFO - Story generation skipped for template: Weather Report
+2026-01-17 07:58:33,638 - EmailService - INFO - Starting sending mails for 2026-01-17...
+2026-01-17 07:58:34,178 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-17 07:58:34,721 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-17 07:58:35,534 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-17 07:58:36,267 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-17 07:58:37,036 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-17 07:58:37,602 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-17 07:58:38,134 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-17 07:58:38,679 - EmailService - INFO - Email sent successfully to 1 recipients
+2026-01-17 08:16:16,994 - StoryGeneration - INFO - Generating story for template: Divorces in Basel-Stadt Last Year
+2026-01-17 08:16:30,629 - StoryGeneration - INFO - Successfully generated story for template: Divorces in Basel-Stadt Last Year
+2026-01-17 08:17:45,732 - StoryGeneration - INFO - Generating story for template: Divorces in Basel-Stadt Last Year
+2026-01-17 08:17:59,134 - StoryGeneration - INFO - Successfully generated story for template: Divorces in Basel-Stadt Last Year
