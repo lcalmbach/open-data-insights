@@ -5,6 +5,7 @@ import re
 import shlex
 import subprocess
 import sys
+from pathlib import Path
 
 import altair as alt
 import markdown2
@@ -17,6 +18,7 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.text import slugify
 from django.views.decorators.cache import never_cache
@@ -72,9 +74,35 @@ class _DatasetRow:
         return self._data[item]
 
 
-def _get_random_quote() -> Quote | None:
-    """Return one random quote that is not authored by ChatGPT."""
-    return Quote.objects.exclude(author__iexact="chatgpt").order_by("?").first()
+def _get_daily_quote(for_date=None) -> Quote | None:
+    """Return a deterministic quote of the day (exclude ChatGPT)."""
+    quote_qs = Quote.objects.exclude(author__iexact="chatgpt").order_by("id")
+    total = quote_qs.count()
+    if total == 0:
+        return None
+    day = for_date or timezone.localdate()
+    index = day.toordinal() % total
+    return quote_qs[index]
+
+
+def _get_daily_splash_image(for_date=None) -> str:
+    """Return a deterministic splash image path relative to static/."""
+    images_dir = Path(settings.BASE_DIR) / "static" / "reports"
+    if not images_dir.is_dir():
+        return "reports/splash.png"
+    images = sorted(
+        [
+            path.name
+            for path in images_dir.iterdir()
+            if path.is_file()
+            and path.suffix.lower() in {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"}
+        ]
+    )
+    if not images:
+        return "reports/splash.png"
+    day = for_date or timezone.localdate()
+    index = day.toordinal() % len(images)
+    return f"reports/{images[index]}"
 
 
 def _accessible_template_ids(user):
@@ -101,7 +129,8 @@ def _attach_graphic_chart_ids(graphics):
 
 @never_cache
 def home_view(request):
-    random_quote = _get_random_quote()
+    random_quote = _get_daily_quote()
+    splash_image = _get_daily_splash_image()
     template_ids = _accessible_template_ids(request.user)
     stories = list(
         Story.objects.filter(template_id__in=template_ids).order_by("-published_date")
@@ -110,7 +139,11 @@ def home_view(request):
         return render(
             request,
             "home.html",
-            {"story": None, "random_quote": random_quote},
+            {
+                "story": None,
+                "random_quote": random_quote,
+                "splash_image": splash_image,
+            },
         )
     selected_story = stories[0]
     next_story_id = stories[1].id if len(stories) > 1 else None
@@ -138,7 +171,8 @@ def home_view(request):
             "other_ressources": other_ressources,
             "available_subscriptions": available_subscriptions,
             "random_quote": random_quote,
-            "num_insights": Story.objects.count()
+            "num_insights": Story.objects.count(),
+            "splash_image": splash_image,
         },
     )
 
@@ -501,7 +535,8 @@ class AboutView(TemplateView):
 
 
 def view_story(request, story_id=None):
-    random_quote = _get_random_quote()
+    random_quote = _get_daily_quote()
+    splash_image = _get_daily_splash_image()
     template_ids = _accessible_template_ids(request.user)
     stories = list(
         Story.objects.filter(template_id__in=template_ids).order_by("-published_date")
@@ -510,7 +545,11 @@ def view_story(request, story_id=None):
         return render(
             request,
             "home.html",
-            {"story": None, "random_quote": random_quote},
+            {
+                "story": None,
+                "random_quote": random_quote,
+                "splash_image": splash_image,
+            },
         )
 
     if story_id is None:
@@ -547,6 +586,7 @@ def view_story(request, story_id=None):
             "data_source": data_source,
             "available_subscriptions": available_subscriptions,
             "random_quote": random_quote,
+            "splash_image": splash_image,
         },
     )
 

@@ -1,6 +1,7 @@
 .venv
 .env
 .backup
+figures
 work
 logs
 __pycache__/

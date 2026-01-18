@@ -7,7 +7,7 @@
 
 <!-- Splash image centered -->
 <div class="text-center mb-4">
-    <img src="{% static 'reports/splash.png' %}" alt="Splash image" class="img-fluid"
+    <img src="{% static splash_image|default:'reports/splash.png' %}" alt="Splash image" class="img-fluid"
         style="max-width: 600px; height: auto;">
 </div>
 
