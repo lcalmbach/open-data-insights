@@ -25,4 +25,6 @@ urlpatterns = [
         name="story_table_download",
     ),
     path("management/commands/", views.run_commands_view, name="run_commands"),
+    path("management/query/", views.query_datasets_view, name="query_datasets"),
+    path("management/email/", views.email_users_view, name="email_users"),
 ]

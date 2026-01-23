@@ -14,6 +14,10 @@ from iommi import Column, Table
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.core.validators import validate_email
+from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -35,6 +39,7 @@ from .models.lookups import Period
 from .models.story_rating import StoryRating
 from .models.quote import Quote
 from .services.database_client import DjangoPostgresClient
+from .services.utils import normalize_sql_query
 
 MARKDOWN_EXTRAS = ["tables", "fenced-code-blocks"]
 
@@ -633,6 +638,209 @@ def delete_story(request, story_id):
         return redirect("story_detail", story_id=story_id)
     story_to_delete.delete()
     return redirect("stories")
+
+
+_READ_ONLY_SQL_FORBIDDEN = re.compile(
+    r"\b(insert|update|delete|drop|alter|create|truncate|grant|revoke|call|execute|copy)\b",
+    re.IGNORECASE,
+)
+
+
+def _validate_read_only_sql(query: str) -> tuple[str | None, str]:
+    clean_query = normalize_sql_query(query or "")
+    if not clean_query:
+        return "Enter a SQL query.", clean_query
+    if ";" in clean_query:
+        return "Only one SQL statement is allowed.", clean_query
+    if not re.match(r"^(select|with)\b", clean_query, re.IGNORECASE):
+        return "Only SELECT (read-only) queries are allowed.", clean_query
+    if _READ_ONLY_SQL_FORBIDDEN.search(clean_query):
+        return "Only read-only queries are allowed.", clean_query
+    return None, clean_query
+
+
+def _get_schema_tables(schema: str) -> list[str]:
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = %s
+            AND table_type = 'BASE TABLE'
+            ORDER BY table_name
+            """,
+            [schema],
+        )
+        return [row[0] for row in cursor.fetchall()]
+
+
+@login_required
+@user_passes_test(lambda user: user.is_staff)
+def query_datasets_view(request):
+    query = ""
+    max_rows = 200
+    result = None
+    error = None
+    schema = getattr(settings, "DB_DATA_SCHEMA", "opendata")
+    tables = _get_schema_tables(schema)
+
+    if request.method == "POST":
+        query = (request.POST.get("query") or "").strip()
+        max_rows_raw = (request.POST.get("max_rows") or "").strip()
+        if max_rows_raw:
+            try:
+                max_rows = int(max_rows_raw)
+            except ValueError:
+                error = "Max rows must be a number."
+        if error is None:
+            if max_rows < 1 or max_rows > 1000:
+                error = "Max rows must be between 1 and 1000."
+        if error is None:
+            error, clean_query = _validate_read_only_sql(query)
+        if error is None:
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(clean_query)
+                    columns = (
+                        [col[0] for col in cursor.description]
+                        if cursor.description
+                        else []
+                    )
+                    rows = cursor.fetchmany(max_rows + 1)
+                has_more = len(rows) > max_rows
+                rows = rows[:max_rows]
+                result = {
+                    "columns": columns,
+                    "rows": rows,
+                    "has_more": has_more,
+                }
+            except Exception as exc:
+                error = f"Query failed: {exc}"
+
+    return render(
+        request,
+        "reports/query_datasets.html",
+        {
+            "query": query,
+            "max_rows": max_rows,
+            "result": result,
+            "error": error,
+            "schema": schema,
+            "tables": tables,
+        },
+    )
+
+
+def _parse_recipient_list(raw: str) -> tuple[list[str], list[str]]:
+    tokens = [token for token in re.split(r"[,\s;]+", raw or "") if token]
+    valid = []
+    invalid = []
+    seen = set()
+    for token in tokens:
+        email = token.strip()
+        if not email or email in seen:
+            continue
+        try:
+            validate_email(email)
+            valid.append(email)
+            seen.add(email)
+        except ValidationError:
+            invalid.append(email)
+    return valid, invalid
+
+
+@login_required
+@user_passes_test(lambda user: user.is_staff)
+def email_users_view(request):
+    subject = ""
+    message = ""
+    recipient_group = "confirmed"
+    specific_emails = ""
+    send_to_self = False
+    selected_user_ids = []
+    result = None
+    error = None
+    selectable_users = list(
+        CustomUser.objects.filter(is_active=True).order_by("email", "id")
+    )
+
+    if request.method == "POST":
+        subject = (request.POST.get("subject") or "").strip()
+        message = (request.POST.get("message") or "").strip()
+        recipient_group = (request.POST.get("recipient_group") or "confirmed").strip()
+        specific_emails = (request.POST.get("specific_emails") or "").strip()
+        send_to_self = bool(request.POST.get("send_to_self"))
+        selected_user_ids = [
+            int(val) for val in request.POST.getlist("specific_users") if val.isdigit()
+        ]
+
+        if not subject or not message:
+            error = "Subject and message are required."
+        else:
+            recipients = []
+            invalid_emails = []
+
+            if send_to_self:
+                if request.user.email:
+                    recipients = [request.user.email]
+                else:
+                    error = "Your account does not have an email address."
+            elif recipient_group == "specific":
+                if selected_user_ids:
+                    recipients = list(
+                        CustomUser.objects.filter(
+                            id__in=selected_user_ids, is_active=True
+                        ).values_list("email", flat=True)
+                    )
+                if not recipients:
+                    recipients, invalid_emails = _parse_recipient_list(specific_emails)
+                    if invalid_emails:
+                        error = f"Invalid emails: {', '.join(invalid_emails)}"
+            else:
+                qs = CustomUser.objects.filter(is_active=True)
+                if recipient_group == "confirmed":
+                    qs = qs.filter(is_confirmed=True)
+                elif recipient_group == "staff":
+                    qs = qs.filter(is_staff=True)
+                recipients = list(qs.values_list("email", flat=True))
+
+            recipients = [email for email in recipients if email]
+            if error is None and not recipients:
+                error = "No recipients found for the selected group."
+
+            if error is None:
+                from_email = getattr(
+                    settings, "DEFAULT_FROM_EMAIL", "no-reply@example.com"
+                )
+                sent = 0
+                failed = []
+                for email in recipients:
+                    try:
+                        send_mail(subject, message, from_email, [email])
+                        sent += 1
+                    except Exception as exc:
+                        failed.append({"email": email, "error": str(exc)})
+                result = {
+                    "total": len(recipients),
+                    "sent": sent,
+                    "failed": failed,
+                }
+
+    return render(
+        request,
+        "reports/email_users.html",
+        {
+            "subject": subject,
+            "message": message,
+            "recipient_group": recipient_group,
+            "specific_emails": specific_emails,
+            "selected_user_ids": selected_user_ids,
+            "send_to_self": send_to_self,
+            "result": result,
+            "error": error,
+            "selectable_users": selectable_users,
+        },
+    )
 
 
 @login_required

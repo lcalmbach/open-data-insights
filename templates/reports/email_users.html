@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Email Users{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h1 class="h3 mb-3">Email Users</h1>
+    <form method="post" class="card shadow-sm">
+      {% csrf_token %}
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="subject" class="form-label">Subject</label>
+          <input type="text" class="form-control" id="subject" name="subject" value="{{ subject }}">
+        </div>
+        <div class="mb-3">
+          <label for="message" class="form-label">Message</label>
+          <textarea class="form-control" id="message" name="message" rows="8">{{ message }}</textarea>
+        </div>
+        <div class="mb-3">
+          <label for="recipient_group" class="form-label">Recipient group</label>
+          <select class="form-select" id="recipient_group" name="recipient_group">
+            <option value="confirmed" {% if recipient_group == "confirmed" %}selected{% endif %}>Confirmed users (active)</option>
+            <option value="active" {% if recipient_group == "active" %}selected{% endif %}>All active users</option>
+            <option value="staff" {% if recipient_group == "staff" %}selected{% endif %}>Staff users</option>
+            <option value="specific" {% if recipient_group == "specific" %}selected{% endif %}>Specific emails</option>
+          </select>
+          <div class="form-text">For "Specific emails", select one or more users below.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Specific emails</label>
+          <div class="border rounded p-2" style="max-height: 240px; overflow-y: auto;">
+            {% if selectable_users %}
+            {% for user in selectable_users %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="user-{{ user.id }}" name="specific_users"
+                value="{{ user.id }}" {% if user.id in selected_user_ids %}checked{% endif %}>
+              <label class="form-check-label" for="user-{{ user.id }}">{{ user.email }}</label>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="text-muted">No active users available.</div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="send_to_self" name="send_to_self"
+            {% if send_to_self %}checked{% endif %}>
+          <label class="form-check-label" for="send_to_self">Send to me only (test)</label>
+        </div>
+        {% if error %}
+        <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+        {% endif %}
+      </div>
+      <div class="card-footer text-end">
+        <button type="submit" class="btn btn-primary">Send Email</button>
+      </div>
+    </form>
+
+    {% if result %}
+    <div class="card mt-4">
+      <div class="card-header">Result</div>
+      <div class="card-body">
+        <div class="mb-2"><strong>Total:</strong> {{ result.total }}</div>
+        <div class="mb-2"><strong>Sent:</strong> {{ result.sent }}</div>
+        {% if result.failed %}
+        <div class="mb-2"><strong>Failed:</strong> {{ result.failed|length }}</div>
+        <div class="alert alert-warning mb-0">
+          {% for failure in result.failed %}
+          <div>{{ failure.email }} — {{ failure.error }}</div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-muted">All emails sent successfully.</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -31,6 +31,8 @@
           </a>
           <ul class="dropdown-menu" aria-labelledby="adminDropdown">
             <li><a class="dropdown-item" href="/admin/">Edit Metadata</a></li>
+            <li><a class="dropdown-item" href="{% url 'query_datasets' %}">Query Datasets</a></li>
+            <li><a class="dropdown-item" href="{% url 'email_users' %}">Email Users</a></li>
             <li><a class="dropdown-item" href="{% url 'run_commands' %}">Run Commands</a></li>
           </ul>
         </li>

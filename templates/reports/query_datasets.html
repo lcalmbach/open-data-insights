@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Query Datasets{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    <h1 class="h3 mb-3">Query Datasets</h1>
+    <form method="post" class="card shadow-sm">
+      {% csrf_token %}
+      <div class="card-body">
+        <div class="accordion mb-3" id="schemaTables">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="schemaTablesHeading">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#schemaTablesCollapse" aria-expanded="false" aria-controls="schemaTablesCollapse">
+                Tables in schema {{ schema }}
+              </button>
+            </h2>
+            <div id="schemaTablesCollapse" class="accordion-collapse collapse" aria-labelledby="schemaTablesHeading"
+              data-bs-parent="#schemaTables">
+              <div class="accordion-body">
+                {% if tables %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2">
+                  {% for table in tables %}
+                  <div class="col">
+                    <div class="small text-muted font-monospace">{{ schema }}.{{ table }}</div>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-muted">No tables found.</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="query" class="form-label">SQL Query</label>
+          <textarea class="form-control" id="query" name="query" rows="6"
+            placeholder="SELECT * FROM opendata.some_table LIMIT 50">{{ query }}</textarea>
+          <div class="form-text">Read-only queries only (SELECT / WITH).</div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <label for="max_rows" class="form-label">Max rows</label>
+            <input type="number" class="form-control" id="max_rows" name="max_rows" min="1" max="1000"
+              value="{{ max_rows }}">
+          </div>
+        </div>
+        {% if error %}
+        <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+        {% endif %}
+      </div>
+      <div class="card-footer text-end">
+        <button type="submit" class="btn btn-primary">Run Query</button>
+      </div>
+    </form>
+
+    {% if result %}
+    <div class="card mt-4">
+      <div class="card-header">Result</div>
+      <div class="card-body">
+        {% if result.columns %}
+        <div class="table-responsive">
+          <table class="table table-sm table-striped align-middle">
+            <thead>
+              <tr>
+                {% for column in result.columns %}
+                <th scope="col">{{ column }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% if result.rows %}
+              {% for row in result.rows %}
+              <tr>
+                {% for cell in row %}
+                <td>{{ cell }}</td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+              {% else %}
+              <tr>
+                <td colspan="{{ result.columns|length }}" class="text-muted">No rows returned.</td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+        {% if result.has_more %}
+        <div class="text-muted">Showing first {{ max_rows }} rows.</div>
+        {% endif %}
+        {% else %}
+        <div class="text-muted">Query executed successfully. No data returned.</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
