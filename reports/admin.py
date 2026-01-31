@@ -54,7 +54,7 @@ class StoryTemplateContextAdmin(admin.ModelAdmin):
     )
     search_fields = ["key"]  # shows a filter sidebar
     sorted_by = ("sort_order",)
-    list_filter = ("story_template",)
+    list_filter = ("story_template__reference_period", "story_template")
 
 
 @admin.register(LookupCategory)

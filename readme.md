@@ -42,6 +42,30 @@ While insight templates provide strong contextual grounding — forcing the lang
 - ✅ **Extensible Design**: New datasets and story types can be added easily
 - ✅ **Django Admin Interface**: Easy management of datasets, templates, and subscriptions
 
+## 🗺️ Leaflet Map Markers
+
+The `map-markers` chart type now renders Leaflet fragments (no full HTML page). Each map returns a `<div>` plus an inline `<script>` that initializes the Leaflet map. Assets are injected once in the main template when at least one map is present.
+
+Key settings (same as before unless noted):
+
+- `latitude` / `longitude` (or `lat`/`lon`): required coordinate fields.
+- `center_lat` / `center_lon`: optional map center (defaults to mean of points).
+- `zoom_start`: initial zoom (default `11`).
+- `tiles`: `"OpenStreetMap"` or a URL template like `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`.
+- `tile_attribution`: override attribution text for tiles.
+- `width` / `height`: numbers are treated as pixels; `"container"`/`"100%"` uses `width:100%` and a 400px height fallback.
+- `marker_style`: `"circle"` or `"marker"`.
+- `cluster`: `true` enables marker clustering for regular markers.
+
+Notes:
+
+- Circle markers are **not clustered** (they render directly on the map even if `cluster` is enabled).
+- Each map container gets a unique ID, so multiple maps per page are safe.
+
+Demo script:
+
+- `reports/visualizations/map_demo.py` prints a minimal HTML page containing two maps. It also shows how assets are included only when maps are present.
+
 ## 🔧 Tech Stack
 
 - **Backend**: Python 3.12, Django 4.x

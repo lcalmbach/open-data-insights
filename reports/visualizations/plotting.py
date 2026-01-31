@@ -1,20 +1,21 @@
+from __future__ import annotations
 import base64
+import json
 import logging
+import re
+import uuid
 from io import BytesIO
 from typing import List
-import re
 
 import numpy as np
 import pandas as pd
 import altair as alt
 from wordcloud import WordCloud
 
-try:
-    import folium
-except ImportError:  # pragma: no cover - folium only needed when map types are requested
-    folium = None
 
 logger = logging.getLogger(__name__)
+
+
 
 def generate_chart(data, settings, chart_id):
     """
@@ -547,11 +548,100 @@ def _sanitize_map_identifier(identifier):
     return sanitized
 
 
+def _sanitize_js_identifier(identifier):
+    sanitized = _sanitize_map_identifier(identifier)
+    return sanitized or "_map"
+
+
+def _css_dimension(value, *, fallback_px=400, default_unit="px"):
+    if value is None:
+        return f"{fallback_px}{default_unit}"
+    if isinstance(value, (int, float)):
+        return f"{int(value)}{default_unit}"
+    text = str(value).strip()
+    if text.lower() in {"container", "100%"}:
+        return f"{fallback_px}{default_unit}"
+    return text
+
+
+def _css_width(value):
+    if value is None:
+        return "100%"
+    if isinstance(value, (int, float)):
+        return f"{int(value)}px"
+    text = str(value).strip()
+    if text.lower() == "container":
+        return "100%"
+    return text
+
+
+def _escape_js(value):
+    if value is None:
+        return "null"
+    return json.dumps(value)
+
+
+def _format_text_for_map(record, fields):
+    if not fields:
+        return None
+    entries = fields if isinstance(fields, (list, tuple)) else [fields]
+    values = []
+    for entry in entries:
+        label = None
+        key = None
+        if isinstance(entry, dict):
+            key = entry.get("field") or entry.get("key")
+            label = entry.get("label")
+        elif isinstance(entry, (list, tuple)) and len(entry) >= 2:
+            label = entry[0]
+            key = entry[1]
+        else:
+            key = entry
+        if not key:
+            continue
+        val = record.get(key)
+        if pd.isna(val):
+            continue
+        text = str(val)
+        if label:
+            values.append(f"{label}: {text}")
+        else:
+            values.append(text)
+    if not values:
+        return None
+    return "<br>".join(values)
+
+
+def _resolve_tile_settings(settings):
+    tiles_value = settings.get("tiles") or "OpenStreetMap"
+    tile_attribution = settings.get("tile_attribution")
+    default_attribution = (
+        '&copy; <a href="https://www.openstreetmap.org/copyright">'
+        "OpenStreetMap</a> contributors"
+    )
+    if isinstance(tiles_value, str) and tiles_value == "OpenStreetMap":
+        tile_url = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        tile_attribution = tile_attribution or default_attribution
+    elif isinstance(tiles_value, str) and (
+        "://" in tiles_value or "{z}" in tiles_value or "{x}" in tiles_value
+    ):
+        tile_url = tiles_value
+        tile_attribution = tile_attribution or default_attribution
+    else:
+        logger.warning("Unsupported tiles value '%s'; defaulting to OpenStreetMap.", tiles_value)
+        tile_url = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        tile_attribution = tile_attribution or default_attribution
+
+    tile_options = settings.get("tile_options") or {}
+    if not isinstance(tile_options, dict):
+        tile_options = {}
+    if "attribution" not in tile_options:
+        tile_options["attribution"] = tile_attribution
+    return tile_url, tile_options
+
+
 def create_map_markers(data, settings):
-    """Create a Folium map populated with markers or circle markers."""
-    if folium is None:
-        logger.error("folium library is not installed; cannot render map markers.")
-        return '<div class="chart-error">folium library is not installed</div>'
+    """Create a Leaflet map populated with markers or circle markers."""
 
     df = pd.DataFrame(data).copy()
 
@@ -588,136 +678,164 @@ def create_map_markers(data, settings):
         center_lat = df[lat_field].mean()
     if center_lon is None or pd.isna(center_lon):
         center_lon = df[lon_field].mean()
+    try:
+        center_lat = float(center_lat)
+        center_lon = float(center_lon)
+    except Exception:
+        logger.warning("Map center could not be parsed; using first coordinate.")
+        center_lat = float(df[lat_field].iloc[0])
+        center_lon = float(df[lon_field].iloc[0])
 
     width = settings.get("width", 700)
-    if width == "container":
-        width = "100%"
     height = settings.get("height", 400)
-    if height == "container":
-        height = "100%"
+    height_css = _css_dimension(height, fallback_px=400)
+    width_css = _css_width(width)
 
-    map_kwargs = {
-        "location": [center_lat, center_lon],
-        "zoom_start": settings.get("zoom_start", 11),
-        "tiles": settings.get("tiles", "OpenStreetMap"),
-        "width": width,
-        "height": height,
-        "control_scale": settings.get("control_scale", True),
-    }
-    extra_map_options = settings.get("map_options") or {}
-    if isinstance(extra_map_options, dict):
-        map_kwargs.update(extra_map_options)
+    map_id = settings.get("map_id") or settings.get("chart_id") or "map"
+    base_id = _sanitize_map_identifier(map_id) or "map"
+    unique_suffix = uuid.uuid4().hex[:8]
+    container_id = f"{base_id}_{unique_suffix}"
+    container_id = _sanitize_map_identifier(container_id) or f"map_{unique_suffix}"
+    map_var = _sanitize_js_identifier(f"map_{container_id}")
+    cluster_var = _sanitize_js_identifier(f"cluster_{container_id}")
 
-    map_obj = folium.Map(**map_kwargs)
-    map_id = settings.get("map_id") or settings.get("chart_id")
-    sanitized_map_id = _sanitize_map_identifier(map_id)
-    if sanitized_map_id:
-        map_obj._name = sanitized_map_id
-        map_obj._id = sanitized_map_id
+    tile_url, tile_options = _resolve_tile_settings(settings)
+    try:
+        tile_options_json = _escape_js(tile_options)
+    except Exception:
+        logger.warning("Tile options could not be serialized; using attribution only.")
+        tile_options_json = _escape_js({"attribution": tile_options.get("attribution")})
 
-    cluster_layer = None
-    if settings.get("cluster", False):
-        try:
-            from folium.plugins import MarkerCluster
-
-            cluster_layer = MarkerCluster()
-            cluster_layer.add_to(map_obj)
-        except ImportError:
-            logger.warning(
-                "folium.plugins.MarkerCluster not available; rendering without clustering."
-            )
-
-    def _format_text(record, fields):
-        if not fields:
-            return None
-        entries = fields if isinstance(fields, (list, tuple)) else [fields]
-        values = []
-        for entry in entries:
-            label = None
-            key = None
-            if isinstance(entry, dict):
-                key = entry.get("field") or entry.get("key")
-                label = entry.get("label")
-            elif isinstance(entry, (list, tuple)) and len(entry) >= 2:
-                label = entry[0]
-                key = entry[1]
-            else:
-                key = entry
-            if not key:
-                continue
-            val = record.get(key)
-            if pd.isna(val):
-                continue
-            text = str(val)
-            if label:
-                values.append(f"{label}: {text}")
-            else:
-                values.append(text)
-        if not values:
-            return None
-        return "<br>".join(values)
+    map_options = settings.get("map_options") or {}
+    if not isinstance(map_options, dict):
+        map_options = {}
+    if "zoomControl" not in map_options:
+        map_options["zoomControl"] = True
+    if "scrollWheelZoom" not in map_options:
+        map_options["scrollWheelZoom"] = settings.get("scroll_wheel_zoom", True)
+    if "dragging" not in map_options:
+        map_options["dragging"] = settings.get("dragging", True)
+    try:
+        map_options_json = _escape_js(map_options)
+    except Exception:
+        logger.warning("Map options could not be serialized; using defaults.")
+        map_options_json = "{}"
 
     marker_style = (settings.get("marker_style") or "marker").lower()
     marker_color_field = settings.get("marker_color") or settings.get("color")
     tooltip_spec = settings.get("tooltips") or settings.get("tooltip")
     popup_spec = settings.get("popup")
+    tooltip_sticky = settings.get("tooltip_sticky", True)
+    cluster_enabled = bool(settings.get("cluster", False))
+    cluster_circles = cluster_enabled and marker_style != "circle"
+    if cluster_enabled and marker_style == "circle":
+        logger.info("Map marker clustering enabled, but circle markers are not clustered.")
+    icon_name = settings.get("icon") or settings.get("icon_name")
+    icon_color = settings.get("icon_color")
+    if (icon_name or icon_color) and marker_style != "circle":
+        logger.info("Leaflet icon customization requires extra plugins; using default icons.")
+
+    style_block = f"<style>#{container_id}{{width:{width_css};height:{height_css};}}</style>"
+    container_div = (
+        f'<div id="{container_id}" class="leaflet-map" '
+        f'data-leaflet-map="1" data-markercluster="{int(cluster_circles)}"></div>'
+    )
+
+    js_lines = [
+        "(function(){",
+        f"  var containerId = {_escape_js(container_id)};",
+        "  var mapEl = document.getElementById(containerId);",
+        "  if (!mapEl) { return; }",
+        f"  var {map_var} = L.map(containerId, {map_options_json}).setView("
+        f"[{center_lat}, {center_lon}], {settings.get('zoom_start', 11)});",
+        f"  L.tileLayer({_escape_js(tile_url)}, {tile_options_json}).addTo({map_var});",
+        "  window.__leafletMaps = window.__leafletMaps || {};",
+        f"  window.__leafletMaps[containerId] = {map_var};",
+    ]
+
+    if settings.get("control_scale", True):
+        js_lines.append(f"  L.control.scale().addTo({map_var});")
+
+    if cluster_circles:
+        js_lines.append(f"  var {cluster_var} = L.markerClusterGroup();")
 
     for record in df.to_dict(orient="records"):
         lat = record.get(lat_field)
         lon = record.get(lon_field)
-        if lat is None or lon is None:
+        if lat is None or lon is None or pd.isna(lat) or pd.isna(lon):
+            continue
+        try:
+            lat = float(lat)
+            lon = float(lon)
+        except Exception:
             continue
 
-        popup_text = _format_text(record, popup_spec)
-        tooltip_text = _format_text(record, tooltip_spec)
-
-        parent_target = map_obj
-        if marker_style != "circle" and cluster_layer is not None:
-            parent_target = cluster_layer
+        popup_text = _format_text_for_map(record, popup_spec)
+        tooltip_text = _format_text_for_map(record, tooltip_spec)
 
         if marker_style == "circle":
             circle_kwargs = {
                 "radius": settings.get("radius", 6),
-                "fill": True,
-                "fill_opacity": settings.get("fill_opacity", 0.7),
+                "fillOpacity": settings.get("fill_opacity", 0.7),
                 "opacity": settings.get("line_opacity", 0.9),
             }
             coord_color = record.get(marker_color_field) if marker_color_field else None
             if coord_color and not pd.isna(coord_color):
                 circle_kwargs["color"] = str(coord_color)
-                circle_kwargs["fill_color"] = str(coord_color)
+                circle_kwargs["fillColor"] = str(coord_color)
             elif settings.get("circle_color"):
                 circle_kwargs["color"] = settings["circle_color"]
-                circle_kwargs["fill_color"] = settings["circle_color"]
-            if popup_text:
-                circle_kwargs["popup"] = popup_text
-            if tooltip_text:
-                circle_kwargs["tooltip"] = tooltip_text
-
-            folium.CircleMarker(location=[lat, lon], **circle_kwargs).add_to(
-                parent_target
+                circle_kwargs["fillColor"] = settings["circle_color"]
+            circle_kwargs_json = _escape_js(circle_kwargs)
+            js_lines.append(
+                f"  var marker = L.circleMarker([{lat}, {lon}], {circle_kwargs_json});"
             )
         else:
-            marker_kwargs = {}
-            if popup_text:
-                marker_kwargs["popup"] = popup_text
-            if tooltip_text:
-                marker_kwargs["tooltip"] = tooltip_text
+            js_lines.append(f"  var marker = L.marker([{lat}, {lon}]);")
 
-            icon_kwargs = {}
-            icon_name = settings.get("icon") or settings.get("icon_name")
-            icon_color = settings.get("icon_color")
-            if icon_name or icon_color:
-                if icon_name:
-                    icon_kwargs["icon"] = icon_name
-                if icon_color:
-                    icon_kwargs["color"] = icon_color
-                icon_kwargs["prefix"] = settings.get("icon_prefix", "glyphicon")
-                marker_kwargs["icon"] = folium.Icon(**icon_kwargs)
+        if popup_text:
+            js_lines.append(f"  marker.bindPopup({_escape_js(popup_text)});")
+        if tooltip_text:
+            sticky_opt = "{sticky:true}" if tooltip_sticky else "{}"
+            js_lines.append(
+                f"  marker.bindTooltip({_escape_js(tooltip_text)}, {sticky_opt});"
+            )
 
-            folium.Marker(location=[lat, lon], **marker_kwargs).add_to(parent_target)
+        if cluster_circles:
+            js_lines.append(f"  {cluster_var}.addLayer(marker);")
+        else:
+            js_lines.append(f"  marker.addTo({map_var});")
 
-    return map_obj.get_root().render()
+    if cluster_circles:
+        js_lines.append(f"  {map_var}.addLayer({cluster_var});")
+
+    js_lines.extend(
+        [
+            "  if (!window.__leafletMapResizeHook) {",
+            "    window.__leafletMapResizeHook = true;",
+            "    document.addEventListener('shown.bs.tab', function(){",
+            "      Object.values(window.__leafletMaps || {}).forEach(function(map){",
+            "        map.invalidateSize();",
+            "      });",
+            "    });",
+            "    document.addEventListener('shown.bs.collapse', function(){",
+            "      Object.values(window.__leafletMaps || {}).forEach(function(map){",
+            "        map.invalidateSize();",
+            "      });",
+            "    });",
+            "  }",
+            "  setTimeout(function(){",
+            f"    if (window.__leafletMaps && window.__leafletMaps[containerId]) {{",
+            "      window.__leafletMaps[containerId].invalidateSize();",
+            "    }",
+            "  }, 50);",
+            "})();",
+        ]
+    )
+
+    script_block = "<script>\n" + "\n".join(js_lines) + "\n</script>"
+
+    return "\n".join([style_block, container_div, script_block])
 
 
 def create_histogram(data, settings):

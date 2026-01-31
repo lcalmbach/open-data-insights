@@ -1,0 +1,13 @@
+{
+    {"key": "lat", "value": "lat",
+    "lon": "lon",
+    "tooltips": {
+        "lat": "lat",
+        "lon": "lon",
+        "Station": "Station",
+        "Street Type": "Street Type",
+        "Vehicle Types": "Vehicle Types",
+        "Total Monthly Count": "Total Monthly Count"
+    },
+    "zoom_start": 12
+}

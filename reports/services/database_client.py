@@ -42,15 +42,6 @@ class DjangoPostgresClient:
 
         try:
             with connection.cursor() as cursor:
-                # Log rendered SQL for debugging (psycopg2-style)§
-                # try in your environment to see the exact error
-                try:
-                    # print("SQL:", clean_query)
-                    # print("params:", params, "type:", type(params))
-                    rendered = cursor.mogrify(clean_query, params)
-                    # print("rendered:", rendered)
-                except Exception as ex:
-                    print("mogrify error:", type(ex).__name__, ex)
                 cursor.execute(clean_query, params)
                 cols = [c[0] for c in cursor.description] if cursor.description else []
                 rows = cursor.fetchall()

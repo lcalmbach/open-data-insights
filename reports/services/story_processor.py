@@ -266,6 +266,7 @@ class StoryProcessor:
     def generate_table(self, table: StoryTable):
         table_template = table.table_template
         sql_cmd = table_template.sql_command
+        sql_cmd = self._replace_reference_period_expression(sql_cmd)
         params = self._get_sql_command_params(sql_cmd)
         try:
             df = self.dbclient.run_query(sql_cmd, params)

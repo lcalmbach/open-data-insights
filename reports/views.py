@@ -132,6 +132,34 @@ def _attach_graphic_chart_ids(graphics):
         graphic.chart_id = _extract_chart_id(graphic.content_html)
 
 
+def _extract_leaflet_requirements(content_html: str | None) -> tuple[bool, bool]:
+    if not content_html:
+        return False, False
+    needs_leaflet = bool(
+        re.search(r'data-leaflet-map=["\\\']1["\\\']', content_html)
+        or re.search(r"\bL\.map\(", content_html)
+    )
+    needs_markercluster = bool(
+        re.search(r'data-markercluster=["\\\']1["\\\']', content_html)
+        or re.search(r"\bmarkerClusterGroup\(", content_html)
+    )
+    return needs_leaflet, needs_markercluster
+
+
+def _attach_graphic_requirements(graphics):
+    needs_leaflet = False
+    needs_markercluster = False
+    for graphic in graphics:
+        graphic_requires_leaflet, graphic_requires_markercluster = _extract_leaflet_requirements(
+            graphic.content_html
+        )
+        graphic.requires_leaflet = graphic_requires_leaflet
+        graphic.requires_markercluster = graphic_requires_markercluster
+        needs_leaflet = needs_leaflet or graphic_requires_leaflet
+        needs_markercluster = needs_markercluster or graphic_requires_markercluster
+    return needs_leaflet, needs_markercluster
+
+
 @never_cache
 def home_view(request):
     random_quote = _get_daily_quote()
@@ -158,6 +186,7 @@ def home_view(request):
     tables = get_tables(selected_story) if selected_story else []
     graphics = selected_story.story_graphics.all() if selected_story else []
     _attach_graphic_chart_ids(graphics)
+    needs_leaflet, needs_markercluster = _attach_graphic_requirements(graphics)
     data_source = selected_story.template.data_source if selected_story else None
     other_ressources = (
         selected_story.template.other_ressources if selected_story else None
@@ -178,6 +207,8 @@ def home_view(request):
             "random_quote": random_quote,
             "num_insights": Story.objects.count(),
             "splash_image": splash_image,
+            "needs_leaflet": needs_leaflet,
+            "needs_markercluster": needs_markercluster,
         },
     )
 
@@ -287,6 +318,7 @@ def stories_view(request):
     if selected_story:
         graphics = selected_story.story_graphics.all() if selected_story else []
         _attach_graphic_chart_ids(graphics)
+        needs_leaflet, needs_markercluster = _attach_graphic_requirements(graphics)
         data_source = selected_story.template.data_source if selected_story else None
         other_ressources = (
             selected_story.template.other_ressources if selected_story else None
@@ -298,6 +330,8 @@ def stories_view(request):
         )
     else:
         graphics = []
+        needs_leaflet = False
+        needs_markercluster = False
         data_source = None
         other_ressources = None
         tables = []
@@ -314,6 +348,8 @@ def stories_view(request):
             "other_ressources": other_ressources,
             "data_source": data_source,
             "periods": periods,
+            "needs_leaflet": needs_leaflet,
+            "needs_markercluster": needs_markercluster,
         },
     )
 
@@ -570,6 +606,7 @@ def view_story(request, story_id=None):
     tables = get_tables(selected_story) if selected_story else []
     graphics = selected_story.story_graphics.all() if selected_story else []
     _attach_graphic_chart_ids(graphics)
+    needs_leaflet, needs_markercluster = _attach_graphic_requirements(graphics)
     data_source = selected_story.template.data_source if selected_story else None
     other_ressources = (
         selected_story.template.other_ressources if selected_story else None
@@ -592,6 +629,8 @@ def view_story(request, story_id=None):
             "available_subscriptions": available_subscriptions,
             "random_quote": random_quote,
             "splash_image": splash_image,
+            "needs_leaflet": needs_leaflet,
+            "needs_markercluster": needs_markercluster,
         },
     )
 
@@ -605,6 +644,7 @@ def story_detail(request, story_id=None):
     tables = get_tables(selected_story) if selected_story else []
     graphics = selected_story.story_graphics.all() if selected_story else []
     _attach_graphic_chart_ids(graphics)
+    needs_leaflet, needs_markercluster = _attach_graphic_requirements(graphics)
     data_source = selected_story.template.data_source if selected_story else None
     other_ressources = (
         selected_story.template.other_ressources if selected_story else None
@@ -622,6 +662,8 @@ def story_detail(request, story_id=None):
             "tables": tables,
             "other_ressources": other_ressources,
             "data_source": data_source,
+            "needs_leaflet": needs_leaflet,
+            "needs_markercluster": needs_markercluster,
         },
     )
 
