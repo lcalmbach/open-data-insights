@@ -208,6 +208,11 @@ class Dataset(models.Model):
         verbose_name="Import Type",
     )
 
+    allow_future_data = models.BooleanField(
+        default=False,
+        help_text="If true, limits the data import upto yesterday's date to avoid partial data"
+    )
+
     class Meta:
         verbose_name = "Dataset"
         verbose_name_plural = "Datasets"
@@ -223,6 +228,6 @@ class Dataset(models.Model):
 
     def natural_key(self):
         return (self.slug,)
-
+    
     natural_key.dependencies = []  # optional; can be omitted
     objects = DatasetManager()

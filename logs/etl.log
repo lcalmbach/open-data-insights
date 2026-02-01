@@ -25243,3 +25243,45 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2026-01-29 07:16:14,437 - StoryGeneration - INFO - Successfully generated story for template: Traffic Counting in Basel-Stadt
 2026-01-29 07:32:42,721 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
 2026-01-29 07:32:57,247 - StoryGeneration - INFO - Successfully generated story for template: Traffic Counting in Basel-Stadt
+2026-01-31 17:01:44,563 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-01-31 17:01:44,580 - StoryGeneration - INFO - Story generation skipped for template: Traffic Counting in Basel-Stadt
+2026-01-31 17:01:51,077 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-01-31 17:02:08,404 - StoryGeneration - INFO - Successfully generated story for template: Traffic Counting in Basel-Stadt
+2026-01-31 17:03:43,116 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-01-31 17:03:57,420 - StoryGeneration - INFO - Successfully generated story for template: Traffic Counting in Basel-Stadt
+2026-01-31 17:12:36,834 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-01-31 17:12:49,712 - StoryGeneration - INFO - Successfully generated story for template: Traffic Counting in Basel-Stadt
+2026-01-31 17:18:35,120 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-01-31 17:18:49,767 - StoryGeneration - INFO - Successfully generated story for template: Traffic Counting in Basel-Stadt
+2026-02-01 09:08:47,999 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-02-01 09:09:00,373 - StoryGeneration - INFO - Successfully generated story for template: Traffic Counting in Basel-Stadt
+2026-02-01 09:25:11,013 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-02-01 09:25:11,085 - StoryGeneration - INFO - Story generation skipped for template: Traffic Counting in Basel-Stadt
+2026-02-01 09:25:18,463 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-02-01 09:25:30,127 - StoryGeneration - INFO - Successfully generated story for template: Traffic Counting in Basel-Stadt
+2026-02-01 10:08:30,045 - DatasetSync - INFO - Synchronizing dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:08:30,045 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:08:30,541 - DatasetSync - INFO - Successfully synchronized dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:08:30,541 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-01 10:08:30,541 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-01 10:11:24,142 - DatasetSync - INFO - Synchronizing dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:11:24,142 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:11:31,886 - DatasetSync - INFO - Successfully synchronized dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:11:31,887 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-01 10:11:31,887 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-01 10:32:16,892 - DatasetSync - INFO - Synchronizing dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:32:16,892 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:33:42,070 - DatasetSync - INFO - Synchronizing dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:33:42,071 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:46:56,720 - DatasetSync - INFO - Synchronizing dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:46:56,720 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:47:05,843 - DatasetSync - INFO - Successfully synchronized dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:47:05,844 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-01 10:47:05,844 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-01 10:48:58,717 - DatasetSync - INFO - Synchronizing dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:48:58,717 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:50:39,987 - DatasetSync - INFO - Synchronizing dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:50:39,987 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:51:57,089 - DatasetSync - INFO - Successfully synchronized dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-01 10:51:57,091 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-01 10:51:57,091 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful

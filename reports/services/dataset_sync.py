@@ -521,10 +521,13 @@ class DatasetProcessor:
             return True
 
         self.logger.info(f"New data available in ODS. Last record date: {ods_date}")
-
+        
+        # today and future data should not be accepted in most cases as those are often empty records or partial data. however for events or predictions, future data is important and must be imported.
         where_clause = (
             f"{self.dataset.source_timestamp_field} > '{target_db_date.strftime('%Y-%m-%d')}' "
-            f"and {self.dataset.source_timestamp_field} < '{datetime.now(timezone.utc).strftime('%Y-%m-%d')}'"
+        ) if self.dataset.allow_future_data else (
+            f"{self.dataset.source_timestamp_field} > '{target_db_date.strftime('%Y-%m-%d')}' "
+            f"and {self.dataset.source_timestamp_field} < '{(datetime.now(timezone.utc) - timedelta(days=1)).strftime('%Y-%m-%d')}'"
         )
         df = self.download_ods_data(
             filename,
@@ -892,7 +895,7 @@ class DatasetProcessor:
 
     def get_time_limit_where_clause(self) -> Optional[str]:
         """Construct WHERE clause for time limits"""
-        if self.dataset.source_timestamp_field:
+        if self.dataset.source_timestamp_field and not self.dataset.allow_future_data:
             today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
             return f"{self.dataset.source_timestamp_field} < '{today}'"
         else:
