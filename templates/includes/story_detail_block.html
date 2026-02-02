@@ -11,6 +11,21 @@
           &nbsp;&middot;&nbsp;
           Period: {{ selected_story.reference_period }}
         </small>
+        {% if user.is_authenticated and not user.is_staff %}
+        <div class="mt-2">
+          <a class="text-decoration-none" href="{% url 'rate_story' selected_story.id %}" title="Rate this story">
+            <span class="me-2 fw-semibold text-dark">{{ rating_avg_int|default:0 }}</span>
+            {% for _ in "12345"|make_list %}
+              {% if forloop.counter <= rating_avg_int|default:0 %}
+                <i class="bi bi-star-fill text-warning"></i>
+              {% else %}
+                <i class="bi bi-star text-warning"></i>
+              {% endif %}
+            {% endfor %}
+            <span class="ms-2 text-muted">{{ rating_count|default:0 }}</span>
+          </a>
+        </div>
+        {% endif %}
       </div>
       {% if user.is_staff %}
       <form

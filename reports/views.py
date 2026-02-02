@@ -18,8 +18,8 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.db import connection
-from django.db.models import Q
-from django.http import HttpResponse
+from django.db.models import Avg, Count, Q
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -42,6 +42,145 @@ from .services.database_client import DjangoPostgresClient
 from .services.utils import normalize_sql_query
 
 MARKDOWN_EXTRAS = ["tables", "fenced-code-blocks"]
+
+_NEGATIVE_KEYWORDS = {
+    "bad",
+    "poor",
+    "boring",
+    "useless",
+    "wrong",
+    "incorrect",
+    "misleading",
+    "biased",
+    "confusing",
+    "confused",
+    "unclear",
+    "hate",
+    "terrible",
+    "awful",
+    "disappointed",
+    "disappointing",
+    "spam",
+    "irrelevant",
+    "error",
+    "broken",
+    "bug",
+}
+
+_POSITIVE_KEYWORDS = {
+    "good",
+    "great",
+    "excellent",
+    "helpful",
+    "useful",
+    "clear",
+    "insightful",
+    "interesting",
+    "love",
+    "awesome",
+    "amazing",
+    "thanks",
+}
+
+
+def _analyze_rating_sentiment(rating_value: int, rating_text: str) -> str:
+    """
+    Lightweight sentiment analysis based on rating + a few keywords.
+    Returns: "negative", "neutral", or "positive".
+    """
+    text = (rating_text or "").strip().lower()
+    tokens = set(re.findall(r"[a-z']+", text))
+    has_negative = bool(tokens & _NEGATIVE_KEYWORDS)
+    has_positive = bool(tokens & _POSITIVE_KEYWORDS)
+
+    # Rating is the primary signal, text can tip borderline cases.
+    if rating_value <= 2:
+        return "negative"
+    if rating_value >= 4:
+        return "positive"
+    if has_negative and not has_positive:
+        return "negative"
+    if has_positive and not has_negative:
+        return "positive"
+    return "neutral"
+
+
+def _send_story_rating_email(
+    request,
+    *,
+    story: Story,
+    rating_value: int,
+    rating_text: str,
+    sentiment: str,
+) -> None:
+    """Send a short follow-up mail to the rating user. Never raises."""
+    recipient = getattr(request.user, "email", "") or ""
+    if not recipient:
+        return
+
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@example.com")
+    profile_url = request.build_absolute_uri(reverse("account:profile"))
+    story_url = request.build_absolute_uri(reverse("view_story", args=(story.id,)))
+
+    subject = f"Thanks for rating: {story.title}"
+    base = [
+        f"Hi {request.user.get_short_name()},",
+        "",
+        f"Thanks for rating '{story.title}'.",
+        f"Your rating: {rating_value}/5",
+    ]
+    if (rating_text or "").strip():
+        base.append("")
+        base.append("Your feedback:")
+        base.append(rating_text.strip())
+
+    base.append("")
+    if sentiment == "negative":
+        base.extend(
+            [
+                "We're sorry this insight didn't meet your expectations.",
+                "Thank you for the feedback - we constantly work on improving the insights.",
+                "",
+                "If you're not interested in this particular insight anymore, you can unsubscribe so you won't receive it in the future:",
+                profile_url,
+            ]
+        )
+    elif sentiment == "neutral":
+        base.extend(
+            [
+                "Thank you for your feedback. It helps us improve the insights over time.",
+            ]
+        )
+    else:
+        base.extend(
+            [
+                "Thanks! We're glad you found it useful.",
+            ]
+        )
+
+    base.extend(["", "View the story:", story_url])
+    message = "\n".join(base)
+
+    try:
+        send_mail(subject, message, from_email, [recipient])
+    except Exception:
+        # Keep rating submission successful even if email delivery fails.
+        pass
+
+
+def _get_story_rating_context(story: Story) -> dict:
+    stats = StoryRating.objects.filter(story=story).aggregate(
+        avg=Avg("rating"),
+        count=Count("id"),
+    )
+    avg = stats.get("avg") or 0
+    count = stats.get("count") or 0
+    avg_int = int(round(avg)) if count else 0
+    return {
+        "rating_avg": avg,
+        "rating_avg_int": avg_int,
+        "rating_count": count,
+    }
 
 class _RequestWithFilteredQuery:
     """Lightweight request proxy that drops a handful of query keys."""
@@ -543,22 +682,61 @@ def storytemplate_detail_view(request, pk):
 @login_required
 def rate_story(request, story_id):
     story = get_object_or_404(Story, pk=story_id)
+    if request.user.is_staff:
+        return HttpResponseForbidden("Staff users cannot rate stories.")
+
+    rating_ctx = _get_story_rating_context(story)
+    ratings = (
+        StoryRating.objects.filter(story=story)
+        .select_related("user")
+        .order_by("-create_date")
+    )
+    user_rating_obj = (
+        StoryRating.objects.filter(story=story, user=request.user)
+        .order_by("-create_date")
+        .first()
+    )
+
     if request.method == "POST":
         form = StoryRatingForm(request.POST)
-        rating = request.POST.get("rating")
-
-        if form.is_valid() and rating:
-            StoryRating.objects.create(
+        if form.is_valid():
+            rating_value = int(form.cleaned_data["rating"])
+            rating_text = form.cleaned_data.get("rating_text") or ""
+            sentiment = _analyze_rating_sentiment(rating_value, rating_text)
+            if user_rating_obj is not None:
+                user_rating_obj.rating = rating_value
+                user_rating_obj.rating_text = rating_text
+                user_rating_obj.create_date = timezone.now()
+                user_rating_obj.save(update_fields=["rating", "rating_text", "create_date"])
+            else:
+                StoryRating.objects.create(
+                    story=story,
+                    user=request.user,
+                    rating=rating_value,
+                    rating_text=rating_text,
+                )
+            _send_story_rating_email(
+                request,
                 story=story,
-                user=request.user,
-                rating=int(rating),
-                rating_text=form.cleaned_data["rating_text"],
+                rating_value=rating_value,
+                rating_text=rating_text,
+                sentiment=sentiment,
             )
-            return render(request, "reports/story_rating_thanks.html", {"story": story})
+            return redirect("rate_story", story_id=story.id)
     else:
         form = StoryRatingForm()
 
-    return render(request, "reports/story_rating.html", {"form": form, "story": story})
+    return render(
+        request,
+        "reports/story_rating.html",
+        {
+            "form": form,
+            "story": story,
+            "ratings": ratings,
+            "user_rating": user_rating_obj.rating if user_rating_obj else None,
+            **rating_ctx,
+        },
+    )
 
 
 class AboutView(TemplateView):
@@ -615,6 +793,7 @@ def view_story(request, story_id=None):
     selected_story.content_html = markdown2.markdown(
         selected_story.content, extras=MARKDOWN_EXTRAS
     )
+    rating_ctx = _get_story_rating_context(selected_story)
     return render(
         request,
         "home.html",
@@ -631,6 +810,7 @@ def view_story(request, story_id=None):
             "splash_image": splash_image,
             "needs_leaflet": needs_leaflet,
             "needs_markercluster": needs_markercluster,
+            **rating_ctx,
         },
     )
 
@@ -653,6 +833,7 @@ def story_detail(request, story_id=None):
     selected_story.content_html = markdown2.markdown(
         selected_story.content, extras=MARKDOWN_EXTRAS
     )
+    rating_ctx = _get_story_rating_context(selected_story)
     return render(
         request,
         "reports/story_detail.html",
@@ -664,6 +845,7 @@ def story_detail(request, story_id=None):
             "data_source": data_source,
             "needs_leaflet": needs_leaflet,
             "needs_markercluster": needs_markercluster,
+            **rating_ctx,
         },
     )
 
