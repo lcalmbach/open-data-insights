@@ -51,9 +51,11 @@
         <li class="nav-item">
           <a class="nav-link" text-white href="{% url 'about' %}">About</a>
         </li>
+        {% if user.is_authenticated %}
         <li class="nav-item">
           <a class="nav-link" text-white href="{% url 'user_feedback' %}">Feedback</a>
         </li>
+        {% endif %}
       </ul>
 
       <!-- Rechtsbündige Initialen-Anzeige -->
