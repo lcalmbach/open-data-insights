@@ -9,6 +9,7 @@ from .models.story_log import StoryLog
 from .models.story_table import StoryTable
 from .models.graphic import Graphic, StoryTemplateGraphic
 from .models.story_table_template import StoryTemplateTable
+from .models.user_comment import UserComment
 
 
 @admin.register(Story)
@@ -187,3 +188,10 @@ class StoryGraphicAdmin(admin.ModelAdmin):
     sortable_by = ("id", "title")
     search_fields = ("title",)
     list_filter = ("story__template",)
+
+
+@admin.register(UserComment)
+class UserCommentAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "sentiment", "date")
+    list_filter = ("sentiment", "date")
+    search_fields = ("comment", "user__email", "user__first_name", "user__last_name")

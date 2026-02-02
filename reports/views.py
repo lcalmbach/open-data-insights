@@ -29,7 +29,7 @@ from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
 
 from account.models import CustomUser
-from .forms import StoryRatingForm
+from .forms import StoryRatingForm, UserCommentForm
 from .models.dataset import Dataset
 from .models.graphic import Graphic
 from .models.story_template import StoryTemplate, StoryTemplateDataset
@@ -37,6 +37,7 @@ from .models.story import Story
 from .models.story_table import StoryTable
 from .models.lookups import Period
 from .models.story_rating import StoryRating
+from .models.user_comment import UserComment
 from .models.quote import Quote
 from .services.database_client import DjangoPostgresClient
 from .services.utils import normalize_sql_query
@@ -103,6 +104,22 @@ def _analyze_rating_sentiment(rating_value: int, rating_text: str) -> str:
     if has_positive and not has_negative:
         return "positive"
     return "neutral"
+
+
+def _analyze_comment_sentiment(comment: str) -> int:
+    """
+    General feedback sentiment mapping:
+      1=positive, 2=neutral, 3=negative
+    """
+    text = (comment or "").strip().lower()
+    tokens = set(re.findall(r"[a-z']+", text))
+    neg = len(tokens & _NEGATIVE_KEYWORDS)
+    pos = len(tokens & _POSITIVE_KEYWORDS)
+    if neg > pos and neg > 0:
+        return UserComment.SENTIMENT_NEGATIVE
+    if pos > neg and pos > 0:
+        return UserComment.SENTIMENT_POSITIVE
+    return UserComment.SENTIMENT_NEUTRAL
 
 
 def _send_story_rating_email(
@@ -735,6 +752,34 @@ def rate_story(request, story_id):
             "ratings": ratings,
             "user_rating": user_rating_obj.rating if user_rating_obj else None,
             **rating_ctx,
+        },
+    )
+
+
+@login_required
+def user_feedback_view(request):
+    """
+    General feedback form (not tied to a specific story).
+    """
+    if request.method == "POST":
+        form = UserCommentForm(request.POST)
+        if form.is_valid():
+            comment = form.cleaned_data["comment"]
+            sentiment = _analyze_comment_sentiment(comment)
+            UserComment.objects.create(
+                user=request.user,
+                comment=comment,
+                sentiment=sentiment,
+            )
+            return render(request, "reports/user_feedback_thanks.html")
+    else:
+        form = UserCommentForm()
+
+    return render(
+        request,
+        "reports/user_feedback.html",
+        {
+            "form": form,
         },
     )
 

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Feedback{% endblock %}
+
+{% block content %}
+  <div class="container" style="max-width: 900px;">
+    <h1 class="mb-3">Feedback 💬</h1>
+    <p class="text-muted">
+      Use this form to share feedback about anything: data sources you'd like to see, themes we should cover,
+      things you like or dislike, suggestions, bugs, or other ideas. This is not limited to a specific story.
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.comment|as_crispy_field }}
+      <div class="d-flex gap-2 mt-3">
+        <button type="submit" class="btn btn-primary">Send</button>
+        <a class="btn btn-outline-secondary" href="{% url 'home' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

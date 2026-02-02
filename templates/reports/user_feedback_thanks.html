@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Thank You{% endblock %}
+
+{% block content %}
+  <div class="container text-center mt-5" style="max-width: 900px;">
+    <h1 class="mb-3">Thank you! ❤️</h1>
+    <p class="lead">Your feedback has been sent.</p>
+    <p class="text-muted mb-4">If your comment requires a response, you'll hear from us shortly.</p>
+    <a class="btn btn-primary mt-2" href="{% url 'home' %}">Back to Home</a>
+  </div>
+{% endblock %}

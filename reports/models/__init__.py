@@ -12,3 +12,4 @@ from .story_feedback import StoryFeedback
 from .story_log import StoryLog
 from .story_rating import StoryRating
 from .subscription import StoryTemplateSubscription
+from .user_comment import UserComment
