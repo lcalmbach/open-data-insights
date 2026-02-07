@@ -37,15 +37,26 @@ def generate_chart(data, settings, chart_id):
             "heatmap": create_heatmap,
             "histogram": create_histogram,
             "map-markers": create_map_markers,
+            "choropleth": create_chloropleth,
+            "chloropleth": create_chloropleth,
             "wordcloud": create_word_cloud
         }
         chart_settings = settings.copy() if hasattr(settings, "copy") else dict(settings)
         chart_settings.setdefault("chart_id", chart_id)
-        chart_type = chart_settings.get("type").value.lower()
+        chart_type_value = chart_settings.get("type")
+        if hasattr(chart_type_value, "value"):
+            chart_type_value = chart_type_value.value
+        chart_type = str(chart_type_value).lower() if chart_type_value is not None else ""
         chart_func = chart_functions.get(chart_type, create_line_chart)
         chart = chart_func(data, chart_settings)
 
-        if chart_type not in ("wordcloud", "map_markers", "map-markers"):
+        if chart_type not in (
+            "wordcloud",
+            "map_markers",
+            "map-markers",
+            "choropleth",
+            "chloropleth",
+        ):
             html = chart.to_html(
                 embed_options={
                     "actions": False,  # Hide download buttons
@@ -70,6 +81,14 @@ def generate_chart(data, settings, chart_id):
     except Exception as e:
         logger.error(f"Error generating chart: {str(e)}")
         return f'<div id=\"{chart_id}\" class=\"chart-error\">Error generating chart: {str(e)}</div>'
+
+
+def generate_chloropleth(data, settings, chart_id=None):
+    """Generate a Leaflet choropleth map fragment (HTML + inline JS)."""
+    chart_settings = settings.copy() if hasattr(settings, "copy") else dict(settings)
+    if chart_id:
+        chart_settings.setdefault("chart_id", chart_id)
+    return create_chloropleth(data, chart_settings)
 
 
 def create_line_chart(data, settings):
@@ -639,6 +658,364 @@ def _resolve_tile_settings(settings):
         tile_options["attribution"] = tile_attribution
     return tile_url, tile_options
 
+
+def create_chloropleth(data, settings):
+    """
+    Create a Leaflet choropleth map based on GeoJSON features + a value column.
+
+    Required settings:
+    - geojson: FeatureCollection (dict) or JSON string, OR geojson_path/geojson_file (path to JSON).
+    - data_key: column name in `data` used to join (defaults to "id").
+    - geo_key: property name on GeoJSON features used to join (defaults to data_key).
+    - value: column name in `data` to color by (defaults to "value").
+
+    Optional settings (common):
+    - tooltip / popup: like create_map_markers; if omitted, an automatic tooltip is used.
+    - colors: list of hex colors (default 6-step Blues ramp).
+    - bins: number of bins (default len(colors)); method: "quantile" (default) or "equal_interval".
+    - missing_color: fill color for missing values (default "#d9d9d9").
+    - border_color/border_weight/fill_opacity: polygon styling.
+    - legend: bool (default True), legend_title, legend_position.
+    - tiles, tile_attribution, tile_options, map_options, width, height, control_scale.
+    """
+
+    df = pd.DataFrame(data).copy()
+
+    geojson_obj = (
+        settings.get("geojson")
+        or settings.get("geojson_data")
+        or settings.get("geojson_object")
+    )
+    geojson_path = settings.get("geojson_path") or settings.get("geojson_file")
+    if geojson_obj is None and geojson_path:
+        try:
+            with open(str(geojson_path), "r", encoding="utf-8") as handle:
+                geojson_obj = json.load(handle)
+        except Exception as exc:
+            logger.error("Choropleth failed to load geojson from '%s': %s", geojson_path, exc)
+            return '<div class="chart-error">Choropleth requires a valid GeoJSON input.</div>'
+
+    if geojson_obj is None:
+        logger.error("Choropleth requires a 'geojson' setting (dict/JSON string/path).")
+        return '<div class="chart-error">Choropleth requires GeoJSON input.</div>'
+
+    if isinstance(geojson_obj, str):
+        try:
+            geojson_obj = json.loads(geojson_obj)
+        except Exception as exc:
+            logger.error("Choropleth geojson JSON could not be parsed: %s", exc)
+            return '<div class="chart-error">Choropleth GeoJSON could not be parsed.</div>'
+
+    data_key = settings.get("data_key") or settings.get("key") or settings.get("id_field") or "id"
+    geo_key = settings.get("geo_key") or settings.get("feature_key") or data_key
+    value_field = settings.get("value") or settings.get("value_field") or "value"
+
+    if data_key not in df.columns:
+        logger.error("Choropleth data missing join key column '%s'.", data_key)
+        return '<div class="chart-error">Choropleth data missing join key.</div>'
+    if value_field not in df.columns:
+        logger.error("Choropleth data missing value column '%s'.", value_field)
+        return '<div class="chart-error">Choropleth data missing value field.</div>'
+
+    df[value_field] = pd.to_numeric(df[value_field], errors="coerce")
+
+    tooltip_spec = settings.get("tooltips") or settings.get("tooltip")
+    popup_spec = settings.get("popup")
+
+    payload_by_key = {}
+    for record in df.to_dict(orient="records"):
+        join_val = record.get(data_key)
+        if join_val is None or pd.isna(join_val):
+            continue
+        key = str(join_val)
+        value = record.get(value_field)
+        value_js = None if value is None or pd.isna(value) else float(value)
+        payload_by_key[key] = {
+            "value": value_js,
+            "tooltip": _format_text_for_map(record, tooltip_spec),
+            "popup": _format_text_for_map(record, popup_spec),
+        }
+
+    values = [entry["value"] for entry in payload_by_key.values() if entry.get("value") is not None]
+    if not values:
+        logger.warning("Choropleth has no numeric values to render; all features will be missing-color.")
+
+    colors = settings.get("colors")
+    if not colors:
+        colors = ["#eff3ff", "#c6dbef", "#9ecae1", "#6baed6", "#3182bd", "#08519c"]
+    if not isinstance(colors, (list, tuple)) or len(colors) < 2:
+        colors = ["#eff3ff", "#6baed6", "#08519c"]
+    colors = [str(c) for c in colors]
+
+    requested_bins = settings.get("bins") or settings.get("steps")
+    try:
+        requested_bins = int(requested_bins) if requested_bins is not None else len(colors)
+    except Exception:
+        requested_bins = len(colors)
+    bins = max(2, min(int(requested_bins), len(colors)))
+    colors = colors[:bins]
+
+    method = (settings.get("method") or settings.get("binning") or "quantile").lower()
+    thresholds = []
+    if values:
+        arr = np.asarray(values, dtype=float)
+        if method in {"equal", "equal_interval", "interval"}:
+            vmin = float(np.nanmin(arr))
+            vmax = float(np.nanmax(arr))
+            if vmax > vmin:
+                step = (vmax - vmin) / bins
+                thresholds = [vmin + step * i for i in range(1, bins)]
+        else:
+            # quantile
+            try:
+                qs = [i / bins for i in range(1, bins)]
+                thresholds = [float(v) for v in np.quantile(arr, qs)]
+            except Exception:
+                thresholds = []
+
+    missing_color = settings.get("missing_color", "#d9d9d9")
+    fill_opacity = settings.get("fill_opacity", 0.75)
+    border_color = settings.get("border_color", "#ffffff")
+    border_weight = settings.get("border_weight", 1)
+
+    width = settings.get("width", 700)
+    height = settings.get("height", 420)
+    height_css = _css_dimension(height, fallback_px=420)
+    width_css = _css_width(width)
+
+    map_id = settings.get("map_id") or settings.get("chart_id") or "choropleth"
+    base_id = _sanitize_map_identifier(map_id) or "choropleth"
+    unique_suffix = uuid.uuid4().hex[:8]
+    container_id = f"{base_id}_{unique_suffix}"
+    container_id = _sanitize_map_identifier(container_id) or f"choropleth_{unique_suffix}"
+    map_var = _sanitize_js_identifier(f"map_{container_id}")
+    layer_var = _sanitize_js_identifier(f"layer_{container_id}")
+
+    tile_url, tile_options = _resolve_tile_settings(settings)
+    try:
+        tile_options_json = _escape_js(tile_options)
+    except Exception:
+        tile_options_json = _escape_js({"attribution": tile_options.get("attribution")})
+
+    map_options = settings.get("map_options") or {}
+    if not isinstance(map_options, dict):
+        map_options = {}
+    if "zoomControl" not in map_options:
+        map_options["zoomControl"] = True
+    if "scrollWheelZoom" not in map_options:
+        map_options["scrollWheelZoom"] = settings.get("scroll_wheel_zoom", True)
+    if "dragging" not in map_options:
+        map_options["dragging"] = settings.get("dragging", True)
+    try:
+        map_options_json = _escape_js(map_options)
+    except Exception:
+        map_options_json = "{}"
+
+    zoom_start = settings.get("zoom_start", 6)
+    center_lat = settings.get("center_lat")
+    center_lon = settings.get("center_lon")
+
+    style_block = f"<style>#{container_id}{{width:{width_css};height:{height_css};}}</style>"
+    container_div = (
+        f'<div id="{container_id}" class="leaflet-map" data-leaflet-map="1" '
+        'data-markercluster="0"></div>'
+    )
+
+    js_lines = [
+        "(function(){",
+        f"  var containerId = {_escape_js(container_id)};",
+        "  var mapEl = document.getElementById(containerId);",
+        "  if (!mapEl) { return; }",
+        f"  var dataByKey = {_escape_js(payload_by_key)};",
+        f"  var geoKey = {_escape_js(geo_key)};",
+        f"  var colors = {_escape_js(colors)};",
+        f"  var thresholds = {_escape_js(thresholds)};",
+        f"  var missingColor = {_escape_js(missing_color)};",
+        "  function getColor(value){",
+        "    if (value === null || value === undefined || isNaN(value)) { return missingColor; }",
+        "    for (var i = 0; i < thresholds.length; i++) {",
+        "      if (value <= thresholds[i]) { return colors[i]; }",
+        "    }",
+        "    return colors[colors.length - 1];",
+        "  }",
+        "  function style(feature){",
+        "    var props = (feature && feature.properties) ? feature.properties : {};",
+        "    var keyVal = props[geoKey];",
+        "    if (keyVal === null || keyVal === undefined) {",
+        "      keyVal = (feature && (feature.id !== null && feature.id !== undefined)) ? feature.id : null;",
+        "    }",
+        "    var entry = (keyVal !== null && keyVal !== undefined) ? dataByKey[String(keyVal)] : null;",
+        "    var value = entry ? entry.value : null;",
+        "    return {",
+        f"      fillColor: getColor(value),",
+        f"      weight: {border_weight},",
+        f"      opacity: 1.0,",
+        f"      color: {_escape_js(border_color)},",
+        f"      fillOpacity: {fill_opacity}",
+        "    };",
+        "  }",
+    ]
+
+    if center_lat is not None and center_lon is not None:
+        try:
+            center_lat = float(center_lat)
+            center_lon = float(center_lon)
+            js_lines.append(
+                f"  var {map_var} = L.map(containerId, {map_options_json}).setView([{center_lat}, {center_lon}], {int(zoom_start)});"
+            )
+        except Exception:
+            center_lat = center_lon = None
+
+    if center_lat is None or center_lon is None:
+        js_lines.append(
+            f"  var {map_var} = L.map(containerId, {map_options_json}).setView([0, 0], {int(zoom_start)});"
+        )
+
+    js_lines.extend(
+        [
+            f"  L.tileLayer({_escape_js(tile_url)}, {tile_options_json}).addTo({map_var});",
+            "  window.__leafletMaps = window.__leafletMaps || {};",
+            f"  window.__leafletMaps[containerId] = {map_var};",
+        ]
+    )
+
+    if settings.get("control_scale", True):
+        js_lines.append(f"  L.control.scale().addTo({map_var});")
+
+    highlight_style = settings.get("highlight_style") or {}
+    if not isinstance(highlight_style, dict):
+        highlight_style = {}
+    highlight_style.setdefault("weight", border_weight + 1)
+    highlight_style.setdefault("color", "#666666")
+    highlight_style.setdefault("fillOpacity", min(1.0, float(fill_opacity) + 0.1))
+
+    js_lines.extend(
+        [
+            f"  var geojsonData = {_escape_js(geojson_obj)};",
+            "  function onEachFeature(feature, layer){",
+            "    var props = (feature && feature.properties) ? feature.properties : {};",
+            "    var keyVal = props[geoKey];",
+            "    if (keyVal === null || keyVal === undefined) {",
+            "      keyVal = (feature && (feature.id !== null && feature.id !== undefined)) ? feature.id : null;",
+            "    }",
+            "    var entry = (keyVal !== null && keyVal !== undefined) ? dataByKey[String(keyVal)] : null;",
+            "    if (entry && entry.popup) { layer.bindPopup(entry.popup); }",
+            "    if (entry && entry.tooltip) { layer.bindTooltip(entry.tooltip, {sticky:true}); }",
+            "    if ((!entry || (!entry.tooltip && !entry.popup)) && props) {",
+            "      var label = props.name || props[geoKey] || (keyVal !== null ? String(keyVal) : '');",
+            "      var val = entry ? entry.value : null;",
+            "      if (label) {",
+            "        var text = (val === null || val === undefined || isNaN(val)) ? (label + ': n/a') : (label + ': ' + val);",
+            "        layer.bindTooltip(text, {sticky:true});",
+            "      }",
+            "    }",
+            f"    layer.on('mouseover', function(){{ layer.setStyle({_escape_js(highlight_style)}); }});",
+            "    layer.on('mouseout', function(e){",
+            f"      {layer_var}.resetStyle(e.target);",
+            "    });",
+            "  }",
+            f"  var {layer_var} = L.geoJSON(geojsonData, {{",
+            "    style: style,",
+            "    onEachFeature: onEachFeature",
+            f"  }}).addTo({map_var});",
+        ]
+    )
+
+    if settings.get("fit_bounds", True) and (center_lat is None or center_lon is None):
+        js_lines.extend(
+            [
+                f"  try {{",
+                f"    var bounds = {layer_var}.getBounds();",
+                "    if (bounds && bounds.isValid && bounds.isValid()) {",
+                f"      {map_var}.fitBounds(bounds, {{padding:[10,10]}});",
+                "    }",
+                "  } catch (e) {}",
+            ]
+        )
+
+    if settings.get("legend", True):
+        legend_title = settings.get("legend_title") or value_field
+        legend_position = settings.get("legend_position") or "bottomright"
+        js_lines.extend(
+            [
+                f"  var legend = L.control({{position: {_escape_js(legend_position)}}});",
+                "  legend.onAdd = function(){",
+                "    var div = L.DomUtil.create('div', 'leaflet-legend');",
+                "    div.style.background = 'rgba(255,255,255,0.9)';",
+                "    div.style.padding = '8px 10px';",
+                "    div.style.borderRadius = '4px';",
+                "    div.style.boxShadow = '0 0 10px rgba(0,0,0,0.15)';",
+                f"    var title = {_escape_js(str(legend_title))};",
+                "    if (title) {",
+                "      var t = document.createElement('div');",
+                "      t.style.fontWeight = '600';",
+                "      t.style.marginBottom = '6px';",
+                "      t.textContent = title;",
+                "      div.appendChild(t);",
+                "    }",
+                "    function fmt(n){",
+                "      if (n === null || n === undefined || isNaN(n)) { return 'n/a'; }",
+                "      try { return Number(n).toLocaleString(); } catch (e) { return String(n); }",
+                "    }",
+                "    var ranges = [];",
+                "    var prev = null;",
+                "    for (var i = 0; i < colors.length; i++) {",
+                "      var from = (i === 0) ? null : thresholds[i-1];",
+                "      var to = (i < thresholds.length) ? thresholds[i] : null;",
+                "      ranges.push({from: from, to: to, color: colors[i]});",
+                "    }",
+                "    ranges.forEach(function(r){",
+                "      var row = document.createElement('div');",
+                "      row.style.display = 'flex';",
+                "      row.style.alignItems = 'center';",
+                "      row.style.gap = '8px';",
+                "      var swatch = document.createElement('i');",
+                "      swatch.style.width = '14px';",
+                "      swatch.style.height = '14px';",
+                "      swatch.style.background = r.color;",
+                "      swatch.style.display = 'inline-block';",
+                "      swatch.style.border = '1px solid rgba(0,0,0,0.15)';",
+                "      row.appendChild(swatch);",
+                "      var label = document.createElement('span');",
+                "      if (r.from === null && r.to !== null) { label.textContent = '≤ ' + fmt(r.to); }",
+                "      else if (r.from !== null && r.to !== null) { label.textContent = fmt(r.from) + ' – ' + fmt(r.to); }",
+                "      else if (r.from !== null && r.to === null) { label.textContent = '≥ ' + fmt(r.from); }",
+                "      else { label.textContent = ''; }",
+                "      row.appendChild(label);",
+                "      div.appendChild(row);",
+                "    });",
+                "    return div;",
+                "  };",
+                f"  legend.addTo({map_var});",
+            ]
+        )
+
+    js_lines.extend(
+        [
+            "  if (!window.__leafletMapResizeHook) {",
+            "    window.__leafletMapResizeHook = true;",
+            "    document.addEventListener('shown.bs.tab', function(){",
+            "      Object.values(window.__leafletMaps || {}).forEach(function(map){",
+            "        map.invalidateSize();",
+            "      });",
+            "    });",
+            "    document.addEventListener('shown.bs.collapse', function(){",
+            "      Object.values(window.__leafletMaps || {}).forEach(function(map){",
+            "        map.invalidateSize();",
+            "      });",
+            "    });",
+            "  }",
+            "  setTimeout(function(){",
+            f"    if (window.__leafletMaps && window.__leafletMaps[containerId]) {{",
+            "      window.__leafletMaps[containerId].invalidateSize();",
+            "    }",
+            "  }, 50);",
+            "})();",
+        ]
+    )
+
+    script_block = "<script>\n" + "\n".join(js_lines) + "\n</script>"
+    return "\n".join([style_block, container_div, script_block])
 
 def create_map_markers(data, settings):
     """Create a Leaflet map populated with markers or circle markers."""

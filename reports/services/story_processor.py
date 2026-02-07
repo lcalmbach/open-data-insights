@@ -145,8 +145,8 @@ class StoryProcessor:
                     self.story.reference_period_end,
                 ) = self._get_reference_period(self.anchor_date, template)
 
+                self.story.published_date = date.today()
             self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
-            self.story.published_date = date.today()
 
         # Ensure reference period fields are set to avoid AttributeError later
         self.logger = logging.getLogger(

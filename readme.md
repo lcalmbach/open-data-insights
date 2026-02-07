@@ -66,6 +66,14 @@ Demo script:
 
 - `reports/visualizations/map_demo.py` prints a minimal HTML page containing two maps. It also shows how assets are included only when maps are present.
 
+## 🗺️ Leaflet Choropleth
+
+The `choropleth` (alias: `chloropleth`) chart type renders a Leaflet choropleth from GeoJSON + a joined value column. It returns the same kind of Leaflet fragment (a `<div>` + inline `<script>`), so assets are injected the same way as for `map-markers`.
+
+Demo script:
+
+- `reports/visualizations/choropleth_demo.py` prints a minimal HTML page containing a small, inline GeoJSON choropleth.
+
 ## 🔧 Tech Stack
 
 - **Backend**: Python 3.12, Django 4.x
