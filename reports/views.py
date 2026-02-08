@@ -293,17 +293,26 @@ def _send_story_rating_notification_email(
 
 
 def _get_story_rating_context(story: Story) -> dict:
+    import math
+
     stats = StoryRating.objects.filter(story=story).aggregate(
         avg=Avg("rating"),
         count=Count("id"),
     )
+    print(stats)
     avg = stats.get("avg") or 0
     count = stats.get("count") or 0
-    avg_int = int(round(avg)) if count else 0
+    avg_half = round(float(avg) * 2) / 2 if count else 0
+    avg_int = int(math.floor(avg_half + 0.5)) if count else 0
+    stars_full = int(math.floor(avg_half)) if count else 0
+    stars_half = 1 if count and (avg_half - stars_full) >= 0.5 else 0
     return {
         "rating_avg": avg,
+        "rating_avg_half": avg_half,
         "rating_avg_int": avg_int,
         "rating_count": count,
+        "rating_stars_full": stars_full,
+        "rating_stars_half": stars_half,
     }
 
 class _RequestWithFilteredQuery:
@@ -455,6 +464,7 @@ def home_view(request):
         selected_story.template.other_ressources if selected_story else None
     )
     available_subscriptions = len(template_ids)
+    rating_ctx = _get_story_rating_context(selected_story)
     return render(
         request,
         "home.html",
@@ -472,6 +482,7 @@ def home_view(request):
             "splash_image": splash_image,
             "needs_leaflet": needs_leaflet,
             "needs_markercluster": needs_markercluster,
+            **rating_ctx,
         },
     )
 
@@ -591,6 +602,7 @@ def stories_view(request):
         selected_story.content_html = markdown2.markdown(
             selected_story.content, extras=MARKDOWN_EXTRAS
         )
+        rating_ctx = _get_story_rating_context(selected_story)
     else:
         graphics = []
         needs_leaflet = False
@@ -598,6 +610,14 @@ def stories_view(request):
         data_source = None
         other_ressources = None
         tables = []
+        rating_ctx = {
+            "rating_avg": 0,
+            "rating_avg_half": 0,
+            "rating_avg_int": 0,
+            "rating_count": 0,
+            "rating_stars_full": 0,
+            "rating_stars_half": 0,
+        }
 
     return render(
         request,
@@ -613,6 +633,7 @@ def stories_view(request):
             "periods": periods,
             "needs_leaflet": needs_leaflet,
             "needs_markercluster": needs_markercluster,
+            **rating_ctx,
         },
     )
 
@@ -827,19 +848,13 @@ def rate_story(request, story_id):
             rating_value = int(form.cleaned_data["rating"])
             rating_text = form.cleaned_data.get("rating_text") or ""
             sentiment = _analyze_rating_sentiment(rating_value, rating_text)
-            if user_rating_obj is not None:
-                user_rating_obj.rating = rating_value
-                user_rating_obj.rating_text = rating_text
-                user_rating_obj.create_date = timezone.now()
-                user_rating_obj.save(update_fields=["rating", "rating_text", "create_date"])
-                rating_obj = user_rating_obj
-            else:
-                rating_obj = StoryRating.objects.create(
-                    story=story,
-                    user=request.user,
-                    rating=rating_value,
-                    rating_text=rating_text,
-                )
+            # Always create a new rating record (keep rating history).
+            rating_obj = StoryRating.objects.create(
+                story=story,
+                user=request.user,
+                rating=rating_value,
+                rating_text=rating_text,
+            )
             _send_story_rating_email(
                 request,
                 story=story,

@@ -7,15 +7,23 @@
   <div class="container">
     <h1 class="mb-1">Rate: {{ story.title }}</h1>
     <div class="mb-4">
-      <span class="me-2 fw-semibold">{{ rating_avg_int|default:0 }}</span>
+      {% if rating_count|default:0 %}
+        <span class="me-2 fw-semibold">{{ rating_avg|floatformat:1 }}</span>
+      {% else %}
+        <span class="me-2 fw-semibold">0.0</span>
+      {% endif %}
       {% for _ in "12345"|make_list %}
-        {% if forloop.counter <= rating_avg_int|default:0 %}
+        {% if forloop.counter <= rating_stars_full|default:0 %}
+          <span style="color: gold;">★</span>
+        {% elif rating_stars_half|default:0 and forloop.counter == rating_stars_full|default:0|add:"1" %}
           <span style="color: gold;">★</span>
         {% else %}
           <span style="color: #ccc;">★</span>
         {% endif %}
       {% endfor %}
-      <span class="ms-2 text-muted">{{ rating_count|default:0 }}</span>
+      <span class="ms-2 text-muted">
+        ({{ rating_count|default:0 }} rating{{ rating_count|default:0|pluralize }})
+      </span>
     </div>
 
     <form method="post">
