@@ -299,7 +299,6 @@ def _get_story_rating_context(story: Story) -> dict:
         avg=Avg("rating"),
         count=Count("id"),
     )
-    print(stats)
     avg = stats.get("avg") or 0
     count = stats.get("count") or 0
     avg_half = round(float(avg) * 2) / 2 if count else 0

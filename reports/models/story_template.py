@@ -142,6 +142,14 @@ class StoryTemplate(models.Model):
         related_name="story_templates",
         help_text="Limit this template to members of a single organisation.",
     )
+    ai_model = models.CharField(
+        max_length=255,
+        default="gpt-4o",
+        null=True,
+        blank=True,
+        help_text="AI model to use for generating the story. This can be set to 'deepseek-chat' to use the Deepseek API instead of OpenAI.",
+    )
+
 
     class Meta:
         verbose_name = "Story Template"

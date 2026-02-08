@@ -25940,3 +25940,22 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2026-02-07 16:20:58,514 - StoryGeneration - INFO - Successfully generated story for template: Air Quality in Basel
 2026-02-07 16:24:29,462 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel
 2026-02-07 16:24:38,485 - StoryGeneration - INFO - Successfully generated story for template: Air Quality in Basel
+2026-02-08 15:44:30,651 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-02-08 15:44:34,727 - StoryGeneration - ERROR - Failed to generate story for template: Traffic Counting in Basel-Stadt
+2026-02-08 15:45:29,830 - DatasetSync - INFO - Synchronizing dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-08 15:45:29,830 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-08 15:46:17,362 - DatasetSync - INFO - Successfully synchronized dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-08 15:46:17,363 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-08 15:46:17,363 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-08 15:47:49,999 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-02-08 15:47:50,095 - StoryGeneration - INFO - Story generation skipped for template: Traffic Counting in Basel-Stadt
+2026-02-08 15:49:01,139 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-02-08 15:49:16,749 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-02-08 15:49:39,383 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-02-08 15:50:20,693 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-02-08 15:51:40,620 - StoryGeneration - ERROR - Failed to generate story for template: Traffic Counting in Basel-Stadt
+2026-02-08 15:52:23,812 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-02-08 15:55:18,088 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-02-08 15:57:05,312 - StoryGeneration - ERROR - Failed to generate story for template: Traffic Counting in Basel-Stadt
+2026-02-08 16:05:37,065 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
+2026-02-08 16:07:18,113 - StoryGeneration - INFO - Successfully generated story for template: Traffic Counting in Basel-Stadt

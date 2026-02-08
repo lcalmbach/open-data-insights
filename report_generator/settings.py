@@ -211,6 +211,7 @@ DATA_FILES_PATH = os.environ.get('DATA_FILES_PATH', str(BASE_DIR / 'files'))
 
 # OpenAI Configuration
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY')
 DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL', 'gpt-4o')
 
 APP_ROOT = "https://www.open-data-insights.org/"

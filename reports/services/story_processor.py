@@ -146,7 +146,10 @@ class StoryProcessor:
                 ) = self._get_reference_period(self.anchor_date, template)
 
                 self.story.published_date = date.today()
+
+        if not getattr(self.story, "ai_model", None):
             self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
+        self.ai_client = self.get_ai_client()
 
         # Ensure reference period fields are set to avoid AttributeError later
         self.logger = logging.getLogger(
@@ -170,6 +173,14 @@ class StoryProcessor:
         self.is_data_based = StoryTemplateContext.objects.filter(
             story_template=template
         ).exists()
+
+    def get_ai_client(self) -> OpenAI:
+        if self.story.ai_model == "deepseek-chat":
+            api_key = getattr(settings, "DEEPSEEK_API_KEY", None)
+            return OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+        else:
+            api_key = getattr(settings, "OPENAI_API_KEY", None)
+            return OpenAI(api_key=api_key)
 
 
     def _replace_reference_period_expression(self, expression: str) -> str:
@@ -693,14 +704,6 @@ class StoryProcessor:
     def _generate_insight_text(self) -> bool:
         """Generate story text using OpenAI API"""
         try:
-            # Get OpenAI API key from settings
-            api_key = getattr(settings, "OPENAI_API_KEY", None)
-            if not api_key:
-                self.logger.error("OpenAI API key not configured")
-                return None
-
-            # Initialize OpenAI client
-            client = OpenAI(api_key=api_key)
             message = self._replace_reference_period_expression(
                 self.story.template.prompt_text
             )  # Prepare messages for chat completion
@@ -732,7 +735,7 @@ class StoryProcessor:
                 ]
 
                 # Generate response
-            response = client.chat.completions.create(
+            response = self.ai_client.chat.completions.create(
                 model=self.story.ai_model,
                 messages=messages,
                 temperature=self.story.template.temperature,
@@ -752,12 +755,6 @@ class StoryProcessor:
 
     def _generate_summary(self, kind: str) -> Optional[str]:
         try:
-            api_key = getattr(settings, "OPENAI_API_KEY", None)
-            if not api_key:
-                self.logger.error("OpenAI API key not configured")
-                return None
-
-            client = OpenAI(api_key=api_key)
             # Kind-specific instructions
             if kind == "title":
                 system = "You are a concise editorial assistant producing sharp, data-driven insight titles"
@@ -797,7 +794,7 @@ class StoryProcessor:
                 },
             ]
 
-            response = client.chat.completions.create(
+            response = self.ai_client.chat.completions.create(
                 model=self.story.ai_model,
                 messages=messages,
                 temperature=temperature,
