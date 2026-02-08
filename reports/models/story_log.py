@@ -1,5 +1,5 @@
 from django.db import models
-from base.utils import default_yesterday
+from reports.utils import default_yesterday
 from .story import Story
 
 

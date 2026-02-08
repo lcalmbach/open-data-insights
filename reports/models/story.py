@@ -7,7 +7,7 @@ from django.urls import reverse
 from pydantic import ValidationError
 
 from report_generator import settings
-from base.utils import default_yesterday
+from reports.utils import default_yesterday
 from .story_template import StoryTemplate
 from reports.constants.reference_period import ReferencePeriod
 

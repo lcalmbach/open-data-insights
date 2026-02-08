@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'markdownify',
     'django_countries',
-    "base",
     "iommi",
 ]
 
@@ -216,6 +215,8 @@ DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL', 'gpt-4o')
 
 APP_ROOT = "https://www.open-data-insights.org/"
 DEVELOPER_EMAIL = DEFAULT_FROM_EMAIL
+FEEDBACK_NOTIFY_EMAIL = os.environ.get("FEEDBACK_NOTIFY_EMAIL", "lcalmbach@gmail.com")
+RATING_NOTIFY_EMAIL = os.environ.get("RATING_NOTIFY_EMAIL", FEEDBACK_NOTIFY_EMAIL)
 
 # In development/local only:
 if DEBUG:  # or use a custom flag for your environment

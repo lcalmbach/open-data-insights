@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 import random
 import re
 import shlex
@@ -43,6 +44,7 @@ from .services.database_client import DjangoPostgresClient
 from .services.utils import normalize_sql_query
 
 MARKDOWN_EXTRAS = ["tables", "fenced-code-blocks"]
+logger = logging.getLogger(__name__)
 
 _NEGATIVE_KEYWORDS = {
     "bad",
@@ -183,6 +185,111 @@ def _send_story_rating_email(
     except Exception:
         # Keep rating submission successful even if email delivery fails.
         pass
+
+
+def _send_user_feedback_notification_email(
+    request,
+    *,
+    user_comment: UserComment,
+) -> None:
+    """Notify the developer when a user submits general feedback. Never raises."""
+    recipient = getattr(settings, "FEEDBACK_NOTIFY_EMAIL", "") or ""
+    if not recipient:
+        return
+
+    # Redirect all emails to developer in development/local
+    if hasattr(settings, "EMAIL_REDIRECT_TO"):
+        recipients = list(settings.EMAIL_REDIRECT_TO or [])
+    else:
+        recipients = [recipient]
+    recipients = [r for r in recipients if r]
+    if not recipients:
+        return
+
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@example.com")
+    user = request.user
+    profile_url = request.build_absolute_uri(reverse("account:profile"))
+
+    subject = f"New feedback from {user.get_username()}"
+    message = "\n".join(
+        [
+            "A user submitted feedback:",
+            "",
+            f"User: {user.get_username()} (id={user.id})",
+            f"Name: {user.get_full_name() or '-'}",
+            f"Email: {getattr(user, 'email', '') or '-'}",
+            f"Sentiment: {user_comment.get_sentiment_display()}",
+            f"Submitted at: {timezone.localtime(user_comment.date).isoformat()}",
+            "",
+            "Comment:",
+            user_comment.comment.strip(),
+            "",
+            f"Profile: {profile_url}",
+        ]
+    )
+
+    try:
+        send_mail(subject, message, from_email, recipients)
+    except Exception:  # noqa: BLE001
+        logger.exception("Failed to send feedback notification email")
+
+
+def _send_story_rating_notification_email(
+    request,
+    *,
+    story: Story,
+    rating_obj: StoryRating,
+    sentiment: str,
+) -> None:
+    """Notify the developer when a user submits/updates a story rating. Never raises."""
+    recipient = (
+        getattr(settings, "RATING_NOTIFY_EMAIL", "")
+        or getattr(settings, "FEEDBACK_NOTIFY_EMAIL", "")
+        or ""
+    )
+    if not recipient:
+        return
+
+    # Redirect all emails to developer in development/local
+    if hasattr(settings, "EMAIL_REDIRECT_TO"):
+        recipients = list(settings.EMAIL_REDIRECT_TO or [])
+    else:
+        recipients = [recipient]
+    recipients = [r for r in recipients if r]
+    if not recipients:
+        return
+
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@example.com")
+    user = request.user
+    profile_url = request.build_absolute_uri(reverse("account:profile"))
+    story_url = request.build_absolute_uri(reverse("view_story", args=(story.id,)))
+
+    subject = f"New rating ({rating_obj.rating}/5) for: {story.title}"
+    message = "\n".join(
+        [
+            "A user submitted a story rating:",
+            "",
+            f"Story: {story.title} (id={story.id})",
+            f"Rating: {rating_obj.rating}/5",
+            f"Sentiment: {sentiment}",
+            f"Submitted at: {timezone.localtime(rating_obj.create_date).isoformat()}",
+            "",
+            f"User: {user.get_username()} (id={user.id})",
+            f"Name: {user.get_full_name() or '-'}",
+            f"Email: {getattr(user, 'email', '') or '-'}",
+            "",
+            "Feedback:",
+            (rating_obj.rating_text or "").strip() or "-",
+            "",
+            f"Story: {story_url}",
+            f"Profile: {profile_url}",
+        ]
+    )
+
+    try:
+        send_mail(subject, message, from_email, recipients)
+    except Exception:  # noqa: BLE001
+        logger.exception("Failed to send rating notification email")
 
 
 def _get_story_rating_context(story: Story) -> dict:
@@ -725,8 +832,9 @@ def rate_story(request, story_id):
                 user_rating_obj.rating_text = rating_text
                 user_rating_obj.create_date = timezone.now()
                 user_rating_obj.save(update_fields=["rating", "rating_text", "create_date"])
+                rating_obj = user_rating_obj
             else:
-                StoryRating.objects.create(
+                rating_obj = StoryRating.objects.create(
                     story=story,
                     user=request.user,
                     rating=rating_value,
@@ -737,6 +845,12 @@ def rate_story(request, story_id):
                 story=story,
                 rating_value=rating_value,
                 rating_text=rating_text,
+                sentiment=sentiment,
+            )
+            _send_story_rating_notification_email(
+                request,
+                story=story,
+                rating_obj=rating_obj,
                 sentiment=sentiment,
             )
             return redirect("rate_story", story_id=story.id)
@@ -766,11 +880,12 @@ def user_feedback_view(request):
         if form.is_valid():
             comment = form.cleaned_data["comment"]
             sentiment = _analyze_comment_sentiment(comment)
-            UserComment.objects.create(
+            user_comment = UserComment.objects.create(
                 user=request.user,
                 comment=comment,
                 sentiment=sentiment,
             )
+            _send_user_feedback_notification_email(request, user_comment=user_comment)
             return render(request, "reports/user_feedback_thanks.html")
     else:
         form = UserCommentForm()

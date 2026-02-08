@@ -25927,3 +25927,16 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2026-02-07 09:46:35,510 - StoryGeneration - ERROR - Failed to generate story for template: Air Quality in Basel
 2026-02-07 09:48:41,368 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel
 2026-02-07 09:48:50,638 - StoryGeneration - INFO - Successfully generated story for template: Air Quality in Basel
+2026-02-07 11:51:32,439 - StoryGeneration - ERROR - No active story template found with ID: 72
+2026-02-07 11:51:49,673 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel
+2026-02-07 11:52:00,335 - StoryGeneration - INFO - Successfully generated story for template: Air Quality in Basel
+2026-02-07 11:55:50,498 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel
+2026-02-07 11:56:01,957 - StoryGeneration - INFO - Successfully generated story for template: Air Quality in Basel
+2026-02-07 16:13:04,723 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel
+2026-02-07 16:13:13,133 - StoryGeneration - INFO - Successfully generated story for template: Air Quality in Basel
+2026-02-07 16:19:17,146 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel
+2026-02-07 16:19:27,909 - StoryGeneration - INFO - Successfully generated story for template: Air Quality in Basel
+2026-02-07 16:20:49,239 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel
+2026-02-07 16:20:58,514 - StoryGeneration - INFO - Successfully generated story for template: Air Quality in Basel
+2026-02-07 16:24:29,462 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel
+2026-02-07 16:24:38,485 - StoryGeneration - INFO - Successfully generated story for template: Air Quality in Basel
