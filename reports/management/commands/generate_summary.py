@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from reports.models.story_template import StoryTemplate
 from reports.models.story import Story
 from reports.services.story_processor import StoryProcessor
+from datetime import date
 
 class Command(BaseCommand):
     help = 'Generate tables and/or graphics for a given story template, story or single graphic'
@@ -17,7 +18,7 @@ class Command(BaseCommand):
         story_id = options.get('story_id')
         
         if template_id:
-            stories = Story.objects.filter(template_id=template_id)
+            stories = Story.objects.filter(templatefocus__story_template_id=template_id)
         elif story_id:
             stories = Story.objects.filter(id=story_id)
         else:
@@ -26,7 +27,12 @@ class Command(BaseCommand):
         processed, errors = 0,0
         
         for story in stories:
-            processor = StoryProcessor(template=None, published_date=None, force_generation=False, story=story)
+            processor = StoryProcessor(
+                anchor_date=story.published_date or date.today(),
+                template=None,
+                force_generation=False,
+                story=story,
+            )
             if options.get('lead', False): 
                 if processor.generate_lead():
                     story.save()

@@ -437,7 +437,9 @@ def home_view(request):
     splash_image = _get_daily_splash_image()
     template_ids = _accessible_template_ids(request.user)
     stories = list(
-        Story.objects.filter(template_id__in=template_ids).order_by("-published_date")
+        Story.objects.filter(templatefocus__story_template_id__in=template_ids).order_by(
+            "-published_date"
+        )
     )
     if not stories:
         return render(
@@ -515,7 +517,9 @@ def templates_view(request):
         selected_template.description_html = markdown2.markdown(
             selected_template.description, extras=MARKDOWN_EXTRAS
         )
-        story_count = Story.objects.filter(template=selected_template).count()
+        story_count = Story.objects.filter(
+            templatefocus__story_template=selected_template
+        ).count()
     else:
         story_count = 0
     periods = Period.objects.order_by("value")
@@ -555,8 +559,8 @@ def stories_view(request):
 
     # Base queryset
     stories = (
-        Story.objects.select_related("template")
-        .filter(template_id__in=template_ids)
+        Story.objects.select_related("templatefocus__story_template")
+        .filter(templatefocus__story_template_id__in=template_ids)
         .order_by("-published_date")
     )
     periods = Period.objects.order_by("value")
@@ -565,7 +569,7 @@ def stories_view(request):
     if template_id and template_id.isdigit() and int(template_id) not in template_ids:
         template_id = None
     if template_id:
-        stories = stories.filter(template_id=template_id)
+        stories = stories.filter(templatefocus__story_template_id=template_id)
 
     # Filter by search query
     search = request.GET.get("search")
@@ -932,7 +936,9 @@ def view_story(request, story_id=None):
     splash_image = _get_daily_splash_image()
     template_ids = _accessible_template_ids(request.user)
     stories = list(
-        Story.objects.filter(template_id__in=template_ids).order_by("-published_date")
+        Story.objects.filter(templatefocus__story_template_id__in=template_ids).order_by(
+            "-published_date"
+        )
     )
     if not stories:
         return render(
@@ -949,7 +955,7 @@ def view_story(request, story_id=None):
         selected_story = stories[0]  # Default to the first story
     else:
         selected_story = get_object_or_404(
-            Story.objects.filter(template_id__in=template_ids),
+            Story.objects.filter(templatefocus__story_template_id__in=template_ids),
             id=story_id,
         )
     index = stories.index(selected_story)
@@ -992,7 +998,7 @@ def view_story(request, story_id=None):
 def story_detail(request, story_id=None):
     template_ids = _accessible_template_ids(request.user)
     selected_story = get_object_or_404(
-        Story.objects.filter(template_id__in=template_ids),
+        Story.objects.filter(templatefocus__story_template_id__in=template_ids),
         id=story_id,
     )
     tables = get_tables(selected_story) if selected_story else []
@@ -1029,7 +1035,7 @@ def story_detail(request, story_id=None):
 def delete_story(request, story_id):
     template_ids = _accessible_template_ids(request.user)
     story_to_delete = get_object_or_404(
-        Story.objects.filter(template_id__in=template_ids),
+        Story.objects.filter(templatefocus__story_template_id__in=template_ids),
         id=story_id,
     )
     if request.method != "POST":

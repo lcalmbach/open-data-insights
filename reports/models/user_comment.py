@@ -34,4 +34,3 @@ class UserComment(models.Model):
 
     def __str__(self):
         return f"UserComment {self.id} by {self.user_id}"
-

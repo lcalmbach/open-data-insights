@@ -25959,3 +25959,192 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2026-02-08 15:57:05,312 - StoryGeneration - ERROR - Failed to generate story for template: Traffic Counting in Basel-Stadt
 2026-02-08 16:05:37,065 - StoryGeneration - INFO - Generating story for template: Traffic Counting in Basel-Stadt
 2026-02-08 16:07:18,113 - StoryGeneration - INFO - Successfully generated story for template: Traffic Counting in Basel-Stadt
+2026-02-09 06:28:04,297 - DatasetSync - INFO - Synchronizing dataset ID 76: Key figures for municipalities
+2026-02-09 06:28:04,306 - DatasetSync - INFO - Starting synchronization for dataset ID 76: Key figures for municipalities
+2026-02-09 06:28:04,916 - DatasetSync - INFO - Successfully synchronized dataset ID 76: Key figures for municipalities
+2026-02-09 06:28:04,916 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-09 06:28:04,916 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-12 06:14:53,099 - StoryGeneration - INFO - Generating story for template: Municipality portrait (focus=1)
+2026-02-12 06:39:49,838 - StoryGeneration - INFO - Generating story for template: Municipality Portrait (focus=1)
+2026-02-12 06:43:30,267 - StoryGeneration - INFO - Generating story for template: A Day to Remember Lives Lost to Gun Violence in the USA (focus=219)
+2026-02-12 06:43:30,348 - StoryGeneration - INFO - Story generation skipped for template: A Day to Remember Lives Lost to Gun Violence in the USA
+2026-02-12 06:43:30,348 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel (focus=220)
+2026-02-12 06:43:30,362 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel
+2026-02-12 06:43:30,362 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel (focus=221)
+2026-02-12 06:43:30,381 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel
+2026-02-12 06:43:30,381 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse (focus=222)
+2026-02-12 06:43:30,399 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse
+2026-02-12 06:43:30,399 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse (focus=223)
+2026-02-12 06:43:30,411 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse
+2026-02-12 06:43:30,412 - StoryGeneration - INFO - Generating story for template: Air Traffic at Basel-Mulhouse Airport (focus=224)
+2026-02-12 06:43:30,427 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Basel-Mulhouse Airport
+2026-02-12 06:43:30,427 - StoryGeneration - INFO - Generating story for template: Awareness Days (focus=225)
+2026-02-12 06:43:30,442 - StoryGeneration - INFO - Story generation skipped for template: Awareness Days
+2026-02-12 06:43:30,442 - StoryGeneration - INFO - Generating story for template: Basel-Stadt Mortality by Sex and Age Group (focus=226)
+2026-02-12 06:43:30,456 - StoryGeneration - INFO - Story generation skipped for template: Basel-Stadt Mortality by Sex and Age Group
+2026-02-12 06:43:30,456 - StoryGeneration - INFO - Generating story for template: Building Land Prices in Baselland (focus=227)
+2026-02-12 06:43:30,470 - StoryGeneration - INFO - Story generation skipped for template: Building Land Prices in Baselland
+2026-02-12 06:43:30,470 - StoryGeneration - INFO - Generating story for template: Building Stock of Canton Baselland (focus=228)
+2026-02-12 06:43:30,482 - StoryGeneration - INFO - Story generation skipped for template: Building Stock of Canton Baselland
+2026-02-12 06:43:30,482 - StoryGeneration - INFO - Generating story for template: Cleanliness of Basel's Streets (focus=229)
+2026-02-12 06:43:30,564 - StoryGeneration - INFO - Story generation skipped for template: Cleanliness of Basel's Streets
+2026-02-12 06:43:30,565 - StoryGeneration - INFO - Generating story for template: CO2 Emissions (focus=230)
+2026-02-12 06:43:30,597 - StoryGeneration - INFO - Story generation skipped for template: CO2 Emissions
+2026-02-12 06:43:30,597 - StoryGeneration - INFO - Generating story for template: Cold Day Report (focus=231)
+2026-02-12 06:43:30,660 - StoryGeneration - INFO - Story generation skipped for template: Cold Day Report
+2026-02-12 06:43:30,660 - StoryGeneration - INFO - Generating story for template: Daylight in Basel (focus=232)
+2026-02-12 06:43:30,675 - StoryGeneration - INFO - Story generation skipped for template: Daylight in Basel
+2026-02-12 06:43:30,675 - StoryGeneration - INFO - Generating story for template: Divorces in Basel-Stadt Last Year (focus=233)
+2026-02-12 06:44:17,038 - StoryGeneration - INFO - Successfully generated story for template: Divorces in Basel-Stadt Last Year
+2026-02-12 06:44:17,038 - StoryGeneration - INFO - Generating story for template: Dog Population in Basel (focus=234)
+2026-02-12 06:44:17,053 - StoryGeneration - INFO - Story generation skipped for template: Dog Population in Basel
+2026-02-12 06:44:17,053 - StoryGeneration - INFO - Generating story for template: Dry Spells at NBCN Station Basel/Binningen (focus=235)
+2026-02-12 06:44:17,119 - StoryGeneration - INFO - Story generation skipped for template: Dry Spells at NBCN Station Basel/Binningen
+2026-02-12 06:44:17,119 - StoryGeneration - INFO - Generating story for template: Electricity Consumption in Basel (focus=236)
+2026-02-12 06:44:17,135 - StoryGeneration - INFO - Story generation skipped for template: Electricity Consumption in Basel
+2026-02-12 06:44:17,135 - StoryGeneration - INFO - Generating story for template: Extreme Rainfall Events in Basel (focus=237)
+2026-02-12 06:44:17,162 - StoryGeneration - INFO - Story generation skipped for template: Extreme Rainfall Events in Basel
+2026-02-12 06:44:17,162 - StoryGeneration - INFO - Generating story for template: Fishing Statistics in the Canton of Basel-Stadt (focus=239)
+2026-02-12 06:46:38,230 - StoryGeneration - INFO - Generating story for template: A Day to Remember Lives Lost to Gun Violence in the USA (focus=219)
+2026-02-12 06:46:38,300 - StoryGeneration - INFO - Story generation skipped for template: A Day to Remember Lives Lost to Gun Violence in the USA
+2026-02-12 06:46:38,300 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel (focus=220)
+2026-02-12 06:46:38,314 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel
+2026-02-12 06:46:38,314 - StoryGeneration - INFO - Generating story for template: Air Quality in Basel (focus=221)
+2026-02-12 06:46:38,329 - StoryGeneration - INFO - Story generation skipped for template: Air Quality in Basel
+2026-02-12 06:46:38,329 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse (focus=222)
+2026-02-12 06:46:38,344 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse
+2026-02-12 06:46:38,344 - StoryGeneration - INFO - Generating story for template: Air Traffic at Airport Basel/Mulhouse (focus=223)
+2026-02-12 06:46:38,357 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Airport Basel/Mulhouse
+2026-02-12 06:46:38,357 - StoryGeneration - INFO - Generating story for template: Air Traffic at Basel-Mulhouse Airport (focus=224)
+2026-02-12 06:46:38,372 - StoryGeneration - INFO - Story generation skipped for template: Air Traffic at Basel-Mulhouse Airport
+2026-02-12 06:46:38,372 - StoryGeneration - INFO - Generating story for template: Awareness Days (focus=225)
+2026-02-12 06:46:38,385 - StoryGeneration - INFO - Story generation skipped for template: Awareness Days
+2026-02-12 06:46:38,385 - StoryGeneration - INFO - Generating story for template: Basel-Stadt Mortality by Sex and Age Group (focus=226)
+2026-02-12 06:46:38,397 - StoryGeneration - INFO - Story generation skipped for template: Basel-Stadt Mortality by Sex and Age Group
+2026-02-12 06:46:38,397 - StoryGeneration - INFO - Generating story for template: Building Land Prices in Baselland (focus=227)
+2026-02-12 06:46:38,410 - StoryGeneration - INFO - Story generation skipped for template: Building Land Prices in Baselland
+2026-02-12 06:46:38,410 - StoryGeneration - INFO - Generating story for template: Building Stock of Canton Baselland (focus=228)
+2026-02-12 06:46:38,422 - StoryGeneration - INFO - Story generation skipped for template: Building Stock of Canton Baselland
+2026-02-12 06:46:38,422 - StoryGeneration - INFO - Generating story for template: Cleanliness of Basel's Streets (focus=229)
+2026-02-12 06:46:38,446 - StoryGeneration - INFO - Story generation skipped for template: Cleanliness of Basel's Streets
+2026-02-12 06:46:38,446 - StoryGeneration - INFO - Generating story for template: CO2 Emissions (focus=230)
+2026-02-12 06:46:38,464 - StoryGeneration - INFO - Story generation skipped for template: CO2 Emissions
+2026-02-12 06:46:38,464 - StoryGeneration - INFO - Generating story for template: Cold Day Report (focus=231)
+2026-02-12 06:46:38,492 - StoryGeneration - INFO - Story generation skipped for template: Cold Day Report
+2026-02-12 06:46:38,492 - StoryGeneration - INFO - Generating story for template: Daylight in Basel (focus=232)
+2026-02-12 06:46:38,504 - StoryGeneration - INFO - Story generation skipped for template: Daylight in Basel
+2026-02-12 06:46:38,504 - StoryGeneration - INFO - Generating story for template: Divorces in Basel-Stadt Last Year (focus=233)
+2026-02-12 06:46:38,516 - StoryGeneration - INFO - Story generation skipped for template: Divorces in Basel-Stadt Last Year
+2026-02-12 06:46:38,516 - StoryGeneration - INFO - Generating story for template: Dog Population in Basel (focus=234)
+2026-02-12 06:46:38,528 - StoryGeneration - INFO - Story generation skipped for template: Dog Population in Basel
+2026-02-12 06:46:38,529 - StoryGeneration - INFO - Generating story for template: Dry Spells at NBCN Station Basel/Binningen (focus=235)
+2026-02-12 06:46:38,584 - StoryGeneration - INFO - Story generation skipped for template: Dry Spells at NBCN Station Basel/Binningen
+2026-02-12 06:46:38,584 - StoryGeneration - INFO - Generating story for template: Electricity Consumption in Basel (focus=236)
+2026-02-12 06:46:38,598 - StoryGeneration - INFO - Story generation skipped for template: Electricity Consumption in Basel
+2026-02-12 06:46:38,598 - StoryGeneration - INFO - Generating story for template: Extreme Rainfall Events in Basel (focus=237)
+2026-02-12 06:46:38,624 - StoryGeneration - INFO - Story generation skipped for template: Extreme Rainfall Events in Basel
+2026-02-12 06:46:38,624 - StoryGeneration - INFO - Generating story for template: Fishing Statistics in the Canton of Basel-Stadt (focus=239)
+2026-02-12 06:47:27,586 - StoryGeneration - INFO - Generating story for template: A Day to Remember Lives Lost to Gun Violence in the USA (focus=219)
+2026-02-12 06:49:34,213 - StoryGeneration - INFO - Generating story for template: Municipality Portrait (focus=273)
+2026-02-12 06:51:28,300 - StoryGeneration - INFO - Generating story for template: Municipality Portrait (focus=1)
+2026-02-12 06:53:51,370 - StoryGeneration - INFO - Successfully generated story for template: Municipality Portrait
+2026-02-12 07:04:20,144 - StoryGeneration - INFO - Generating story for template: Municipality Portrait (focus=1)
+2026-02-12 07:04:48,154 - StoryGeneration - INFO - Successfully generated story for template: Municipality Portrait
+2026-02-12 07:33:30,249 - StoryGeneration - INFO - Generating story for template: Municipality Portrait (focus=1)
+2026-02-12 07:33:38,705 - StoryGeneration - INFO - Successfully generated story for template: Municipality Portrait
+2026-02-12 07:36:06,068 - StoryGeneration - INFO - Generating story for template: Municipality Portrait (focus=1)
+2026-02-12 07:36:13,770 - StoryGeneration - INFO - Successfully generated story for template: Municipality Portrait
+2026-02-14 08:53:04,514 - DatasetSync - INFO - Synchronizing dataset ID 77: Population in Baselland by Nationality
+2026-02-14 08:53:04,514 - DatasetSync - INFO - Starting synchronization for dataset ID 77: Population in Baselland by Nationality
+2026-02-14 08:53:04,934 - DatasetSync - INFO - Successfully synchronized dataset ID 77: Population in Baselland by Nationality
+2026-02-14 08:53:04,934 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-14 08:53:04,934 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-14 09:04:03,785 - DatasetSync - INFO - Synchronizing dataset ID 77: Population in Baselland by Nationality
+2026-02-14 09:04:03,785 - DatasetSync - INFO - Starting synchronization for dataset ID 77: Population in Baselland by Nationality
+2026-02-14 09:04:04,249 - DatasetSync - INFO - Successfully synchronized dataset ID 77: Population in Baselland by Nationality
+2026-02-14 09:04:04,249 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-14 09:04:04,249 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-14 09:04:28,576 - DatasetSync - INFO - Synchronizing dataset ID 77: Population in Baselland by Nationality
+2026-02-14 09:04:28,576 - DatasetSync - INFO - Starting synchronization for dataset ID 77: Population in Baselland by Nationality
+2026-02-14 09:04:28,956 - DatasetSync - INFO - Successfully synchronized dataset ID 77: Population in Baselland by Nationality
+2026-02-14 09:04:28,956 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-14 09:04:28,956 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-14 09:05:38,693 - DatasetSync - INFO - Synchronizing dataset ID 77: Population in Baselland by Nationality
+2026-02-14 09:05:38,693 - DatasetSync - INFO - Starting synchronization for dataset ID 77: Population in Baselland by Nationality
+2026-02-14 09:05:59,209 - DatasetSync - INFO - Successfully synchronized dataset ID 77: Population in Baselland by Nationality
+2026-02-14 09:05:59,210 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-14 09:05:59,210 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-14 09:52:02,061 - StoryGeneration - INFO - Generating story for template: :filter_value – Municipal Profile (focus=1)
+2026-02-14 09:52:10,215 - StoryGeneration - ERROR - Failed to generate story for template: :filter_value – Municipal Profile
+2026-02-14 09:54:02,825 - StoryGeneration - INFO - Generating story for template: :filter_value – Municipal Profile (focus=1)
+2026-02-14 09:54:11,505 - StoryGeneration - ERROR - Failed to generate story for template: :filter_value – Municipal Profile
+2026-02-14 09:54:53,289 - StoryGeneration - INFO - Generating story for template: :filter_value – Municipal Profile (focus=1)
+2026-02-14 09:55:01,014 - StoryGeneration - ERROR - Failed to generate story for template: :filter_value – Municipal Profile
+2026-02-14 09:56:08,777 - StoryGeneration - INFO - Generating story for template: :filter_value – Municipal Profile (focus=1)
+2026-02-14 09:56:15,321 - StoryGeneration - ERROR - Failed to generate story for template: :filter_value – Municipal Profile
+2026-02-14 09:56:48,128 - StoryGeneration - INFO - Generating story for template: :filter_value – Municipal Profile (focus=1)
+2026-02-14 09:56:57,354 - StoryGeneration - ERROR - Failed to generate story for template: :filter_value – Municipal Profile
+2026-02-14 09:57:25,824 - StoryGeneration - INFO - Generating story for template: :filter_value – Municipal Profile (focus=1)
+2026-02-14 10:00:38,095 - StoryGeneration - INFO - Generating story for template: :filter_value – Municipal Profile (focus=1)
+2026-02-14 10:02:19,907 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 10:02:36,339 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 10:04:59,907 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 10:05:06,524 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 10:07:07,928 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 10:08:14,757 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 10:11:42,921 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 10:11:54,946 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 10:16:52,864 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 10:17:03,544 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 13:09:29,419 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 13:09:38,322 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 13:10:22,394 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 13:10:32,583 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 13:11:53,052 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 13:14:09,124 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 13:15:08,003 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 13:17:50,912 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 13:22:13,325 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 13:28:57,739 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 13:29:07,595 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 13:29:43,448 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 13:31:53,599 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 13:33:09,269 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 13:39:22,589 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 13:40:14,150 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 13:57:51,175 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 13:58:19,466 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 15:46:37,158 - DatasetSync - INFO - Synchronizing dataset ID 78: Energy Consumption of Baselland
+2026-02-14 15:46:37,158 - DatasetSync - INFO - Starting synchronization for dataset ID 78: Energy Consumption of Baselland
+2026-02-14 15:46:37,783 - DatasetSync - INFO - Successfully synchronized dataset ID 78: Energy Consumption of Baselland
+2026-02-14 15:46:37,783 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-14 15:46:37,783 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-14 16:06:46,110 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 16:06:55,437 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 16:09:07,073 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 16:09:16,610 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 16:10:41,357 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 16:10:51,724 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 16:17:48,529 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 16:18:07,896 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 16:20:21,740 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 16:20:31,680 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-14 17:43:07,161 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-14 17:43:19,479 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-15 09:23:41,331 - DatasetSync - INFO - Synchronizing dataset ID 79: Population of Baselland since 1699
+2026-02-15 09:23:41,331 - DatasetSync - INFO - Starting synchronization for dataset ID 79: Population of Baselland since 1699
+2026-02-15 09:23:42,397 - DatasetSync - INFO - Successfully synchronized dataset ID 79: Population of Baselland since 1699
+2026-02-15 09:23:42,397 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-15 09:23:42,397 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-15 09:47:16,604 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-15 09:47:18,620 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-15 09:48:24,898 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-15 09:48:34,134 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-15 10:09:43,768 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-15 10:09:54,243 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-15 10:13:24,455 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-15 10:13:33,700 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-15 10:15:14,946 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-15 10:15:23,752 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile
+2026-02-15 10:18:42,622 - StoryGeneration - INFO - Generating story for template: Municipal Profile (focus=1)
+2026-02-15 10:18:52,570 - StoryGeneration - INFO - Successfully generated story for template: Municipal Profile

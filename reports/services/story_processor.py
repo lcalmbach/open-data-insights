@@ -7,6 +7,7 @@ import uuid
 import json
 import logging
 import calendar
+import re
 import pandas as pd
 from datetime import datetime, date, timedelta
 from typing import Optional, Dict, Any, Tuple
@@ -23,6 +24,7 @@ from reports.models.story_context import StoryTemplate
 from reports.models.story import Story
 from reports.models.story_table import StoryTable
 from reports.models.graphic import Graphic
+from reports.models.story_template import StoryTemplateFocus
 from dateutil.relativedelta import relativedelta
 from reports.models.lookups import PeriodDirectionEnum
 from reports.constants.reference_period import ReferencePeriod
@@ -107,6 +109,7 @@ class StoryProcessor:
         template: StoryTemplate = None,
         force_generation: bool = False,
         story: Story = None,
+        focus: StoryTemplateFocus | None = None,
     ):
         # verify if either template or story is provided
         if not template and not story:
@@ -118,10 +121,11 @@ class StoryProcessor:
         self.dbclient = DjangoPostgresClient()
         self.force_generation = force_generation
         self.anchor_date = anchor_date or date.today()
-        # if there is a existing story set, use it an d overwrite its content
+        # If there is an existing story, reuse it and regenerate its content.
         if story:
             self.story = story
-            template = story.template
+            self.focus = story.templatefocus
+            template = self.focus.story_template
         else:
             reference_period_start, reference_period_end = (
                 self._get_reference_period(self.anchor_date, template)
@@ -131,14 +135,19 @@ class StoryProcessor:
             )
             self.story = (
                 Story.objects.filter(
-                    template=template,
+                    templatefocus=focus if focus is not None else template.default_focus,
                     reference_period_start=reference_period_start,
                     reference_period_end=reference_period_end,
                 ).first()
                 or Story()  # creates a new, empty instance if no match
             )
             if self.story.id is None:
-                self.story.template = template
+                self.focus = focus if focus is not None else template.default_focus
+                if self.focus is None:
+                    raise ValueError(
+                        f"StoryTemplate {getattr(template, 'id', None)} has no default focus row"
+                    )
+                self.story.templatefocus = self.focus
 
                 (
                     self.story.reference_period_start,
@@ -146,6 +155,11 @@ class StoryProcessor:
                 ) = self._get_reference_period(self.anchor_date, template)
 
                 self.story.published_date = date.today()
+            else:
+                # Existing story found: ensure focus/templatefocus are set for downstream logic.
+                self.focus = self.story.templatefocus
+
+        self.template = template
 
         if not getattr(self.story, "ai_model", None):
             self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
@@ -153,7 +167,7 @@ class StoryProcessor:
 
         # Ensure reference period fields are set to avoid AttributeError later
         self.logger = logging.getLogger(
-            f"StoryProcessor.{self.story.template.id} {template.title}"
+            f"StoryProcessor.{self.template.id}.{getattr(self.focus, 'id', 'nofocus')} {self.template.title}"
         )
         self.season, self.season_year = self._get_season(
             self.story.reference_period_start, template
@@ -203,7 +217,68 @@ class StoryProcessor:
         result = result.replace(
             ":published_date", self.story.published_date.strftime("%Y-%m-%d")
         )
+        result = result.replace(":filter_value", self.focus.filter_value if self.focus and self.focus.filter_value else "")
+        result = result.replace(":filter_expression", self.focus.filter_expression if self.focus and self.focus.filter_expression else "")
         return result
+
+    def _get_focus_filter_expression(self) -> str:
+        """
+        Return the SQL snippet used to restrict queries to the current focus.
+
+        Templates should embed `:focus_filter` in their SQL where a focus condition
+        is expected.
+        - For default/no-filter focuses, substitute `1=1` (no-op).
+        - For filtered focuses, build an expression from
+          `template.focus_filter_fields` and `focus.filter_value`.
+        """
+        if not self.focus:
+            return "1=1"
+
+        filter_value = (getattr(self.focus, "filter_value", None) or "").strip()
+        if not filter_value:
+            return "1=1"
+
+        focus_fields_raw = (getattr(self.template, "focus_filter_fields", None) or "").strip()
+        if not focus_fields_raw:
+            return "1=1"
+
+        def quote_ident(ident: str) -> str:
+            parts = [p.strip() for p in ident.split(".") if p.strip()]
+            if not parts:
+                raise ValueError("empty identifier")
+            for part in parts:
+                if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", part):
+                    raise ValueError(f"invalid identifier part: {part!r}")
+            return ".".join(f'"{p}"' for p in parts)
+
+        fields: list[str] = []
+        for raw in focus_fields_raw.split(","):
+            name = raw.strip()
+            if not name:
+                continue
+            try:
+                fields.append(quote_ident(name))
+            except Exception as exc:  # noqa: BLE001
+                self.logger.warning("Invalid focus_filter_fields entry %r: %s", name, exc)
+
+        if not fields:
+            return "1=1"
+
+        value_sql = filter_value.replace("'", "''")
+        clauses = [f"{field} = '{value_sql}'" for field in fields]
+        if len(clauses) == 1:
+            return clauses[0]
+        return "(" + " OR ".join(clauses) + ")"
+
+    def _replace_sql_expressions(self, sql: str) -> str:
+        """
+        Replace placeholders in SQL statements, including reference period
+        expressions and the `:focus_filter` token.
+        """
+        if not sql:
+            return sql
+        result = self._replace_reference_period_expression(sql)
+        return result.replace(":focus_filter", self._get_focus_filter_expression())
 
     def story_is_due(self) -> bool:
         """
@@ -225,13 +300,12 @@ class StoryProcessor:
                 Returns:
                     bool: True if all conditions are met, False otherwise.
                 """
-                if self.story.template.publish_conditions:
-                    cmd = self._replace_reference_period_expression(
-                        self.story.template.publish_conditions
-                    )
+                publish_conditions = getattr(self.focus, "publish_conditions", None) if self.focus else None
+                if publish_conditions:
+                    cmd = self._replace_sql_expressions(publish_conditions)
                     params = self._get_sql_command_params(cmd)
                     df = self.dbclient.run_query(
-                        self.story.template.publish_conditions, params
+                        cmd, params
                     )
                     if df is not None:
                         return df.iloc[0, 0] == 1
@@ -240,35 +314,25 @@ class StoryProcessor:
                 else:
                     return True  # no conditions defined, so we assume they are met
 
-            has_data = True
             story_exists = False
             publish_conditions_met = True
-            result = False
 
-            if self.story.template.has_data_sql:
-                params = self._get_sql_command_params(self.story.template.has_data_sql)
-                df = self.dbclient.run_query(self.story.template.has_data_sql, params)
-                if df is not None:
-                    has_data = df.iloc[0, 0] > 0
-                else:
-                    has_data = False
             if self.force_generation:
-                result = has_data
-            elif not self.is_data_based:
+                return True
+            if not self.is_data_based:
                 story_exists = Story.objects.filter(
-                    template=self.story.template,
+                    templatefocus=self.story.templatefocus,
                     reference_period_start=self.story.reference_period_start,
                 ).exists()
-                result = not story_exists
+                return not story_exists
             else:
                 story_exists = Story.objects.filter(
-                    template=self.story.template,
+                    templatefocus=self.story.templatefocus,
                     reference_period_start=self.story.reference_period_start,
                 ).exists()
                 publish_conditions_met = get_publish_conditions_result()
-                result = has_data and not story_exists and publish_conditions_met
+                return not story_exists and publish_conditions_met
             # print(f"Story is due: {is_due}, has_data: {has_data}, date_is_due: {date_is_due}, publish_conditions_met: {publish_conditions_met}, regular_due_date: {regular_due_date}, last_published_date: {self.last_reference_period_start_date}")
-            return result
 
         except Exception as e:
             self.logger.error(f"Error checking if story is due: {e}")
@@ -276,8 +340,7 @@ class StoryProcessor:
 
     def generate_table(self, table: StoryTable):
         table_template = table.table_template
-        sql_cmd = table_template.sql_command
-        sql_cmd = self._replace_reference_period_expression(sql_cmd)
+        sql_cmd = self._replace_sql_expressions(table_template.sql_command)
         params = self._get_sql_command_params(sql_cmd)
         try:
             df = self.dbclient.run_query(sql_cmd, params)
@@ -324,9 +387,7 @@ class StoryProcessor:
     def generate_graphic(self, graphic: Graphic):
         try:
             graphic_template = graphic.graphic_template
-            sql_command = self._replace_reference_period_expression(
-                graphic_template.sql_command
-            )
+            sql_command = self._replace_sql_expressions(graphic_template.sql_command)
             if not sql_command:
                 self.logger.warning(
                     f"Empty SQL command for graphic template: {graphic_template.title}"
@@ -452,7 +513,8 @@ class StoryProcessor:
             # Execute post-publish commands
             if self.story.template.post_publish_command:
                 self.logger.info("Executing post-publish command...")
-                self.dbclient.run_action_query(self.story.template.post_publish_command)
+                cmd = self._replace_sql_expressions(self.story.template.post_publish_command)
+                self.dbclient.run_action_query(cmd)
 
             self.logger.info("Story generation completed successfully")
             return True
@@ -478,7 +540,8 @@ class StoryProcessor:
         if most_recent_day_sql:
             try:
                 params = {"published_date": self.anchor_date}
-                df = self.dbclient.run_query(most_recent_day_sql, params)
+                cmd = self._replace_sql_expressions(most_recent_day_sql)
+                df = self.dbclient.run_query(cmd, params)
                 if not df.empty and df.iloc[0, 0] is not None:
                     # return a date object for consistency with DB DateFields
                     return to_date_obj(pd.to_datetime(df.iloc[0, 0]))
@@ -490,7 +553,7 @@ class StoryProcessor:
 
     def _get_last_published_date(self) -> Optional[datetime]:
         """Get the last published date for this template"""
-        return Story.objects.filter(template=self.story.template).aggregate(
+        return Story.objects.filter(templatefocus=self.story.templatefocus).aggregate(
             Max("reference_period_start")
         )["reference_period_start__max"]
 
@@ -634,7 +697,7 @@ class StoryProcessor:
             result[key] = {}
             result[key]["description"] = context_item.description
 
-            cmd = context_item.sql_command
+            cmd = self._replace_sql_expressions(context_item.sql_command)
             params = self._get_sql_command_params(cmd)
             self.logger.info(f"Running context query for key: {key}")
             df = self.dbclient.run_query(cmd, params)
@@ -658,6 +721,13 @@ class StoryProcessor:
         params = {}
         if not cmd:
             return params
+
+        # Guard against invalid named-parameter syntax like `%()s`.
+        if "%()s" in cmd:
+            raise ValueError(
+                "Invalid SQL parameter placeholder `%()s`. "
+                "Use a named placeholder like `%(filter_value)s` or `%(bfs_nr)s`."
+            )
 
         if "%(period_start_date)s" in cmd:
             params["period_start_date"] = (
@@ -683,6 +753,21 @@ class StoryProcessor:
             params["previous_year"] = self.year - 1
         if "%(season)s" in cmd:
             params["season"] = month_to_season[self.month]
+        if "%(filter_value)s" in cmd:
+            raw = self.focus.filter_value if self.focus and self.focus.filter_value else ""
+            raw = str(raw).strip()
+            params["filter_value"] = int(raw) if raw.isdigit() else raw
+        if "%(filter_expression)s" in cmd:
+            params["filter_expression"] = (
+                self.focus.filter_expression
+                if self.focus and self.focus.filter_expression
+                else ""
+            )
+        if "%(bfs_nr)s" in cmd:
+            raw = self.focus.filter_value if self.focus and self.focus.filter_value else ""
+            raw = str(raw).strip()
+            params["bfs_nr"] = int(raw) if raw.isdigit() else raw
+
 
         return params
 
@@ -707,6 +792,10 @@ class StoryProcessor:
             message = self._replace_reference_period_expression(
                 self.story.template.prompt_text
             )  # Prepare messages for chat completion
+            
+            #if self.focus.additional_context:
+            #    message += f"\n\nAdditional context: {self.focus.additional_context}"
+            
             if self.is_data_based:
                 messages = [
                     {

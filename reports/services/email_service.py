@@ -15,7 +15,7 @@ import markdown
 from django.contrib.auth import get_user_model
 from reports.models.story import Story
 from reports.models.subscription import StoryTemplateSubscription
-from reports.models.story import StoryTemplate
+from reports.models.story_template import StoryTemplate
 
 from reports.services.base import ETLBaseService
 from reports.services.database_client import DjangoPostgresClient
@@ -112,8 +112,9 @@ class EmailService(ETLBaseService):
                 )
                 # Find stories published on send_date for these templates
                 stories = Story.objects.filter(
-                    template_id__in=template_ids, published_date=send_date
-                ).select_related("template")
+                    templatefocus__story_template_id__in=template_ids,
+                    published_date=send_date,
+                ).select_related("templatefocus__story_template")
 
                 if not stories.exists():
                     continue

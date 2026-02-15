@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from report_generator import settings
 from reports.utils import default_yesterday
-from .story_template import StoryTemplate
+from .story_template import StoryTemplateFocus
 from reports.constants.reference_period import ReferencePeriod
 
 month_to_season = {
@@ -30,11 +30,11 @@ season_names = {1: "Spring", 2: "Summer", 3: "Fall", 4: "Winter"}
 
 
 class Story(models.Model):
-    template = models.ForeignKey(
-        StoryTemplate,
+    templatefocus = models.ForeignKey(
+        StoryTemplateFocus,
         on_delete=models.CASCADE,
         related_name="stories",
-        help_text="The template used to generate the story.",
+        help_text="The template focus used to generate the story.",
     )
     title = models.CharField(
         max_length=255, help_text="Title of the story.", blank=True, null=True
@@ -101,8 +101,8 @@ class Story(models.Model):
         if not self.title:
             raise ValidationError({"title": "Title is required"})
 
-        if self.template is None:
-            raise ValidationError({"template": "Story template is required"})
+        if self.templatefocus is None:
+            raise ValidationError({"templatefocus": "Story template focus is required"})
 
         if not self.content:
             raise ValidationError({"content": "Content is required"})
@@ -214,3 +214,14 @@ class Story(models.Model):
 
     def get_email_list_entry(self):
         return f"<b>{self.title}:</b></br><p>{self.summary}<p>"
+
+    @property
+    def template(self):
+        """
+        Backwards-compatible access to the owning StoryTemplate.
+
+        After introducing `templatefocus`, most template attributes live on
+        `self.templatefocus.story_template`. Keeping this property avoids having
+        to rewrite all read-only usages at once.
+        """
+        return self.templatefocus.story_template

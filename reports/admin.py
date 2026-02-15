@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models.story import Story
-from .models.story_template import StoryTemplateDataset, StoryTemplate
+from .models.story_template import StoryTemplateDataset, StoryTemplate, StoryTemplateFocus
 from .models.story_context import StoryTemplateContext
 from .models.lookups import LookupCategory, LookupValue
 from .models.dataset import Dataset
@@ -10,6 +10,11 @@ from .models.story_table import StoryTable
 from .models.graphic import Graphic, StoryTemplateGraphic
 from .models.story_table_template import StoryTemplateTable
 from .models.user_comment import UserComment
+
+
+class StoryTemplateFocusInline(admin.TabularInline):
+    model = StoryTemplateFocus
+    extra = 0
 
 
 @admin.register(Story)
@@ -26,7 +31,7 @@ class StoryAdmin(admin.ModelAdmin):
         "template",
         "published_date",
     )
-    list_filter = ("template",)
+    list_filter = ("templatefocus__story_template",)
     search_fields = (
         "id",
         "title",
@@ -41,8 +46,21 @@ class StoryTemplateAdmin(admin.ModelAdmin):
         "reference_period",
         "organisation",
     )
+    inlines = (StoryTemplateFocusInline,)
     search_fields = ("title", "reference_period__value")
     list_filter = ["reference_period", "organisation"]  # shows a filter sidebar
+
+
+@admin.register(StoryTemplateFocus)
+class StoryTemplateFocusAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "story_template",
+        "filter_value",
+    )
+    list_select_related = ("story_template",)
+    search_fields = ("story_template__title", "focus_value")
+    list_filter = ("story_template",)
 
 
 @admin.register(StoryTemplateContext)
@@ -147,7 +165,7 @@ class StoryTableAdmin(admin.ModelAdmin):
         "story_template",
         "table_template",
     )
-    list_select_related = ("story__template",)
+    list_select_related = ("story__templatefocus__story_template",)
     search_fields = ("table_template__title", "table_template__id", "story__title")
 
     def story_published_date(self, obj):
@@ -161,7 +179,7 @@ class StoryTableAdmin(admin.ModelAdmin):
         return getattr(tpl, "title", None) if tpl is not None else None
 
     story_template.short_description = "Story template"
-    story_template.admin_order_field = "story__template__title"
+    story_template.admin_order_field = "story__templatefocus__story_template__title"
 
 
 @admin.register(StoryTemplateGraphic)
@@ -170,11 +188,12 @@ class StoryTemplateGraphicAdmin(admin.ModelAdmin):
         "id",
         "title",
         "story_template",
+        "graphic_type",
         "sort_order",
     )
     sortable_by = ("id", "title","sort_order")
     search_fields = ("title",)
-    list_filter = ("story_template",)
+    list_filter = ("graphic_type", "story_template")
 
 
 @admin.register(Graphic)
@@ -187,7 +206,7 @@ class StoryGraphicAdmin(admin.ModelAdmin):
 
     sortable_by = ("id", "title")
     search_fields = ("title",)
-    list_filter = ("story__template",)
+    list_filter = ("story__templatefocus__story_template",)
 
 
 @admin.register(UserComment)

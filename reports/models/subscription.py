@@ -4,9 +4,9 @@ from django.db import models, transaction
 from .story_template import StoryTemplate
 
 
-
 class StoryTemplateSubscription(models.Model):
     """Track a user subscription to a story template and its status."""
+
     story_template = models.ForeignKey(
         StoryTemplate,
         on_delete=models.CASCADE,
@@ -50,8 +50,9 @@ class StoryTemplateSubscription(models.Model):
         if not template_ids:
             return
         existing_ids = set(
-            cls.objects.filter(user=user, story_template_id__in=template_ids)
-            .values_list("story_template_id", flat=True)
+            cls.objects.filter(
+                user=user, story_template_id__in=template_ids
+            ).values_list("story_template_id", flat=True)
         )
         new_subscriptions = [
             cls(user=user, story_template_id=template_id)

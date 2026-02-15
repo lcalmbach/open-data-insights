@@ -3,6 +3,7 @@ from django.db import transaction
 from reports.services.story_processor import StoryProcessor
 from reports.models.story import Story
 from reports.models.story_template import StoryTemplate
+from datetime import date
 
 class Command(BaseCommand):
     help = "Regenerate titles for existing stories. Use --template-id to process all stories for a template, --id for a single story, or --all to process every story."
@@ -31,7 +32,7 @@ class Command(BaseCommand):
                 template = StoryTemplate.objects.get(id=template_id)
             except StoryTemplate.DoesNotExist:
                 raise CommandError(f"StoryTemplate with id={template_id} does not exist.")
-            qs = Story.objects.filter(template=template)
+            qs = Story.objects.filter(templatefocus__story_template=template)
             self.stdout.write(f"Processing {qs.count()} stories for template id={template_id} ({template.title})")
         elif story_id:
             qs = Story.objects.filter(id=story_id)
@@ -53,23 +54,29 @@ class Command(BaseCommand):
                     skipped += 1
                     continue
 
-                processor = StoryProcessor(story.template, story.published_date)
-                new_title = processor.generate_summary(story.content, kind="title")
+                old_title = story.title or ""
+                processor = StoryProcessor(
+                    anchor_date=story.published_date or date.today(),
+                    template=None,
+                    force_generation=False,
+                    story=story,
+                )
+                ok = processor.generate_title()
+                new_title = story.title if ok else None
 
                 if not new_title:
                     self.stdout.write(self.style.WARNING(f"No title generated for story id={story.id}"))
                     skipped += 1
                     continue
 
-                if new_title.strip() == (story.title or "").strip():
+                if new_title.strip() == old_title.strip():
                     self.stdout.write(f"No change for story id={story.id} (title unchanged)")
                     skipped += 1
                     continue
 
-                self.stdout.write(f"Updating story id={story.id}: '{story.title}' -> '{new_title}'")
+                self.stdout.write(f"Updating story id={story.id}: '{old_title}' -> '{new_title}'")
                 if not dry_run:
                     with transaction.atomic():
-                        story.title = new_title
                         story.save(update_fields=["title"])
                     updated += 1
                 else:

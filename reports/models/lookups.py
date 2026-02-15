@@ -12,6 +12,7 @@ IMPORT_TYPE_CATEGORY_ID = 8
 TAG_CATEGORY_ID = 9
 from account.models import CustomUser
 
+
 class PeriodDirectionEnum(Enum):
     Backward = 72
     Forward = 71
@@ -181,6 +182,7 @@ class ContextPeriod(LookupValue):
         verbose_name = "Context Period"
         verbose_name_plural = "Context Periods"
 
+
 class TagDataset(models.Model):
     tag = models.ForeignKey(
         Tag, on_delete=models.CASCADE, related_name="dataset_assignments"
@@ -197,6 +199,7 @@ class TagDataset(models.Model):
     def __str__(self):
         return f"{self.tag.value} - {self.dataset.name}"
 
+
 class TagStoryTemplate(models.Model):
     tag = models.ForeignKey(
         Tag, on_delete=models.CASCADE, related_name="story_template_assignments"
@@ -209,9 +212,10 @@ class TagStoryTemplate(models.Model):
         verbose_name = "Story Template Tag Assignment"
         verbose_name_plural = "Story Template Tag Assignments"
         unique_together = ("tag", "story_template")
-    
+
     def __str__(self):
         return f"{self.tag.value} - {self.story_template.title}"
+
 
 class TagUser(models.Model):
     tag = models.ForeignKey(

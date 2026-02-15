@@ -86,8 +86,8 @@
         {% for story in stories %}
           <option
             value="{{ story.id }}"
-            data-template="{{ story.template.id|default:'' }}"
-            data-period="{{ story.template.reference_period|default:'' }}"
+            data-template="{{ story.templatefocus.story_template.id|default:'' }}"
+            data-period="{{ story.templatefocus.story_template.reference_period|default:'' }}"
             data-title="{{ story.title|escapejs }}"
             {% if selected_story and story.id == selected_story.id %}selected{% endif %}>
             {{ story.title }} — published on {{ story.published_date|date:"Y-m-d" }}

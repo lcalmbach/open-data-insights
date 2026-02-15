@@ -632,7 +632,23 @@ def _format_text_for_map(record, fields):
 
 
 def _resolve_tile_settings(settings):
-    tiles_value = settings.get("tiles") or "OpenStreetMap"
+    # Default to OpenStreetMap when the caller didn't specify any tiles setting.
+    # Only disable tiles when the key is explicitly present (None/False/"none"/...).
+    if "tiles" in settings:
+        tiles_value = settings.get("tiles")
+    else:
+        tiles_value = "OpenStreetMap"
+
+    if tiles_value is None or tiles_value is False:
+        return None, {}
+    if isinstance(tiles_value, str):
+        normalized = tiles_value.strip().lower()
+        if normalized in {"none", "off", "false", "0", "no"}:
+            return None, {}
+        if not normalized:
+            tiles_value = "OpenStreetMap"
+    if tiles_value is None:
+        tiles_value = "OpenStreetMap"
     tile_attribution = settings.get("tile_attribution")
     default_attribution = (
         '&copy; <a href="https://www.openstreetmap.org/copyright">'
@@ -659,7 +675,7 @@ def _resolve_tile_settings(settings):
     return tile_url, tile_options
 
 
-def create_chloropleth(data, settings):
+def create_chloropleth(data:pd.DataFrame, settings:dict):
     """
     Create a Leaflet choropleth map based on GeoJSON features + a value column.
 
@@ -687,6 +703,75 @@ def create_chloropleth(data, settings):
         or settings.get("geojson_object")
     )
     geojson_path = settings.get("geojson_path") or settings.get("geojson_file")
+
+    data_key = settings.get("data_key") or settings.get("key") or settings.get("id_field") or "id"
+    geo_key = settings.get("geo_key") or settings.get("feature_key") or data_key
+    value_field = settings.get("value") or settings.get("value_field") or "value"
+    geojson_column = settings.get("geojson_column")
+
+    # Support: settings["geojson"] is a DataFrame column name that contains per-row geometries/features.
+    if not geojson_column and isinstance(geojson_obj, str) and geojson_obj in df.columns:
+        geojson_column = geojson_obj
+        geojson_obj = None
+
+    join_on_index = bool(settings.get("join_on_index", False))
+    if join_on_index:
+        df = df.reset_index(drop=True)
+        df["__index"] = list(range(len(df)))
+        data_key = "__index"
+        geo_key = "__index"
+
+    # If geometries are provided per-row but no join key exists, default to joining by row order.
+    if geojson_column and geojson_column in df.columns and data_key not in df.columns:
+        df = df.reset_index(drop=True)
+        df["__index"] = list(range(len(df)))
+        data_key = "__index"
+        geo_key = "__index"
+
+    if geojson_column and geojson_column in df.columns:
+        features = []
+        records = df.to_dict(orient="records")
+        for idx, record in enumerate(records):
+            item = record.get(geojson_column)
+            if isinstance(item, str):
+                try:
+                    item = json.loads(item)
+                except Exception:
+                    item = None
+
+            if isinstance(item, dict) and item.get("type") == "FeatureCollection" and isinstance(item.get("features"), list):
+                geojson_obj = item
+                features = None
+                break
+
+            feature = None
+            if isinstance(item, dict) and item.get("type") == "Feature":
+                feature = dict(item)
+            elif isinstance(item, dict) and item.get("type") in {"Polygon", "MultiPolygon"} and "coordinates" in item:
+                feature = {"type": "Feature", "properties": {}, "geometry": item}
+
+            if not feature:
+                logger.error(
+                    "Choropleth geojson column '%s' row %s is not valid GeoJSON Feature/Polygon/MultiPolygon.",
+                    geojson_column,
+                    idx,
+                )
+                return '<div class="chart-error">Choropleth GeoJSON column contains invalid geometry.</div>'
+
+            props = feature.get("properties")
+            if not isinstance(props, dict):
+                props = {}
+            props.setdefault("__index", idx)
+
+            join_val = record.get(data_key)
+            if join_val is not None and not pd.isna(join_val):
+                props.setdefault(geo_key, join_val)
+            feature["properties"] = props
+            features.append(feature)
+
+        if features is not None:
+            geojson_obj = {"type": "FeatureCollection", "features": features}
+
     if geojson_obj is None and geojson_path:
         try:
             with open(str(geojson_path), "r", encoding="utf-8") as handle:
@@ -706,13 +791,9 @@ def create_chloropleth(data, settings):
             logger.error("Choropleth geojson JSON could not be parsed: %s", exc)
             return '<div class="chart-error">Choropleth GeoJSON could not be parsed.</div>'
 
-    data_key = settings.get("data_key") or settings.get("key") or settings.get("id_field") or "id"
-    geo_key = settings.get("geo_key") or settings.get("feature_key") or data_key
-    value_field = settings.get("value") or settings.get("value_field") or "value"
-
     if data_key not in df.columns:
         logger.error("Choropleth data missing join key column '%s'.", data_key)
-        return '<div class="chart-error">Choropleth data missing join key.</div>'
+        return '<div class="chart-error">Choropleth data missing join key. Set join_on_index=true to align rows to polygons.</div>'
     if value_field not in df.columns:
         logger.error("Choropleth data missing value column '%s'.", value_field)
         return '<div class="chart-error">Choropleth data missing value field.</div>'
@@ -793,9 +874,9 @@ def create_chloropleth(data, settings):
 
     tile_url, tile_options = _resolve_tile_settings(settings)
     try:
-        tile_options_json = _escape_js(tile_options)
+        tile_options_json = _escape_js(tile_options or {})
     except Exception:
-        tile_options_json = _escape_js({"attribution": tile_options.get("attribution")})
+        tile_options_json = "{}"
 
     map_options = settings.get("map_options") or {}
     if not isinstance(map_options, dict):
@@ -815,7 +896,14 @@ def create_chloropleth(data, settings):
     center_lat = settings.get("center_lat")
     center_lon = settings.get("center_lon")
 
-    style_block = f"<style>#{container_id}{{width:{width_css};height:{height_css};}}</style>"
+    background_color = settings.get("background_color") or settings.get("map_background")
+    if background_color is None and not tile_url:
+        background_color = "#ffffff"
+    bg_css = f"background:{background_color};" if background_color else ""
+    style_block = (
+        f"<style>#{container_id}{{width:{width_css};height:{height_css};{bg_css}}}"
+        f"#{container_id}.leaflet-container{{{bg_css}}}</style>"
+    )
     container_div = (
         f'<div id="{container_id}" class="leaflet-map" data-leaflet-map="1" '
         'data-markercluster="0"></div>'
@@ -873,11 +961,15 @@ def create_chloropleth(data, settings):
 
     js_lines.extend(
         [
-            f"  L.tileLayer({_escape_js(tile_url)}, {tile_options_json}).addTo({map_var});",
             "  window.__leafletMaps = window.__leafletMaps || {};",
             f"  window.__leafletMaps[containerId] = {map_var};",
         ]
     )
+    if tile_url:
+        js_lines.insert(
+            js_lines.index("  window.__leafletMaps = window.__leafletMaps || {};"),
+            f"  L.tileLayer({_escape_js(tile_url)}, {tile_options_json}).addTo({map_var});",
+        )
 
     if settings.get("control_scale", True):
         js_lines.append(f"  L.control.scale().addTo({map_var});")
@@ -1078,10 +1170,10 @@ def create_map_markers(data, settings):
 
     tile_url, tile_options = _resolve_tile_settings(settings)
     try:
-        tile_options_json = _escape_js(tile_options)
+        tile_options_json = _escape_js(tile_options or {})
     except Exception:
         logger.warning("Tile options could not be serialized; using attribution only.")
-        tile_options_json = _escape_js({"attribution": tile_options.get("attribution")})
+        tile_options_json = "{}"
 
     map_options = settings.get("map_options") or {}
     if not isinstance(map_options, dict):
@@ -1112,7 +1204,14 @@ def create_map_markers(data, settings):
     if (icon_name or icon_color) and marker_style != "circle":
         logger.info("Leaflet icon customization requires extra plugins; using default icons.")
 
-    style_block = f"<style>#{container_id}{{width:{width_css};height:{height_css};}}</style>"
+    background_color = settings.get("background_color") or settings.get("map_background")
+    if background_color is None and not tile_url:
+        background_color = "#ffffff"
+    bg_css = f"background:{background_color};" if background_color else ""
+    style_block = (
+        f"<style>#{container_id}{{width:{width_css};height:{height_css};{bg_css}}}"
+        f"#{container_id}.leaflet-container{{{bg_css}}}</style>"
+    )
     container_div = (
         f'<div id="{container_id}" class="leaflet-map" '
         f'data-leaflet-map="1" data-markercluster="{int(cluster_circles)}"></div>'
@@ -1125,10 +1224,15 @@ def create_map_markers(data, settings):
         "  if (!mapEl) { return; }",
         f"  var {map_var} = L.map(containerId, {map_options_json}).setView("
         f"[{center_lat}, {center_lon}], {settings.get('zoom_start', 11)});",
-        f"  L.tileLayer({_escape_js(tile_url)}, {tile_options_json}).addTo({map_var});",
-        "  window.__leafletMaps = window.__leafletMaps || {};",
-        f"  window.__leafletMaps[containerId] = {map_var};",
     ]
+    if tile_url:
+        js_lines.append(f"  L.tileLayer({_escape_js(tile_url)}, {tile_options_json}).addTo({map_var});")
+    js_lines.extend(
+        [
+            "  window.__leafletMaps = window.__leafletMaps || {};",
+            f"  window.__leafletMaps[containerId] = {map_var};",
+        ]
+    )
 
     if settings.get("control_scale", True):
         js_lines.append(f"  L.control.scale().addTo({map_var});")

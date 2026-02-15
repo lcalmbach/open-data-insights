@@ -66,9 +66,9 @@ class Command(BaseCommand):
             stories = Story.objects.filter(id=story_id)
         elif story_template_id:
             template = StoryTemplate.objects.get(id=story_template_id)
-            graphics = Graphic.objects.filter(story__template=template)
-            tables = StoryTable.objects.filter(story__template=template)
-            stories = Story.objects.filter(template=template)
+            graphics = Graphic.objects.filter(story__templatefocus__story_template=template)
+            tables = StoryTable.objects.filter(story__templatefocus__story_template=template)
+            stories = Story.objects.filter(templatefocus__story_template=template)
         elif all_flag:
             if graphics_flag:
                 graphics = Graphic.objects.all()

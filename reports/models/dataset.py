@@ -14,11 +14,13 @@ class ImportTypeEnum(Enum):
     FULL_RELOAD = 79
     SKIP = 82
 
+
 class PeriodEnum(Enum):
     DAILY = 35
     WEEKLY = 70
     MONTHLY = 36
     YEARLY = 38
+
 
 def default_yesterday():
     return date.today() - timedelta(days=1)
@@ -93,7 +95,7 @@ class Dataset(models.Model):
         help_text="Indicates if the dataset is active. Only active datasets will be imported and synchronized.",
         verbose_name="Active Dataset",
     )
-    
+
     source_identifier = models.CharField(
         max_length=255,
         help_text="Unique identifier for the source dataset.",
@@ -175,7 +177,7 @@ class Dataset(models.Model):
         help_text="Name of the field representing the year in the dataset.",
         verbose_name="Year Field",
     )
-    
+
     month_field = models.CharField(
         max_length=255,
         blank=True,
@@ -183,16 +185,16 @@ class Dataset(models.Model):
         help_text="Name of the field representing the month in the dataset.",
         verbose_name="Month Field",
     )
-    
+
     import_month = models.IntegerField(
         blank=True,
         null=True,
         help_text="Month to be imported when the import type is NEW_MONTH or NEW_YEAR_MONTH (1-12).",
         verbose_name="Import Month",
-    )       
+    )
 
     import_day = models.IntegerField(
-        blank=True,     
+        blank=True,
         null=True,
         help_text="Day to be imported when the import type is DAILY_RELOAD (1-31).",
         verbose_name="Import Day",
@@ -210,7 +212,7 @@ class Dataset(models.Model):
 
     allow_future_data = models.BooleanField(
         default=False,
-        help_text="If true, limits the data import upto yesterday's date to avoid partial data"
+        help_text="If true, limits the data import upto yesterday's date to avoid partial data",
     )
 
     class Meta:
@@ -228,6 +230,6 @@ class Dataset(models.Model):
 
     def natural_key(self):
         return (self.slug,)
-    
+
     natural_key.dependencies = []  # optional; can be omitted
     objects = DatasetManager()

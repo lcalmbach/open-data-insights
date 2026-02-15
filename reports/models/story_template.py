@@ -38,16 +38,6 @@ class StoryTemplate(models.Model):
         default=True,
         help_text="Indicates if the story template is active. Only active templates will be used for generating stories.",
     )
-    has_data_sql = models.TextField(
-        blank=True,
-        null=True,
-        help_text="SQL command to check if there is data for a given date.",
-    )
-    publish_conditions = models.TextField(
-        help_text="SQL command to check if the story should be published. If this command returns no results, the story will not be published.",
-        blank=True,
-        null=True,
-    )
     most_recent_day_sql = models.TextField(
         blank=True,
         null=True,
@@ -95,6 +85,12 @@ class StoryTemplate(models.Model):
         blank=True,
         null=True,
         help_text="Additional ressource, e.g., [{'text': 'meteoblue', 'url': 'https://meteoblue.ch/station_346353']",
+    )
+    focus_filter_fields = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="For Dataset containing data for multiple regions or categories, insights may focus on a specific subset of the data. This field specifies the column(s) to filter on, e.g., 'region' or 'category'. If insights should be generated for multiple values, separate them with commas, e.g., 'region,category'.",
     )
     prompt_text = models.TextField(help_text="The prompt used to generate the story.")
     temperature = models.FloatField(
@@ -171,6 +167,22 @@ class StoryTemplate(models.Model):
     natural_key.dependencies = []
     objects = StoryTemplateManager()
 
+    @property
+    def default_focus(self):
+        """
+        Return the "default" focus row for this template:
+        - Prefer the focus row without a filter value (single-insight templates)
+        - Fallback to the first focus row, if all have filter values
+        """
+        qs = getattr(self, "focus_areas", None)
+        if qs is None:
+            return None
+        return (
+            qs.filter(Q(filter_value__isnull=True) | Q(filter_value="")).order_by("id").first()
+            or qs.order_by("id").first()
+        )
+
+
 class StoryTemplateDataset(models.Model):
     """Join table linking story templates to datasets they rely on."""
     story_template = models.ForeignKey(StoryTemplate, on_delete=models.CASCADE, related_name='datasets')
@@ -183,3 +195,68 @@ class StoryTemplateDataset(models.Model):
 
     def __str__(self):
         return f"{self.story_template.title} - {self.dataset.name}"
+
+class StoryTemplateFocus(models.Model):
+    """
+    A focus row attached to a StoryTemplate.
+
+    Normal (single-insight) templates should have exactly one focus row with no
+    `filter_value`. Multi-focus templates can have multiple rows, each with a
+    different `filter_value`.
+    """
+
+    story_template = models.ForeignKey(
+        StoryTemplate,
+        on_delete=models.CASCADE,
+        related_name="focus_areas",
+    )
+    publish_conditions = models.TextField(
+        blank=True,
+        null=True,
+        help_text="SQL command to check if the story should be published for this focus. If this command returns no results, the story will not be published.",
+    )
+    filter_expression = models.CharField(
+        max_length=255,
+        help_text="Expression to be pasted in text templates, e.g. the title. The filter value may be a numeric code in which case the filter expression is the associated expression.",
+        blank=True,
+        null=True,
+    )
+    filter_value = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Optional SQL filter value to apply for this focus area, e.g., 'Zurich' or 'Health'.",
+    )
+    focus_subject = models.TextField(
+        help_text="Additional instructions for LLM on what to focus on in the insight content, 'Focus on population growth since 2022' or 'Focus on Health category'.",
+        blank=True,
+        null=True,
+    )
+    image = models.ImageField(
+        blank=True,
+        null=True,
+        upload_to="story_template_focus/",
+        help_text="Optional image shown for this focus.",
+    )
+
+    class Meta:
+        verbose_name = "Story Template Focus"
+        verbose_name_plural = "Story Template Focuses"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["story_template", "filter_value"],
+                condition=Q(filter_value__isnull=False) & ~Q(filter_value=""),
+                name="uniq_filter_value_per_template",
+            ),
+            models.UniqueConstraint(
+                fields=["story_template"],
+                condition=Q(filter_value__isnull=True) | Q(filter_value=""),
+                name="uniq_default_focus_per_template",
+            )
+        ]
+
+    def __str__(self):
+        suffix = (self.filter_expression or self.filter_value or "").strip()
+        if suffix:
+            return f"{self.story_template.title} ({suffix})"
+        return f"{self.story_template.title} (default)"
