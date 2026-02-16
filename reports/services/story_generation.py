@@ -22,7 +22,7 @@ class StoryGenerationService(ETLBaseService):
     def generate_story(
         self,  # This is the first argument (self)
         focus: StoryTemplateFocus,  # Second argument
-        anchor_date: Optional[date] = None,  # Third argument with default
+        published_date: Optional[date] = None,  # Third argument with default
         force: bool = False,  # Fourth argument with default
     ) -> Dict[str, Any]:
         """Generate a single story from a template"""
@@ -32,18 +32,18 @@ class StoryGenerationService(ETLBaseService):
                 f"Generating story for template: {template.title} (focus={getattr(focus, 'id', None)})"
             )
 
-            # Use provided date or default to yesterday
-            if not anchor_date:
-                anchor_date = date.today() - timedelta(days=1)
+            # Use provided date or default to today
+            if not published_date:
+                published_date = date.today() 
 
-            # Ensure anchor_date is a date object, not a datetime
-            if isinstance(anchor_date, datetime):
-                anchor_date = anchor_date.date()
+            # Ensure published_date is a date object, not a datetime
+            if isinstance(published_date, datetime):
+                published_date = published_date.date()
 
-            story_processor = StoryProcessor(anchor_date, template, force, focus=focus)
+            story_processor = StoryProcessor(published_date, template, force, focus=focus)
 
             # Check if story should be generated
-            if not force and not story_processor.story_is_due():
+            if not force and not story_processor.story:
                 self.logger.info(
                     f"Story generation skipped for template: {template.title}"
                 )
@@ -82,7 +82,7 @@ class StoryGenerationService(ETLBaseService):
     def generate_stories(
         self,
         template_id: Optional[int] = None,
-        anchor_date: Optional[date] = None,
+        published_date: Optional[date] = None,
         force: bool = False,
         exclude_template_ids: Optional[List[int]] = None,
     ) -> Dict[str, Any]:
@@ -139,7 +139,7 @@ class StoryGenerationService(ETLBaseService):
                     dataset_names.append(relation.dataset.name)
 
             result = self.generate_story(
-                focus=focus, anchor_date=anchor_date, force=force
+                focus=focus, published_date=published_date, force=force
             )
             detail = {
                 "template_id": template.id,

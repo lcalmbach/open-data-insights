@@ -1,4 +1,3 @@
-
 import uuid
 from django.db import models
 from django.db.models import Q
@@ -33,6 +32,7 @@ class StoryTemplateManager(NaturalKeyManager):
 
 class StoryTemplate(models.Model):
     """Model representing a configurable template for generating stories."""
+
     slug = models.SlugField(unique=True, blank=True, null=True, editable=False)
     active = models.BooleanField(
         default=True,
@@ -85,12 +85,6 @@ class StoryTemplate(models.Model):
         blank=True,
         null=True,
         help_text="Additional ressource, e.g., [{'text': 'meteoblue', 'url': 'https://meteoblue.ch/station_346353']",
-    )
-    focus_filter_fields = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True,
-        help_text="For Dataset containing data for multiple regions or categories, insights may focus on a specific subset of the data. This field specifies the column(s) to filter on, e.g., 'region' or 'category'. If insights should be generated for multiple values, separate them with commas, e.g., 'region,category'.",
     )
     prompt_text = models.TextField(help_text="The prompt used to generate the story.")
     temperature = models.FloatField(
@@ -146,12 +140,10 @@ class StoryTemplate(models.Model):
         help_text="AI model to use for generating the story. This can be set to 'deepseek-chat' to use the Deepseek API instead of OpenAI.",
     )
 
-
     class Meta:
         verbose_name = "Story Template"
         verbose_name_plural = "Story Templates"
         ordering = ["title"]  # or any other field
-
 
     def __str__(self):
         return f"{self.title} ({self.reference_period})"
@@ -178,23 +170,31 @@ class StoryTemplate(models.Model):
         if qs is None:
             return None
         return (
-            qs.filter(Q(filter_value__isnull=True) | Q(filter_value="")).order_by("id").first()
+            qs.filter(Q(filter_value__isnull=True) | Q(filter_value=""))
+            .order_by("id")
+            .first()
             or qs.order_by("id").first()
         )
 
 
 class StoryTemplateDataset(models.Model):
     """Join table linking story templates to datasets they rely on."""
-    story_template = models.ForeignKey(StoryTemplate, on_delete=models.CASCADE, related_name='datasets')
-    dataset = models.ForeignKey('Dataset', on_delete=models.CASCADE, related_name='story_templates')
-    
+
+    story_template = models.ForeignKey(
+        StoryTemplate, on_delete=models.CASCADE, related_name="datasets"
+    )
+    dataset = models.ForeignKey(
+        "Dataset", on_delete=models.CASCADE, related_name="story_templates"
+    )
+
     class Meta:
         verbose_name = "StoryTemplate-Dataset relation"
         verbose_name_plural = "StoryTemplate-Dataset relations"
-        unique_together = ('story_template', 'dataset')
+        unique_together = ("story_template", "dataset")
 
     def __str__(self):
         return f"{self.story_template.title} - {self.dataset.name}"
+
 
 class StoryTemplateFocus(models.Model):
     """
@@ -252,7 +252,7 @@ class StoryTemplateFocus(models.Model):
                 fields=["story_template"],
                 condition=Q(filter_value__isnull=True) | Q(filter_value=""),
                 name="uniq_default_focus_per_template",
-            )
+            ),
         ]
 
     def __str__(self):

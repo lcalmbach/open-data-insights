@@ -32,8 +32,7 @@
       "args": [
         "generate_stories",
         "--id",
-        "68",
-        "--force",
+        "37",
         "-v",
         "2"
       ],

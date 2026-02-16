@@ -66,7 +66,7 @@ def to_datetime_obj(d) -> Optional[datetime]:
         return None
 
 
-def to_date_obj(d) -> Optional[date]:
+def to_date_obj(d) -> date:
     """Normalize various date-like inputs to a date (or None)."""
     dt = to_datetime_obj(d)
     return dt.date() if dt is not None else None
@@ -96,7 +96,6 @@ season_dates = {
 }
 
 
-
 class StoryProcessor:
     """
     Migrated Story class from data_news.py
@@ -105,7 +104,7 @@ class StoryProcessor:
 
     def __init__(
         self,
-        anchor_date: date,
+        published_date: date,
         template: StoryTemplate = None,
         force_generation: bool = False,
         story: Story = None,
@@ -114,79 +113,84 @@ class StoryProcessor:
         # verify if either template or story is provided
         if not template and not story:
             raise ValueError("Either template or story must be provided")
-        # verify that published_date is provided if template is provided
-        if template and not anchor_date:
-            raise ValueError("published_date must be provided if template is provided")
-
+        
         self.dbclient = DjangoPostgresClient()
         self.force_generation = force_generation
-        self.anchor_date = anchor_date or date.today()
+        self.published_date = published_date
+        self.template = template
+        self.focus = focus
+        self.logger = logging.getLogger(
+            f"StoryProcessor.{self.template.id}.{self.focus.id} {self.template.title}"
+        )
+
         # If there is an existing story, reuse it and regenerate its content.
         if story:
             self.story = story
-            self.focus = story.templatefocus
-            template = self.focus.story_template
+
         else:
-            reference_period_start, reference_period_end = (
-                self._get_reference_period(self.anchor_date, template)
+            most_recent_date_with_data = self._get_most_recent_day(template) or published_date
+            # add a day for yearly, monthly or sesonal updated data: in such cases the data is set to e.g. 31.12. for yearly, 
+            # which would result in the previous year being picked for backward looking stories. By adding a day, we ensure that the current 
+            # year is picked as anchor date for the reference period calculation.
+            anchor_date = most_recent_date_with_data if template.reference_period.value == 'day' else most_recent_date_with_data + timedelta(days=1)
+            self.reference_period_start, self.reference_period_end = (
+                self._get_reference_period(anchor_date, template)
             )
             self.season, self.season_year = self._get_season(
-                reference_period_start, template
+                self.reference_period_start, template
             )
-            self.story = (
-                Story.objects.filter(
-                    templatefocus=focus if focus is not None else template.default_focus,
-                    reference_period_start=reference_period_start,
-                    reference_period_end=reference_period_end,
-                ).first()
-                or Story()  # creates a new, empty instance if no match
+            self.season, self.season_year = self._get_season(
+                self.reference_period_start, template
+            )   
+            # safe access to year/month
+            self.year = (
+                self.reference_period_start.year
+                if self.reference_period_start
+                else datetime.now().year
             )
-            if self.story.id is None:
-                self.focus = focus if focus is not None else template.default_focus
-                if self.focus is None:
-                    raise ValueError(
-                        f"StoryTemplate {getattr(template, 'id', None)} has no default focus row"
-                    )
-                self.story.templatefocus = self.focus
-
-                (
-                    self.story.reference_period_start,
-                    self.story.reference_period_end,
-                ) = self._get_reference_period(self.anchor_date, template)
-
-                self.story.published_date = date.today()
+            self.month = (
+                self.reference_period_start.month
+                if self.reference_period_start
+                else datetime.now().month
+            )
+            # self.last_reference_period_start_date = self._get_last_published_date()
+            self.is_data_based = StoryTemplateContext.objects.filter(
+                story_template=template
+            ).exists()
+            # true means: insight does not exist for refernece period and conditions are met
+            if self.story_is_due(self.reference_period_start):
+                self.story = (
+                    Story.objects.filter(
+                        templatefocus=focus if focus is not None else template.default_focus,
+                        reference_period_start=self.reference_period_start,
+                        reference_period_end=self.reference_period_end,
+                    ).first()
+                    or Story()  # creates a new, empty instance if no match
+                )
+                if self.story.id is None:
+                    self.focus = focus if focus is not None else template.default_focus
+                    if self.focus is None:
+                        raise ValueError(
+                            f"StoryTemplate {getattr(template, 'id', None)} has no default focus row"
+                        )
+                    self.story.templatefocus = self.focus
+                    self.story.reference_period_start = self.reference_period_start
+                    self.story.reference_period_end = self.reference_period_end
+                    self.story.published_date = self.published_date
+                else:
+                    # Existing story found: ensure focus/templatefocus are set for downstream logic.
+                    self.focus = self.story.templatefocus
             else:
-                # Existing story found: ensure focus/templatefocus are set for downstream logic.
-                self.focus = self.story.templatefocus
+                self.story = None  # not due, so we won't generate a story
 
-        self.template = template
 
-        if not getattr(self.story, "ai_model", None):
-            self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
-        self.ai_client = self.get_ai_client()
+            if self.story:
+                self.template = template
 
-        # Ensure reference period fields are set to avoid AttributeError later
-        self.logger = logging.getLogger(
-            f"StoryProcessor.{self.template.id}.{getattr(self.focus, 'id', 'nofocus')} {self.template.title}"
-        )
-        self.season, self.season_year = self._get_season(
-            self.story.reference_period_start, template
-        )   
-        # safe access to year/month
-        self.year = (
-            self.story.reference_period_start.year
-            if self.story.reference_period_start
-            else datetime.now().year
-        )
-        self.month = (
-            self.story.reference_period_start.month
-            if self.story.reference_period_start
-            else datetime.now().month
-        )
-        # self.last_reference_period_start_date = self._get_last_published_date()
-        self.is_data_based = StoryTemplateContext.objects.filter(
-            story_template=template
-        ).exists()
+                if not getattr(self.story, "ai_model", None):
+                    self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
+                self.ai_client = self.get_ai_client()
+
 
     def get_ai_client(self) -> OpenAI:
         if self.story.ai_model == "deepseek-chat":
@@ -280,7 +284,7 @@ class StoryProcessor:
         result = self._replace_reference_period_expression(sql)
         return result.replace(":focus_filter", self._get_focus_filter_expression())
 
-    def story_is_due(self) -> bool:
+    def story_is_due(self, reference_period_start) -> bool:
         """
         Check if the story should be generated
         is_due is determined by:
@@ -293,7 +297,7 @@ class StoryProcessor:
         """
         try:
 
-            def get_publish_conditions_result() -> bool:
+            def _get_publish_conditions_result() -> bool:
                 """
                 Checks whether all publish conditions defined in the story template are met.
 
@@ -302,10 +306,9 @@ class StoryProcessor:
                 """
                 publish_conditions = getattr(self.focus, "publish_conditions", None) if self.focus else None
                 if publish_conditions:
-                    cmd = self._replace_sql_expressions(publish_conditions)
-                    params = self._get_sql_command_params(cmd)
+                    params = self._get_sql_command_params(publish_conditions)
                     df = self.dbclient.run_query(
-                        cmd, params
+                        publish_conditions, params
                     )
                     if df is not None:
                         return df.iloc[0, 0] == 1
@@ -319,20 +322,16 @@ class StoryProcessor:
 
             if self.force_generation:
                 return True
-            if not self.is_data_based:
-                story_exists = Story.objects.filter(
-                    templatefocus=self.story.templatefocus,
-                    reference_period_start=self.story.reference_period_start,
-                ).exists()
-                return not story_exists
-            else:
-                story_exists = Story.objects.filter(
-                    templatefocus=self.story.templatefocus,
-                    reference_period_start=self.story.reference_period_start,
-                ).exists()
-                publish_conditions_met = get_publish_conditions_result()
-                return not story_exists and publish_conditions_met
-            # print(f"Story is due: {is_due}, has_data: {has_data}, date_is_due: {date_is_due}, publish_conditions_met: {publish_conditions_met}, regular_due_date: {regular_due_date}, last_published_date: {self.last_reference_period_start_date}")
+            
+            story_exists = Story.objects.filter(
+                templatefocus=self.focus,
+                reference_period_start=reference_period_start,
+            ).exists()
+            publish_conditions_met = (
+                _get_publish_conditions_result() if not story_exists else False
+            )
+            return not story_exists and publish_conditions_met
+        # print(f"Story is due: {is_due}, has_data: {has_data}, date_is_due: {date_is_due}, publish_conditions_met: {publish_conditions_met}, regular_due_date: {regular_due_date}, last_published_date: {self.last_reference_period_start_date}")
 
         except Exception as e:
             self.logger.error(f"Error checking if story is due: {e}")
@@ -536,12 +535,11 @@ class StoryProcessor:
             not found or if an error occurs during the query.
         """
 
-        most_recent_day_sql = template.most_recent_day_sql
-        if most_recent_day_sql:
+        if template.most_recent_day_sql:
+            params= {}
             try:
-                params = {"published_date": self.anchor_date}
-                cmd = self._replace_sql_expressions(most_recent_day_sql)
-                df = self.dbclient.run_query(cmd, params)
+                params = params = self._get_sql_command_params(template.most_recent_day_sql)
+                df = self.dbclient.run_query(template.most_recent_day_sql, params)
                 if not df.empty and df.iloc[0, 0] is not None:
                     # return a date object for consistency with DB DateFields
                     return to_date_obj(pd.to_datetime(df.iloc[0, 0]))
@@ -731,18 +729,18 @@ class StoryProcessor:
 
         if "%(period_start_date)s" in cmd:
             params["period_start_date"] = (
-                self.story.reference_period_start.strftime("%Y-%m-%d")
-                if self.story.reference_period_start
-                else self.story.published_date.strftime("%Y-%m-%d")
+                self.reference_period_start.strftime("%Y-%m-%d")
+                if self.reference_period_start
+                else self.published_date.strftime("%Y-%m-%d")
             )
         if "%(period_end_date)s" in cmd:
             params["period_end_date"] = (
-                self.story.reference_period_end.strftime("%Y-%m-%d")
-                if self.story.reference_period_end
-                else self.story.published_date.strftime("%Y-%m-%d")
+                self.reference_period_end.strftime("%Y-%m-%d")
+                if self.reference_period_end
+                else self.published_date.strftime("%Y-%m-%d")
             )
         if "%(published_date)s" in cmd:
-            params["published_date"] = self.story.published_date.strftime("%Y-%m-%d")
+            params["published_date"] = self.published_date.strftime("%Y-%m-%d")
         if "%(month)s" in cmd:
             params["month"] = self.month
         if "%(season_year)s" in cmd:
