@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from reports.models import StoryTemplate
-from reports.models import CustomUser
+from account.models import CustomUser
 from reports.models import StoryTemplateSubscription as Subscription
 
 class Command(BaseCommand):
