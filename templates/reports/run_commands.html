@@ -6,6 +6,48 @@
 <div class="row justify-content-center">
   <div class="col-lg-8">
     <h1 class="h3 mb-3">Run Management Commands</h1>
+
+    <details class="card shadow-sm mb-3" id="commands-help">
+      <summary class="card-header" style="cursor: pointer;">
+        Help: available management commands
+      </summary>
+      <div class="card-body">
+        <label for="command-filter" class="form-label mb-1">Filter</label>
+        <input type="search" class="form-control mb-3" id="command-filter" placeholder="Type to filter commands…">
+        <div class="form-text mb-3">Tip: click a command to fill the input below.</div>
+
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="fw-semibold mb-2">Project commands</div>
+            <div id="command-list-project">
+              {% for c in available_commands.project %}
+              <button type="button" class="btn btn-sm btn-outline-secondary mb-2 me-2 command-pick"
+                data-command="{{ c.name }}" data-app="{{ c.app }}">
+                {{ c.name }}
+              </button>
+              {% empty %}
+              <div class="text-muted">No project commands found.</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="fw-semibold mb-2">Django / third-party commands</div>
+            <div id="command-list-other">
+              {% for c in available_commands.other %}
+              <button type="button" class="btn btn-sm btn-outline-secondary mb-2 me-2 command-pick"
+                data-command="{{ c.name }}" data-app="{{ c.app }}">
+                {{ c.name }}
+              </button>
+              {% empty %}
+              <div class="text-muted">No commands found.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+
     <form method="post" class="card shadow-sm" id="run-command-form">
       {% csrf_token %}
       <div class="card-body">
@@ -49,6 +91,34 @@
 <script>
   const runForm = document.getElementById("run-command-form");
   const resultBox = document.getElementById("run-command-result");
+  const commandInput = document.getElementById("command");
+  const commandFilter = document.getElementById("command-filter");
+  const pickButtons = document.querySelectorAll(".command-pick");
+
+  function filterCommands(value) {
+    const q = (value || "").trim().toLowerCase();
+    pickButtons.forEach((btn) => {
+      const name = (btn.dataset.command || "").toLowerCase();
+      const app = (btn.dataset.app || "").toLowerCase();
+      const visible = !q || name.includes(q) || app.includes(q);
+      btn.classList.toggle("d-none", !visible);
+    });
+  }
+
+  pickButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (!commandInput) return;
+      commandInput.value = btn.dataset.command || "";
+      commandInput.focus();
+    });
+  });
+
+  if (commandFilter) {
+    commandFilter.addEventListener("input", (e) => {
+      filterCommands(e.target.value);
+    });
+  }
+
   if (runForm && resultBox) {
     runForm.addEventListener("submit", () => {
       resultBox.remove();

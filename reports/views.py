@@ -15,6 +15,9 @@ from iommi import Column, Table
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.management import get_commands
+import importlib.util
+from pathlib import Path
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
@@ -1252,6 +1255,33 @@ def email_users_view(request):
 def run_commands_view(request):
     command = ""
     result = None
+    commands_map = get_commands()  # {command_name: app_name}
+    all_commands = sorted(
+        (
+            {"name": name, "app": app}
+            for name, app in commands_map.items()
+            if name and app
+        ),
+        key=lambda item: item["name"],
+    )
+    base_dir = Path(settings.BASE_DIR).resolve()
+
+    def _is_local_app(app_module: str) -> bool:
+        try:
+            spec = importlib.util.find_spec(app_module)
+            if not spec or not spec.origin:
+                return False
+            origin = Path(spec.origin).resolve()
+            try:
+                origin.relative_to(base_dir)
+                return True
+            except ValueError:
+                return False
+        except Exception:
+            return False
+
+    project_commands = [c for c in all_commands if _is_local_app(c["app"])]
+    other_commands = [c for c in all_commands if not _is_local_app(c["app"])]
     if request.method == "POST":
         command = (request.POST.get("command") or "").strip()
         if command:
@@ -1281,7 +1311,14 @@ def run_commands_view(request):
     return render(
         request,
         "reports/run_commands.html",
-        {"command": command, "result": result},
+        {
+            "command": command,
+            "result": result,
+            "available_commands": {
+                "project": project_commands,
+                "other": other_commands,
+            },
+        },
     )
 
 
