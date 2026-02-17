@@ -119,9 +119,10 @@ class StoryProcessor:
         self.published_date = published_date
         self.template = template
         self.focus = focus
-        self.logger = logging.getLogger(
-            f"StoryProcessor.{self.template.id}.{self.focus.id} {self.template.title}"
-        )
+        template_id = getattr(self.template, "id", None)
+        focus_id = getattr(self.focus, "id", None)
+        template_title = getattr(self.template, "title", "") or ""
+        self.logger = logging.getLogger(f"StoryProcessor.{template_id}.{focus_id} {template_title}")
 
         # If there is an existing story, reuse it and regenerate its content.
         if story:
@@ -472,7 +473,13 @@ class StoryProcessor:
         """Generate the complete story"""
         try:
             self.logger.info(
-                f"Initializing story generation for {self.story.template.title} ({self.story.published_date.strftime('%Y-%m-%d')})"
+                "Initializing story generation (template_id=%s, template_title=%s, focus_id=%s, focus_value=%s, published_date=%s, story_id=%s)",
+                getattr(getattr(self.story, "template", None), "id", None),
+                getattr(getattr(self.story, "template", None), "title", ""),
+                getattr(getattr(self.story, "templatefocus", None), "id", None),
+                getattr(getattr(self.story, "templatefocus", None), "filter_value", None) or "",
+                getattr(self.story, "published_date", None).strftime("%Y-%m-%d") if getattr(self.story, "published_date", None) else "",
+                getattr(self.story, "id", None),
             )
             if self.is_data_based:
                 self.story.context_values = self._get_context_data()
@@ -518,10 +525,14 @@ class StoryProcessor:
             self.logger.info("Story generation completed successfully")
             return True
         except Exception as e:
-            self.logger.error(f"Error generating story: {e}")
-            import traceback
-
-            self.logger.error(traceback.format_exc())
+            self.logger.exception(
+                "Error generating story (template_id=%s, focus_id=%s, story_id=%s, reference_period_start=%s, reference_period_end=%s)",
+                getattr(getattr(self.story, "template", None), "id", None) if getattr(self, "story", None) else getattr(self.template, "id", None),
+                getattr(getattr(self.story, "templatefocus", None), "id", None) if getattr(self, "story", None) else getattr(self.focus, "id", None),
+                getattr(getattr(self, "story", None), "id", None),
+                getattr(getattr(self, "reference_period_start", None), "isoformat", lambda: None)(),
+                getattr(getattr(self, "reference_period_end", None), "isoformat", lambda: None)(),
+            )
             return False
 
     def _get_most_recent_day(self, template) -> Optional[datetime]:
@@ -914,7 +925,9 @@ class StoryProcessor:
               "title" -> single-line engaging analytical title
         """
         self.logger.info("Generating lead...")
-        if self.story.template.create_lead:
+        if self.template.create_lead and self.template.default_lead:
+            self.story.summary = self._replace_reference_period_expression(self.template.default_lead)
+        elif self.template.create_lead:
             self.story.summary = self._generate_summary(kind="lead")
         else:
             self.story.summary = self._replace_reference_period_expression(

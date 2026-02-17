@@ -28,8 +28,14 @@ class StoryGenerationService(ETLBaseService):
         """Generate a single story from a template"""
         try:
             template = focus.story_template
+            focus_id = getattr(focus, "id", None)
+            focus_value = getattr(focus, "filter_value", None) or ""
             self.logger.info(
-                f"Generating story for template: {template.title} (focus={getattr(focus, 'id', None)})"
+                "Generating story (template_id=%s, template_title=%s, focus_id=%s, focus_value=%s)",
+                getattr(template, "id", None),
+                getattr(template, "title", ""),
+                focus_id,
+                focus_value,
             )
 
             # Use provided date or default to today
@@ -45,7 +51,9 @@ class StoryGenerationService(ETLBaseService):
             # Check if story should be generated
             if not force and not story_processor.story:
                 self.logger.info(
-                    f"Story generation skipped for template: {template.title}"
+                    "Story generation skipped (template_id=%s, focus_id=%s)",
+                    getattr(template, "id", None),
+                    focus_id,
                 )
                 return {
                     "success": True,
@@ -58,7 +66,10 @@ class StoryGenerationService(ETLBaseService):
 
             if success:
                 self.logger.info(
-                    f"Successfully generated story for template: {template.title}"
+                    "Successfully generated story (template_id=%s, focus_id=%s, story_id=%s)",
+                    getattr(template, "id", None),
+                    focus_id,
+                    getattr(getattr(story_processor, "story", None), "id", None),
                 )
                 return {
                     "success": True,
@@ -69,13 +80,20 @@ class StoryGenerationService(ETLBaseService):
                 }
             else:
                 self.logger.error(
-                    f"Failed to generate story for template: {template.title}"
+                    "Failed to generate story (template_id=%s, focus_id=%s)",
+                    getattr(template, "id", None),
+                    focus_id,
                 )
                 return {"success": False, "error": "Story generation failed"}
 
         except Exception as e:
-            self.logger.error(
-                f"Error generating story for template {template.title}: {str(e)}"
+            template = getattr(focus, "story_template", None)
+            self.logger.exception(
+                "Error generating story (template_id=%s, template_title=%s, focus_id=%s, focus_value=%s)",
+                getattr(template, "id", None),
+                getattr(template, "title", ""),
+                getattr(focus, "id", None),
+                getattr(focus, "filter_value", None) or "",
             )
             return {"success": False, "error": str(e)}
 
@@ -133,41 +151,54 @@ class StoryGenerationService(ETLBaseService):
 
         for focus in focuses:
             template = focus.story_template
-            dataset_names = []
-            for relation in template.datasets.all():
-                if relation.dataset and getattr(relation.dataset, "name", None):
-                    dataset_names.append(relation.dataset.name)
+            focus_id = getattr(focus, "id", None)
+            focus_value = getattr(focus, "filter_value", None) or ""
+            dataset_names: list[str] = []
+            try:
+                for relation in template.datasets.all():
+                    if relation.dataset and getattr(relation.dataset, "name", None):
+                        dataset_names.append(relation.dataset.name)
 
-            result = self.generate_story(
-                focus=focus, published_date=published_date, force=force
-            )
+                self.logger.info(
+                    "Processing focus (template_id=%s, template_title=%s, focus_id=%s, focus_value=%s)",
+                    getattr(template, "id", None),
+                    getattr(template, "title", ""),
+                    focus_id,
+                    focus_value,
+                )
+
+                result = self.generate_story(
+                    focus=focus, published_date=published_date, force=force
+                )
+            except Exception as e:  # noqa: BLE001
+                self.logger.exception(
+                    "Unhandled error generating story (template_id=%s, template_title=%s, focus_id=%s, focus_value=%s, datasets=%s)",
+                    getattr(template, "id", None),
+                    getattr(template, "title", ""),
+                    focus_id,
+                    focus_value,
+                    ", ".join(dataset_names) if dataset_names else "",
+                )
+                result = {"success": False, "error": str(e)}
+
             detail = {
-                "template_id": template.id,
-                "template_title": template.title,
-                "focus_id": focus.id,
-                "focus_value": focus.filter_value or "",
+                "template_id": getattr(template, "id", None),
+                "template_title": getattr(template, "title", ""),
+                "focus_id": focus_id,
+                "focus_value": focus_value,
                 "dataset_names": dataset_names,
             }
 
             if result.get("skipped"):
                 results["skipped"] += 1
-                detail.update(
-                    {
-                        "status": "skipped",
-                        "message": result.get("message"),
-                    }
-                )
+                detail.update({"status": "skipped", "message": result.get("message")})
             elif result.get("success"):
                 results["successful"] += 1
                 detail["status"] = "success"
             else:
                 results["failed"] += 1
-                detail.update(
-                    {
-                        "status": "failed",
-                        "error": result.get("error", "Unknown error"),
-                    }
-                )
+                detail.update({"status": "failed", "error": result.get("error", "Unknown error")})
+
             results["details"].append(detail)
 
         results["success"] = results["failed"] == 0

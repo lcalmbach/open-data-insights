@@ -136,7 +136,7 @@ class Command(BaseCommand):
             self.stdout.write("Step 2: Generating stories...")
             story_service = StoryGenerationService()
             story_result = story_service.generate_stories(
-                anchor_date=anchor_date,
+                published_date=anchor_date,
                 force=force,
                 exclude_template_ids=list(blocked_template_ids) if blocked_template_ids else None,
             )
