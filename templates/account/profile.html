@@ -27,18 +27,26 @@
       </div>
     </div>
 
-    <div class="mb-3">
-      <label class="form-label" for="{{ profile_form.country.id_for_label }}">Country</label>
-      {{ profile_form.country }}
-      {% if profile_form.country.errors %}
-        <div class="text-danger small">{{ profile_form.country.errors }}</div>
-      {% endif %}
-    </div>
+	    <div class="mb-3">
+	      <label class="form-label" for="{{ profile_form.country.id_for_label }}">Country</label>
+	      {{ profile_form.country }}
+	      {% if profile_form.country.errors %}
+	        <div class="text-danger small">{{ profile_form.country.errors }}</div>
+	      {% endif %}
+	    </div>
 
-    <div class="form-check mb-3">
-      {{ profile_form.auto_subscribe }}
-      <label class="form-check-label" for="{{ profile_form.auto_subscribe.id_for_label }}">
-        Automatically subscribe to new insights
+	    <div class="mb-3">
+	      <label class="form-label" for="{{ profile_form.preferred_language.id_for_label }}">Preferred language</label>
+	      {{ profile_form.preferred_language }}
+	      {% if profile_form.preferred_language.errors %}
+	        <div class="text-danger small">{{ profile_form.preferred_language.errors }}</div>
+	      {% endif %}
+	    </div>
+
+	    <div class="form-check mb-3">
+	      {{ profile_form.auto_subscribe }}
+	      <label class="form-check-label" for="{{ profile_form.auto_subscribe.id_for_label }}">
+	        Automatically subscribe to new insights
       </label>
       {% if profile_form.auto_subscribe.errors %}
         <div class="text-danger small">{{ profile_form.auto_subscribe.errors }}</div>

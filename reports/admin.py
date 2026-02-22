@@ -56,6 +56,7 @@ class StoryTemplateAdmin(admin.ModelAdmin):
         "id",
         "title",
         "reference_period",
+        "generation_mode",
         "organisation",
     )
     inlines = (StoryTemplateFocusInline,)

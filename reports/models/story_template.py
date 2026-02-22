@@ -37,6 +37,13 @@ class StoryTemplateManager(NaturalKeyManager):
 class StoryTemplate(models.Model):
     """Model representing a configurable template for generating stories."""
 
+    GENERATION_MODE_TRANSLATE = "translate"
+    GENERATION_MODE_NATIVE = "native"
+    GENERATION_MODE_CHOICES = (
+        (GENERATION_MODE_TRANSLATE, "Generate English and translate"),
+        (GENERATION_MODE_NATIVE, "Generate each language natively"),
+    )
+
     slug = models.SlugField(unique=True, blank=True, null=True, editable=False)
     active = models.BooleanField(
         default=True,
@@ -142,6 +149,12 @@ class StoryTemplate(models.Model):
         null=True,
         blank=True,
         help_text="AI model to use for generating the story. This can be set to 'deepseek-chat' to use the Deepseek API instead of OpenAI.",
+    )
+    generation_mode = models.CharField(
+        max_length=16,
+        choices=GENERATION_MODE_CHOICES,
+        default=GENERATION_MODE_TRANSLATE,
+        help_text="How multilingual stories are produced: generate in English then translate, or generate each language from the prompt.",
     )
 
     class Meta:

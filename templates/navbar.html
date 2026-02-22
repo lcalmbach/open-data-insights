@@ -58,14 +58,34 @@
         {% endif %}
       </ul>
 
-      <!-- Rechtsbündige Initialen-Anzeige -->
-      {% if user.is_authenticated %}
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" text-white href="{% url 'account:profile' %}">
-            {% with user.first_name|slice:":1" as fi %}
-            {% with user.last_name|slice:":1" as li %}
-            <span class="badge bg-secondary rounded-circle p-2 text-uppercase"
+	      <!-- Rechtsbündige Initialen-Anzeige -->
+	      {% if user.is_authenticated %}
+	      <ul class="navbar-nav ms-auto">
+	        {% if available_languages %}
+	        <li class="nav-item me-2 d-flex align-items-center">
+	          <form method="post" action="{% url 'account:set_language' %}" class="d-flex align-items-center">
+	            {% csrf_token %}
+	            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+	            <select
+	              name="language_id"
+	              class="form-select form-select-sm"
+	              onchange="this.form.submit()"
+	              aria-label="Language"
+	            >
+	              {% for lang in available_languages %}
+	                <option value="{{ lang.id }}" {% if lang.id == content_language_id %}selected{% endif %}>
+	                  {{ lang.value }}
+	                </option>
+	              {% endfor %}
+	            </select>
+	          </form>
+	        </li>
+	        {% endif %}
+	        <li class="nav-item">
+	          <a class="nav-link" text-white href="{% url 'account:profile' %}">
+	            {% with user.first_name|slice:":1" as fi %}
+	            {% with user.last_name|slice:":1" as li %}
+	            <span class="badge bg-secondary rounded-circle p-2 text-uppercase"
               style="width: 2.5rem; height: 2.5rem; display: inline-flex; align-items: center; justify-content: center;">
               {{ fi }}{{ li }}
             </span>

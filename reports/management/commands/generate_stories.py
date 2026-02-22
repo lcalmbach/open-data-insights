@@ -13,6 +13,11 @@ class Command(BaseCommand):
             help='ID of the specific story template to process'
         )
         parser.add_argument(
+            '--story_focus_id',
+            type=int,
+            help='ID of the specific story template focus to process'
+        )
+        parser.add_argument(
             '--date',
             type=str,
             help='Date to generate stories for (YYYY-MM-DD format). Defaults to yesterday.'
@@ -25,7 +30,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         template_id = options.get('id')
+        story_focus_id = options.get('story_focus_id')
         force = options.get('force', False)
+
+        if template_id and story_focus_id:
+            self.stdout.write(
+                self.style.ERROR(
+                    "Use either --id (template) or --story_focus_id (focus), not both."
+                )
+            )
+            return
         
         # Parse the date if provided
         published_date = None
@@ -42,7 +56,12 @@ class Command(BaseCommand):
         else:
             published_date = date.today() 
         service = StoryGenerationService()
-        result = service.generate_stories(template_id=template_id, published_date=published_date, force=force)
+        result = service.generate_stories(
+            template_id=template_id,
+            story_focus_id=story_focus_id,
+            published_date=published_date,
+            force=force,
+        )
         
         if result.get('success', False):
             self.stdout.write(

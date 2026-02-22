@@ -8,6 +8,7 @@ urlpatterns = [
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
     path("register/", views.register, name="register"),  # keep only one
+    path("set-language/", views.set_language, name="set_language"),
     path("confirm/<uidb64>/<token>/", views.confirm_email, name="confirm_email"),
     path("email-sent/", lambda r: render(r, "account/email_sent.html"), name="email_sent"),
 

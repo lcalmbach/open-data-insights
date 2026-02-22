@@ -22,7 +22,7 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.db import connection
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Case, Count, IntegerField, Q, When
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -45,6 +45,7 @@ from .models.user_comment import UserComment
 from .models.quote import Quote
 from .services.database_client import DjangoPostgresClient
 from .services.utils import normalize_sql_query
+from .language import ENGLISH_LANGUAGE_ID, get_content_language_id
 
 MARKDOWN_EXTRAS = ["tables", "fenced-code-blocks"]
 logger = logging.getLogger(__name__)
@@ -72,6 +73,82 @@ _NEGATIVE_KEYWORDS = {
     "broken",
     "bug",
 }
+
+
+def _dedupe_stories_by_language(stories_qs, preferred_language_id: int) -> list[Story]:
+    """
+    Return at most one Story per (templatefocus, reference period, published_date),
+    preferring `preferred_language_id`, otherwise English.
+    """
+    preferred_language_id = int(preferred_language_id)
+    qs = (
+        stories_qs
+        .annotate(
+            _lang_rank=Case(
+                When(language_id=preferred_language_id, then=0),
+                When(language_id=ENGLISH_LANGUAGE_ID, then=1),
+                default=2,
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("-published_date", "_lang_rank", "-id")
+    )
+    result: list[Story] = []
+    seen: set[tuple] = set()
+    for story in qs:
+        key = (
+            story.templatefocus_id,
+            story.reference_period_start,
+            story.reference_period_end,
+            story.published_date,
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(story)
+    return result
+
+
+def _story_group_key(story: Story) -> tuple:
+    return (
+        story.templatefocus_id,
+        story.reference_period_start,
+        story.reference_period_end,
+        story.published_date,
+    )
+
+
+def _resolve_story_for_language(story: Story, preferred_language_id: int) -> Story:
+    """
+    Given a story (any language), return the preferred-language variant if it exists,
+    otherwise fall back to English, otherwise keep the original.
+    """
+    preferred_language_id = int(preferred_language_id)
+    if story.language_id == preferred_language_id:
+        return story
+
+    preferred = Story.objects.filter(
+        templatefocus_id=story.templatefocus_id,
+        reference_period_start=story.reference_period_start,
+        reference_period_end=story.reference_period_end,
+        published_date=story.published_date,
+        language_id=preferred_language_id,
+    ).first()
+    if preferred:
+        return preferred
+
+    if preferred_language_id != ENGLISH_LANGUAGE_ID and story.language_id != ENGLISH_LANGUAGE_ID:
+        english = Story.objects.filter(
+            templatefocus_id=story.templatefocus_id,
+            reference_period_start=story.reference_period_start,
+            reference_period_end=story.reference_period_end,
+            published_date=story.published_date,
+            language_id=ENGLISH_LANGUAGE_ID,
+        ).first()
+        if english:
+            return english
+
+    return story
 
 _POSITIVE_KEYWORDS = {
     "good",
@@ -560,7 +637,7 @@ def stories_view(request):
     template_ids = list(accessible_templates.values_list("id", flat=True))
     templates = accessible_templates.order_by("title")
 
-    # Base queryset
+    # Base queryset (all languages; we'll pick preferred language later)
     stories = (
         Story.objects.select_related("templatefocus__story_template")
         .filter(templatefocus__story_template_id__in=template_ids)
@@ -589,11 +666,23 @@ def stories_view(request):
     if published_to:
         stories = stories.filter(published_date__lte=published_to)
 
+    preferred_language_id = get_content_language_id(request)
+    stories_list = _dedupe_stories_by_language(stories, preferred_language_id)
+
     # Selected story (for detail view)
-    story_id = request.GET.get("story")
-    if not stories.filter(id=story_id).exists():
-        story_id = stories.first().id if stories else None
-    selected_story = stories.filter(id=story_id).first() if story_id else None
+    story_id = (request.GET.get("story") or "").strip()
+    selected_story = None
+    if story_id and story_id.isdigit():
+        base_story = stories.filter(id=int(story_id)).first()
+        if base_story:
+            desired_key = _story_group_key(base_story)
+            selected_story = next(
+                (s for s in stories_list if _story_group_key(s) == desired_key),
+                None,
+            )
+    if selected_story is None:
+        selected_story = stories_list[0] if stories_list else None
+
     # Process story content
     if selected_story:
         graphics = selected_story.story_graphics.all() if selected_story else []
@@ -630,7 +719,7 @@ def stories_view(request):
         "reports/stories_list.html",
         {
             "templates": templates,
-            "stories": stories,
+            "stories": stories_list,
             "selected_story": selected_story,
             "graphics": graphics,
             "tables": tables,
@@ -938,11 +1027,11 @@ def view_story(request, story_id=None):
     random_quote = _get_daily_quote()
     splash_image = _get_daily_splash_image()
     template_ids = _accessible_template_ids(request.user)
-    stories = list(
-        Story.objects.filter(templatefocus__story_template_id__in=template_ids).order_by(
-            "-published_date"
-        )
-    )
+    preferred_language_id = get_content_language_id(request)
+    stories_qs = Story.objects.filter(
+        templatefocus__story_template_id__in=template_ids
+    ).order_by("-published_date")
+    stories = _dedupe_stories_by_language(stories_qs, preferred_language_id)
     if not stories:
         return render(
             request,
@@ -957,10 +1046,18 @@ def view_story(request, story_id=None):
     if story_id is None:
         selected_story = stories[0]  # Default to the first story
     else:
-        selected_story = get_object_or_404(
+        base_story = get_object_or_404(
             Story.objects.filter(templatefocus__story_template_id__in=template_ids),
             id=story_id,
         )
+        desired_key = _story_group_key(base_story)
+        selected_story = next(
+            (s for s in stories if _story_group_key(s) == desired_key),
+            None,
+        ) or _resolve_story_for_language(base_story, preferred_language_id)
+        if selected_story not in stories:
+            selected_story = stories[0]
+
     index = stories.index(selected_story)
     prev_story_id = stories[index - 1].id if index > 0 else None
     next_story_id = stories[index + 1].id if index < len(stories) - 1 else None
@@ -1004,6 +1101,10 @@ def story_detail(request, story_id=None):
         Story.objects.filter(templatefocus__story_template_id__in=template_ids),
         id=story_id,
     )
+    preferred_language_id = get_content_language_id(request)
+    resolved_story = _resolve_story_for_language(selected_story, preferred_language_id)
+    if resolved_story.id != selected_story.id:
+        return redirect("story_detail", story_id=resolved_story.id)
     tables = get_tables(selected_story) if selected_story else []
     graphics = selected_story.story_graphics.all() if selected_story else []
     _attach_graphic_chart_ids(graphics)

@@ -88,6 +88,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "reports.context_processors.ai_disclaimer",
                 "reports.context_processors.show_dev_banner",
+                "reports.context_processors.content_language",
             ],
         },
     },

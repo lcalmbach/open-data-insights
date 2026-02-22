@@ -26,7 +26,7 @@ from reports.models.story_table import StoryTable
 from reports.models.graphic import Graphic
 from reports.models.story_template import StoryTemplateFocus
 from dateutil.relativedelta import relativedelta
-from reports.models.lookups import PeriodDirectionEnum
+from reports.models.lookups import Language, LanguageEnum, PeriodDirectionEnum
 from reports.constants.reference_period import ReferencePeriod
 
 
@@ -165,6 +165,7 @@ class StoryProcessor:
                         templatefocus=focus if focus is not None else template.default_focus,
                         reference_period_start=self.reference_period_start,
                         reference_period_end=self.reference_period_end,
+                        language_id=LanguageEnum.ENGLISH.value,
                     ).first()
                     or Story()  # creates a new, empty instance if no match
                 )
@@ -178,6 +179,7 @@ class StoryProcessor:
                     self.story.reference_period_start = self.reference_period_start
                     self.story.reference_period_end = self.reference_period_end
                     self.story.published_date = self.published_date
+                    self.story.language_id = LanguageEnum.ENGLISH.value
                 else:
                     # Existing story found: ensure focus/templatefocus are set for downstream logic.
                     self.focus = self.story.templatefocus
@@ -327,6 +329,7 @@ class StoryProcessor:
             story_exists = Story.objects.filter(
                 templatefocus=self.focus,
                 reference_period_start=reference_period_start,
+                language_id=LanguageEnum.ENGLISH.value,
             ).exists()
             publish_conditions_met = (
                 _get_publish_conditions_result() if not story_exists else False
@@ -484,6 +487,12 @@ class StoryProcessor:
             if self.is_data_based:
                 self.story.context_values = self._get_context_data()
 
+            self.story.language_id = LanguageEnum.ENGLISH.value
+            generation_mode = (
+                getattr(self.story.template, "generation_mode", StoryTemplate.GENERATION_MODE_TRANSLATE)
+                or StoryTemplate.GENERATION_MODE_TRANSLATE
+            )
+
             # Generate content
             self.logger.info("Generating story content...")
             # generate main content
@@ -514,6 +523,7 @@ class StoryProcessor:
             self._generate_tables()
             self.logger.info("Generating graphics...")
             self._generate_graphics()
+            self._generate_language_variants(mode=generation_mode)
             self._save_log_record()
 
             # Execute post-publish commands
@@ -534,6 +544,122 @@ class StoryProcessor:
                 getattr(getattr(self, "reference_period_end", None), "isoformat", lambda: None)(),
             )
             return False
+
+    def _translate_text(self, text: str, target_language_name: str, max_tokens: int = 3000) -> str:
+        if not text:
+            return text
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    f"You are a professional translator. Translate the input text to {target_language_name}. "
+                    "Preserve meaning, numbers, dates, links, and markdown structure. Return only the translated text."
+                ),
+            },
+            {"role": "user", "content": text},
+        ]
+        response = self.ai_client.chat.completions.create(
+            model=self.story.ai_model,
+            messages=messages,
+            temperature=0.0,
+            max_tokens=max_tokens,
+        )
+        translated = (response.choices[0].message.content or "").strip()
+        return translated or text
+
+    def _upsert_story_for_language(self, language_id: int) -> Story:
+        language_id = int(language_id)
+        story = Story.objects.filter(
+            templatefocus=self.story.templatefocus,
+            reference_period_start=self.story.reference_period_start,
+            reference_period_end=self.story.reference_period_end,
+            language_id=language_id,
+        ).first()
+        if story:
+            return story
+        return Story(
+            templatefocus=self.story.templatefocus,
+            reference_period_start=self.story.reference_period_start,
+            reference_period_end=self.story.reference_period_end,
+            published_date=self.story.published_date,
+            ai_model=self.story.ai_model,
+            language_id=language_id,
+            context_values=self.story.context_values,
+        )
+
+    def _copy_story_assets(self, source_story: Story, target_story: Story, language_id: int) -> None:
+        for source_table in StoryTable.objects.filter(story=source_story):
+            target_table = StoryTable.objects.filter(
+                story=target_story, table_template=source_table.table_template
+            ).first() or StoryTable(story=target_story, table_template=source_table.table_template)
+            target_table.title = source_table.title
+            target_table.data = source_table.data
+            target_table.sort_order = source_table.sort_order
+            target_table.language_id = language_id
+            target_table.save()
+
+        for source_graphic in Graphic.objects.filter(story=source_story):
+            target_graphic = Graphic.objects.filter(
+                story=target_story, graphic_template=source_graphic.graphic_template
+            ).first() or Graphic(story=target_story, graphic_template=source_graphic.graphic_template)
+            target_graphic.title = source_graphic.title
+            target_graphic.data = source_graphic.data
+            target_graphic.content_html = source_graphic.content_html
+            target_graphic.sort_order = source_graphic.sort_order
+            target_graphic.language_id = language_id
+            target_graphic.save()
+
+    def _generate_language_variants(self, mode: str) -> None:
+        languages = Language.objects.exclude(id=LanguageEnum.ENGLISH.value).order_by("sort_order", "value")
+        if not languages.exists():
+            return
+
+        english_story = self.story
+        for language in languages:
+            try:
+                if mode == StoryTemplate.GENERATION_MODE_NATIVE:
+                    variant = self._upsert_story_for_language(language.id)
+                    variant.language_id = language.id
+                    variant.context_values = english_story.context_values
+                    variant.published_date = english_story.published_date
+                    variant.ai_model = english_story.ai_model
+
+                    previous_story = self.story
+                    try:
+                        self.story = variant
+                        self._generate_insight_text(target_language=language.value)
+                        self.generate_lead(target_language=language.value)
+                        self.generate_title(target_language=language.value)
+                        self.story.full_clean()
+                        self.story.save()
+                        self._copy_story_assets(
+                            source_story=english_story,
+                            target_story=self.story,
+                            language_id=language.id,
+                        )
+                    finally:
+                        self.story = previous_story
+                    continue
+
+                variant = self._upsert_story_for_language(language.id)
+                variant.language_id = language.id
+                variant.published_date = english_story.published_date
+                variant.ai_model = english_story.ai_model
+                variant.context_values = english_story.context_values
+                variant.content = self._translate_text(english_story.content or "", language.value, max_tokens=3000)
+                variant.summary = self._translate_text(english_story.summary or "", language.value, max_tokens=500)
+                variant.title = self._translate_text(english_story.title or "", language.value, max_tokens=120)
+                variant.prompt_text = f"Translated from English story {english_story.id} to {language.value}"
+                variant.full_clean()
+                variant.save()
+                self._copy_story_assets(source_story=english_story, target_story=variant, language_id=language.id)
+            except Exception:
+                self.logger.exception(
+                    "Failed to generate language variant (story_id=%s, language_id=%s, mode=%s)",
+                    getattr(english_story, "id", None),
+                    language.id,
+                    mode,
+                )
 
     def _get_most_recent_day(self, template) -> Optional[datetime]:
         """
@@ -740,18 +866,18 @@ class StoryProcessor:
 
         if "%(period_start_date)s" in cmd:
             params["period_start_date"] = (
-                self.reference_period_start.strftime("%Y-%m-%d")
+                self.reference_period_start
                 if self.reference_period_start
-                else self.published_date.strftime("%Y-%m-%d")
+                else self.published_date
             )
         if "%(period_end_date)s" in cmd:
             params["period_end_date"] = (
-                self.reference_period_end.strftime("%Y-%m-%d")
+                self.reference_period_end
                 if self.reference_period_end
-                else self.published_date.strftime("%Y-%m-%d")
+                else self.published_date
             )
         if "%(published_date)s" in cmd:
-            params["published_date"] = self.published_date.strftime("%Y-%m-%d")
+            params["published_date"] = self.published_date
         if "%(month)s" in cmd:
             params["month"] = self.month
         if "%(season_year)s" in cmd:
@@ -795,9 +921,14 @@ class StoryProcessor:
             self.logger.error(f"Error saving log record: {e}")
             raise
 
-    def _generate_insight_text(self) -> bool:
+    def _generate_insight_text(self, target_language: str | None = None) -> bool:
         """Generate story text using OpenAI API"""
         try:
+            language_instruction = (
+                f"Write the final output in {target_language}."
+                if target_language
+                else ""
+            )
             message = self._replace_reference_period_expression(
                 self.story.template.prompt_text
             )  # Prepare messages for chat completion
@@ -809,7 +940,9 @@ class StoryProcessor:
                 messages = [
                     {
                         "role": "system",
-                        "content": f"{message}\n\n{LLM_FORMATTING_INSTRUCTIONS}",
+                        "content": "\n\n".join(
+                            part for part in [message, LLM_FORMATTING_INSTRUCTIONS, language_instruction] if part
+                        ),
                     },
                     {
                         "role": "user",
@@ -821,7 +954,14 @@ class StoryProcessor:
                 ]
             else:
                 messages = [
-                    {"role": "system", "content": self.story.template.system_prompt},
+                    {
+                        "role": "system",
+                        "content": "\n\n".join(
+                            part
+                            for part in [self.story.template.system_prompt, language_instruction]
+                            if part
+                        ),
+                    },
                     {
                         "role": "user",
                         "content": (
@@ -851,8 +991,13 @@ class StoryProcessor:
             self.logger.error(f"Error generating report text with OpenAI: {e}")
             return None
 
-    def _generate_summary(self, kind: str) -> Optional[str]:
+    def _generate_summary(self, kind: str, target_language: str | None = None) -> Optional[str]:
         try:
+            language_instruction = (
+                f"Write the final output in {target_language}."
+                if target_language
+                else ""
+            )
             # Kind-specific instructions
             if kind == "title":
                 system = "You are a concise editorial assistant producing sharp, data-driven insight titles"
@@ -884,7 +1029,9 @@ class StoryProcessor:
             messages = [
                 {
                     "role": "system",
-                    "content": f"{system}\n\n{LLM_FORMATTING_INSTRUCTIONS}",
+                    "content": "\n\n".join(
+                        part for part in [system, LLM_FORMATTING_INSTRUCTIONS, language_instruction] if part
+                    ),
                 },
                 {
                     "role": "user",
@@ -905,20 +1052,22 @@ class StoryProcessor:
             self.logger.error(f"Error generating {kind} with OpenAI: {e}")
             return None
 
-    def generate_title(self) -> Optional[str]:
+    def generate_title(self, target_language: str | None = None) -> Optional[str]:
         """Generate title using the unified LLM helper"""
         self.logger.info("Generating title...")
         # Generate lead (summary) and an engaging title using the unified LLM helper
 
         if self.story.template.create_title:
-            self.story.title = self._generate_summary(kind="title")
+            self.story.title = self._generate_summary(
+                kind="title", target_language=target_language
+            )
         else:
             self.story.title = self._replace_reference_period_expression(
                 self.story.template.default_title
             )
         return bool(self.story.title)
 
-    def generate_lead(self) -> Optional[str]:
+    def generate_lead(self, target_language: str | None = None) -> Optional[str]:
         """
         Generic LLM helper to produce different short outputs.
         kind: "lead" -> one- or two-sentence summary
@@ -928,7 +1077,9 @@ class StoryProcessor:
         if self.template.create_lead and self.template.default_lead:
             self.story.summary = self._replace_reference_period_expression(self.template.default_lead)
         elif self.template.create_lead:
-            self.story.summary = self._generate_summary(kind="lead")
+            self.story.summary = self._generate_summary(
+                kind="lead", target_language=target_language
+            )
         else:
             self.story.summary = self._replace_reference_period_expression(
                 self.story.template.summary

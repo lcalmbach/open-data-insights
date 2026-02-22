@@ -100,6 +100,7 @@ class StoryGenerationService(ETLBaseService):
     def generate_stories(
         self,
         template_id: Optional[int] = None,
+        story_focus_id: Optional[int] = None,
         published_date: Optional[date] = None,
         force: bool = False,
         exclude_template_ids: Optional[List[int]] = None,
@@ -108,12 +109,25 @@ class StoryGenerationService(ETLBaseService):
         focuses = StoryTemplateFocus.objects.select_related("story_template").filter(
             story_template__active=True
         )
+        if story_focus_id:
+            focuses = focuses.filter(id=story_focus_id)
         if template_id:
             focuses = focuses.filter(story_template_id=template_id)
         if exclude_template_ids:
             focuses = focuses.exclude(story_template_id__in=exclude_template_ids)
 
         if not focuses.exists():
+            if story_focus_id:
+                self.logger.error("No active story focus found with ID: %s", story_focus_id)
+                return {
+                    "success": False,
+                    "message": f"Story focus ID {story_focus_id} not found",
+                    "total_templates": 0,
+                    "successful": 0,
+                    "failed": 0,
+                    "skipped": 0,
+                    "details": [],
+                }
             if template_id:
                 self.logger.error(
                     f"No active story template found with ID: {template_id}"

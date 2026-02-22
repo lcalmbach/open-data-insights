@@ -19,10 +19,12 @@ from .forms import CustomUserUpdateForm
 from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
 from django.db import transaction
+from django.views.decorators.http import require_POST
 import logging
 
 from reports.models.subscription import StoryTemplateSubscription
 from reports.models.story_template import StoryTemplate
+from reports.language import get_content_language_id, set_content_language_id
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +52,8 @@ def profile_view(request):
 
             if profile_form.is_valid():
                 profile_form.save()
+                if getattr(user, "preferred_language_id", None):
+                    set_content_language_id(request, user.preferred_language_id)
                 messages.success(request, "Your profile has been updated.")
                 return redirect("account:profile")
 
@@ -125,6 +129,8 @@ def login_view(request):
             # AuthenticationForm already authenticated the user
             user = form.get_user()
             login(request, user)
+            if getattr(user, "preferred_language_id", None):
+                set_content_language_id(request, user.preferred_language_id)
             return redirect("home")
 
         # keep a concise debug log for failed attempts
@@ -148,6 +154,34 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect("home")
+
+
+@require_POST
+def set_language(request):
+    next_url = (request.POST.get("next") or "").strip() or request.META.get(
+        "HTTP_REFERER", "/"
+    )
+    raw_id = (request.POST.get("language_id") or "").strip()
+    try:
+        language_id = int(raw_id)
+    except (TypeError, ValueError):
+        messages.error(request, "Invalid language selection.")
+        return redirect(next_url)
+
+    from reports.models.lookups import Language
+
+    if not Language.objects.filter(id=language_id).exists():
+        messages.error(request, "Unknown language selection.")
+        return redirect(next_url)
+
+    set_content_language_id(request, language_id)
+
+    if getattr(request.user, "is_authenticated", False):
+        if getattr(request.user, "preferred_language_id", None) != language_id:
+            request.user.preferred_language_id = language_id
+            request.user.save(update_fields=["preferred_language"])
+
+    return redirect(next_url)
 
 
 def register_view(request):

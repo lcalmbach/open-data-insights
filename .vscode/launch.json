@@ -31,11 +31,8 @@
       "program": "${workspaceFolder}/manage.py",
       "args": [
         "generate_stories",
-        "--id",
-        "70",
-        "--force",
-        "--date",
-        "2024-06-01",
+        "--story_focus_id",
+        "279",
         "-v",
         "2"
       ],

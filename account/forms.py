@@ -14,17 +14,26 @@ class CustomUserUpdateForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ["first_name", "last_name", "country", "auto_subscribe", "email"]  # email nicht speichern
+        fields = [
+            "first_name",
+            "last_name",
+            "country",
+            "preferred_language",
+            "auto_subscribe",
+            "email",
+        ]  # email nicht speichern
         widgets = {
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
             "last_name": forms.TextInput(attrs={"class": "form-control"}),
             "country": CountrySelectWidget(attrs={"class": "form-select"}),
+            "preferred_language": forms.Select(attrs={"class": "form-select"}),
             "auto_subscribe": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
         labels = {
             "first_name": "First name",
             "last_name": "Last name",
             "country": "Country",
+            "preferred_language": "Preferred language",
             "auto_subscribe": "Auto subscribe to new content",
         }
 

@@ -1,5 +1,7 @@
 from django.conf import settings
 
+from .language import get_content_language_id
+
 
 def ai_disclaimer(request):
     return {
@@ -19,3 +21,20 @@ def format_instructions(request):
 
 def show_dev_banner(request):
     return {"SHOW_DEV_BANNER": getattr(settings, "SHOW_DEV_BANNER", False)}
+
+
+def content_language(request):
+    """
+    Provide content-language (stories) selection to all templates (navbar).
+    """
+    try:
+        from reports.models.lookups import Language
+
+        languages = Language.objects.order_by("sort_order", "value")
+    except Exception:  # noqa: BLE001
+        languages = []
+
+    return {
+        "available_languages": languages,
+        "content_language_id": get_content_language_id(request),
+    }
