@@ -49,6 +49,13 @@ INSTALLED_APPS = [
     "iommi",
 ]
 
+USE_S3_MEDIA = (
+    os.environ.get("USE_S3_MEDIA", "False") == "True"
+    or bool(os.environ.get("AWS_STORAGE_BUCKET_NAME"))
+)
+if USE_S3_MEDIA:
+    INSTALLED_APPS.append("storages")
+
 CRISPY_ALLOWED_TEMPLATE_PACKS = ["bootstrap5"]
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
@@ -176,8 +183,33 @@ STATICFILES_DIRS = [
 # For production (e.g., collectstatic)
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+if USE_S3_MEDIA:
+    AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
+    AWS_MEDIA_LOCATION = os.environ.get("AWS_MEDIA_LOCATION", "media")
+    AWS_S3_CUSTOM_DOMAIN = os.environ.get("AWS_S3_CUSTOM_DOMAIN")
+    if not AWS_S3_CUSTOM_DOMAIN and AWS_STORAGE_BUCKET_NAME:
+        if AWS_S3_REGION_NAME:
+            AWS_S3_CUSTOM_DOMAIN = (
+                f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+            )
+        else:
+            AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_S3_SIGNATURE_VERSION = "s3v4"
+    AWS_LOCATION = AWS_MEDIA_LOCATION
+
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/"
+else:
+    MEDIA_URL = "/media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

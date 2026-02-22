@@ -252,6 +252,15 @@ Required environment variables:
 - `EMAIL_HOST_PASSWORD`: Email password
 - `DATABASE_URL`: PostgreSQL connection string (auto-set by Heroku)
 
+Media storage on S3 (recommended on Heroku):
+- `USE_S3_MEDIA=True`
+- `AWS_STORAGE_BUCKET_NAME=<your-bucket>`
+- `AWS_ACCESS_KEY_ID=<aws-access-key>`
+- `AWS_SECRET_ACCESS_KEY=<aws-secret-key>`
+- `AWS_S3_REGION_NAME=<region>` (for example `eu-central-1`)
+- Optional: `AWS_MEDIA_LOCATION=media`
+- Optional: `AWS_S3_CUSTOM_DOMAIN=<cdn-or-custom-domain>`
+
 ## 🔧 Configuration
 
 ### Adding New Datasets
