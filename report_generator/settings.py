@@ -192,22 +192,24 @@ if USE_S3_MEDIA:
     AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
     AWS_MEDIA_LOCATION = os.environ.get("AWS_MEDIA_LOCATION", "media")
     AWS_S3_CUSTOM_DOMAIN = os.environ.get("AWS_S3_CUSTOM_DOMAIN")
-    if not AWS_S3_CUSTOM_DOMAIN and AWS_STORAGE_BUCKET_NAME:
-        if AWS_S3_REGION_NAME:
-            AWS_S3_CUSTOM_DOMAIN = (
-                f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
-            )
-        else:
-            AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 
     AWS_DEFAULT_ACL = None
-    AWS_QUERYSTRING_AUTH = False
+    AWS_QUERYSTRING_AUTH = os.environ.get("AWS_QUERYSTRING_AUTH", "True") == "True"
+    AWS_QUERYSTRING_EXPIRE = int(os.environ.get("AWS_QUERYSTRING_EXPIRE", "3600"))
     AWS_S3_FILE_OVERWRITE = False
     AWS_S3_SIGNATURE_VERSION = "s3v4"
     AWS_LOCATION = AWS_MEDIA_LOCATION
 
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/"
+    if AWS_S3_CUSTOM_DOMAIN:
+        MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/"
+    elif AWS_STORAGE_BUCKET_NAME and AWS_S3_REGION_NAME:
+        MEDIA_URL = (
+            f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/"
+            f"{AWS_MEDIA_LOCATION}/"
+        )
+    else:
+        MEDIA_URL = f"/{AWS_MEDIA_LOCATION}/"
 else:
     MEDIA_URL = "/media/"
 
@@ -233,7 +235,7 @@ MARKDOWNIFY = {
 }
 
 APP_INFO = {
-    "version": "0.2.2",
+    "version": "0.2.3",
     "version_date": "2026-02-22",
     "author_name": "Lukas Calmbach",
     "author_email": "lcalmbach@gmail.com",
