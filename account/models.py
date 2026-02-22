@@ -1,10 +1,13 @@
 # account/models.py
 from __future__ import annotations
 import uuid
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
 from django_countries.fields import CountryField
+
+DEFAULT_PREFERRED_LANGUAGE_ID = int(getattr(settings, "DEFAULT_PREFERRED_LANGUAGE_ID", 94))
 
 
 class NaturalKeyManager(models.Manager):
@@ -74,6 +77,16 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30)
     last_name  = models.CharField(max_length=30)
     country = CountryField(blank_label="(select country)")
+    preferred_language = models.ForeignKey(
+        "reports.Language",
+        blank=True,
+        null=True,
+        default=DEFAULT_PREFERRED_LANGUAGE_ID,  # Default to English
+        on_delete=models.SET_NULL,
+        related_name="users",
+        limit_choices_to={"category_id": 10},
+        help_text="Preferred language for the UI/content, based on lookup values (category_id=10).",
+    )
     organisation = models.ForeignKey(
         "account.Organisation",
         blank=True,

@@ -1,6 +1,12 @@
 from django.contrib import admin
 from .models.story import Story
-from .models.story_template import StoryTemplateDataset, StoryTemplate, StoryTemplateFocus
+from .models.story_template import (
+    StoryImage,
+    StoryTemplateDataset,
+    StoryTemplate,
+    StoryTemplateFocus,
+    StoryTemplateFocusImage,
+)
 from .models.story_context import StoryTemplateContext
 from .models.lookups import LookupCategory, LookupValue
 from .models.dataset import Dataset
@@ -15,6 +21,12 @@ from .models.user_comment import UserComment
 class StoryTemplateFocusInline(admin.TabularInline):
     model = StoryTemplateFocus
     extra = 0
+
+
+class StoryTemplateFocusImageInline(admin.TabularInline):
+    model = StoryTemplateFocusImage
+    extra = 0
+    autocomplete_fields = ("image",)
 
 
 @admin.register(Story)
@@ -59,8 +71,15 @@ class StoryTemplateFocusAdmin(admin.ModelAdmin):
         "filter_value",
     )
     list_select_related = ("story_template",)
-    search_fields = ("story_template__title", "focus_value")
+    search_fields = ("story_template__title", "filter_value")
     list_filter = ("story_template",)
+    inlines = (StoryTemplateFocusImageInline,)
+
+
+@admin.register(StoryImage)
+class StoryImageAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "image_source")
+    search_fields = ("title", "image_source")
 
 
 @admin.register(StoryTemplateContext)

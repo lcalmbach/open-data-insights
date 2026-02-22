@@ -31400,3 +31400,1003 @@ LINE 1: UPDATE report_generator.reports_story SET is_sent = true
 2026-02-17 07:50:02,269 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=358, focus_value=2895)
 2026-02-17 07:50:02,269 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=358, focus_value=2895)
 2026-02-17 07:50:02,270 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=358)
+2026-02-21 09:35:41,602 - DatasetSync - INFO - Synchronizing dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 09:35:41,602 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 09:35:42,574 - DatasetSync - ERROR - Failed to synchronize dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 09:35:42,574 - DatasetSync - INFO - Synchronizing dataset ID 2: Virus Wastewater Monitoring
+2026-02-21 09:35:42,574 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2026-02-21 09:35:43,442 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2026-02-21 09:35:43,442 - DatasetSync - INFO - Synchronizing dataset ID 4: Rhine River Discharge and Water Level
+2026-02-21 09:35:43,442 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine River Discharge and Water Level
+2026-02-21 09:35:44,255 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine River Discharge and Water Level
+2026-02-21 09:35:44,255 - DatasetSync - INFO - Synchronizing dataset ID 6: Dog Population in Basel by Breed
+2026-02-21 09:35:44,255 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog Population in Basel by Breed
+2026-02-21 09:35:45,251 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog Population in Basel by Breed
+2026-02-21 09:35:45,252 - DatasetSync - INFO - Synchronizing dataset ID 9: Dognames in Basel-Stadt
+2026-02-21 09:35:45,252 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2026-02-21 09:35:46,007 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2026-02-21 09:35:46,007 - DatasetSync - INFO - Synchronizing dataset ID 10: Dog Population since 1970
+2026-02-21 09:35:46,007 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2026-02-21 09:35:46,654 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2026-02-21 09:35:46,655 - DatasetSync - INFO - Synchronizing dataset ID 13: Air Quality at NCBN station Binningen
+2026-02-21 09:35:46,655 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2026-02-21 09:35:47,385 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2026-02-21 09:35:47,385 - DatasetSync - INFO - Synchronizing dataset ID 14: Air Traffic at Airport Basel/Mulhouse
+2026-02-21 09:35:47,385 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air Traffic at Airport Basel/Mulhouse
+2026-02-21 09:35:47,978 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air Traffic at Airport Basel/Mulhouse
+2026-02-21 09:35:47,978 - DatasetSync - INFO - Synchronizing dataset ID 15: kGWR Baselland
+2026-02-21 09:35:47,978 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2026-02-21 09:35:48,476 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2026-02-21 09:35:48,476 - DatasetSync - INFO - Synchronizing dataset ID 16: Land Price by Community in Baselland
+2026-02-21 09:35:48,476 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land Price by Community in Baselland
+2026-02-21 09:35:49,184 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land Price by Community in Baselland
+2026-02-21 09:35:49,184 - DatasetSync - INFO - Synchronizing dataset ID 17: Population of Basel-Stadt by Nationality
+2026-02-21 09:35:49,184 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel-Stadt by Nationality
+2026-02-21 09:35:49,861 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel-Stadt by Nationality
+2026-02-21 09:35:49,861 - DatasetSync - INFO - Synchronizing dataset ID 18: Population of Baselland by Age, Sex and Nationality
+2026-02-21 09:35:49,861 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by Age, Sex and Nationality
+2026-02-21 09:35:50,768 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by Age, Sex and Nationality
+2026-02-21 09:35:50,768 - DatasetSync - INFO - Synchronizing dataset ID 19: Population of Basel-Stadt by Residential District
+2026-02-21 09:35:50,768 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by Residential District
+2026-02-21 09:35:51,392 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by Residential District
+2026-02-21 09:35:51,392 - DatasetSync - INFO - Synchronizing dataset ID 20: Daily Arrivals and Overnight Stays by Origin in Basel-Stadt
+2026-02-21 09:35:51,392 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily Arrivals and Overnight Stays by Origin in Basel-Stadt
+2026-02-21 09:35:51,871 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily Arrivals and Overnight Stays by Origin in Basel-Stadt
+2026-02-21 09:35:51,871 - DatasetSync - INFO - Synchronizing dataset ID 21: Daily Arrivals, Overnight Stays, Rooms by Hotel Category in Basel-Stadt
+2026-02-21 09:35:51,872 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily Arrivals, Overnight Stays, Rooms by Hotel Category in Basel-Stadt
+2026-02-21 09:35:52,369 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily Arrivals, Overnight Stays, Rooms by Hotel Category in Basel-Stadt
+2026-02-21 09:35:52,369 - DatasetSync - INFO - Synchronizing dataset ID 22: Daily Overnight Stays, available and occupied Rooms in Basel-Stadt
+2026-02-21 09:35:52,369 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily Overnight Stays, available and occupied Rooms in Basel-Stadt
+2026-02-21 09:35:52,741 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily Overnight Stays, available and occupied Rooms in Basel-Stadt
+2026-02-21 09:35:52,741 - DatasetSync - INFO - Synchronizing dataset ID 23: Electricity Consumption in Basel
+2026-02-21 09:35:52,741 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity Consumption in Basel
+2026-02-21 09:35:53,516 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity Consumption in Basel
+2026-02-21 09:35:53,516 - DatasetSync - INFO - Synchronizing dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2026-02-21 09:35:53,516 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2026-02-21 09:35:54,163 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2026-02-21 09:35:54,163 - DatasetSync - INFO - Synchronizing dataset ID 25: Dwellings Basel-Stadt (GWR)
+2026-02-21 09:35:54,163 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2026-02-21 09:35:54,428 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2026-02-21 09:35:54,428 - DatasetSync - INFO - Synchronizing dataset ID 26: Addresses in Basel-Stadt
+2026-02-21 09:35:54,428 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel-Stadt
+2026-02-21 09:35:54,696 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel-Stadt
+2026-02-21 09:35:54,696 - DatasetSync - INFO - Synchronizing dataset ID 27: Opendata Datasets Basel-Stadt
+2026-02-21 09:35:54,696 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2026-02-21 09:35:55,124 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2026-02-21 09:35:55,124 - DatasetSync - INFO - Synchronizing dataset ID 28: Noise Monitoring in Basel
+2026-02-21 09:35:55,124 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2026-02-21 09:35:56,690 - DatasetSync - INFO - Successfully synchronized dataset ID 28: Noise Monitoring in Basel
+2026-02-21 09:35:56,690 - DatasetSync - INFO - Synchronizing dataset ID 29: Noise Monitoring Stations in Basel
+2026-02-21 09:35:56,690 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2026-02-21 09:35:57,435 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2026-02-21 09:35:57,435 - DatasetSync - INFO - Synchronizing dataset ID 30: Traffic Accidents in Basel-Stadt
+2026-02-21 09:35:57,435 - DatasetSync - INFO - Starting synchronization for dataset ID 30: Traffic Accidents in Basel-Stadt
+2026-02-21 09:35:57,815 - DatasetSync - INFO - Successfully synchronized dataset ID 30: Traffic Accidents in Basel-Stadt
+2026-02-21 09:35:57,815 - DatasetSync - INFO - Synchronizing dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2026-02-21 09:35:57,815 - DatasetSync - INFO - Starting synchronization for dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2026-02-21 09:35:58,681 - DatasetSync - INFO - Successfully synchronized dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2026-02-21 09:35:58,681 - DatasetSync - INFO - Synchronizing dataset ID 32: Population Baselland
+2026-02-21 09:35:58,681 - DatasetSync - INFO - Starting synchronization for dataset ID 32: Population Baselland
+2026-02-21 09:35:59,344 - DatasetSync - INFO - Successfully synchronized dataset ID 32: Population Baselland
+2026-02-21 09:35:59,344 - DatasetSync - INFO - Synchronizing dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2026-02-21 09:35:59,344 - DatasetSync - INFO - Starting synchronization for dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2026-02-21 09:35:59,643 - DatasetSync - INFO - Successfully synchronized dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2026-02-21 09:35:59,643 - DatasetSync - INFO - Synchronizing dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2026-02-21 09:35:59,643 - DatasetSync - INFO - Starting synchronization for dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2026-02-21 09:36:00,931 - DatasetSync - INFO - Successfully synchronized dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2026-02-21 09:36:00,931 - DatasetSync - INFO - Synchronizing dataset ID 35: Newborns in the Canton of Basel-Stadt by Sex and Origin
+2026-02-21 09:36:00,931 - DatasetSync - INFO - Starting synchronization for dataset ID 35: Newborns in the Canton of Basel-Stadt by Sex and Origin
+2026-02-21 09:36:01,792 - DatasetSync - INFO - Successfully synchronized dataset ID 35: Newborns in the Canton of Basel-Stadt by Sex and Origin
+2026-02-21 09:36:01,792 - DatasetSync - INFO - Synchronizing dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2026-02-21 09:36:01,792 - DatasetSync - INFO - Starting synchronization for dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2026-02-21 09:36:02,507 - DatasetSync - INFO - Successfully synchronized dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2026-02-21 09:36:02,507 - DatasetSync - INFO - Synchronizing dataset ID 37: Population of Basel-Stadt by Country of Origin
+2026-02-21 09:36:02,507 - DatasetSync - INFO - Starting synchronization for dataset ID 37: Population of Basel-Stadt by Country of Origin
+2026-02-21 09:36:03,331 - DatasetSync - INFO - Successfully synchronized dataset ID 37: Population of Basel-Stadt by Country of Origin
+2026-02-21 09:36:03,332 - DatasetSync - INFO - Synchronizing dataset ID 38: Fishing Statistics Basel-Stadt
+2026-02-21 09:36:03,332 - DatasetSync - INFO - Starting synchronization for dataset ID 38: Fishing Statistics Basel-Stadt
+2026-02-21 09:36:03,964 - DatasetSync - INFO - Successfully synchronized dataset ID 38: Fishing Statistics Basel-Stadt
+2026-02-21 09:36:03,964 - DatasetSync - INFO - Synchronizing dataset ID 39: Mortality in the Canton of Basel-Stadt by Date and Age Group
+2026-02-21 09:36:03,964 - DatasetSync - INFO - Starting synchronization for dataset ID 39: Mortality in the Canton of Basel-Stadt by Date and Age Group
+2026-02-21 09:36:04,584 - DatasetSync - INFO - Successfully synchronized dataset ID 39: Mortality in the Canton of Basel-Stadt by Date and Age Group
+2026-02-21 09:36:04,584 - DatasetSync - INFO - Synchronizing dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2026-02-21 09:36:04,584 - DatasetSync - INFO - Starting synchronization for dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2026-02-21 09:36:05,014 - DatasetSync - INFO - Successfully synchronized dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2026-02-21 09:36:05,014 - DatasetSync - INFO - Synchronizing dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-21 09:36:05,014 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-21 09:36:05,404 - DatasetSync - INFO - Successfully synchronized dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-21 09:36:05,405 - DatasetSync - INFO - Synchronizing dataset ID 42: Cantonal Votes in Basel-Stadt
+2026-02-21 09:36:05,405 - DatasetSync - INFO - Starting synchronization for dataset ID 42: Cantonal Votes in Basel-Stadt
+2026-02-21 09:36:05,861 - DatasetSync - INFO - Successfully synchronized dataset ID 42: Cantonal Votes in Basel-Stadt
+2026-02-21 09:36:05,861 - DatasetSync - INFO - Synchronizing dataset ID 43: National Votations: Basel-Stadt Votes
+2026-02-21 09:36:05,861 - DatasetSync - INFO - Starting synchronization for dataset ID 43: National Votations: Basel-Stadt Votes
+2026-02-21 09:36:06,350 - DatasetSync - INFO - Successfully synchronized dataset ID 43: National Votations: Basel-Stadt Votes
+2026-02-21 09:36:06,350 - DatasetSync - INFO - Synchronizing dataset ID 44: Degrees of Students in Baselland
+2026-02-21 09:36:06,350 - DatasetSync - INFO - Starting synchronization for dataset ID 44: Degrees of Students in Baselland
+2026-02-21 09:36:06,717 - DatasetSync - INFO - Successfully synchronized dataset ID 44: Degrees of Students in Baselland
+2026-02-21 09:36:06,717 - DatasetSync - INFO - Synchronizing dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2026-02-21 09:36:06,717 - DatasetSync - INFO - Starting synchronization for dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2026-02-21 09:36:07,563 - DatasetSync - INFO - Successfully synchronized dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2026-02-21 09:36:07,563 - DatasetSync - INFO - Synchronizing dataset ID 46: Illegal Waste dumps
+2026-02-21 09:36:07,563 - DatasetSync - INFO - Starting synchronization for dataset ID 46: Illegal Waste dumps
+2026-02-21 09:36:08,232 - DatasetSync - INFO - Successfully synchronized dataset ID 46: Illegal Waste dumps
+2026-02-21 09:36:08,232 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:36:08,232 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:36:08,236 - DatasetSync - INFO - Successfully synchronized dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:36:08,236 - DatasetSync - INFO - Synchronizing dataset ID 48: Groundwater Quality in Basel-Stadt
+2026-02-21 09:36:08,236 - DatasetSync - INFO - Starting synchronization for dataset ID 48: Groundwater Quality in Basel-Stadt
+2026-02-21 09:36:08,657 - DatasetSync - INFO - Successfully synchronized dataset ID 48: Groundwater Quality in Basel-Stadt
+2026-02-21 09:36:08,657 - DatasetSync - INFO - Synchronizing dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2026-02-21 09:36:08,657 - DatasetSync - INFO - Starting synchronization for dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2026-02-21 09:36:10,221 - DatasetSync - INFO - Successfully synchronized dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2026-02-21 09:36:10,221 - DatasetSync - INFO - Synchronizing dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2026-02-21 09:36:10,221 - DatasetSync - INFO - Starting synchronization for dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2026-02-21 09:36:10,863 - DatasetSync - INFO - Successfully synchronized dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2026-02-21 09:36:10,863 - DatasetSync - INFO - Synchronizing dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2026-02-21 09:36:10,863 - DatasetSync - INFO - Starting synchronization for dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2026-02-21 09:36:11,710 - DatasetSync - INFO - Successfully synchronized dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2026-02-21 09:36:11,710 - DatasetSync - INFO - Synchronizing dataset ID 52: Environmental Travel Pass Basel Area
+2026-02-21 09:36:11,710 - DatasetSync - INFO - Starting synchronization for dataset ID 52: Environmental Travel Pass Basel Area
+2026-02-21 09:36:12,386 - DatasetSync - INFO - Successfully synchronized dataset ID 52: Environmental Travel Pass Basel Area
+2026-02-21 09:36:12,386 - DatasetSync - INFO - Synchronizing dataset ID 53: Motor Vehicle Stock in Baselland
+2026-02-21 09:36:12,386 - DatasetSync - INFO - Starting synchronization for dataset ID 53: Motor Vehicle Stock in Baselland
+2026-02-21 09:36:12,755 - DatasetSync - INFO - Successfully synchronized dataset ID 53: Motor Vehicle Stock in Baselland
+2026-02-21 09:36:12,755 - DatasetSync - INFO - Synchronizing dataset ID 54: Sprayereien in Basel-Stadt
+2026-02-21 09:36:12,755 - DatasetSync - INFO - Starting synchronization for dataset ID 54: Sprayereien in Basel-Stadt
+2026-02-21 09:36:14,078 - DatasetSync - INFO - Successfully synchronized dataset ID 54: Sprayereien in Basel-Stadt
+2026-02-21 09:36:14,078 - DatasetSync - INFO - Synchronizing dataset ID 55: Divorces in Basel-Stadt
+2026-02-21 09:36:14,078 - DatasetSync - INFO - Starting synchronization for dataset ID 55: Divorces in Basel-Stadt
+2026-02-21 09:36:14,564 - DatasetSync - INFO - Successfully synchronized dataset ID 55: Divorces in Basel-Stadt
+2026-02-21 09:36:14,564 - DatasetSync - INFO - Synchronizing dataset ID 56: Marriages by Date of Wedding Ceremony in Basel-Stadt
+2026-02-21 09:36:14,564 - DatasetSync - INFO - Starting synchronization for dataset ID 56: Marriages by Date of Wedding Ceremony in Basel-Stadt
+2026-02-21 09:36:16,126 - DatasetSync - INFO - Successfully synchronized dataset ID 56: Marriages by Date of Wedding Ceremony in Basel-Stadt
+2026-02-21 09:36:16,126 - DatasetSync - INFO - Synchronizing dataset ID 57: Cleanliness Index in Basel-Stadt
+2026-02-21 09:36:16,126 - DatasetSync - INFO - Starting synchronization for dataset ID 57: Cleanliness Index in Basel-Stadt
+2026-02-21 09:36:16,767 - DatasetSync - INFO - Successfully synchronized dataset ID 57: Cleanliness Index in Basel-Stadt
+2026-02-21 09:36:16,767 - DatasetSync - INFO - Synchronizing dataset ID 58: Geoshapes Communities of Basel-Stadt
+2026-02-21 09:36:16,767 - DatasetSync - INFO - Starting synchronization for dataset ID 58: Geoshapes Communities of Basel-Stadt
+2026-02-21 09:36:17,183 - DatasetSync - INFO - Successfully synchronized dataset ID 58: Geoshapes Communities of Basel-Stadt
+2026-02-21 09:36:17,183 - DatasetSync - INFO - Synchronizing dataset ID 59: Opendata Datasets Baselland
+2026-02-21 09:36:17,183 - DatasetSync - INFO - Starting synchronization for dataset ID 59: Opendata Datasets Baselland
+2026-02-21 09:36:17,657 - DatasetSync - INFO - Successfully synchronized dataset ID 59: Opendata Datasets Baselland
+2026-02-21 09:36:17,657 - DatasetSync - INFO - Synchronizing dataset ID 60: Daylight in Basel
+2026-02-21 09:36:17,657 - DatasetSync - INFO - Starting synchronization for dataset ID 60: Daylight in Basel
+2026-02-21 09:36:17,663 - DatasetSync - INFO - Successfully synchronized dataset ID 60: Daylight in Basel
+2026-02-21 09:36:17,663 - DatasetSync - INFO - Synchronizing dataset ID 61: Relocations from and to Basel-Stadt
+2026-02-21 09:36:17,663 - DatasetSync - INFO - Starting synchronization for dataset ID 61: Relocations from and to Basel-Stadt
+2026-02-21 09:36:19,283 - DatasetSync - INFO - Successfully synchronized dataset ID 61: Relocations from and to Basel-Stadt
+2026-02-21 09:36:19,283 - DatasetSync - INFO - Synchronizing dataset ID 62: Summary Fines in Basel-Stadt
+2026-02-21 09:36:19,283 - DatasetSync - INFO - Starting synchronization for dataset ID 62: Summary Fines in Basel-Stadt
+2026-02-21 09:36:20,917 - DatasetSync - INFO - Successfully synchronized dataset ID 62: Summary Fines in Basel-Stadt
+2026-02-21 09:36:20,918 - DatasetSync - INFO - Synchronizing dataset ID 63: Basel-Stadt Neighbourhoods: Key Figures
+2026-02-21 09:36:20,918 - DatasetSync - INFO - Starting synchronization for dataset ID 63: Basel-Stadt Neighbourhoods: Key Figures
+2026-02-21 09:36:21,363 - DatasetSync - INFO - Successfully synchronized dataset ID 63: Basel-Stadt Neighbourhoods: Key Figures
+2026-02-21 09:36:21,364 - DatasetSync - INFO - Synchronizing dataset ID 64: Air Quality Station St. Johannplatz
+2026-02-21 09:36:21,364 - DatasetSync - INFO - Starting synchronization for dataset ID 64: Air Quality Station St. Johannplatz
+2026-02-21 09:36:22,270 - DatasetSync - INFO - Successfully synchronized dataset ID 64: Air Quality Station St. Johannplatz
+2026-02-21 09:36:22,270 - DatasetSync - INFO - Synchronizing dataset ID 65: GVA Incidents
+2026-02-21 09:36:22,270 - DatasetSync - INFO - Starting synchronization for dataset ID 65: GVA Incidents
+2026-02-21 09:36:22,276 - DatasetSync - INFO - Successfully synchronized dataset ID 65: GVA Incidents
+2026-02-21 09:36:22,276 - DatasetSync - INFO - Synchronizing dataset ID 66: Awareness Days
+2026-02-21 09:36:22,276 - DatasetSync - INFO - Starting synchronization for dataset ID 66: Awareness Days
+2026-02-21 09:36:22,282 - DatasetSync - INFO - Successfully synchronized dataset ID 66: Awareness Days
+2026-02-21 09:36:22,282 - DatasetSync - INFO - Synchronizing dataset ID 67: Personalities from Basel
+2026-02-21 09:36:22,282 - DatasetSync - INFO - Starting synchronization for dataset ID 67: Personalities from Basel
+2026-02-21 09:36:22,288 - DatasetSync - INFO - Successfully synchronized dataset ID 67: Personalities from Basel
+2026-02-21 09:36:22,288 - DatasetSync - INFO - Synchronizing dataset ID 68: Historic Events
+2026-02-21 09:36:22,288 - DatasetSync - INFO - Starting synchronization for dataset ID 68: Historic Events
+2026-02-21 09:36:22,293 - DatasetSync - INFO - Successfully synchronized dataset ID 68: Historic Events
+2026-02-21 09:36:22,293 - DatasetSync - INFO - Synchronizing dataset ID 69: Tree Cadastre: Tree Felling and Replacement List
+2026-02-21 09:36:22,293 - DatasetSync - INFO - Starting synchronization for dataset ID 69: Tree Cadastre: Tree Felling and Replacement List
+2026-02-21 09:36:22,775 - DatasetSync - INFO - Successfully synchronized dataset ID 69: Tree Cadastre: Tree Felling and Replacement List
+2026-02-21 09:36:22,775 - DatasetSync - INFO - Synchronizing dataset ID 71: Tree register: tree inventory
+2026-02-21 09:36:22,775 - DatasetSync - INFO - Starting synchronization for dataset ID 71: Tree register: tree inventory
+2026-02-21 09:36:22,981 - DatasetSync - INFO - Successfully synchronized dataset ID 71: Tree register: tree inventory
+2026-02-21 09:36:22,981 - DatasetSync - INFO - Synchronizing dataset ID 72: Traffic Count Data for motorized individual Transport (MIT)
+2026-02-21 09:36:22,981 - DatasetSync - INFO - Starting synchronization for dataset ID 72: Traffic Count Data for motorized individual Transport (MIT)
+2026-02-21 09:36:26,998 - DatasetSync - INFO - Successfully synchronized dataset ID 72: Traffic Count Data for motorized individual Transport (MIT)
+2026-02-21 09:36:26,998 - DatasetSync - INFO - Synchronizing dataset ID 73: Memberships Parliment Basel-Stadt
+2026-02-21 09:36:26,998 - DatasetSync - INFO - Starting synchronization for dataset ID 73: Memberships Parliment Basel-Stadt
+2026-02-21 09:36:27,155 - DatasetSync - INFO - Successfully synchronized dataset ID 73: Memberships Parliment Basel-Stadt
+2026-02-21 09:36:27,156 - DatasetSync - INFO - Synchronizing dataset ID 74: Traffic Counting Stations
+2026-02-21 09:36:27,156 - DatasetSync - INFO - Starting synchronization for dataset ID 74: Traffic Counting Stations
+2026-02-21 09:36:27,388 - DatasetSync - INFO - Successfully synchronized dataset ID 74: Traffic Counting Stations
+2026-02-21 09:36:27,388 - DatasetSync - INFO - Synchronizing dataset ID 75: Traffic count data for bicycles and pedestrian
+2026-02-21 09:36:27,388 - DatasetSync - INFO - Starting synchronization for dataset ID 75: Traffic count data for bicycles and pedestrian
+2026-02-21 09:36:32,028 - DatasetSync - INFO - Successfully synchronized dataset ID 75: Traffic count data for bicycles and pedestrian
+2026-02-21 09:36:32,028 - DatasetSync - INFO - Synchronizing dataset ID 76: Key figures for municipalities
+2026-02-21 09:36:32,028 - DatasetSync - INFO - Starting synchronization for dataset ID 76: Key figures for municipalities
+2026-02-21 09:36:32,225 - DatasetSync - INFO - Successfully synchronized dataset ID 76: Key figures for municipalities
+2026-02-21 09:36:32,226 - DatasetSync - INFO - Synchronizing dataset ID 77: Population in Baselland by Nationality
+2026-02-21 09:36:32,226 - DatasetSync - INFO - Starting synchronization for dataset ID 77: Population in Baselland by Nationality
+2026-02-21 09:36:32,762 - DatasetSync - INFO - Successfully synchronized dataset ID 77: Population in Baselland by Nationality
+2026-02-21 09:36:32,762 - DatasetSync - INFO - Synchronizing dataset ID 78: Energy Consumption of Baselland
+2026-02-21 09:36:32,762 - DatasetSync - INFO - Starting synchronization for dataset ID 78: Energy Consumption of Baselland
+2026-02-21 09:36:33,292 - DatasetSync - INFO - Successfully synchronized dataset ID 78: Energy Consumption of Baselland
+2026-02-21 09:36:33,292 - DatasetSync - INFO - Synchronizing dataset ID 79: Population of Baselland since 1699
+2026-02-21 09:36:33,292 - DatasetSync - INFO - Starting synchronization for dataset ID 79: Population of Baselland since 1699
+2026-02-21 09:36:33,490 - DatasetSync - INFO - Successfully synchronized dataset ID 79: Population of Baselland since 1699
+2026-02-21 09:36:33,491 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 09:36:33,491 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 72, Failed: 1, Failed dataset IDs: [1]
+2026-02-21 09:36:34,329 - EmailService - INFO - Sent admin alert email to 1 recipients
+2026-02-21 09:36:34,352 - StoryGeneration - INFO - Processing focus (template_id=44, template_title=Air Quality in Basel, focus_id=220, focus_value=)
+2026-02-21 09:36:34,352 - StoryGeneration - INFO - Generating story (template_id=44, template_title=Air Quality in Basel, focus_id=220, focus_value=)
+2026-02-21 09:36:34,357 - StoryGeneration - INFO - Story generation skipped (template_id=44, focus_id=220)
+2026-02-21 09:36:34,357 - StoryGeneration - INFO - Processing focus (template_id=16, template_title=Air Quality in Basel, focus_id=221, focus_value=)
+2026-02-21 09:36:34,357 - StoryGeneration - INFO - Generating story (template_id=16, template_title=Air Quality in Basel, focus_id=221, focus_value=)
+2026-02-21 09:36:34,361 - StoryGeneration - INFO - Story generation skipped (template_id=16, focus_id=221)
+2026-02-21 09:36:34,361 - StoryGeneration - INFO - Processing focus (template_id=17, template_title=Air Traffic at Airport Basel/Mulhouse, focus_id=222, focus_value=)
+2026-02-21 09:36:34,361 - StoryGeneration - INFO - Generating story (template_id=17, template_title=Air Traffic at Airport Basel/Mulhouse, focus_id=222, focus_value=)
+2026-02-21 09:36:34,364 - StoryGeneration - INFO - Story generation skipped (template_id=17, focus_id=222)
+2026-02-21 09:36:34,365 - StoryGeneration - INFO - Processing focus (template_id=30, template_title=Air Traffic at Airport Basel/Mulhouse, focus_id=223, focus_value=)
+2026-02-21 09:36:34,365 - StoryGeneration - INFO - Generating story (template_id=30, template_title=Air Traffic at Airport Basel/Mulhouse, focus_id=223, focus_value=)
+2026-02-21 09:36:34,368 - StoryGeneration - INFO - Story generation skipped (template_id=30, focus_id=223)
+2026-02-21 09:36:34,368 - StoryGeneration - INFO - Processing focus (template_id=33, template_title=Air Traffic at Basel-Mulhouse Airport, focus_id=224, focus_value=)
+2026-02-21 09:36:34,368 - StoryGeneration - INFO - Generating story (template_id=33, template_title=Air Traffic at Basel-Mulhouse Airport, focus_id=224, focus_value=)
+2026-02-21 09:36:34,370 - StoryGeneration - INFO - Story generation skipped (template_id=33, focus_id=224)
+2026-02-21 09:36:34,370 - StoryGeneration - INFO - Processing focus (template_id=28, template_title=Basel-Stadt Mortality by Sex and Age Group, focus_id=226, focus_value=)
+2026-02-21 09:36:34,370 - StoryGeneration - INFO - Generating story (template_id=28, template_title=Basel-Stadt Mortality by Sex and Age Group, focus_id=226, focus_value=)
+2026-02-21 09:36:34,373 - StoryGeneration - INFO - Story generation skipped (template_id=28, focus_id=226)
+2026-02-21 09:36:34,373 - StoryGeneration - INFO - Processing focus (template_id=55, template_title=Building Land Prices in Baselland, focus_id=227, focus_value=)
+2026-02-21 09:36:34,373 - StoryGeneration - INFO - Generating story (template_id=55, template_title=Building Land Prices in Baselland, focus_id=227, focus_value=)
+2026-02-21 09:36:34,374 - StoryGeneration - INFO - Story generation skipped (template_id=55, focus_id=227)
+2026-02-21 09:36:34,374 - StoryGeneration - INFO - Processing focus (template_id=18, template_title=Building Stock of Canton Baselland, focus_id=228, focus_value=)
+2026-02-21 09:36:34,374 - StoryGeneration - INFO - Generating story (template_id=18, template_title=Building Stock of Canton Baselland, focus_id=228, focus_value=)
+2026-02-21 09:36:34,410 - StoryGeneration - INFO - Story generation skipped (template_id=18, focus_id=228)
+2026-02-21 09:36:34,410 - StoryGeneration - INFO - Processing focus (template_id=59, template_title=Cleanliness of Basel's Streets, focus_id=229, focus_value=)
+2026-02-21 09:36:34,410 - StoryGeneration - INFO - Generating story (template_id=59, template_title=Cleanliness of Basel's Streets, focus_id=229, focus_value=)
+2026-02-21 09:36:34,444 - StoryGeneration - INFO - Story generation skipped (template_id=59, focus_id=229)
+2026-02-21 09:36:34,444 - StoryGeneration - INFO - Processing focus (template_id=41, template_title=CO2 Emissions, focus_id=230, focus_value=)
+2026-02-21 09:36:34,444 - StoryGeneration - INFO - Generating story (template_id=41, template_title=CO2 Emissions, focus_id=230, focus_value=)
+2026-02-21 09:36:34,459 - StoryGeneration - INFO - Story generation skipped (template_id=41, focus_id=230)
+2026-02-21 09:36:34,459 - StoryGeneration - INFO - Processing focus (template_id=65, template_title=Cold Day Report, focus_id=231, focus_value=)
+2026-02-21 09:36:34,459 - StoryGeneration - INFO - Generating story (template_id=65, template_title=Cold Day Report, focus_id=231, focus_value=)
+2026-02-21 09:36:34,498 - StoryGeneration - INFO - Story generation skipped (template_id=65, focus_id=231)
+2026-02-21 09:36:34,498 - StoryGeneration - INFO - Processing focus (template_id=58, template_title=Daylight in Basel, focus_id=232, focus_value=)
+2026-02-21 09:36:34,498 - StoryGeneration - INFO - Generating story (template_id=58, template_title=Daylight in Basel, focus_id=232, focus_value=)
+2026-02-21 09:36:34,501 - StoryGeneration - INFO - Story generation skipped (template_id=58, focus_id=232)
+2026-02-21 09:36:34,501 - StoryGeneration - INFO - Processing focus (template_id=51, template_title=Divorces in Basel-Stadt Last Year, focus_id=233, focus_value=)
+2026-02-21 09:36:34,501 - StoryGeneration - INFO - Generating story (template_id=51, template_title=Divorces in Basel-Stadt Last Year, focus_id=233, focus_value=)
+2026-02-21 09:36:34,504 - StoryGeneration - INFO - Story generation skipped (template_id=51, focus_id=233)
+2026-02-21 09:36:34,504 - StoryGeneration - INFO - Processing focus (template_id=11, template_title=Dog Population in Basel, focus_id=234, focus_value=)
+2026-02-21 09:36:34,504 - StoryGeneration - INFO - Generating story (template_id=11, template_title=Dog Population in Basel, focus_id=234, focus_value=)
+2026-02-21 09:36:34,514 - StoryGeneration - INFO - Story generation skipped (template_id=11, focus_id=234)
+2026-02-21 09:36:34,514 - StoryGeneration - INFO - Processing focus (template_id=21, template_title=Electricity Consumption in Basel, focus_id=236, focus_value=)
+2026-02-21 09:36:34,514 - StoryGeneration - INFO - Generating story (template_id=21, template_title=Electricity Consumption in Basel, focus_id=236, focus_value=)
+2026-02-21 09:36:34,516 - StoryGeneration - INFO - Story generation skipped (template_id=21, focus_id=236)
+2026-02-21 09:36:34,516 - StoryGeneration - INFO - Processing focus (template_id=32, template_title=Fishing Statistics in the Canton of Basel-Stadt, focus_id=239, focus_value=)
+2026-02-21 09:36:34,516 - StoryGeneration - INFO - Generating story (template_id=32, template_title=Fishing Statistics in the Canton of Basel-Stadt, focus_id=239, focus_value=)
+2026-02-21 09:36:34,519 - StoryGeneration - INFO - Story generation skipped (template_id=32, focus_id=239)
+2026-02-21 09:36:34,519 - StoryGeneration - INFO - Processing focus (template_id=38, template_title=Graduates from Baselland at Swiss Universities by Type, Field, Sex and Level, focus_id=241, focus_value=)
+2026-02-21 09:36:34,519 - StoryGeneration - INFO - Generating story (template_id=38, template_title=Graduates from Baselland at Swiss Universities by Type, Field, Sex and Level, focus_id=241, focus_value=)
+2026-02-21 09:36:34,522 - StoryGeneration - INFO - Story generation skipped (template_id=38, focus_id=241)
+2026-02-21 09:36:34,522 - StoryGeneration - INFO - Processing focus (template_id=47, template_title=Graffiti Removals in Basel-Stadt, focus_id=242, focus_value=)
+2026-02-21 09:36:34,522 - StoryGeneration - INFO - Generating story (template_id=47, template_title=Graffiti Removals in Basel-Stadt, focus_id=242, focus_value=)
+2026-02-21 09:36:34,524 - StoryGeneration - INFO - Story generation skipped (template_id=47, focus_id=242)
+2026-02-21 09:36:34,524 - StoryGeneration - INFO - Processing focus (template_id=42, template_title=Groundwater Quality, focus_id=243, focus_value=)
+2026-02-21 09:36:34,524 - StoryGeneration - INFO - Generating story (template_id=42, template_title=Groundwater Quality, focus_id=243, focus_value=)
+2026-02-21 09:36:34,542 - StoryGeneration - INFO - Story generation skipped (template_id=42, focus_id=243)
+2026-02-21 09:36:34,542 - StoryGeneration - INFO - Processing focus (template_id=49, template_title=How Basel-Stadt Married Last Year, focus_id=245, focus_value=)
+2026-02-21 09:36:34,542 - StoryGeneration - INFO - Generating story (template_id=49, template_title=How Basel-Stadt Married Last Year, focus_id=245, focus_value=)
+2026-02-21 09:36:34,548 - StoryGeneration - INFO - Story generation skipped (template_id=49, focus_id=245)
+2026-02-21 09:36:34,548 - StoryGeneration - INFO - Processing focus (template_id=40, template_title=Illegal Waste Disposal in Basel-Stadt, focus_id=246, focus_value=)
+2026-02-21 09:36:34,548 - StoryGeneration - INFO - Generating story (template_id=40, template_title=Illegal Waste Disposal in Basel-Stadt, focus_id=246, focus_value=)
+2026-02-21 09:36:34,552 - StoryGeneration - INFO - Story generation skipped (template_id=40, focus_id=246)
+2026-02-21 09:36:34,552 - StoryGeneration - INFO - Processing focus (template_id=62, template_title=Impact of Fireworks on Air Quality in Basel-Stadt, focus_id=247, focus_value=)
+2026-02-21 09:36:34,552 - StoryGeneration - INFO - Generating story (template_id=62, template_title=Impact of Fireworks on Air Quality in Basel-Stadt, focus_id=247, focus_value=)
+2026-02-21 09:36:34,554 - StoryGeneration - INFO - Story generation skipped (template_id=62, focus_id=247)
+2026-02-21 09:36:34,554 - StoryGeneration - INFO - Processing focus (template_id=39, template_title=Landuse in the Canton of Baselland, focus_id=248, focus_value=)
+2026-02-21 09:36:34,554 - StoryGeneration - INFO - Generating story (template_id=39, template_title=Landuse in the Canton of Baselland, focus_id=248, focus_value=)
+2026-02-21 09:36:34,557 - StoryGeneration - INFO - Story generation skipped (template_id=39, focus_id=248)
+2026-02-21 09:36:34,557 - StoryGeneration - INFO - Processing focus (template_id=54, template_title=Motorfahrzeuge nach Fahrzeugart, Treibstoff und Gemeinde ("Speckgürtel"), focus_id=249, focus_value=)
+2026-02-21 09:36:34,557 - StoryGeneration - INFO - Generating story (template_id=54, template_title=Motorfahrzeuge nach Fahrzeugart, Treibstoff und Gemeinde ("Speckgürtel"), focus_id=249, focus_value=)
+2026-02-21 09:36:34,564 - StoryGeneration - INFO - Story generation skipped (template_id=54, focus_id=249)
+2026-02-21 09:36:34,564 - StoryGeneration - INFO - Processing focus (template_id=46, template_title=Motor Vehicle Stock by Vehicle Type, Fuel and Municipality, focus_id=250, focus_value=)
+2026-02-21 09:36:34,564 - StoryGeneration - INFO - Generating story (template_id=46, template_title=Motor Vehicle Stock by Vehicle Type, Fuel and Municipality, focus_id=250, focus_value=)
+2026-02-21 09:36:34,569 - StoryGeneration - INFO - Story generation skipped (template_id=46, focus_id=250)
+2026-02-21 09:36:34,569 - StoryGeneration - INFO - Processing focus (template_id=31, template_title=Newborns in the Canton of Basel-Stadt, focus_id=251, focus_value=)
+2026-02-21 09:36:34,569 - StoryGeneration - INFO - Generating story (template_id=31, template_title=Newborns in the Canton of Basel-Stadt, focus_id=251, focus_value=)
+2026-02-21 09:36:34,575 - StoryGeneration - INFO - Story generation skipped (template_id=31, focus_id=251)
+2026-02-21 09:36:34,575 - StoryGeneration - INFO - Processing focus (template_id=23, template_title=New Metadata published on OGD Basel-Stadt, focus_id=253, focus_value=)
+2026-02-21 09:36:34,575 - StoryGeneration - INFO - Generating story (template_id=23, template_title=New Metadata published on OGD Basel-Stadt, focus_id=253, focus_value=)
+2026-02-21 09:36:34,578 - StoryGeneration - INFO - Story generation skipped (template_id=23, focus_id=253)
+2026-02-21 09:36:34,578 - StoryGeneration - INFO - Processing focus (template_id=57, template_title=New Metadata published on OGD Baselland, focus_id=252, focus_value=)
+2026-02-21 09:36:34,578 - StoryGeneration - INFO - Generating story (template_id=57, template_title=New Metadata published on OGD Baselland, focus_id=252, focus_value=)
+2026-02-21 09:36:34,579 - StoryGeneration - INFO - Story generation skipped (template_id=57, focus_id=252)
+2026-02-21 09:36:34,579 - StoryGeneration - INFO - Processing focus (template_id=48, template_title=Awareness Days, focus_id=225, focus_value=)
+2026-02-21 09:36:34,579 - StoryGeneration - INFO - Generating story (template_id=48, template_title=Awareness Days, focus_id=225, focus_value=)
+2026-02-21 09:36:34,582 - StoryGeneration - INFO - Story generation skipped (template_id=48, focus_id=225)
+2026-02-21 09:36:34,582 - StoryGeneration - INFO - Processing focus (template_id=25, template_title=Noise Monitoring in the Canton of Basel-Stadt, focus_id=254, focus_value=)
+2026-02-21 09:36:34,582 - StoryGeneration - INFO - Generating story (template_id=25, template_title=Noise Monitoring in the Canton of Basel-Stadt, focus_id=254, focus_value=)
+2026-02-21 09:36:34,588 - StoryGeneration - INFO - Story generation skipped (template_id=25, focus_id=254)
+2026-02-21 09:36:34,588 - StoryGeneration - INFO - Processing focus (template_id=35, template_title=On This Day in History, focus_id=255, focus_value=)
+2026-02-21 09:36:34,588 - StoryGeneration - INFO - Generating story (template_id=35, template_title=On This Day in History, focus_id=255, focus_value=)
+2026-02-21 09:36:34,592 - StoryGeneration - INFO - Story generation skipped (template_id=35, focus_id=255)
+2026-02-21 09:36:34,592 - StoryGeneration - INFO - Processing focus (template_id=43, template_title=Parliament: Political Proceedings, focus_id=256, focus_value=)
+2026-02-21 09:36:34,592 - StoryGeneration - INFO - Generating story (template_id=43, template_title=Parliament: Political Proceedings, focus_id=256, focus_value=)
+2026-02-21 09:36:34,606 - StoryGeneration - INFO - Story generation skipped (template_id=43, focus_id=256)
+2026-02-21 09:36:34,606 - StoryGeneration - INFO - Processing focus (template_id=64, template_title=Record Weather Events, focus_id=257, focus_value=)
+2026-02-21 09:36:34,606 - StoryGeneration - INFO - Generating story (template_id=64, template_title=Record Weather Events, focus_id=257, focus_value=)
+2026-02-21 09:36:34,687 - StoryGeneration - INFO - Story generation skipped (template_id=64, focus_id=257)
+2026-02-21 09:36:34,687 - StoryGeneration - INFO - Processing focus (template_id=22, template_title=Rent Prices in the Canton of Baselland, focus_id=258, focus_value=)
+2026-02-21 09:36:34,687 - StoryGeneration - INFO - Generating story (template_id=22, template_title=Rent Prices in the Canton of Baselland, focus_id=258, focus_value=)
+2026-02-21 09:36:34,690 - StoryGeneration - INFO - Story generation skipped (template_id=22, focus_id=258)
+2026-02-21 09:36:34,690 - StoryGeneration - INFO - Processing focus (template_id=14, template_title=Rhine Discharge, focus_id=259, focus_value=)
+2026-02-21 09:36:34,690 - StoryGeneration - INFO - Generating story (template_id=14, template_title=Rhine Discharge, focus_id=259, focus_value=)
+2026-02-21 09:36:34,692 - StoryGeneration - INFO - Story generation skipped (template_id=14, focus_id=259)
+2026-02-21 09:36:34,692 - StoryGeneration - INFO - Processing focus (template_id=60, template_title=Summary Fines in Basel-Stadt, focus_id=260, focus_value=)
+2026-02-21 09:36:34,692 - StoryGeneration - INFO - Generating story (template_id=60, template_title=Summary Fines in Basel-Stadt, focus_id=260, focus_value=)
+2026-02-21 09:36:34,766 - StoryGeneration - INFO - Story generation skipped (template_id=60, focus_id=260)
+2026-02-21 09:36:34,766 - StoryGeneration - INFO - Processing focus (template_id=26, template_title=Temperatures of Public Outdoor Swimming Pools in Basel, focus_id=261, focus_value=)
+2026-02-21 09:36:34,766 - StoryGeneration - INFO - Generating story (template_id=26, template_title=Temperatures of Public Outdoor Swimming Pools in Basel, focus_id=261, focus_value=)
+2026-02-21 09:36:34,769 - StoryGeneration - INFO - Story generation skipped (template_id=26, focus_id=261)
+2026-02-21 09:36:34,769 - StoryGeneration - INFO - Processing focus (template_id=36, template_title=This Month’s Anniversaries of Historic Events and Notable Personalities from Basel, focus_id=262, focus_value=)
+2026-02-21 09:36:34,769 - StoryGeneration - INFO - Generating story (template_id=36, template_title=This Month’s Anniversaries of Historic Events and Notable Personalities from Basel, focus_id=262, focus_value=)
+2026-02-21 09:36:34,771 - StoryGeneration - INFO - Story generation skipped (template_id=36, focus_id=262)
+2026-02-21 09:36:34,771 - StoryGeneration - INFO - Processing focus (template_id=20, template_title=Tourism Insights – Basel, Switzerland, focus_id=263, focus_value=)
+2026-02-21 09:36:34,771 - StoryGeneration - INFO - Generating story (template_id=20, template_title=Tourism Insights – Basel, Switzerland, focus_id=263, focus_value=)
+2026-02-21 09:36:34,773 - StoryGeneration - INFO - Story generation skipped (template_id=20, focus_id=263)
+2026-02-21 09:36:34,773 - StoryGeneration - INFO - Processing focus (template_id=24, template_title=Traffic Accidents, focus_id=264, focus_value=)
+2026-02-21 09:36:34,773 - StoryGeneration - INFO - Generating story (template_id=24, template_title=Traffic Accidents, focus_id=264, focus_value=)
+2026-02-21 09:36:34,776 - StoryGeneration - INFO - Story generation skipped (template_id=24, focus_id=264)
+2026-02-21 09:36:34,776 - StoryGeneration - INFO - Processing focus (template_id=63, template_title=Tree Inventory Basel-Stadt, focus_id=266, focus_value=)
+2026-02-21 09:36:34,776 - StoryGeneration - INFO - Generating story (template_id=63, template_title=Tree Inventory Basel-Stadt, focus_id=266, focus_value=)
+2026-02-21 09:36:34,777 - StoryGeneration - INFO - Story generation skipped (template_id=63, focus_id=266)
+2026-02-21 09:36:34,777 - StoryGeneration - INFO - Processing focus (template_id=45, template_title=Use of Environmental Travel Pass in Basel Area, focus_id=267, focus_value=)
+2026-02-21 09:36:34,777 - StoryGeneration - INFO - Generating story (template_id=45, template_title=Use of Environmental Travel Pass in Basel Area, focus_id=267, focus_value=)
+2026-02-21 09:36:34,779 - StoryGeneration - INFO - Story generation skipped (template_id=45, focus_id=267)
+2026-02-21 09:36:34,779 - StoryGeneration - INFO - Processing focus (template_id=15, template_title=Wastewater Monitoring for Viral RNA – ARA Basel, focus_id=269, focus_value=)
+2026-02-21 09:36:34,779 - StoryGeneration - INFO - Generating story (template_id=15, template_title=Wastewater Monitoring for Viral RNA – ARA Basel, focus_id=269, focus_value=)
+2026-02-21 09:36:34,781 - StoryGeneration - INFO - Story generation skipped (template_id=15, focus_id=269)
+2026-02-21 09:36:34,781 - StoryGeneration - INFO - Processing focus (template_id=66, template_title=Weather Report, focus_id=272, focus_value=)
+2026-02-21 09:36:34,781 - StoryGeneration - INFO - Generating story (template_id=66, template_title=Weather Report, focus_id=272, focus_value=)
+2026-02-21 09:36:34,782 - StoryGeneration - INFO - Story generation skipped (template_id=66, focus_id=272)
+2026-02-21 09:36:34,782 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=296, focus_value=2789)
+2026-02-21 09:36:34,782 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=296, focus_value=2789)
+2026-02-21 09:36:34,783 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=296)
+2026-02-21 09:36:34,783 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=297, focus_value=2790)
+2026-02-21 09:36:34,783 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=297, focus_value=2790)
+2026-02-21 09:36:34,784 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=297)
+2026-02-21 09:36:34,784 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=298, focus_value=2791)
+2026-02-21 09:36:34,784 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=298, focus_value=2791)
+2026-02-21 09:36:34,785 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=298)
+2026-02-21 09:36:34,785 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=299, focus_value=2792)
+2026-02-21 09:36:34,785 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=299, focus_value=2792)
+2026-02-21 09:36:34,787 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=299)
+2026-02-21 09:36:34,787 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=300, focus_value=2793)
+2026-02-21 09:36:34,787 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=300, focus_value=2793)
+2026-02-21 09:36:34,788 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=300)
+2026-02-21 09:36:34,788 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=301, focus_value=2821)
+2026-02-21 09:36:34,788 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=301, focus_value=2821)
+2026-02-21 09:36:34,789 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=301)
+2026-02-21 09:36:34,789 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=302, focus_value=2822)
+2026-02-21 09:36:34,789 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=302, focus_value=2822)
+2026-02-21 09:36:34,790 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=302)
+2026-02-21 09:36:34,790 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=303, focus_value=2823)
+2026-02-21 09:36:34,790 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=303, focus_value=2823)
+2026-02-21 09:36:34,791 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=303)
+2026-02-21 09:36:34,791 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=304, focus_value=2824)
+2026-02-21 09:36:34,791 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=304, focus_value=2824)
+2026-02-21 09:36:34,792 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=304)
+2026-02-21 09:36:34,792 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=305, focus_value=2825)
+2026-02-21 09:36:34,792 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=305, focus_value=2825)
+2026-02-21 09:36:34,794 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=305)
+2026-02-21 09:36:34,794 - StoryGeneration - INFO - Processing focus (template_id=67, template_title=Traffic Counting in Basel-Stadt, focus_id=265, focus_value=)
+2026-02-21 09:36:34,794 - StoryGeneration - INFO - Generating story (template_id=67, template_title=Traffic Counting in Basel-Stadt, focus_id=265, focus_value=)
+2026-02-21 09:36:34,795 - StoryGeneration - INFO - Story generation skipped (template_id=67, focus_id=265)
+2026-02-21 09:36:34,795 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=1, focus_value=2761)
+2026-02-21 09:36:34,795 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=1, focus_value=2761)
+2026-02-21 09:36:34,796 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=1)
+2026-02-21 09:36:34,797 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=274, focus_value=2762)
+2026-02-21 09:36:34,797 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=274, focus_value=2762)
+2026-02-21 09:36:34,798 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=274)
+2026-02-21 09:36:34,798 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=275, focus_value=2763)
+2026-02-21 09:36:34,798 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=275, focus_value=2763)
+2026-02-21 09:36:34,799 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=275)
+2026-02-21 09:36:34,799 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=276, focus_value=2764)
+2026-02-21 09:36:34,799 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=276, focus_value=2764)
+2026-02-21 09:36:34,800 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=276)
+2026-02-21 09:36:34,800 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=277, focus_value=2765)
+2026-02-21 09:36:34,800 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=277, focus_value=2765)
+2026-02-21 09:36:34,801 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=277)
+2026-02-21 09:36:34,801 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=279, focus_value=2767)
+2026-02-21 09:36:34,801 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=279, focus_value=2767)
+2026-02-21 09:36:34,802 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=279)
+2026-02-21 09:36:34,802 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=280, focus_value=2768)
+2026-02-21 09:36:34,802 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=280, focus_value=2768)
+2026-02-21 09:36:34,803 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=280)
+2026-02-21 09:36:34,803 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=281, focus_value=2769)
+2026-02-21 09:36:34,803 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=281, focus_value=2769)
+2026-02-21 09:36:34,805 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=281)
+2026-02-21 09:36:34,805 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=282, focus_value=2770)
+2026-02-21 09:36:34,805 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=282, focus_value=2770)
+2026-02-21 09:36:34,806 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=282)
+2026-02-21 09:36:34,806 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=283, focus_value=2771)
+2026-02-21 09:36:34,806 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=283, focus_value=2771)
+2026-02-21 09:36:34,807 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=283)
+2026-02-21 09:36:34,807 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=284, focus_value=2772)
+2026-02-21 09:36:34,807 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=284, focus_value=2772)
+2026-02-21 09:36:34,808 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=284)
+2026-02-21 09:36:34,808 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=285, focus_value=2773)
+2026-02-21 09:36:34,808 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=285, focus_value=2773)
+2026-02-21 09:36:34,809 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=285)
+2026-02-21 09:36:34,809 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=286, focus_value=2774)
+2026-02-21 09:36:34,809 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=286, focus_value=2774)
+2026-02-21 09:36:34,810 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=286)
+2026-02-21 09:36:34,810 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=287, focus_value=2775)
+2026-02-21 09:36:34,810 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=287, focus_value=2775)
+2026-02-21 09:36:34,811 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=287)
+2026-02-21 09:36:34,811 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=288, focus_value=2781)
+2026-02-21 09:36:34,811 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=288, focus_value=2781)
+2026-02-21 09:36:34,812 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=288)
+2026-02-21 09:36:34,813 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=289, focus_value=2782)
+2026-02-21 09:36:34,813 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=289, focus_value=2782)
+2026-02-21 09:36:34,814 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=289)
+2026-02-21 09:36:34,814 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=290, focus_value=2783)
+2026-02-21 09:36:34,814 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=290, focus_value=2783)
+2026-02-21 09:36:34,815 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=290)
+2026-02-21 09:36:34,815 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=291, focus_value=2784)
+2026-02-21 09:36:34,815 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=291, focus_value=2784)
+2026-02-21 09:36:34,816 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=291)
+2026-02-21 09:36:34,816 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=292, focus_value=2785)
+2026-02-21 09:36:34,816 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=292, focus_value=2785)
+2026-02-21 09:36:34,817 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=292)
+2026-02-21 09:36:34,818 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=293, focus_value=2786)
+2026-02-21 09:36:34,818 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=293, focus_value=2786)
+2026-02-21 09:36:34,819 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=293)
+2026-02-21 09:36:34,819 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=294, focus_value=2787)
+2026-02-21 09:36:34,819 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=294, focus_value=2787)
+2026-02-21 09:36:34,820 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=294)
+2026-02-21 09:36:34,820 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=295, focus_value=2788)
+2026-02-21 09:36:34,820 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=295, focus_value=2788)
+2026-02-21 09:36:34,821 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=295)
+2026-02-21 09:36:34,821 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=278, focus_value=2766)
+2026-02-21 09:36:34,821 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=278, focus_value=2766)
+2026-02-21 09:36:49,114 - StoryGeneration - ERROR - Failed to generate story (template_id=68, focus_id=278)
+2026-02-21 09:36:49,114 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=306, focus_value=2826)
+2026-02-21 09:36:49,114 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=306, focus_value=2826)
+2026-02-21 09:36:49,116 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=306)
+2026-02-21 09:36:49,116 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=307, focus_value=2827)
+2026-02-21 09:36:49,116 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=307, focus_value=2827)
+2026-02-21 09:36:49,117 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=307)
+2026-02-21 09:36:49,117 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=308, focus_value=2828)
+2026-02-21 09:36:49,117 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=308, focus_value=2828)
+2026-02-21 09:36:49,118 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=308)
+2026-02-21 09:36:49,118 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=309, focus_value=2829)
+2026-02-21 09:36:49,118 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=309, focus_value=2829)
+2026-02-21 09:36:49,119 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=309)
+2026-02-21 09:36:49,119 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=310, focus_value=2830)
+2026-02-21 09:36:49,119 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=310, focus_value=2830)
+2026-02-21 09:36:49,120 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=310)
+2026-02-21 09:36:49,120 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=311, focus_value=2831)
+2026-02-21 09:36:49,120 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=311, focus_value=2831)
+2026-02-21 09:36:49,121 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=311)
+2026-02-21 09:36:49,121 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=312, focus_value=2832)
+2026-02-21 09:36:49,121 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=312, focus_value=2832)
+2026-02-21 09:36:49,121 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=312)
+2026-02-21 09:36:49,121 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=313, focus_value=2833)
+2026-02-21 09:36:49,122 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=313, focus_value=2833)
+2026-02-21 09:36:49,122 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=313)
+2026-02-21 09:36:49,122 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=314, focus_value=2834)
+2026-02-21 09:36:49,122 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=314, focus_value=2834)
+2026-02-21 09:36:49,123 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=314)
+2026-02-21 09:36:49,124 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=315, focus_value=2841)
+2026-02-21 09:36:49,124 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=315, focus_value=2841)
+2026-02-21 09:36:49,125 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=315)
+2026-02-21 09:36:49,125 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=316, focus_value=2842)
+2026-02-21 09:36:49,125 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=316, focus_value=2842)
+2026-02-21 09:36:49,126 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=316)
+2026-02-21 09:36:49,126 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=317, focus_value=2843)
+2026-02-21 09:36:49,126 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=317, focus_value=2843)
+2026-02-21 09:36:49,127 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=317)
+2026-02-21 09:36:49,127 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=318, focus_value=2844)
+2026-02-21 09:36:49,127 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=318, focus_value=2844)
+2026-02-21 09:36:49,128 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=318)
+2026-02-21 09:36:49,128 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=319, focus_value=2845)
+2026-02-21 09:36:49,128 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=319, focus_value=2845)
+2026-02-21 09:36:49,129 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=319)
+2026-02-21 09:36:49,129 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=320, focus_value=2846)
+2026-02-21 09:36:49,129 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=320, focus_value=2846)
+2026-02-21 09:36:49,130 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=320)
+2026-02-21 09:36:49,130 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=321, focus_value=2847)
+2026-02-21 09:36:49,130 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=321, focus_value=2847)
+2026-02-21 09:36:49,131 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=321)
+2026-02-21 09:36:49,131 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=322, focus_value=2848)
+2026-02-21 09:36:49,131 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=322, focus_value=2848)
+2026-02-21 09:36:49,132 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=322)
+2026-02-21 09:36:49,132 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=323, focus_value=2849)
+2026-02-21 09:36:49,132 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=323, focus_value=2849)
+2026-02-21 09:36:49,133 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=323)
+2026-02-21 09:36:49,133 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=324, focus_value=2850)
+2026-02-21 09:36:49,133 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=324, focus_value=2850)
+2026-02-21 09:36:49,134 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=324)
+2026-02-21 09:36:49,134 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=325, focus_value=2851)
+2026-02-21 09:36:49,134 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=325, focus_value=2851)
+2026-02-21 09:36:49,135 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=325)
+2026-02-21 09:36:49,135 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=326, focus_value=2852)
+2026-02-21 09:36:49,135 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=326, focus_value=2852)
+2026-02-21 09:36:49,136 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=326)
+2026-02-21 09:36:49,136 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=327, focus_value=2853)
+2026-02-21 09:36:49,136 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=327, focus_value=2853)
+2026-02-21 09:36:49,137 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=327)
+2026-02-21 09:36:49,137 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=328, focus_value=2854)
+2026-02-21 09:36:49,137 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=328, focus_value=2854)
+2026-02-21 09:36:49,138 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=328)
+2026-02-21 09:36:49,138 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=329, focus_value=2855)
+2026-02-21 09:36:49,138 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=329, focus_value=2855)
+2026-02-21 09:36:49,139 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=329)
+2026-02-21 09:36:49,139 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=330, focus_value=2856)
+2026-02-21 09:36:49,139 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=330, focus_value=2856)
+2026-02-21 09:36:49,140 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=330)
+2026-02-21 09:36:49,140 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=331, focus_value=2857)
+2026-02-21 09:36:49,140 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=331, focus_value=2857)
+2026-02-21 09:36:49,141 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=331)
+2026-02-21 09:36:49,141 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=332, focus_value=2858)
+2026-02-21 09:36:49,141 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=332, focus_value=2858)
+2026-02-21 09:36:49,142 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=332)
+2026-02-21 09:36:49,142 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=333, focus_value=2859)
+2026-02-21 09:36:49,142 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=333, focus_value=2859)
+2026-02-21 09:36:49,143 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=333)
+2026-02-21 09:36:49,143 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=334, focus_value=2860)
+2026-02-21 09:36:49,143 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=334, focus_value=2860)
+2026-02-21 09:36:49,144 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=334)
+2026-02-21 09:36:49,144 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=335, focus_value=2861)
+2026-02-21 09:36:49,144 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=335, focus_value=2861)
+2026-02-21 09:36:49,145 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=335)
+2026-02-21 09:36:49,145 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=336, focus_value=2862)
+2026-02-21 09:36:49,145 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=336, focus_value=2862)
+2026-02-21 09:36:49,147 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=336)
+2026-02-21 09:36:49,147 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=337, focus_value=2863)
+2026-02-21 09:36:49,147 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=337, focus_value=2863)
+2026-02-21 09:36:49,148 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=337)
+2026-02-21 09:36:49,148 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=338, focus_value=2864)
+2026-02-21 09:36:49,148 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=338, focus_value=2864)
+2026-02-21 09:36:49,149 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=338)
+2026-02-21 09:36:49,149 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=339, focus_value=2865)
+2026-02-21 09:36:49,149 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=339, focus_value=2865)
+2026-02-21 09:36:49,150 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=339)
+2026-02-21 09:36:49,150 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=340, focus_value=2866)
+2026-02-21 09:36:49,150 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=340, focus_value=2866)
+2026-02-21 09:36:49,151 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=340)
+2026-02-21 09:36:49,151 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=341, focus_value=2867)
+2026-02-21 09:36:49,151 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=341, focus_value=2867)
+2026-02-21 09:36:49,152 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=341)
+2026-02-21 09:36:49,152 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=342, focus_value=2868)
+2026-02-21 09:36:49,152 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=342, focus_value=2868)
+2026-02-21 09:36:49,153 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=342)
+2026-02-21 09:36:49,153 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=343, focus_value=2869)
+2026-02-21 09:36:49,153 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=343, focus_value=2869)
+2026-02-21 09:36:49,154 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=343)
+2026-02-21 09:36:49,154 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=344, focus_value=2881)
+2026-02-21 09:36:49,154 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=344, focus_value=2881)
+2026-02-21 09:36:49,155 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=344)
+2026-02-21 09:36:49,155 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=345, focus_value=2882)
+2026-02-21 09:36:49,155 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=345, focus_value=2882)
+2026-02-21 09:36:49,157 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=345)
+2026-02-21 09:36:49,157 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=346, focus_value=2883)
+2026-02-21 09:36:49,157 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=346, focus_value=2883)
+2026-02-21 09:36:49,158 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=346)
+2026-02-21 09:36:49,158 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=347, focus_value=2884)
+2026-02-21 09:36:49,158 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=347, focus_value=2884)
+2026-02-21 09:36:49,159 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=347)
+2026-02-21 09:36:49,159 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=348, focus_value=2885)
+2026-02-21 09:36:49,159 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=348, focus_value=2885)
+2026-02-21 09:36:49,160 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=348)
+2026-02-21 09:36:49,160 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=349, focus_value=2886)
+2026-02-21 09:36:49,160 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=349, focus_value=2886)
+2026-02-21 09:36:49,161 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=349)
+2026-02-21 09:36:49,161 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=350, focus_value=2887)
+2026-02-21 09:36:49,161 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=350, focus_value=2887)
+2026-02-21 09:36:49,162 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=350)
+2026-02-21 09:36:49,162 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=351, focus_value=2888)
+2026-02-21 09:36:49,162 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=351, focus_value=2888)
+2026-02-21 09:36:49,163 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=351)
+2026-02-21 09:36:49,163 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=352, focus_value=2889)
+2026-02-21 09:36:49,163 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=352, focus_value=2889)
+2026-02-21 09:36:49,165 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=352)
+2026-02-21 09:36:49,165 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=353, focus_value=2890)
+2026-02-21 09:36:49,165 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=353, focus_value=2890)
+2026-02-21 09:36:49,166 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=353)
+2026-02-21 09:36:49,166 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=354, focus_value=2891)
+2026-02-21 09:36:49,166 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=354, focus_value=2891)
+2026-02-21 09:36:49,167 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=354)
+2026-02-21 09:36:49,167 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=355, focus_value=2892)
+2026-02-21 09:36:49,167 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=355, focus_value=2892)
+2026-02-21 09:36:49,168 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=355)
+2026-02-21 09:36:49,168 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=356, focus_value=2893)
+2026-02-21 09:36:49,168 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=356, focus_value=2893)
+2026-02-21 09:36:49,169 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=356)
+2026-02-21 09:36:49,169 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=357, focus_value=2894)
+2026-02-21 09:36:49,169 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=357, focus_value=2894)
+2026-02-21 09:36:49,170 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=357)
+2026-02-21 09:36:49,170 - StoryGeneration - INFO - Processing focus (template_id=52, template_title=A Day to Remember Lives Lost to Gun Violence in the USA, focus_id=219, focus_value=)
+2026-02-21 09:36:49,170 - StoryGeneration - INFO - Generating story (template_id=52, template_title=A Day to Remember Lives Lost to Gun Violence in the USA, focus_id=219, focus_value=)
+2026-02-21 09:36:49,174 - StoryGeneration - INFO - Story generation skipped (template_id=52, focus_id=219)
+2026-02-21 09:36:49,175 - StoryGeneration - INFO - Processing focus (template_id=68, template_title=Municipal Profile, focus_id=358, focus_value=2895)
+2026-02-21 09:36:49,175 - StoryGeneration - INFO - Generating story (template_id=68, template_title=Municipal Profile, focus_id=358, focus_value=2895)
+2026-02-21 09:36:49,176 - StoryGeneration - INFO - Story generation skipped (template_id=68, focus_id=358)
+2026-02-21 09:36:49,176 - StoryGeneration - INFO - Processing focus (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 09:36:49,176 - StoryGeneration - INFO - Generating story (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 09:36:49,180 - StoryGeneration - INFO - Story generation skipped (template_id=69, focus_id=359)
+2026-02-21 09:36:49,180 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 09:36:49,180 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 09:36:49,182 - StoryGeneration - INFO - Story generation skipped (template_id=70, focus_id=360)
+2026-02-21 09:36:49,848 - EmailService - INFO - Sent admin alert email to 1 recipients
+2026-02-21 09:36:49,870 - EmailService - INFO - Starting sending mails for 2026-02-21...
+2026-02-21 09:43:21,249 - DatasetSync - INFO - Synchronizing dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 09:43:21,249 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 09:43:23,100 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 09:43:23,100 - DatasetSync - INFO - Synchronizing dataset ID 2: Virus Wastewater Monitoring
+2026-02-21 09:43:23,100 - DatasetSync - INFO - Starting synchronization for dataset ID 2: Virus Wastewater Monitoring
+2026-02-21 09:43:23,864 - DatasetSync - INFO - Successfully synchronized dataset ID 2: Virus Wastewater Monitoring
+2026-02-21 09:43:23,865 - DatasetSync - INFO - Synchronizing dataset ID 4: Rhine River Discharge and Water Level
+2026-02-21 09:43:23,865 - DatasetSync - INFO - Starting synchronization for dataset ID 4: Rhine River Discharge and Water Level
+2026-02-21 09:43:24,546 - DatasetSync - INFO - Successfully synchronized dataset ID 4: Rhine River Discharge and Water Level
+2026-02-21 09:43:24,546 - DatasetSync - INFO - Synchronizing dataset ID 6: Dog Population in Basel by Breed
+2026-02-21 09:43:24,546 - DatasetSync - INFO - Starting synchronization for dataset ID 6: Dog Population in Basel by Breed
+2026-02-21 09:43:25,207 - DatasetSync - INFO - Successfully synchronized dataset ID 6: Dog Population in Basel by Breed
+2026-02-21 09:43:25,207 - DatasetSync - INFO - Synchronizing dataset ID 9: Dognames in Basel-Stadt
+2026-02-21 09:43:25,207 - DatasetSync - INFO - Starting synchronization for dataset ID 9: Dognames in Basel-Stadt
+2026-02-21 09:43:25,767 - DatasetSync - INFO - Successfully synchronized dataset ID 9: Dognames in Basel-Stadt
+2026-02-21 09:43:25,767 - DatasetSync - INFO - Synchronizing dataset ID 10: Dog Population since 1970
+2026-02-21 09:43:25,767 - DatasetSync - INFO - Starting synchronization for dataset ID 10: Dog Population since 1970
+2026-02-21 09:43:26,447 - DatasetSync - INFO - Successfully synchronized dataset ID 10: Dog Population since 1970
+2026-02-21 09:43:26,447 - DatasetSync - INFO - Synchronizing dataset ID 13: Air Quality at NCBN station Binningen
+2026-02-21 09:43:26,447 - DatasetSync - INFO - Starting synchronization for dataset ID 13: Air Quality at NCBN station Binningen
+2026-02-21 09:43:27,102 - DatasetSync - INFO - Successfully synchronized dataset ID 13: Air Quality at NCBN station Binningen
+2026-02-21 09:43:27,102 - DatasetSync - INFO - Synchronizing dataset ID 14: Air Traffic at Airport Basel/Mulhouse
+2026-02-21 09:43:27,102 - DatasetSync - INFO - Starting synchronization for dataset ID 14: Air Traffic at Airport Basel/Mulhouse
+2026-02-21 09:43:27,655 - DatasetSync - INFO - Successfully synchronized dataset ID 14: Air Traffic at Airport Basel/Mulhouse
+2026-02-21 09:43:27,655 - DatasetSync - INFO - Synchronizing dataset ID 15: kGWR Baselland
+2026-02-21 09:43:27,655 - DatasetSync - INFO - Starting synchronization for dataset ID 15: kGWR Baselland
+2026-02-21 09:43:28,075 - DatasetSync - INFO - Successfully synchronized dataset ID 15: kGWR Baselland
+2026-02-21 09:43:28,075 - DatasetSync - INFO - Synchronizing dataset ID 16: Land Price by Community in Baselland
+2026-02-21 09:43:28,075 - DatasetSync - INFO - Starting synchronization for dataset ID 16: Land Price by Community in Baselland
+2026-02-21 09:43:28,699 - DatasetSync - INFO - Successfully synchronized dataset ID 16: Land Price by Community in Baselland
+2026-02-21 09:43:28,699 - DatasetSync - INFO - Synchronizing dataset ID 17: Population of Basel-Stadt by Nationality
+2026-02-21 09:43:28,699 - DatasetSync - INFO - Starting synchronization for dataset ID 17: Population of Basel-Stadt by Nationality
+2026-02-21 09:43:31,383 - DatasetSync - INFO - Successfully synchronized dataset ID 17: Population of Basel-Stadt by Nationality
+2026-02-21 09:43:31,383 - DatasetSync - INFO - Synchronizing dataset ID 18: Population of Baselland by Age, Sex and Nationality
+2026-02-21 09:43:31,383 - DatasetSync - INFO - Starting synchronization for dataset ID 18: Population of Baselland by Age, Sex and Nationality
+2026-02-21 09:43:32,141 - DatasetSync - INFO - Successfully synchronized dataset ID 18: Population of Baselland by Age, Sex and Nationality
+2026-02-21 09:43:32,141 - DatasetSync - INFO - Synchronizing dataset ID 19: Population of Basel-Stadt by Residential District
+2026-02-21 09:43:32,141 - DatasetSync - INFO - Starting synchronization for dataset ID 19: Population of Basel-Stadt by Residential District
+2026-02-21 09:43:33,747 - DatasetSync - INFO - Successfully synchronized dataset ID 19: Population of Basel-Stadt by Residential District
+2026-02-21 09:43:33,747 - DatasetSync - INFO - Synchronizing dataset ID 20: Daily Arrivals and Overnight Stays by Origin in Basel-Stadt
+2026-02-21 09:43:33,747 - DatasetSync - INFO - Starting synchronization for dataset ID 20: Daily Arrivals and Overnight Stays by Origin in Basel-Stadt
+2026-02-21 09:43:34,138 - DatasetSync - INFO - Successfully synchronized dataset ID 20: Daily Arrivals and Overnight Stays by Origin in Basel-Stadt
+2026-02-21 09:43:34,139 - DatasetSync - INFO - Synchronizing dataset ID 21: Daily Arrivals, Overnight Stays, Rooms by Hotel Category in Basel-Stadt
+2026-02-21 09:43:34,139 - DatasetSync - INFO - Starting synchronization for dataset ID 21: Daily Arrivals, Overnight Stays, Rooms by Hotel Category in Basel-Stadt
+2026-02-21 09:43:34,485 - DatasetSync - INFO - Successfully synchronized dataset ID 21: Daily Arrivals, Overnight Stays, Rooms by Hotel Category in Basel-Stadt
+2026-02-21 09:43:34,485 - DatasetSync - INFO - Synchronizing dataset ID 22: Daily Overnight Stays, available and occupied Rooms in Basel-Stadt
+2026-02-21 09:43:34,485 - DatasetSync - INFO - Starting synchronization for dataset ID 22: Daily Overnight Stays, available and occupied Rooms in Basel-Stadt
+2026-02-21 09:43:34,886 - DatasetSync - INFO - Successfully synchronized dataset ID 22: Daily Overnight Stays, available and occupied Rooms in Basel-Stadt
+2026-02-21 09:43:34,886 - DatasetSync - INFO - Synchronizing dataset ID 23: Electricity Consumption in Basel
+2026-02-21 09:43:34,886 - DatasetSync - INFO - Starting synchronization for dataset ID 23: Electricity Consumption in Basel
+2026-02-21 09:43:35,300 - DatasetSync - INFO - Successfully synchronized dataset ID 23: Electricity Consumption in Basel
+2026-02-21 09:43:35,300 - DatasetSync - INFO - Synchronizing dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2026-02-21 09:43:35,300 - DatasetSync - INFO - Starting synchronization for dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2026-02-21 09:43:36,872 - DatasetSync - INFO - Successfully synchronized dataset ID 24: Rent prices in the canton of Baselland/Switzerland
+2026-02-21 09:43:36,872 - DatasetSync - INFO - Synchronizing dataset ID 25: Dwellings Basel-Stadt (GWR)
+2026-02-21 09:43:36,872 - DatasetSync - INFO - Starting synchronization for dataset ID 25: Dwellings Basel-Stadt (GWR)
+2026-02-21 09:43:37,086 - DatasetSync - INFO - Successfully synchronized dataset ID 25: Dwellings Basel-Stadt (GWR)
+2026-02-21 09:43:37,087 - DatasetSync - INFO - Synchronizing dataset ID 26: Addresses in Basel-Stadt
+2026-02-21 09:43:37,087 - DatasetSync - INFO - Starting synchronization for dataset ID 26: Addresses in Basel-Stadt
+2026-02-21 09:43:37,295 - DatasetSync - INFO - Successfully synchronized dataset ID 26: Addresses in Basel-Stadt
+2026-02-21 09:43:37,295 - DatasetSync - INFO - Synchronizing dataset ID 27: Opendata Datasets Basel-Stadt
+2026-02-21 09:43:37,295 - DatasetSync - INFO - Starting synchronization for dataset ID 27: Opendata Datasets Basel-Stadt
+2026-02-21 09:43:37,841 - DatasetSync - INFO - Successfully synchronized dataset ID 27: Opendata Datasets Basel-Stadt
+2026-02-21 09:43:37,841 - DatasetSync - INFO - Synchronizing dataset ID 28: Noise Monitoring in Basel
+2026-02-21 09:43:37,841 - DatasetSync - INFO - Starting synchronization for dataset ID 28: Noise Monitoring in Basel
+2026-02-21 09:43:38,380 - DatasetSync - INFO - Successfully synchronized dataset ID 28: Noise Monitoring in Basel
+2026-02-21 09:43:38,380 - DatasetSync - INFO - Synchronizing dataset ID 29: Noise Monitoring Stations in Basel
+2026-02-21 09:43:38,381 - DatasetSync - INFO - Starting synchronization for dataset ID 29: Noise Monitoring Stations in Basel
+2026-02-21 09:43:38,587 - DatasetSync - INFO - Successfully synchronized dataset ID 29: Noise Monitoring Stations in Basel
+2026-02-21 09:43:38,587 - DatasetSync - INFO - Synchronizing dataset ID 30: Traffic Accidents in Basel-Stadt
+2026-02-21 09:43:38,587 - DatasetSync - INFO - Starting synchronization for dataset ID 30: Traffic Accidents in Basel-Stadt
+2026-02-21 09:43:39,836 - DatasetSync - INFO - Successfully synchronized dataset ID 30: Traffic Accidents in Basel-Stadt
+2026-02-21 09:43:39,836 - DatasetSync - INFO - Synchronizing dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2026-02-21 09:43:39,836 - DatasetSync - INFO - Starting synchronization for dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2026-02-21 09:43:40,507 - DatasetSync - INFO - Successfully synchronized dataset ID 31: Temperatures of the Outdoor Swimming Pools in Basel
+2026-02-21 09:43:40,507 - DatasetSync - INFO - Synchronizing dataset ID 32: Population Baselland
+2026-02-21 09:43:40,507 - DatasetSync - INFO - Starting synchronization for dataset ID 32: Population Baselland
+2026-02-21 09:43:41,192 - DatasetSync - INFO - Successfully synchronized dataset ID 32: Population Baselland
+2026-02-21 09:43:41,193 - DatasetSync - INFO - Synchronizing dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2026-02-21 09:43:41,193 - DatasetSync - INFO - Starting synchronization for dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2026-02-21 09:43:41,529 - DatasetSync - INFO - Successfully synchronized dataset ID 33: Mortality Rates of the Canton of Basel-Stadt by Month, Sex and Age Group since 2012
+2026-02-21 09:43:41,529 - DatasetSync - INFO - Synchronizing dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2026-02-21 09:43:41,529 - DatasetSync - INFO - Starting synchronization for dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2026-02-21 09:43:42,227 - DatasetSync - INFO - Successfully synchronized dataset ID 34: First Names of Newborns in the Canton of Basel-Stadt
+2026-02-21 09:43:42,227 - DatasetSync - INFO - Synchronizing dataset ID 35: Newborns in the Canton of Basel-Stadt by Sex and Origin
+2026-02-21 09:43:42,228 - DatasetSync - INFO - Starting synchronization for dataset ID 35: Newborns in the Canton of Basel-Stadt by Sex and Origin
+2026-02-21 09:43:42,594 - DatasetSync - INFO - Successfully synchronized dataset ID 35: Newborns in the Canton of Basel-Stadt by Sex and Origin
+2026-02-21 09:43:42,594 - DatasetSync - INFO - Synchronizing dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2026-02-21 09:43:42,594 - DatasetSync - INFO - Starting synchronization for dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2026-02-21 09:43:43,146 - DatasetSync - INFO - Successfully synchronized dataset ID 36: Newborns in the Canton of Basel-Stadt by month, sex and origin
+2026-02-21 09:43:43,147 - DatasetSync - INFO - Synchronizing dataset ID 37: Population of Basel-Stadt by Country of Origin
+2026-02-21 09:43:43,147 - DatasetSync - INFO - Starting synchronization for dataset ID 37: Population of Basel-Stadt by Country of Origin
+2026-02-21 09:43:43,870 - DatasetSync - INFO - Successfully synchronized dataset ID 37: Population of Basel-Stadt by Country of Origin
+2026-02-21 09:43:43,870 - DatasetSync - INFO - Synchronizing dataset ID 38: Fishing Statistics Basel-Stadt
+2026-02-21 09:43:43,870 - DatasetSync - INFO - Starting synchronization for dataset ID 38: Fishing Statistics Basel-Stadt
+2026-02-21 09:43:44,400 - DatasetSync - INFO - Successfully synchronized dataset ID 38: Fishing Statistics Basel-Stadt
+2026-02-21 09:43:44,400 - DatasetSync - INFO - Synchronizing dataset ID 39: Mortality in the Canton of Basel-Stadt by Date and Age Group
+2026-02-21 09:43:44,400 - DatasetSync - INFO - Starting synchronization for dataset ID 39: Mortality in the Canton of Basel-Stadt by Date and Age Group
+2026-02-21 09:43:44,863 - DatasetSync - INFO - Successfully synchronized dataset ID 39: Mortality in the Canton of Basel-Stadt by Date and Age Group
+2026-02-21 09:43:44,863 - DatasetSync - INFO - Synchronizing dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2026-02-21 09:43:44,864 - DatasetSync - INFO - Starting synchronization for dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2026-02-21 09:43:45,331 - DatasetSync - INFO - Successfully synchronized dataset ID 40: Population of Basel-Stadt by Sex and Gender
+2026-02-21 09:43:45,331 - DatasetSync - INFO - Synchronizing dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-21 09:43:45,331 - DatasetSync - INFO - Starting synchronization for dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-21 09:43:45,635 - DatasetSync - INFO - Successfully synchronized dataset ID 41: Traffic-Relevant Events in Basel
+2026-02-21 09:43:45,635 - DatasetSync - INFO - Synchronizing dataset ID 42: Cantonal Votes in Basel-Stadt
+2026-02-21 09:43:45,635 - DatasetSync - INFO - Starting synchronization for dataset ID 42: Cantonal Votes in Basel-Stadt
+2026-02-21 09:43:46,005 - DatasetSync - INFO - Successfully synchronized dataset ID 42: Cantonal Votes in Basel-Stadt
+2026-02-21 09:43:46,005 - DatasetSync - INFO - Synchronizing dataset ID 43: National Votations: Basel-Stadt Votes
+2026-02-21 09:43:46,005 - DatasetSync - INFO - Starting synchronization for dataset ID 43: National Votations: Basel-Stadt Votes
+2026-02-21 09:43:46,416 - DatasetSync - INFO - Successfully synchronized dataset ID 43: National Votations: Basel-Stadt Votes
+2026-02-21 09:43:46,416 - DatasetSync - INFO - Synchronizing dataset ID 44: Degrees of Students in Baselland
+2026-02-21 09:43:46,416 - DatasetSync - INFO - Starting synchronization for dataset ID 44: Degrees of Students in Baselland
+2026-02-21 09:43:46,790 - DatasetSync - INFO - Successfully synchronized dataset ID 44: Degrees of Students in Baselland
+2026-02-21 09:43:46,790 - DatasetSync - INFO - Synchronizing dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2026-02-21 09:43:46,790 - DatasetSync - INFO - Starting synchronization for dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2026-02-21 09:43:47,303 - DatasetSync - INFO - Successfully synchronized dataset ID 45: Land Use & Cover by Category and Municipality (since 1982)
+2026-02-21 09:43:47,303 - DatasetSync - INFO - Synchronizing dataset ID 46: Illegal Waste dumps
+2026-02-21 09:43:47,303 - DatasetSync - INFO - Starting synchronization for dataset ID 46: Illegal Waste dumps
+2026-02-21 09:43:47,764 - DatasetSync - INFO - Successfully synchronized dataset ID 46: Illegal Waste dumps
+2026-02-21 09:43:47,764 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:43:47,764 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:43:47,769 - DatasetSync - INFO - Successfully synchronized dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:43:47,769 - DatasetSync - INFO - Synchronizing dataset ID 48: Groundwater Quality in Basel-Stadt
+2026-02-21 09:43:47,769 - DatasetSync - INFO - Starting synchronization for dataset ID 48: Groundwater Quality in Basel-Stadt
+2026-02-21 09:43:48,202 - DatasetSync - INFO - Successfully synchronized dataset ID 48: Groundwater Quality in Basel-Stadt
+2026-02-21 09:43:48,202 - DatasetSync - INFO - Synchronizing dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2026-02-21 09:43:48,202 - DatasetSync - INFO - Starting synchronization for dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2026-02-21 09:43:48,633 - DatasetSync - INFO - Successfully synchronized dataset ID 49: Parliament of Basel-Stadt: Decisions of Political Matters
+2026-02-21 09:43:48,634 - DatasetSync - INFO - Synchronizing dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2026-02-21 09:43:48,634 - DatasetSync - INFO - Starting synchronization for dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2026-02-21 09:43:49,179 - DatasetSync - INFO - Successfully synchronized dataset ID 50: Basel-Stadt Grand Council – Meeting Schedule
+2026-02-21 09:43:49,179 - DatasetSync - INFO - Synchronizing dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2026-02-21 09:43:49,179 - DatasetSync - INFO - Starting synchronization for dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2026-02-21 09:43:49,544 - DatasetSync - INFO - Successfully synchronized dataset ID 51: Votations Results of the Parliment of Basel-Stadt
+2026-02-21 09:43:49,544 - DatasetSync - INFO - Synchronizing dataset ID 52: Environmental Travel Pass Basel Area
+2026-02-21 09:43:49,544 - DatasetSync - INFO - Starting synchronization for dataset ID 52: Environmental Travel Pass Basel Area
+2026-02-21 09:43:50,034 - DatasetSync - INFO - Successfully synchronized dataset ID 52: Environmental Travel Pass Basel Area
+2026-02-21 09:43:50,034 - DatasetSync - INFO - Synchronizing dataset ID 53: Motor Vehicle Stock in Baselland
+2026-02-21 09:43:50,034 - DatasetSync - INFO - Starting synchronization for dataset ID 53: Motor Vehicle Stock in Baselland
+2026-02-21 09:43:51,506 - DatasetSync - INFO - Successfully synchronized dataset ID 53: Motor Vehicle Stock in Baselland
+2026-02-21 09:43:51,506 - DatasetSync - INFO - Synchronizing dataset ID 54: Sprayereien in Basel-Stadt
+2026-02-21 09:43:51,506 - DatasetSync - INFO - Starting synchronization for dataset ID 54: Sprayereien in Basel-Stadt
+2026-02-21 09:43:52,200 - DatasetSync - INFO - Successfully synchronized dataset ID 54: Sprayereien in Basel-Stadt
+2026-02-21 09:43:52,200 - DatasetSync - INFO - Synchronizing dataset ID 55: Divorces in Basel-Stadt
+2026-02-21 09:43:52,200 - DatasetSync - INFO - Starting synchronization for dataset ID 55: Divorces in Basel-Stadt
+2026-02-21 09:43:52,542 - DatasetSync - INFO - Successfully synchronized dataset ID 55: Divorces in Basel-Stadt
+2026-02-21 09:43:52,542 - DatasetSync - INFO - Synchronizing dataset ID 56: Marriages by Date of Wedding Ceremony in Basel-Stadt
+2026-02-21 09:43:52,542 - DatasetSync - INFO - Starting synchronization for dataset ID 56: Marriages by Date of Wedding Ceremony in Basel-Stadt
+2026-02-21 09:43:53,980 - DatasetSync - INFO - Successfully synchronized dataset ID 56: Marriages by Date of Wedding Ceremony in Basel-Stadt
+2026-02-21 09:43:53,980 - DatasetSync - INFO - Synchronizing dataset ID 57: Cleanliness Index in Basel-Stadt
+2026-02-21 09:43:53,980 - DatasetSync - INFO - Starting synchronization for dataset ID 57: Cleanliness Index in Basel-Stadt
+2026-02-21 09:43:54,495 - DatasetSync - INFO - Successfully synchronized dataset ID 57: Cleanliness Index in Basel-Stadt
+2026-02-21 09:43:54,495 - DatasetSync - INFO - Synchronizing dataset ID 58: Geoshapes Communities of Basel-Stadt
+2026-02-21 09:43:54,495 - DatasetSync - INFO - Starting synchronization for dataset ID 58: Geoshapes Communities of Basel-Stadt
+2026-02-21 09:43:54,983 - DatasetSync - INFO - Successfully synchronized dataset ID 58: Geoshapes Communities of Basel-Stadt
+2026-02-21 09:43:54,983 - DatasetSync - INFO - Synchronizing dataset ID 59: Opendata Datasets Baselland
+2026-02-21 09:43:54,983 - DatasetSync - INFO - Starting synchronization for dataset ID 59: Opendata Datasets Baselland
+2026-02-21 09:43:55,443 - DatasetSync - INFO - Successfully synchronized dataset ID 59: Opendata Datasets Baselland
+2026-02-21 09:43:55,443 - DatasetSync - INFO - Synchronizing dataset ID 60: Daylight in Basel
+2026-02-21 09:43:55,443 - DatasetSync - INFO - Starting synchronization for dataset ID 60: Daylight in Basel
+2026-02-21 09:43:55,450 - DatasetSync - INFO - Successfully synchronized dataset ID 60: Daylight in Basel
+2026-02-21 09:43:55,450 - DatasetSync - INFO - Synchronizing dataset ID 61: Relocations from and to Basel-Stadt
+2026-02-21 09:43:55,450 - DatasetSync - INFO - Starting synchronization for dataset ID 61: Relocations from and to Basel-Stadt
+2026-02-21 09:43:56,886 - DatasetSync - INFO - Successfully synchronized dataset ID 61: Relocations from and to Basel-Stadt
+2026-02-21 09:43:56,886 - DatasetSync - INFO - Synchronizing dataset ID 62: Summary Fines in Basel-Stadt
+2026-02-21 09:43:56,886 - DatasetSync - INFO - Starting synchronization for dataset ID 62: Summary Fines in Basel-Stadt
+2026-02-21 09:43:58,432 - DatasetSync - INFO - Successfully synchronized dataset ID 62: Summary Fines in Basel-Stadt
+2026-02-21 09:43:58,432 - DatasetSync - INFO - Synchronizing dataset ID 63: Basel-Stadt Neighbourhoods: Key Figures
+2026-02-21 09:43:58,432 - DatasetSync - INFO - Starting synchronization for dataset ID 63: Basel-Stadt Neighbourhoods: Key Figures
+2026-02-21 09:43:58,737 - DatasetSync - INFO - Successfully synchronized dataset ID 63: Basel-Stadt Neighbourhoods: Key Figures
+2026-02-21 09:43:58,737 - DatasetSync - INFO - Synchronizing dataset ID 64: Air Quality Station St. Johannplatz
+2026-02-21 09:43:58,737 - DatasetSync - INFO - Starting synchronization for dataset ID 64: Air Quality Station St. Johannplatz
+2026-02-21 09:43:59,313 - DatasetSync - INFO - Successfully synchronized dataset ID 64: Air Quality Station St. Johannplatz
+2026-02-21 09:43:59,313 - DatasetSync - INFO - Synchronizing dataset ID 65: GVA Incidents
+2026-02-21 09:43:59,313 - DatasetSync - INFO - Starting synchronization for dataset ID 65: GVA Incidents
+2026-02-21 09:43:59,321 - DatasetSync - INFO - Successfully synchronized dataset ID 65: GVA Incidents
+2026-02-21 09:43:59,321 - DatasetSync - INFO - Synchronizing dataset ID 66: Awareness Days
+2026-02-21 09:43:59,321 - DatasetSync - INFO - Starting synchronization for dataset ID 66: Awareness Days
+2026-02-21 09:43:59,327 - DatasetSync - INFO - Successfully synchronized dataset ID 66: Awareness Days
+2026-02-21 09:43:59,327 - DatasetSync - INFO - Synchronizing dataset ID 67: Personalities from Basel
+2026-02-21 09:43:59,327 - DatasetSync - INFO - Starting synchronization for dataset ID 67: Personalities from Basel
+2026-02-21 09:43:59,332 - DatasetSync - INFO - Successfully synchronized dataset ID 67: Personalities from Basel
+2026-02-21 09:43:59,333 - DatasetSync - INFO - Synchronizing dataset ID 68: Historic Events
+2026-02-21 09:43:59,333 - DatasetSync - INFO - Starting synchronization for dataset ID 68: Historic Events
+2026-02-21 09:43:59,337 - DatasetSync - INFO - Successfully synchronized dataset ID 68: Historic Events
+2026-02-21 09:43:59,337 - DatasetSync - INFO - Synchronizing dataset ID 69: Tree Cadastre: Tree Felling and Replacement List
+2026-02-21 09:43:59,337 - DatasetSync - INFO - Starting synchronization for dataset ID 69: Tree Cadastre: Tree Felling and Replacement List
+2026-02-21 09:43:59,480 - DatasetSync - INFO - Successfully synchronized dataset ID 69: Tree Cadastre: Tree Felling and Replacement List
+2026-02-21 09:43:59,480 - DatasetSync - INFO - Synchronizing dataset ID 71: Tree register: tree inventory
+2026-02-21 09:43:59,480 - DatasetSync - INFO - Starting synchronization for dataset ID 71: Tree register: tree inventory
+2026-02-21 09:43:59,632 - DatasetSync - INFO - Successfully synchronized dataset ID 71: Tree register: tree inventory
+2026-02-21 09:43:59,632 - DatasetSync - INFO - Synchronizing dataset ID 72: Traffic Count Data for motorized individual Transport (MIT)
+2026-02-21 09:43:59,632 - DatasetSync - INFO - Starting synchronization for dataset ID 72: Traffic Count Data for motorized individual Transport (MIT)
+2026-02-21 09:44:00,207 - DatasetSync - INFO - Successfully synchronized dataset ID 72: Traffic Count Data for motorized individual Transport (MIT)
+2026-02-21 09:44:00,207 - DatasetSync - INFO - Synchronizing dataset ID 73: Memberships Parliment Basel-Stadt
+2026-02-21 09:44:00,207 - DatasetSync - INFO - Starting synchronization for dataset ID 73: Memberships Parliment Basel-Stadt
+2026-02-21 09:44:00,427 - DatasetSync - INFO - Successfully synchronized dataset ID 73: Memberships Parliment Basel-Stadt
+2026-02-21 09:44:00,427 - DatasetSync - INFO - Synchronizing dataset ID 74: Traffic Counting Stations
+2026-02-21 09:44:00,427 - DatasetSync - INFO - Starting synchronization for dataset ID 74: Traffic Counting Stations
+2026-02-21 09:44:00,705 - DatasetSync - INFO - Successfully synchronized dataset ID 74: Traffic Counting Stations
+2026-02-21 09:44:00,705 - DatasetSync - INFO - Synchronizing dataset ID 75: Traffic count data for bicycles and pedestrian
+2026-02-21 09:44:00,705 - DatasetSync - INFO - Starting synchronization for dataset ID 75: Traffic count data for bicycles and pedestrian
+2026-02-21 09:44:01,315 - DatasetSync - INFO - Successfully synchronized dataset ID 75: Traffic count data for bicycles and pedestrian
+2026-02-21 09:44:01,315 - DatasetSync - INFO - Synchronizing dataset ID 76: Key figures for municipalities
+2026-02-21 09:44:01,315 - DatasetSync - INFO - Starting synchronization for dataset ID 76: Key figures for municipalities
+2026-02-21 09:44:01,593 - DatasetSync - INFO - Successfully synchronized dataset ID 76: Key figures for municipalities
+2026-02-21 09:44:01,593 - DatasetSync - INFO - Synchronizing dataset ID 77: Population in Baselland by Nationality
+2026-02-21 09:44:01,593 - DatasetSync - INFO - Starting synchronization for dataset ID 77: Population in Baselland by Nationality
+2026-02-21 09:44:02,229 - DatasetSync - INFO - Successfully synchronized dataset ID 77: Population in Baselland by Nationality
+2026-02-21 09:44:02,229 - DatasetSync - INFO - Synchronizing dataset ID 78: Energy Consumption of Baselland
+2026-02-21 09:44:02,229 - DatasetSync - INFO - Starting synchronization for dataset ID 78: Energy Consumption of Baselland
+2026-02-21 09:44:03,086 - DatasetSync - INFO - Successfully synchronized dataset ID 78: Energy Consumption of Baselland
+2026-02-21 09:44:03,086 - DatasetSync - INFO - Synchronizing dataset ID 79: Population of Baselland since 1699
+2026-02-21 09:44:03,086 - DatasetSync - INFO - Starting synchronization for dataset ID 79: Population of Baselland since 1699
+2026-02-21 09:44:04,542 - DatasetSync - INFO - Successfully synchronized dataset ID 79: Population of Baselland since 1699
+2026-02-21 09:44:04,543 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 09:44:04,543 - DatasetSync - INFO - Synchronization completed successfully. Processed: 72, All successful
+2026-02-21 09:48:53,379 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:48:53,379 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:48:53,411 - DatasetSync - INFO - Successfully synchronized dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:48:53,412 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 09:48:53,412 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-21 09:50:30,344 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:50:30,344 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:50:30,372 - DatasetSync - INFO - Successfully synchronized dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:50:30,372 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 09:50:30,372 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-21 09:51:33,165 - StoryGeneration - ERROR - No active story template found with ID: 37
+2026-02-21 09:51:54,391 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:51:54,391 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:52:52,917 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:52:52,918 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:58:32,616 - DatasetSync - INFO - Successfully synchronized dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:58:46,680 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 09:58:51,263 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-21 09:59:13,864 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 09:59:13,864 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:00:32,988 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:00:32,988 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:01:28,301 - DatasetSync - INFO - Successfully synchronized dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:01:41,726 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 10:01:41,726 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-21 10:02:04,985 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:02:04,985 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:03:56,299 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:03:56,299 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:05:08,549 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:05:08,549 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:05:31,552 - DatasetSync - INFO - Successfully synchronized dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:05:31,553 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 10:05:31,553 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-21 10:06:28,552 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:06:28,552 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:06:28,571 - DatasetSync - ERROR - Failed to synchronize dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:06:28,571 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 10:06:28,571 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [47]
+2026-02-21 10:06:58,896 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:06:58,896 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:09:44,901 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:09:44,901 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:13:08,494 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:13:13,853 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:15:02,469 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:15:02,469 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:15:52,205 - DatasetSync - INFO - Successfully synchronized dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:15:55,813 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 10:15:55,813 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-21 10:16:09,544 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:16:09,545 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:17:07,646 - DatasetSync - INFO - Synchronizing dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:17:07,646 - DatasetSync - INFO - Starting synchronization for dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:26:44,184 - DatasetSync - INFO - Successfully synchronized dataset ID 47: CO2 Emissions (Worldwide)
+2026-02-21 10:26:44,188 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 10:26:44,188 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-21 10:37:21,769 - DatasetSync - INFO - Synchronizing dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:37:21,769 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:37:22,313 - DatasetSync - ERROR - Failed to synchronize dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:37:22,314 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 10:37:22,314 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [1]
+2026-02-21 10:39:12,922 - DatasetSync - INFO - Synchronizing dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:39:12,923 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:40:30,486 - DatasetSync - INFO - Synchronizing dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:40:30,486 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:40:56,291 - DatasetSync - ERROR - Failed to synchronize dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:40:56,293 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 10:40:56,293 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [1]
+2026-02-21 10:44:22,765 - DatasetSync - INFO - Synchronizing dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:44:22,765 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:45:09,095 - DatasetSync - ERROR - Failed to synchronize dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:45:09,097 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 10:45:09,097 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [1]
+2026-02-21 10:46:42,724 - DatasetSync - INFO - Synchronizing dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:46:42,724 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:46:43,427 - DatasetSync - ERROR - Failed to synchronize dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:46:43,427 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 10:46:43,427 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 1, Failed: 1, Failed dataset IDs: [1]
+2026-02-21 10:47:31,534 - DatasetSync - INFO - Synchronizing dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:47:31,534 - DatasetSync - INFO - Starting synchronization for dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:47:59,604 - DatasetSync - INFO - Successfully synchronized dataset ID 1: Weather Data at NBCN Weather Station Binningen
+2026-02-21 10:47:59,606 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 10:47:59,606 - DatasetSync - INFO - Synchronization completed successfully. Processed: 1, All successful
+2026-02-21 11:12:11,249 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:12:11,249 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:12:12,335 - StoryGeneration - ERROR - Failed to generate story (template_id=70, focus_id=360)
+2026-02-21 11:13:15,077 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:13:15,077 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:13:26,013 - StoryGeneration - INFO - Successfully generated story (template_id=70, focus_id=360, story_id=1265)
+2026-02-21 11:17:18,585 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:17:18,585 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:17:32,938 - StoryGeneration - ERROR - Failed to generate story (template_id=70, focus_id=360)
+2026-02-21 11:17:55,568 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:17:55,568 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:18:11,855 - StoryGeneration - ERROR - Failed to generate story (template_id=70, focus_id=360)
+2026-02-21 11:19:20,413 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:19:20,413 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:19:34,631 - StoryGeneration - ERROR - Failed to generate story (template_id=70, focus_id=360)
+2026-02-21 11:21:43,179 - DatasetSync - ERROR - No active dataset found with ID: 70
+2026-02-21 11:21:43,182 - DatasetSync - INFO - Cleaned up temporary files in: files
+2026-02-21 11:21:43,182 - DatasetSync - ERROR - Synchronization completed with errors. Processed: 0, Failed: 1, Failed dataset IDs: [70]
+2026-02-21 11:23:24,871 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:23:42,247 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:23:52,713 - StoryGeneration - INFO - Story generation skipped (template_id=70, focus_id=360)
+2026-02-21 11:25:05,244 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:25:05,244 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:25:24,499 - StoryGeneration - ERROR - Failed to generate story (template_id=70, focus_id=360)
+2026-02-21 11:26:17,829 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:26:17,829 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:27:43,144 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:27:43,144 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:30:24,292 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:30:24,292 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:31:31,961 - StoryGeneration - INFO - Successfully generated story (template_id=70, focus_id=360, story_id=1266)
+2026-02-21 11:31:59,032 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:31:59,032 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:32:13,958 - StoryGeneration - INFO - Successfully generated story (template_id=70, focus_id=360, story_id=1267)
+2026-02-21 11:42:05,373 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:42:05,373 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:56:04,951 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:56:04,951 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:56:21,027 - StoryGeneration - INFO - Successfully generated story (template_id=70, focus_id=360, story_id=1268)
+2026-02-21 11:58:17,249 - StoryGeneration - INFO - Processing focus (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:58:17,249 - StoryGeneration - INFO - Generating story (template_id=70, template_title=Pedestrian Traffic during the Basler Fasnacht, focus_id=360, focus_value=)
+2026-02-21 11:58:32,167 - StoryGeneration - INFO - Successfully generated story (template_id=70, focus_id=360, story_id=1269)
+2026-02-21 13:43:33,507 - StoryGeneration - INFO - Processing focus (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 13:43:33,507 - StoryGeneration - INFO - Generating story (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 13:43:42,019 - StoryGeneration - INFO - Successfully generated story (template_id=69, focus_id=359, story_id=1270)
+2026-02-21 13:58:39,243 - StoryGeneration - INFO - Processing focus (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 13:58:39,243 - StoryGeneration - INFO - Generating story (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 13:58:39,259 - StoryGeneration - INFO - Story generation skipped (template_id=69, focus_id=359)
+2026-02-21 13:58:57,228 - StoryGeneration - INFO - Processing focus (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 13:58:57,228 - StoryGeneration - INFO - Generating story (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 13:59:09,372 - StoryGeneration - INFO - Successfully generated story (template_id=69, focus_id=359, story_id=1270)
+2026-02-21 14:23:00,895 - StoryGeneration - INFO - Processing focus (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:23:00,895 - StoryGeneration - INFO - Generating story (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:23:12,826 - StoryGeneration - INFO - Successfully generated story (template_id=69, focus_id=359, story_id=1270)
+2026-02-21 14:26:46,500 - StoryGeneration - INFO - Processing focus (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:26:46,500 - StoryGeneration - INFO - Generating story (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:26:58,479 - StoryGeneration - INFO - Successfully generated story (template_id=69, focus_id=359, story_id=1270)
+2026-02-21 14:29:49,205 - StoryGeneration - INFO - Processing focus (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:29:49,205 - StoryGeneration - INFO - Generating story (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:30:02,643 - StoryGeneration - INFO - Successfully generated story (template_id=69, focus_id=359, story_id=1270)
+2026-02-21 14:31:08,176 - StoryGeneration - INFO - Processing focus (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:31:08,176 - StoryGeneration - INFO - Generating story (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:31:19,567 - StoryGeneration - INFO - Successfully generated story (template_id=69, focus_id=359, story_id=1270)
+2026-02-21 14:33:06,264 - StoryGeneration - INFO - Processing focus (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:33:06,264 - StoryGeneration - INFO - Generating story (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:33:19,240 - StoryGeneration - INFO - Successfully generated story (template_id=69, focus_id=359, story_id=1270)
+2026-02-21 14:38:36,461 - StoryGeneration - INFO - Processing focus (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:38:36,461 - StoryGeneration - INFO - Generating story (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:38:47,727 - StoryGeneration - INFO - Successfully generated story (template_id=69, focus_id=359, story_id=1270)
+2026-02-21 14:39:12,726 - StoryGeneration - INFO - Processing focus (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:39:12,727 - StoryGeneration - INFO - Generating story (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 14:39:24,332 - StoryGeneration - INFO - Successfully generated story (template_id=69, focus_id=359, story_id=1270)
+2026-02-21 17:18:46,465 - StoryGeneration - INFO - Processing focus (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 17:18:46,465 - StoryGeneration - INFO - Generating story (template_id=69, template_title=Basel’s Neighbourhood Profiles, focus_id=359, focus_value=1)
+2026-02-21 17:18:58,382 - StoryGeneration - INFO - Successfully generated story (template_id=69, focus_id=359, story_id=1270)

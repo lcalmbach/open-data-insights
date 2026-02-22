@@ -60,6 +60,36 @@
       -->
       <p class="card-text mt-3">{{ selected_story.summary|safe }}</p>
     </b>
+    {% with focus_images=selected_story.templatefocus.focus_image_links.all %}
+	          {% if focus_images %}
+	        {% for link in focus_images %}
+	          {% if link.image.image %}
+	            <img
+	              src="{{ link.image.image.url }}"
+	              class="img-fluid rounded mt-3 story-focus-image"
+	              alt="{{ selected_story.title|striptags }}"
+	            >
+	            {% if link.image.credit_line_html %}
+	              <small class="d-block text-muted mt-1">
+	                {{ link.image.credit_line_html }}
+              </small>
+            {% elif link.image.credit_line %}
+              <small class="d-block text-muted mt-1">
+                {{ link.image.credit_line }}
+              </small>
+            {% elif link.image.image_source %}
+              <small class="d-block text-muted mt-1">
+                <a
+                  href="{{ link.image.image_source }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >Image source</a>
+              </small>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
     <p class="card-text mt-3">{{ selected_story.content_html|safe }}</p>
   </div>
 

@@ -1,6 +1,7 @@
 from django.db import models
 from .graphic_template import StoryTemplateGraphic
 from .story import Story
+from reports.models.lookups import Language, LanguageEnum
 
 
 class Graphic(models.Model):
@@ -25,6 +26,15 @@ class Graphic(models.Model):
     data = models.JSONField(
         default=dict,
         help_text="Data for the graphic, e.g., {'date': ['2023-01-01', '2023-01-02'], 'value': [10, 20]}. This should match the settings defined in the graphic.",
+    )
+    language = models.ForeignKey(
+        "reports.LookupValue",
+        blank=True,
+        null=True,
+        default=LanguageEnum.ENGLISH.value,  # Default to English
+        on_delete=models.SET_NULL,
+        related_name="graphics",
+        help_text="Language of the graphic.",
     )
     sort_order = models.IntegerField(
         default=0, help_text="Sort order of the graphic within the story."

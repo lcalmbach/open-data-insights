@@ -1,8 +1,16 @@
 .splash-image {
-    max-height: 200px;
-    width: auto;
-    display: block;
-    margin: 0 auto 1rem auto;
+	    max-height: 200px;
+	    width: auto;
+	    display: block;
+	    margin: 0 auto 1rem auto;
+}
+
+.story-focus-image {
+  max-height: 450px;
+  width: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .custom-navbar {

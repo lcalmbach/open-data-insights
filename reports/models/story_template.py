@@ -1,9 +1,13 @@
 import uuid
+import logging
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 
 from .managers import NaturalKeyManager
 from .lookups import Period, PeriodDirection
+
+logger = logging.getLogger(__name__)
 
 
 class StoryTemplateQuerySet(models.QuerySet):
@@ -196,6 +200,171 @@ class StoryTemplateDataset(models.Model):
         return f"{self.story_template.title} - {self.dataset.name}"
 
 
+class StoryImage(models.Model):
+    """
+    Reusable image + attribution metadata.
+
+    This was previously stored directly on `StoryTemplateFocus` but is now modeled
+    separately so multiple images can be attached to a single focus record.
+    """
+
+    image = models.ImageField(
+        blank=True,
+        null=True,
+        upload_to="story_template_focus/",
+        help_text="Image file.",
+    )
+    title = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="title for image"
+    )
+    author = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Photographer/author.",
+    )
+    author_url = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text="author URL, when available.",
+    )
+    license = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="License name (manual override, e.g. CC BY 4.0).",
+    )
+    license_url = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text="URL to the license terms, when available.",
+    )
+    image_source = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Optional source/attribution for the image, e.g. 'Wikimedia Commons' or 'MeteoSwiss'. This is used in the credit line if provided, even if no other metadata is available.",
+    )
+    image_source_url = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text="Origiginal file page URL (e.g. https://commons.wikimedia.org/wiki/File:Example.jpg).",
+    )
+    image_changes = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="If you modified the image, describe changes (e.g. cropped, resized). Leave blank for no changes.",
+    )
+
+
+    @property
+    def credit_line_html(self):
+        """
+        HTML version of `credit_line` with links when available.
+        """
+        from django.utils.html import format_html, format_html_join
+
+        author = ((self.author or self.author) or "").strip().rstrip(",")
+        title = (self.title or "").strip().rstrip(",")
+        file_url = (self.image_source_url or "").strip()
+        image_source = (self.image_source or "").strip().rstrip(",")
+        license_name = ((self.license or self.license) or "").strip().rstrip(",")
+        license_url = (self.license_url or "").strip()
+
+        if not any([author, title, file_url, license_name]):
+            return None
+
+        segments: list[object] = ["Photo:"]
+        if self.author_url and author:
+            author_link = format_html(
+                '<a href="{}" target="_blank" rel="noopener noreferrer">{}</a>',
+                self.author_url,
+                author,
+            )
+            segments.append(author_link)
+        elif author:
+            segments.append(author)
+        if title:
+            segments.append(title)
+        if self.image_source:
+            if self.image_source_url:
+                source_link = format_html(
+                    '<a href="{}" target="_blank" rel="noopener noreferrer">{}</a>',
+                    file_url,
+                    image_source,
+                )
+                segments.append(format_html("on {}", source_link))
+            else:
+                segments.append(image_source)
+        if license_name:
+            if license_url:
+                license_link = format_html(
+                    '<a href="{}" target="_blank" rel="noopener noreferrer">{}</a>',
+                    license_url,
+                    license_name,
+                )
+                segments.append(format_html("licensed under {}", license_link))
+            else:
+                segments.append(format_html("licensed under {}", license_name))
+
+        meaningful = [s for s in segments[1:] if s and s != "via Wikimedia Commons"]
+        if not meaningful and not license_name:
+            return None
+
+        tail = [seg for seg in segments[1:] if seg]
+        if not tail:
+            return format_html("{}.", segments[0])
+
+        return format_html(
+            "{} {}.",
+            segments[0],
+            format_html_join(", ", "{}", ((seg,) for seg in tail)),
+        )
+
+    def __str__(self) -> str:
+        if self.title:
+            return self.title
+        if self.image_source_url:
+            return self.image_source_url
+        if self.image:
+            return getattr(self.image, "name", "") or "Image"
+        return f"StoryImage {self.pk}" if self.pk else "StoryImage"
+
+
+class StoryTemplateFocusImage(models.Model):
+    """Ordered link between StoryTemplateFocus and StoryImage."""
+
+    focus = models.ForeignKey(
+        "StoryTemplateFocus",
+        on_delete=models.CASCADE,
+        related_name="focus_image_links",
+    )
+    image = models.ForeignKey(
+        StoryImage,
+        on_delete=models.CASCADE,
+        related_name="focus_links",
+    )
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["focus", "image"], name="uniq_storytemplatefocus_image"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.focus_id} -> {self.image_id}"
+
+
 class StoryTemplateFocus(models.Model):
     """
     A focus row attached to a StoryTemplate.
@@ -232,12 +401,34 @@ class StoryTemplateFocus(models.Model):
         blank=True,
         null=True,
     )
-    image = models.ImageField(
+    images = models.ManyToManyField(
+        StoryImage,
+        through=StoryTemplateFocusImage,
+        related_name="focuses",
         blank=True,
-        null=True,
-        upload_to="story_template_focus/",
-        help_text="Optional image shown for this focus.",
     )
+
+    @property
+    def primary_image(self):
+        link = (
+            self.focus_image_links.select_related("image")
+            .order_by("sort_order", "id")
+            .first()
+        )
+        return getattr(getattr(link, "image", None), "image", None)
+
+    @property
+    def image(self):
+        return self.primary_image
+
+    @property
+    def image_source(self) -> str | None:
+        link = (
+            self.focus_image_links.select_related("image")
+            .order_by("sort_order", "id")
+            .first()
+        )
+        return getattr(getattr(link, "image", None), "images_source", None)
 
     class Meta:
         verbose_name = "Story Template Focus"

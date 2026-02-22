@@ -81,7 +81,22 @@ class EmailService(ETLBaseService):
             if not send_date:
                 send_date = date.today()
 
-            self.logger.info(f"Starting sending mails for {send_date}...")
+            self.logger.info("Starting sending mails for %s...", send_date)
+
+            redirect_recipients = getattr(settings, "EMAIL_REDIRECT_TO", None)
+            redirect_max_emails = getattr(settings, "EMAIL_REDIRECT_MAX_EMAILS", None)
+            redirect_active = bool(redirect_recipients)
+            emails_attempted = 0
+
+            if (
+                redirect_active
+                and isinstance(redirect_max_emails, int)
+                and redirect_max_emails == 0
+            ):
+                self.logger.info(
+                    "EMAIL_REDIRECT_TO is enabled; not sending any emails (EMAIL_REDIRECT_MAX_EMAILS=0)."
+                )
+                return {"success": True, "total_sent": 0, "failed": 0, "details": []}
 
             User = get_user_model()
             users = User.objects.filter(is_active=True)
@@ -145,6 +160,8 @@ class EmailService(ETLBaseService):
                     subject=subject,
                     send_date=send_date,
                 )
+
+                emails_attempted += 1
                 details.append(
                     {
                         "user": user.first_name,
@@ -158,15 +175,28 @@ class EmailService(ETLBaseService):
                 else:
                     total_errors += 1
 
+                if (
+                    redirect_active
+                    and isinstance(redirect_max_emails, int)
+                    and redirect_max_emails > 0
+                    and emails_attempted >= redirect_max_emails
+                ):
+                    self.logger.info(
+                        "EMAIL_REDIRECT_TO is enabled; stopping after %s email(s) (EMAIL_REDIRECT_MAX_EMAILS=%s).",
+                        emails_attempted,
+                        redirect_max_emails,
+                    )
+                    break
+
             # mark templates as published if we sent at least one email
             if new_templates_qs.exists() and total_sent > 0:
                 try:
                     count = new_templates_qs.update(is_published=True)
                     self.logger.info(
-                        f"Marked {count} new templates as is_published=True"
+                        "Marked %s new templates as is_published=True", count
                     )
                 except Exception as e:
-                    self.logger.error(f"Failed to mark new templates as published: {e}")
+                    self.logger.error("Failed to mark new templates as published: %s", e)
 
             return {
                 "success": True,
@@ -176,7 +206,7 @@ class EmailService(ETLBaseService):
             }
 
         except Exception as e:
-            self.logger.error(f"Error sending stories for date {send_date}: {str(e)}")
+            self.logger.error("Error sending stories for date %s: %s", send_date, e)
             return {"success": False, "error": str(e)}
 
     def _get_new_templates(self) -> list:

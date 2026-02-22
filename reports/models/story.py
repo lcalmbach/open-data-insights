@@ -10,6 +10,7 @@ from report_generator import settings
 from reports.utils import default_yesterday
 from .story_template import StoryTemplateFocus
 from reports.constants.reference_period import ReferencePeriod
+from reports.models.lookups import Language, LanguageEnum
 
 month_to_season = {
     1: 4,
@@ -76,6 +77,15 @@ class Story(models.Model):
         null=True,
     )
     content = models.TextField(help_text="Content of the story.", blank=True, null=True)
+    language = models.ForeignKey(
+        Language,
+        blank=True,     
+        null=True,   
+        default=LanguageEnum.ENGLISH.value,     # Default to English
+        on_delete=models.SET_NULL,
+        related_name="stories",
+        help_text="Language of the story.",
+    )   
 
     @property
     def reference_period(self):
@@ -142,17 +152,6 @@ class Story(models.Model):
             except json.JSONDecodeError:
                 raise ValidationError({"context_values": "Invalid JSON format"})
 
-        # Validate AI model field
-        valid_ai_models = [
-            "gpt-4o",
-            "gpt-4",
-        ]  # Update with your valid models
-        if self.ai_model and self.ai_model not in valid_ai_models:
-            raise ValidationError(
-                {
-                    "ai_model": f'Invalid AI model. Choose from: {", ".join(valid_ai_models)}'
-                }
-            )
 
     @property
     def reference_period_expression(self) -> str:

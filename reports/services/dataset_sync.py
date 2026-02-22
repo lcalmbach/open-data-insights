@@ -180,7 +180,7 @@ class DatasetProcessor:
 
         # Get ODS metadata and last record
         try:
-            self.ods_records, self.ods_last_record = self.get_ods_last_record()
+            self.ods_records, self.ods_last_record = self.get_ods_last_record() if self.dataset.source == 'ods' else (0, None)  
             # self.ods_last_record_date, self.ods_last_record_identifier = None, None
 
             if self.ods_last_record and self.dataset.source_timestamp_field:
@@ -211,7 +211,7 @@ class DatasetProcessor:
 
         # Get ODS metadata
         try:
-            self.ods_metadata = self.get_ods_metadata()
+            self.ods_metadata = self.get_ods_metadata() if self.dataset.source == 'ods' else None
         except Exception as e:
             self.logger.warning(f"Could not get ODS metadata: {e}")
             self.ods_metadata = None
@@ -392,7 +392,8 @@ class DatasetProcessor:
 
             self.logger.info(f"Starting import for {identifier}")
             start_time = time.time()
-
+            import_is_due = True
+            
             # master data is not reloaded each time and these tables are skipped
             if self.dataset.import_type.id == ImportTypeEnum.SKIP.value:
                 self.logger.info(
@@ -419,7 +420,7 @@ class DatasetProcessor:
                     )
                     return True
             
-            elif self.dataset.import_type.id == ImportTypeEnum.FULL_RELOAD.value:
+            if import_is_due and self.dataset.import_type.id == ImportTypeEnum.FULL_RELOAD.value:
                 self.logger.info(f"Performing full reload for {identifier}")
                 self.dbclient.delete_table(
                     self.dataset.target_table_name, schema="opendata"
@@ -662,7 +663,7 @@ class DatasetProcessor:
 
             # Download full dataset
             if self.dataset.source.lower() == "url":
-                url = self.dataset.base_url
+                url = self.dataset.source_url
                 response = requests.get(url)
                 response.raise_for_status()  # Ensure it worked
                 df = pd.read_csv(StringIO(response.text))

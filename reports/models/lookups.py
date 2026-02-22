@@ -1,5 +1,6 @@
 from django.db import models
 from enum import Enum
+from django.conf import settings
 
 THEME_CATEGORY_ID = 1
 PERIOD_CATEGORY_ID = 2
@@ -10,12 +11,18 @@ GRAPH_TYPE_CATEGORY_ID = 6
 PERIOD_DIRECTION_CATEGORY_ID = 7
 IMPORT_TYPE_CATEGORY_ID = 8
 TAG_CATEGORY_ID = 9
-from account.models import CustomUser
+LANGUAGE_CATEGORY_ID = 10
+
+class LanguageEnum(Enum):
+    ENGLISH=94
+    GERMAN=95
+    FRENCH=96
 
 
 class PeriodDirectionEnum(Enum):
     Backward = 72
     Forward = 71
+    CURRENT = 73
 
 
 class LookupCategory(models.Model):
@@ -182,6 +189,19 @@ class ContextPeriod(LookupValue):
         verbose_name = "Context Period"
         verbose_name_plural = "Context Periods"
 
+class LanguageManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(category_id=LANGUAGE_CATEGORY_ID)
+
+
+class Language(LookupValue):
+    objects = LanguageManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Language"
+        verbose_name_plural = "Languages"
+
 
 class TagDataset(models.Model):
     tag = models.ForeignKey(
@@ -222,7 +242,7 @@ class TagUser(models.Model):
         Tag, on_delete=models.CASCADE, related_name="user_assignments"
     )
     user = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, related_name="tag_assignments"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="tag_assignments"
     )
 
     class Meta:

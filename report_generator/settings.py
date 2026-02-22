@@ -200,8 +200,8 @@ MARKDOWNIFY = {
 }
 
 APP_INFO = {
-    "version": "0.2.1",
-    "version_date": "2026-02-17",
+    "version": "0.2.2",
+    "version_date": "2026-02-22",
     "author_name": "Lukas Calmbach",
     "author_email": "lcalmbach@gmail.com",
     "repo_url": "https://github.com/lcalmbach/open-data-insights",
@@ -215,7 +215,7 @@ DATA_FILES_PATH = os.environ.get('DATA_FILES_PATH', str(BASE_DIR / 'files'))
 # OpenAI Configuration
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY')
-DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL', 'gpt-4o')
+DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL', 'deepseek-chat')
 
 APP_ROOT = "https://www.open-data-insights.org/"
 DEVELOPER_EMAIL = DEFAULT_FROM_EMAIL
@@ -225,6 +225,9 @@ RATING_NOTIFY_EMAIL = os.environ.get("RATING_NOTIFY_EMAIL", FEEDBACK_NOTIFY_EMAI
 # In development/local only:
 if DEBUG:  # or use a custom flag for your environment
     EMAIL_REDIRECT_TO = [DEVELOPER_EMAIL]
+    # When emails are redirected (e.g. to the developer address), avoid spamming during local runs.
+    # Set to a higher number (or unset) if you want to receive more than one test mail.
+    EMAIL_REDIRECT_MAX_EMAILS = int(os.environ.get("EMAIL_REDIRECT_MAX_EMAILS", "1"))
 
 
 #LOGGING = {
