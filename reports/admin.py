@@ -70,10 +70,11 @@ class StoryTemplateFocusAdmin(admin.ModelAdmin):
         "id",
         "story_template",
         "filter_value",
+        "filter_expression",
     )
     list_select_related = ("story_template",)
-    search_fields = ("story_template__title", "filter_value")
-    list_filter = ("story_template",)
+    search_fields = ("story_template__title", "filter_value", "filter_expression")
+    list_filter = ("story_template","filter_expression")
     inlines = (StoryTemplateFocusImageInline,)
 
 
