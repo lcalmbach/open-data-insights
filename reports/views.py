@@ -451,7 +451,8 @@ def _get_daily_splash_image(for_date=None) -> str:
             path.name
             for path in images_dir.iterdir()
             if path.is_file()
-            and path.suffix.lower() in {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"}
+            and path.suffix.lower() == ".png"
+            and path.stem.lower().startswith("splash")
         ]
     )
     if not images:
@@ -1015,7 +1016,9 @@ class AboutView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["app_info"] = settings.APP_INFO
-        context["num_insights"] = Story.objects.count()
+        context["num_insights"] = Story.objects.filter(
+            language_id=ENGLISH_LANGUAGE_ID
+        ).count()
         context["num_datasets"] = Dataset.objects.filter(active=True).count()
         context["num_story_templates"] = StoryTemplate.objects.count()
         context["num_odi_datasets"] = Dataset.objects.filter(active=True, source = 'odi').count()

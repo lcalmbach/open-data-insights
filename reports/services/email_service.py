@@ -13,12 +13,15 @@ from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template.loader import render_to_string
 import markdown
 from django.contrib.auth import get_user_model
+from openai import OpenAI
 from reports.models.story import Story
 from reports.models.subscription import StoryTemplateSubscription
 from reports.models.story_template import StoryTemplate
+from reports.models.lookups import Language
 
 from reports.services.base import ETLBaseService
 from reports.services.database_client import DjangoPostgresClient
+from reports.language import ENGLISH_LANGUAGE_ID
 
 
 class EmailService(ETLBaseService):
@@ -28,6 +31,13 @@ class EmailService(ETLBaseService):
         super().__init__("EmailService")
         self.from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@example.com")
         self.dbclient = DjangoPostgresClient()
+        self.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
+        if self.ai_model == "deepseek-chat":
+            api_key = getattr(settings, "DEEPSEEK_API_KEY", None)
+            self.ai_client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+        else:
+            api_key = getattr(settings, "OPENAI_API_KEY", None)
+            self.ai_client = OpenAI(api_key=api_key)
 
     def send_story_email(
         self,
@@ -99,10 +109,18 @@ class EmailService(ETLBaseService):
                 return {"success": True, "total_sent": 0, "failed": 0, "details": []}
 
             User = get_user_model()
-            users = User.objects.filter(is_active=True)
+            users = (
+                User.objects.filter(is_active=True)
+                .select_related("preferred_language")
+                .order_by("id")
+            )
             total_sent = 0
             total_errors = 0
             details = []
+            translation_cache: dict[tuple[int, str], str] = {}
+            language_name_by_id = dict(
+                Language.objects.values_list("id", "value")
+            )
 
             # fetch templates that are not yet published for creation (one query)
             new_templates_qs = StoryTemplate.objects.filter(is_published=False)
@@ -129,6 +147,7 @@ class EmailService(ETLBaseService):
                 stories = Story.objects.filter(
                     templatefocus__story_template_id__in=template_ids,
                     published_date=send_date,
+                    language_id=ENGLISH_LANGUAGE_ID,
                 ).select_related("templatefocus__story_template")
 
                 if not stories.exists():
@@ -150,10 +169,41 @@ class EmailService(ETLBaseService):
                     )
 
                 # Render email body, include new_templates
-                email_body = self._render_insights_email(
-                    user, insights, new_templates=new_templates
+                english_email_body = self._render_insights_email(
+                    insights, new_templates=new_templates
                 )
-                subject = f"Open Data Insights for {send_date.strftime('%Y-%m-%d')}"
+                english_subject = f"Open Data Insights for {send_date.strftime('%Y-%m-%d')}"
+
+                preferred_language_id = getattr(user, "preferred_language_id", None) or ENGLISH_LANGUAGE_ID
+                preferred_language_id = int(preferred_language_id)
+                preferred_language_name = language_name_by_id.get(preferred_language_id, "English")
+                translated = preferred_language_id != ENGLISH_LANGUAGE_ID
+
+                if preferred_language_id == ENGLISH_LANGUAGE_ID:
+                    subject = english_subject
+                    email_body = english_email_body
+                else:
+                    subject = self._translate_text_cached(
+                        english_subject,
+                        preferred_language_id,
+                        preferred_language_name,
+                        translation_cache,
+                        max_tokens=120,
+                    )
+                    email_body = self._translate_text_cached(
+                        english_email_body,
+                        preferred_language_id,
+                        preferred_language_name,
+                        translation_cache,
+                        max_tokens=3000,
+                    )
+                self.logger.info(
+                    "Prepared localized email (user_email=%s, preferred_language_id=%s, preferred_language=%s, translated=%s)",
+                    user.email,
+                    preferred_language_id,
+                    preferred_language_name,
+                    translated,
+                )
                 result = self.send_story_email(
                     story_content=email_body,
                     recipients=[user.email],
@@ -166,6 +216,9 @@ class EmailService(ETLBaseService):
                     {
                         "user": user.first_name,
                         "email": user.email,
+                        "preferred_language_id": preferred_language_id,
+                        "preferred_language": preferred_language_name,
+                        "translated": translated,
                         "success": result.get("success"),
                         "error": result.get("error"),
                     }
@@ -227,11 +280,11 @@ class EmailService(ETLBaseService):
         return result
 
     def _render_insights_email(
-        self, user, insights: list, new_templates: list | None = None
+        self, insights: list, new_templates: list | None = None
     ):
         """Render the email body for a user, their insights and optional new-template section."""
         lines = [
-            f"Hello {user.first_name},",
+            "Hello,",
             "",
             "",
             "We’ve just published new insights from your subscribed topics:",
@@ -259,6 +312,58 @@ class EmailService(ETLBaseService):
         lines += ["", "", "Best regards,", "your **O**pen **D**ata **I**nsights Team"]
 
         return "\n".join(lines)
+
+    def _translate_text(self, text: str, target_language_name: str, max_tokens: int = 3000) -> str:
+        if not text:
+            return text
+
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    f"You are a professional translator. Translate the input text to {target_language_name}. "
+                    "Preserve meaning, numbers, dates, links, and markdown structure. Return only the translated text."
+                ),
+            },
+            {"role": "user", "content": text},
+        ]
+        response = self.ai_client.chat.completions.create(
+            model=self.ai_model,
+            messages=messages,
+            temperature=0.0,
+            max_tokens=max_tokens,
+        )
+        translated = (response.choices[0].message.content or "").strip()
+        return translated or text
+
+    def _translate_text_cached(
+        self,
+        text: str,
+        language_id: int,
+        language_name: str,
+        cache: dict[tuple[int, str], str],
+        *,
+        max_tokens: int = 3000,
+    ) -> str:
+        key = (int(language_id), text)
+        cached = cache.get(key)
+        if cached:
+            return cached
+        try:
+            translated = self._translate_text(
+                text,
+                target_language_name=language_name,
+                max_tokens=max_tokens,
+            )
+        except Exception:
+            self.logger.exception(
+                "Failed to translate email text (language_id=%s, language=%s); falling back to English",
+                language_id,
+                language_name,
+            )
+            translated = text
+        cache[key] = translated
+        return translated
 
     def send_admin_alert(self, subject: str, body: str) -> Dict[str, Any]:
         """Send a plain-text alert to all active staff admins."""
