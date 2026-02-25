@@ -72,6 +72,7 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "reports.middleware.LanguagePrefixMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -235,8 +236,8 @@ MARKDOWNIFY = {
 }
 
 APP_INFO = {
-    "version": "0.2.4",
-    "version_date": "2026-02-23",
+    "version": "0.2.5",
+    "version_date": "2026-02-25",
     "author_name": "Lukas Calmbach",
     "author_email": "lcalmbach@gmail.com",
     "repo_url": "https://github.com/lcalmbach/open-data-insights",

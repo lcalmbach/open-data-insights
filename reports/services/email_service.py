@@ -21,7 +21,11 @@ from reports.models.lookups import Language
 
 from reports.services.base import ETLBaseService
 from reports.services.database_client import DjangoPostgresClient
-from reports.language import ENGLISH_LANGUAGE_ID
+from reports.language import (
+    ENGLISH_LANGUAGE_ID,
+    get_language_code_for_id,
+    rewrite_url_language,
+)
 
 
 class EmailService(ETLBaseService):
@@ -125,16 +129,15 @@ class EmailService(ETLBaseService):
             # fetch templates that are not yet published for creation (one query)
             new_templates_qs = StoryTemplate.objects.filter(is_published=False)
             root = settings.APP_ROOT.rstrip("/")
-            new_templates = [
-                {
-                    "id": t.id,
-                    "title": t.title,
-                    "url": f"{root}/templates/?template={t.id}",
-                }
-                for t in new_templates_qs
-            ]
+            new_template_records = [{"id": t.id, "title": t.title} for t in new_templates_qs]
 
             for user in users:
+                preferred_language_id = getattr(user, "preferred_language_id", None) or ENGLISH_LANGUAGE_ID
+                preferred_language_id = int(preferred_language_id)
+                language_code = get_language_code_for_id(preferred_language_id)
+                preferred_language_name = language_name_by_id.get(preferred_language_id, "English")
+                translated = preferred_language_id != ENGLISH_LANGUAGE_ID
+
                 # Find subscriptions for this user
                 subscriptions = StoryTemplateSubscription.objects.filter(user=user)
                 # Get subscribed templates the user can access based on organisation
@@ -156,32 +159,38 @@ class EmailService(ETLBaseService):
                 # Build insights list for email
                 insights = []
                 for story in stories:
+                    story_url = (
+                        story.get_absolute_url()
+                        if hasattr(story, "get_absolute_url")
+                        else f"{settings.APP_ROOT.rstrip('/')}/story/{story.id}/"
+                    )
                     insights.append(
                         {
                             "title": story.title,
                             "summary": story.summary,
-                            "url": (
-                                story.get_absolute_url()
-                                if hasattr(story, "get_absolute_url")
-                                else f"{settings.APP_ROOT.rstrip('/')}/story/{story.id}/"
-                            ),
+                            "url": rewrite_url_language(story_url, language_code),
                         }
                     )
 
-                # Render email body, include new_templates
-                english_email_body = self._render_insights_email(
-                    insights, new_templates=new_templates
-                )
                 english_subject = f"Open Data Insights for {send_date.strftime('%Y-%m-%d')}"
 
-                preferred_language_id = getattr(user, "preferred_language_id", None) or ENGLISH_LANGUAGE_ID
-                preferred_language_id = int(preferred_language_id)
-                preferred_language_name = language_name_by_id.get(preferred_language_id, "English")
-                translated = preferred_language_id != ENGLISH_LANGUAGE_ID
+                # Build language-prefixed template links per recipient.
+                new_templates = [
+                    {
+                        "id": t["id"],
+                        "title": t["title"],
+                        "url": rewrite_url_language(f"{root}/templates/?template={t['id']}", language_code),
+                    }
+                    for t in new_template_records
+                ]
 
                 if preferred_language_id == ENGLISH_LANGUAGE_ID:
                     subject = english_subject
-                    email_body = english_email_body
+                    email_body = self._render_insights_email(
+                        insights,
+                        new_templates=new_templates,
+                        profile_url=rewrite_url_language(f"{root}/account/profile/", language_code),
+                    )
                 else:
                     subject = self._translate_text_cached(
                         english_subject,
@@ -190,8 +199,13 @@ class EmailService(ETLBaseService):
                         translation_cache,
                         max_tokens=120,
                     )
+                    localized_english_email_body = self._render_insights_email(
+                        insights,
+                        new_templates=new_templates,
+                        profile_url=rewrite_url_language(f"{root}/account/profile/", language_code),
+                    )
                     email_body = self._translate_text_cached(
-                        english_email_body,
+                        localized_english_email_body,
                         preferred_language_id,
                         preferred_language_name,
                         translation_cache,
@@ -280,7 +294,10 @@ class EmailService(ETLBaseService):
         return result
 
     def _render_insights_email(
-        self, insights: list, new_templates: list | None = None
+        self,
+        insights: list,
+        new_templates: list | None = None,
+        profile_url: str | None = None,
     ):
         """Render the email body for a user, their insights and optional new-template section."""
         lines = [
@@ -299,15 +316,17 @@ class EmailService(ETLBaseService):
             lines += ["", ""]  # spacer# spacer
         # New templates / subscription prompt
         if new_templates:
-            root = settings.APP_ROOT.rstrip("/")
             lines.append("🔥We’ve uncovered new insights — discover them now:")
             lines.append("")
             for t in new_templates:
                 lines.append(f"- [{t['title']}]({t['url']})")
             lines.append("")  # spacer
             # subscription prompt linking to account/profile
+            if not profile_url:
+                root = settings.APP_ROOT.rstrip("/")
+                profile_url = f"{root}/account/profile/"
             lines.append(
-                f"Interested? Subscribe to new insights [here]({root}/account/profile/)"
+                f"Interested? Subscribe to new insights [here]({profile_url})"
             )
         lines += ["", "", "Best regards,", "your **O**pen **D**ata **I**nsights Team"]
 

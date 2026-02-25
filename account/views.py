@@ -24,7 +24,11 @@ import logging
 
 from reports.models.subscription import StoryTemplateSubscription
 from reports.models.story_template import StoryTemplate
-from reports.language import get_content_language_id, set_content_language_id
+from reports.language import (
+    get_language_code_for_id,
+    rewrite_url_language,
+    set_content_language_id,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +185,7 @@ def set_language(request):
             request.user.preferred_language_id = language_id
             request.user.save(update_fields=["preferred_language"])
 
-    return redirect(next_url)
+    return redirect(rewrite_url_language(next_url, get_language_code_for_id(language_id)))
 
 
 def register_view(request):
@@ -245,8 +249,14 @@ def confirm_email(request, uidb64, token):
                 protocol = "https" if request.is_secure() else "http"
                 templates = StoryTemplate.objects.accessible_to(user)
                 if templates.exists():
+                    language_code = get_language_code_for_id(
+                        getattr(user, "preferred_language_id", None)
+                    )
                     # build absolute profile URL at runtime (no hardcoded host)
-                    profile_url = request.build_absolute_uri(reverse("account:profile"))
+                    profile_url = rewrite_url_language(
+                        request.build_absolute_uri(reverse("account:profile")),
+                        language_code,
+                    )
                     lines = [
                         f"Hello {user.get_full_name() or user.email},",
                         "",
@@ -262,7 +272,10 @@ def confirm_email(request, uidb64, token):
                     ]
                     root = f"{protocol}://{domain}".rstrip("/")
                     for t in templates:
-                        lines.append(f"- {t.title}: {root}/templates/?template={t.id}")
+                        lines.append(
+                            f"- {t.title}: "
+                            f"{rewrite_url_language(f'{root}/templates/?template={t.id}', language_code)}"
+                        )
 
                     subject = "Welcome to Open Data Insights"
                     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", f"no-reply@{domain}")

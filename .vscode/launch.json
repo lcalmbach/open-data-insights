@@ -31,8 +31,9 @@
       "program": "${workspaceFolder}/manage.py",
       "args": [
         "generate_stories",
-        "--story_focus_id",
-        "279",
+        "--id",
+        "71",
+        "--force",
         "-v",
         "2"
       ],
