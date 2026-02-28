@@ -127,13 +127,13 @@ class StoryProcessor:
         # If there is an existing story, reuse it and regenerate its content.
         if story:
             self.story = story
-
+            
         else:
             most_recent_date_with_data = self._get_most_recent_day(template) or published_date
             # add a day for yearly, monthly or sesonal updated data: in such cases the data is set to e.g. 31.12. for yearly, 
             # which would result in the previous year being picked for backward looking stories. By adding a day, we ensure that the current 
             # year is picked as anchor date for the reference period calculation.
-            anchor_date = most_recent_date_with_data if template.reference_period.value == 'day' else most_recent_date_with_data + timedelta(days=1)
+            anchor_date = most_recent_date_with_data + timedelta(days=1)
             self.reference_period_start, self.reference_period_end = (
                 self._get_reference_period(anchor_date, template)
             )
