@@ -102,6 +102,56 @@ class StoryProcessor:
     Handles story generation, AI integration, and database operations
     """
 
+    def _set_story_context(
+        self,
+        *,
+        template: StoryTemplate | None = None,
+        focus: StoryTemplateFocus | None = None,
+        story: Story | None = None,
+    ) -> None:
+        """Resolve the template/focus pair from the active initialization path."""
+        resolved_focus = focus or getattr(story, "templatefocus", None)
+        resolved_template = (
+            template
+            or getattr(resolved_focus, "story_template", None)
+            or getattr(story, "template", None)
+        )
+
+        self.template = resolved_template
+        self.focus = resolved_focus or getattr(self.template, "default_focus", None)
+
+    def _set_reference_period_attributes(
+        self,
+        *,
+        reference_period_start: date | None = None,
+        reference_period_end: date | None = None,
+    ) -> None:
+        """Populate all attributes derived from the active reference period."""
+        self.reference_period_start = (
+            reference_period_start
+            if reference_period_start is not None
+            else getattr(getattr(self, "story", None), "reference_period_start", None)
+        )
+        self.reference_period_end = (
+            reference_period_end
+            if reference_period_end is not None
+            else getattr(getattr(self, "story", None), "reference_period_end", None)
+        )
+
+        anchor_date = self.reference_period_start or self.published_date
+        self.year = anchor_date.year if anchor_date else datetime.now().year
+        self.month = anchor_date.month if anchor_date else datetime.now().month
+
+        if anchor_date and self.template:
+            self.season, self.season_year = self._get_season(anchor_date, self.template)
+        else:
+            self.season = month_to_season.get(self.month)
+            self.season_year = self.year
+
+        self.is_data_based = StoryTemplateContext.objects.filter(
+            story_template=self.template
+        ).exists()
+
     def __init__(
         self,
         published_date: date,
@@ -117,8 +167,7 @@ class StoryProcessor:
         self.dbclient = DjangoPostgresClient()
         self.force_generation = force_generation
         self.published_date = published_date
-        self.template = template
-        self.focus = focus
+        self._set_story_context(template=template, focus=focus, story=story)
         template_id = getattr(self.template, "id", None)
         focus_id = getattr(self.focus, "id", None)
         template_title = getattr(self.template, "title", "") or ""
@@ -127,6 +176,7 @@ class StoryProcessor:
         # If there is an existing story, reuse it and regenerate its content.
         if story:
             self.story = story
+            self._set_reference_period_attributes()
             
         else:
             most_recent_date_with_data = self._get_most_recent_day(template) or published_date
@@ -134,30 +184,13 @@ class StoryProcessor:
             # which would result in the previous year being picked for backward looking stories. By adding a day, we ensure that the current 
             # year is picked as anchor date for the reference period calculation.
             anchor_date = most_recent_date_with_data + timedelta(days=1)
-            self.reference_period_start, self.reference_period_end = (
+            reference_period_start, reference_period_end = (
                 self._get_reference_period(anchor_date, template)
             )
-            self.season, self.season_year = self._get_season(
-                self.reference_period_start, template
+            self._set_reference_period_attributes(
+                reference_period_start=reference_period_start,
+                reference_period_end=reference_period_end,
             )
-            self.season, self.season_year = self._get_season(
-                self.reference_period_start, template
-            )   
-            # safe access to year/month
-            self.year = (
-                self.reference_period_start.year
-                if self.reference_period_start
-                else datetime.now().year
-            )
-            self.month = (
-                self.reference_period_start.month
-                if self.reference_period_start
-                else datetime.now().month
-            )
-            # self.last_reference_period_start_date = self._get_last_published_date()
-            self.is_data_based = StoryTemplateContext.objects.filter(
-                story_template=template
-            ).exists()
             # true means: insight does not exist for refernece period and conditions are met
             if self.story_is_due(self.reference_period_start):
                 self.story = (
@@ -170,7 +203,7 @@ class StoryProcessor:
                     or Story()  # creates a new, empty instance if no match
                 )
                 if self.story.id is None:
-                    self.focus = focus if focus is not None else template.default_focus
+                    self._set_story_context(template=template, focus=focus, story=self.story)
                     if self.focus is None:
                         raise ValueError(
                             f"StoryTemplate {getattr(template, 'id', None)} has no default focus row"
@@ -182,17 +215,17 @@ class StoryProcessor:
                     self.story.language_id = LanguageEnum.ENGLISH.value
                 else:
                     # Existing story found: ensure focus/templatefocus are set for downstream logic.
-                    self.focus = self.story.templatefocus
+                    self._set_story_context(template=template, focus=focus, story=self.story)
             else:
                 self.story = None  # not due, so we won't generate a story
 
 
-            if self.story:
-                self.template = template
+        if self.story:
+            self._set_story_context(template=template, focus=focus, story=self.story)
 
-                if not getattr(self.story, "ai_model", None):
-                    self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
-                self.ai_client = self.get_ai_client()
+            if not getattr(self.story, "ai_model", None):
+                self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
+            self.ai_client = self.get_ai_client()
 
 
     def get_ai_client(self) -> OpenAI:

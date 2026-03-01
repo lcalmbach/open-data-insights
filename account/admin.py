@@ -12,7 +12,7 @@ class OrganisationAdmin(admin.ModelAdmin):
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ["email", "first_name", "last_name", "is_staff", "is_confirmed", "is_active"]
+    list_display = ["email", "first_name", "last_name", "is_staff", "is_confirmed", "is_active", "auto_subscribe"]
     list_filter = ["is_staff", "is_superuser", "is_active", "is_confirmed"]
     search_fields = ["email"]
     ordering = ["email"]
@@ -22,7 +22,7 @@ class CustomUserAdmin(UserAdmin):
         (None, {"fields": ("email", "password")}),
         (
             "Personal info",
-            {"fields": ("first_name", "last_name", "country", "organisation")},
+            {"fields": ("first_name", "last_name", "country", "organisation", "auto_subscribe")},
         ),
         ("Permissions", {
             "fields": ("is_active", "is_staff", "is_superuser", "is_confirmed", "groups", "user_permissions")
@@ -33,6 +33,16 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             "classes": ("wide",),
-            "fields": ("email", "password1", "password2", "first_name", "last_name", "is_active", "is_staff", "is_confirmed"),
+            "fields": (
+                "email",
+                "password1",
+                "password2",
+                "first_name",
+                "last_name",
+                "auto_subscribe",
+                "is_active",
+                "is_staff",
+                "is_confirmed",
+            ),
         }),
     )

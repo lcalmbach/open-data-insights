@@ -16,6 +16,47 @@ from wordcloud import WordCloud
 logger = logging.getLogger(__name__)
 
 
+def _build_categorical_x_axis(data, settings, x_field):
+    """Choose axis settings that keep dense bar-chart labels readable."""
+    axis_kwargs = {}
+    x_label_angle = settings.get("x_label_angle")
+    x_label_limit = settings.get("x_label_limit")
+
+    try:
+        n_labels = int(data[x_field].nunique()) if x_field else 0
+    except Exception:
+        n_labels = 0
+
+    try:
+        max_label_length = max((len(str(v)) for v in data[x_field].dropna().unique()), default=0)
+    except Exception:
+        max_label_length = 0
+
+    if x_label_angle is not None:
+        axis_kwargs["labelAngle"] = x_label_angle
+    elif n_labels > 12 or max_label_length > 10:
+        axis_kwargs["labelAngle"] = -40
+    elif n_labels > 8 or max_label_length > 6:
+        axis_kwargs["labelAngle"] = -25
+    else:
+        axis_kwargs["labelAngle"] = 0
+
+    axis_kwargs["labelOverlap"] = settings.get(
+        "x_label_overlap",
+        "greedy" if axis_kwargs["labelAngle"] == 0 else True,
+    )
+    axis_kwargs["labelLimit"] = (
+        x_label_limit
+        if x_label_limit is not None
+        else 120 if axis_kwargs["labelAngle"] == 0 else 160
+    )
+
+    if settings.get("x_format"):
+        axis_kwargs["format"] = settings["x_format"]
+
+    return alt.Axis(**axis_kwargs)
+
+
 
 def generate_chart(data, settings, chart_id):
     """
@@ -93,9 +134,29 @@ def generate_chloropleth(data, settings, chart_id=None):
 
 def create_line_chart(data, settings):
     """Create a line chart with the given data and settings"""
+    settings = settings.copy() if hasattr(settings, "copy") else dict(settings)
     data[settings['y']] = pd.to_numeric(data[settings['y']], errors='coerce')
     if settings.get('x_type') == "T":
         data[settings.get('x')] = pd.to_datetime(data[settings.get('x')], errors='coerce')
+
+    x_field = settings.get("x")
+    if (
+        x_field
+        and settings.get("x_type", "").upper() in {"", "Q", "N"}
+        and "x_tick_integer" not in settings
+    ):
+        try:
+            x_numeric = pd.to_numeric(data[x_field], errors="coerce").dropna()
+            if not x_numeric.empty:
+                is_integer_like = (x_numeric % 1 == 0).all()
+                looks_like_years = x_numeric.between(1000, 9999).all()
+                if is_integer_like and looks_like_years:
+                    settings["x_tick_integer"] = True
+                    x_axis = settings.get("x_axis", {}).copy() if hasattr(settings.get("x_axis", {}), "copy") else dict(settings.get("x_axis", {}) or {})
+                    x_axis.setdefault("format", "d")
+                    settings["x_axis"] = x_axis
+        except Exception:
+            pass
     
     if "focus_line" in settings:
         focus_year = settings["focus_line"]["color_value"]
@@ -202,17 +263,7 @@ def create_bar_chart(data, settings):
     # Build encodings, force x to ordinal categories to avoid numeric fractional ticks for years
     # Build X axis (format belongs to Axis, NOT to alt.X)
     encodings = {}
-    axis_kwargs = {}
-    if x_label_angle is not None:
-        axis_kwargs["labelAngle"] = x_label_angle
-        axis_kwargs["labelOverlap"] = False
-    else:
-        axis_kwargs["labelAngle"] = 0
-
-    if x_format:
-        axis_kwargs["format"] = x_format  # e.g. "%Y-%m" for temporal dates
-
-    axis = alt.Axis(**axis_kwargs)
+    axis = _build_categorical_x_axis(data, settings, x_field)
 
     x_encoding_kwargs = {
         "title": settings.get("x_title", x_field),
@@ -337,7 +388,8 @@ def create_bar_stacked_chart(data, settings):
     encodings = {
         'x': alt.X(
             f"{x_field}:{x_type}",
-            title=settings.get('x_title', x_field)
+            title=settings.get('x_title', x_field),
+            axis=_build_categorical_x_axis(data, settings, x_field),
         ),
         'y': alt.Y(
             y_field, 
