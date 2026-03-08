@@ -56,8 +56,8 @@ class StoryTemplateAdmin(admin.ModelAdmin):
         "id",
         "title",
         "reference_period",
-        "generation_mode",
         "organisation",
+        "active",
     )
     inlines = (StoryTemplateFocusInline,)
     search_fields = ("title", "reference_period__value")

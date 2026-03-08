@@ -179,11 +179,12 @@ class StoryProcessor:
             self._set_reference_period_attributes()
             
         else:
-            most_recent_date_with_data = self._get_most_recent_day(template) or published_date
+            most_recent_date_with_data = self._get_most_recent_day(template)
+
             # add a day for yearly, monthly or sesonal updated data: in such cases the data is set to e.g. 31.12. for yearly, 
             # which would result in the previous year being picked for backward looking stories. By adding a day, we ensure that the current 
             # year is picked as anchor date for the reference period calculation.
-            anchor_date = most_recent_date_with_data + timedelta(days=1)
+            anchor_date = most_recent_date_with_data + timedelta(days=1) if most_recent_date_with_data else published_date
             reference_period_start, reference_period_end = (
                 self._get_reference_period(anchor_date, template)
             )
@@ -755,8 +756,8 @@ class StoryProcessor:
             ReferencePeriod.DAILY.value,
             ReferencePeriod.IRREGULAR.value,
         ):
+            # 
             base_start = anchor_date
-            base_end = anchor_date
             unit = "days"
         elif template.reference_period_id == ReferencePeriod.WEEKLY.value:
             # week starting on Monday that contains anchor
@@ -801,7 +802,7 @@ class StoryProcessor:
         # Apply the shift
         if unit == "days":
             period_start = base_start + pd.DateOffset(days=shift)
-            period_end = base_end + pd.DateOffset(days=shift)
+            period_end = period_start
         elif unit == "weeks":
             period_start = base_start + pd.DateOffset(days=7 * shift)
             period_end = base_end + pd.DateOffset(days=7 * shift)

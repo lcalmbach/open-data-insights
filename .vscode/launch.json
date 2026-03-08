@@ -32,10 +32,7 @@
       "args": [
         "generate_stories",
         "--id",
-        "73",
-        "--date",
-        "2025-05-01",
-        "--force",
+        "48",
         "-v",
         "2"
       ],
@@ -112,7 +109,7 @@
         "PYTHONPATH": "${workspaceFolder}"
       },
       "console": "integratedTerminal"
-    },
+    },graphics
 
     {
       "name": "Django: Send Stories",

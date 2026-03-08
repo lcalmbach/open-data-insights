@@ -76,15 +76,18 @@ def _values_dict_from_instance(
     exclude: Iterable[str] = (),
 ) -> Dict[str, Any]:
     data: Dict[str, Any] = {}
+    exclude_set = set(exclude)
     for f in _iter_model_fields(obj.__class__):
-        if f.name in exclude:
-            continue
         if isinstance(f, models.ManyToManyField):
             continue
         # For ForeignKey fields, use the underlying "<field>_id" value (integer)
         # so we don't pass source-DB model instances into destination DB operations.
         if isinstance(f, models.ForeignKey):
+            if f.name in exclude_set or f.attname in exclude_set:
+                continue
             data[f.attname] = getattr(obj, f.attname)
+            continue
+        if f.name in exclude_set:
             continue
         data[f.name] = getattr(obj, f.name)
     return data
