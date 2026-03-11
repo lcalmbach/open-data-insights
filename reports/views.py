@@ -1,4 +1,5 @@
 import csv
+from decimal import Decimal
 import json
 import logging
 import random
@@ -430,6 +431,19 @@ class _DatasetRow:
         return self._data[item]
 
 
+def _format_dataset_cell_value(value):
+    """Format numeric preview values for the dataset table."""
+    if value is None:
+        return value
+    if isinstance(value, float):
+        if pd.isna(value):
+            return value
+        return f"{value:.1f}"
+    if isinstance(value, Decimal):
+        return f"{value:.1f}"
+    return value
+
+
 def _get_daily_quote(for_date=None) -> Quote | None:
     """Return a deterministic quote of the day (exclude ChatGPT)."""
     quote_qs = Quote.objects.exclude(author__iexact="chatgpt").order_by("id")
@@ -834,8 +848,8 @@ def datasets_view(request):
                     for idx, column_name in enumerate(columns):
                         column_kwargs[f"columns__col_{idx}"] = Column(
                             display_name=column_name,
-                            cell__value=lambda row, column_name=column_name, **_: row.get(
-                                column_name
+                            cell__value=lambda row, column_name=column_name, **_: _format_dataset_cell_value(
+                                row.get(column_name)
                             ),
                         )
                     # IOMMI will try to refine a stray `paginator` query parameter even though

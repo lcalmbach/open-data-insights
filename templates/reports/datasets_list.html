@@ -73,77 +73,94 @@ This page is intended as a preview only: it shows at most 2,000 records and offe
 {% if selected_dataset %}
 <div class="card mb-3 shadow-sm">
   <div class="card-body">
-    <div class="d-flex justify-content-between align-items-start mb-2">
-      <h5 class="card-title mb-0">{{ selected_dataset.name }}</h5>
-      {% if selected_dataset.active %}
-      <span class="badge bg-success">Active</span>
-      {% else %}
-      <span class="badge bg-secondary">Inactive</span>
-      {% endif %}
-    </div>
-    <p class="card-text text-muted mb-2">
-      {{ selected_dataset.description|default:"No description provided."|linebreaksbr }}
-    </p>
-    <div class="row row-cols-1 row-cols-md-2 g-3">
-      <div class="col">
-        <div class="small text-muted">Identifier: {{ selected_dataset.source_identifier }}</div>
-        {% if selected_dataset.source_url and selected_dataset.source_url != "NA" %}
-        <div class="small">
-          <span class="text-muted me-1">Original source:</span>
-          <a href="{{ selected_dataset.source_url }}" target="_blank" rel="noopener">
-            {{ selected_dataset.source_url_label|default:selected_dataset.source_url }}
-          </a>
-        </div>
-        {% endif %}
-      </div>
-      <div class="col">
-        <div class="d-flex align-items-baseline gap-2 mb-1">
-          <span class="small text-muted">Update frequency:</span>
-          <span class="text-dark">{{ selected_dataset.data_update_frequency.value|default:"—" }}</span>
-        </div>
-        <div class="small text-muted">Previewing {{ preview_rows }} of {{ preview_limit }} rows</div>
-      </div>
-      <div class="col">
-        <div class="d-flex align-items-baseline gap-2 mb-1">
-          <span class="small text-muted">Target table:</span>
-          <span class="text-dark"><code>{{ selected_dataset.target_table_name }}</code></span>
-        </div>
-        <div class="small d-flex align-items-center gap-1">
-          <span class="text-muted">Schema:</span>
-          <span class="text-dark">{{ data_schema }}</span>
-        </div>
-      </div>
-      <div class="col">
-        <div class="d-flex align-items-baseline gap-2 mb-1">
-          <span class="small text-muted">Last import:</span>
-          <span class="text-dark">{{ selected_dataset.last_import_date|date:"Y-m-d H:i"|default:"—" }}</span>
-        </div>
-        <div class="small d-flex flex-wrap align-items-center gap-3">
-          <span class="text-muted">Fields:</span>
-          <span class="text-dark">
-            {% if selected_dataset.fields_selection %}
-              {{ selected_dataset.fields_selection|length }}
-            {% else %}
-              all
-            {% endif %}
-          </span>
-          <span class="text-muted">Rows:</span>
-          <span class="text-dark">{{ dataset_row_count|default:"—" }}</span>
-        </div>
-      </div>
-      <div class="col-12">
-        <div class="small text-muted mb-1">Used for insights:</div>
-        {% if insight_templates %}
-        <div class="small">
-          {% for template in insight_templates %}
-            <a href="{% url 'template_detail' template.id %}">
-              {{ template.title }}
-            </a>{% if not forloop.last %},{% endif %}
-          {% endfor %}
-        </div>
+    <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <h5 class="card-title mb-0">{{ selected_dataset.name }}</h5>
+        {% if selected_dataset.active %}
+        <span class="badge bg-success">Active</span>
         {% else %}
-        <div class="small text-dark">Not currently used in any insights.</div>
+        <span class="badge bg-secondary">Inactive</span>
         {% endif %}
+      </div>
+      <button
+        id="dataset-overview-toggle"
+        class="btn btn-sm p-0 border-0 bg-transparent text-secondary lh-1 fs-5"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#dataset-overview-collapse"
+        aria-expanded="true"
+        aria-controls="dataset-overview-collapse"
+        aria-label="Toggle dataset overview"
+        title="Toggle overview"
+      >
+        <span id="dataset-overview-caret" aria-hidden="true">^</span>
+      </button>
+    </div>
+    <div id="dataset-overview-collapse" class="collapse show">
+      <p class="card-text text-muted mb-2">
+        {{ selected_dataset.description|default:"No description provided."|linebreaksbr }}
+      </p>
+      <div class="row row-cols-1 row-cols-md-2 g-3">
+        <div class="col">
+          <div class="small text-muted">Identifier: {{ selected_dataset.source_identifier }}</div>
+          {% if selected_dataset.source_url and selected_dataset.source_url != "NA" %}
+          <div class="small">
+            <span class="text-muted me-1">Original source:</span>
+            <a href="{{ selected_dataset.source_url }}" target="_blank" rel="noopener">
+              {{ selected_dataset.source_url_label|default:selected_dataset.source_url }}
+            </a>
+          </div>
+          {% endif %}
+        </div>
+        <div class="col">
+          <div class="d-flex align-items-baseline gap-2 mb-1">
+            <span class="small text-muted">Update frequency:</span>
+            <span class="text-dark">{{ selected_dataset.data_update_frequency.value|default:"—" }}</span>
+          </div>
+          <div class="small text-muted">Previewing {{ preview_rows }} of {{ preview_limit }} rows</div>
+        </div>
+        <div class="col">
+          <div class="d-flex align-items-baseline gap-2 mb-1">
+            <span class="small text-muted">Target table:</span>
+            <span class="text-dark"><code>{{ selected_dataset.target_table_name }}</code></span>
+          </div>
+          <div class="small d-flex align-items-center gap-1">
+            <span class="text-muted">Schema:</span>
+            <span class="text-dark">{{ data_schema }}</span>
+          </div>
+        </div>
+        <div class="col">
+          <div class="d-flex align-items-baseline gap-2 mb-1">
+            <span class="small text-muted">Last import:</span>
+            <span class="text-dark">{{ selected_dataset.last_import_date|date:"Y-m-d H:i"|default:"—" }}</span>
+          </div>
+          <div class="small d-flex flex-wrap align-items-center gap-3">
+            <span class="text-muted">Fields:</span>
+            <span class="text-dark">
+              {% if selected_dataset.fields_selection %}
+                {{ selected_dataset.fields_selection|length }}
+              {% else %}
+                all
+              {% endif %}
+            </span>
+            <span class="text-muted">Rows:</span>
+            <span class="text-dark">{{ dataset_row_count|default:"—" }}</span>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="small text-muted mb-1">Used for insights:</div>
+          {% if insight_templates %}
+          <div class="small">
+            {% for template in insight_templates %}
+              <a href="{% url 'template_detail' template.id %}">
+                {{ template.title }}
+              </a>{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="small text-dark">Not currently used in any insights.</div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
@@ -158,7 +175,9 @@ This page is intended as a preview only: it shows at most 2,000 records and offe
     <div class="alert alert-warning">{{ table_error }}</div>
     {% endif %}
     {% if table %}
-    {{ table }}
+    <div class="dataset-preview-table">
+      {{ table }}
+    </div>
     {% elif selected_dataset and not table_error %}
     <div class="alert alert-secondary">No data could be loaded for this dataset.</div>
     {% endif %}
@@ -181,6 +200,21 @@ document.addEventListener('DOMContentLoaded', function () {
       hidden.value = this.value;
       form.requestSubmit();
     });
+  }
+
+  document.querySelectorAll('.dataset-preview-table table').forEach(function (tableEl) {
+    tableEl.classList.add('table', 'table-striped');
+  });
+
+  const overviewCollapse = document.getElementById('dataset-overview-collapse');
+  const overviewCaret = document.getElementById('dataset-overview-caret');
+  if (overviewCollapse && overviewCaret) {
+    const syncCaret = function () {
+      overviewCaret.textContent = overviewCollapse.classList.contains('show') ? '^' : 'v';
+    };
+    overviewCollapse.addEventListener('shown.bs.collapse', syncCaret);
+    overviewCollapse.addEventListener('hidden.bs.collapse', syncCaret);
+    syncCaret();
   }
 });
 </script>

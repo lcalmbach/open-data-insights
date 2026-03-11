@@ -142,7 +142,7 @@ class StoryTemplateSubscriptionAdmin(admin.ModelAdmin):
 class StoryTemplateDatasetAdmin(admin.ModelAdmin):
     list_display = ("story_template_id", "story_template", "dataset", "dataset_source_url")
     list_filter = ("story_template", "dataset")
-    ordering = ("story_template__title",)
+    ordering = ("story_template_id","story_template__title",)
     list_select_related = ("story_template", "dataset")
 
     def story_template_id(self, obj):
