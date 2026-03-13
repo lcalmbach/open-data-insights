@@ -16,6 +16,82 @@ from wordcloud import WordCloud
 logger = logging.getLogger(__name__)
 
 
+def _stroke_dash_for_style(stroke_style):
+    style = str(stroke_style or "solid").lower()
+    if style == "dashed":
+        return [6, 4]
+    if style == "dotted":
+        return [2, 2]
+    if style == "dashdot":
+        return [6, 4, 2, 4]
+    return alt.Undefined
+
+
+def _build_reference_line_layers(settings):
+    reference_lines = settings.get("reference_lines") or []
+    if not isinstance(reference_lines, list):
+        return []
+
+    layers = []
+    x_type = (settings.get("x_type") or "Q").upper()
+    y_type = (settings.get("y_type") or "Q").upper()
+
+    for line in reference_lines:
+        if not isinstance(line, dict):
+            continue
+
+        line_type = str(line.get("type") or "").upper()
+        label = line.get("label")
+        if line_type == "V" and "x" in line:
+            line_data = pd.DataFrame([{"x": line["x"], "label": label}])
+            chart = alt.Chart(line_data).mark_rule(
+                color=line.get("color", "red"),
+                strokeWidth=line.get("width", 1),
+                strokeDash=_stroke_dash_for_style(line.get("stroke")),
+            ).encode(
+                x=alt.X(f"x:{x_type}")
+            )
+            layers.append(chart)
+            if label:
+                label_chart = alt.Chart(line_data).mark_text(
+                    text=label,
+                    color=line.get("color", "red"),
+                    align="left",
+                    baseline="top",
+                    dx=4,
+                    dy=4,
+                ).encode(
+                    x=alt.X(f"x:{x_type}"),
+                    y=alt.value(0),
+                )
+                layers.append(label_chart)
+        elif line_type == "H" and "y" in line:
+            line_data = pd.DataFrame([{"y": line["y"], "label": label}])
+            chart = alt.Chart(line_data).mark_rule(
+                color=line.get("color", "red"),
+                strokeWidth=line.get("width", 1),
+                strokeDash=_stroke_dash_for_style(line.get("stroke")),
+            ).encode(
+                y=alt.Y(f"y:{y_type}")
+            )
+            layers.append(chart)
+            if label:
+                label_chart = alt.Chart(line_data).mark_text(
+                    text=label,
+                    color=line.get("color", "red"),
+                    align="left",
+                    baseline="bottom",
+                    dx=4,
+                    dy=-4,
+                ).encode(
+                    x=alt.value(0),
+                    y=alt.Y(f"y:{y_type}"),
+                )
+                layers.append(label_chart)
+
+    return layers
+
+
 def _build_categorical_x_axis(data, settings, x_field):
     """Choose axis settings that keep dense bar-chart labels readable."""
     axis_kwargs = {}
@@ -158,6 +234,8 @@ def create_line_chart(data, settings):
         except Exception:
             pass
     
+    reference_line_layers = _build_reference_line_layers(settings)
+
     if "focus_line" in settings:
         focus_year = settings["focus_line"]["color_value"]
         settings["x_type"] = 'N'
@@ -187,9 +265,9 @@ def create_line_chart(data, settings):
             strokeWidth=settings["focus_line"]["line_width"],
         )
 
+        layers = [ref_lines, focus_line, *reference_line_layers]
         chart = alt.layer(
-            ref_lines,
-            focus_line,
+            *layers,
             data=data   # df = Ergebnis deines SQL-Queries als DataFrame
         ).properties(
             width=700,
@@ -202,6 +280,8 @@ def create_line_chart(data, settings):
         )
         # Apply encodings and properties
         chart = apply_common_settings(chart, settings)
+        if reference_line_layers:
+            chart = alt.layer(chart, *reference_line_layers)
 
     # Line-specific settings
     if 'stroke_width' in settings:

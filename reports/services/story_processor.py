@@ -447,8 +447,13 @@ class StoryProcessor:
             # Generate unique chart ID
             chart_id = f"chart-{graphic_template.id}-{uuid.uuid4().hex[:8]}"
             # Use settings from template
-            settings = graphic_template.settings
+            settings = (
+                graphic_template.settings.copy()
+                if hasattr(graphic_template.settings, "copy")
+                else dict(graphic_template.settings)
+            )
             settings["type"] = graphic_template.graphic_type
+            settings = self._resolve_reference_line_settings(settings)
 
             # Generate chart HTML
             self.logger.info(f"Generating chart for: {graphic_template.title}")
@@ -484,6 +489,51 @@ class StoryProcessor:
 
             self.logger.error(traceback.format_exc())
             return False
+
+    def _resolve_reference_line_settings(self, settings: Dict[str, Any]) -> Dict[str, Any]:
+        """Resolve dynamic SQL-backed reference line positions before plotting."""
+        reference_lines = settings.get("reference_lines")
+        if not isinstance(reference_lines, list):
+            return settings
+
+        resolved_lines = []
+        for line in reference_lines:
+            if not isinstance(line, dict):
+                resolved_lines.append(line)
+                continue
+
+            resolved_line = line.copy()
+            value_sql = resolved_line.get("value_sql")
+            line_type = str(resolved_line.get("type") or "").upper()
+
+            if value_sql and line_type in {"H", "V"}:
+                sql_command = self._replace_sql_expressions(str(value_sql))
+                params = self._get_sql_command_params(sql_command)
+                value = self._run_scalar_query(sql_command, params)
+
+                if value is not None:
+                    if line_type == "V":
+                        resolved_line["x"] = value
+                    else:
+                        resolved_line["y"] = value
+
+            resolved_lines.append(resolved_line)
+
+        settings["reference_lines"] = resolved_lines
+        return settings
+
+    def _run_scalar_query(self, sql_command: str, params: Dict[str, Any]) -> Any:
+        """Execute a query expected to return a single scalar value."""
+        data = self.dbclient.run_query(sql_command, params)
+        if data is None or data.empty or data.shape[1] == 0:
+            return None
+        value = data.iloc[0, 0]
+        if hasattr(value, "item"):
+            try:
+                return value.item()
+            except Exception:
+                pass
+        return value
 
     def _generate_graphics(self) -> list:
         """Generate graphics for the story template and save them directly to database"""

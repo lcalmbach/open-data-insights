@@ -1,7 +1,9 @@
 from datetime import date
 
-from django.test import TestCase
+import pandas as pd
+from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
+from types import SimpleNamespace
 
 from account.models import CustomUser
 from reports.models.lookups import (
@@ -15,6 +17,8 @@ from reports.models.story import Story
 from reports.models.story_rating import StoryRating
 from reports.models.story_template import StoryTemplate
 from reports.models.story_template import StoryTemplateFocus
+from reports.services.story_processor import StoryProcessor
+from reports.visualizations.plotting import create_line_chart
 
 
 class StoryRatingsContextTests(TestCase):
@@ -174,3 +178,84 @@ class StoryTemplateFocusSqlReplacementTests(TestCase):
         processor = StoryProcessor(anchor_date=date(2026, 2, 7), template=self.template, focus=focus)
         replaced = processor._replace_sql_expressions("SELECT 1 WHERE :focus_filter")
         self.assertIn("1=1", replaced)
+
+
+class LineChartReferenceLineTests(TestCase):
+    def test_line_chart_supports_configured_reference_lines(self):
+        data = pd.DataFrame(
+            {
+                "year": [2022, 2023, 2024],
+                "value": [10, 15, 12],
+            }
+        )
+        chart = create_line_chart(
+            data,
+            {
+                "x": "year",
+                "y": "value",
+                "x_type": "Q",
+                "y_type": "Q",
+                "reference_lines": [
+                    {"type": "V", "x": 2023, "color": "red", "width": 2, "stroke": "solid", "label": "average"},
+                    {"type": "H", "y": 13, "color": "blue", "width": 1, "stroke": "dashed"},
+                ],
+            },
+        )
+
+        spec = chart.to_dict()
+
+        self.assertEqual(len(spec["layer"]), 4)
+        self.assertEqual(spec["layer"][1]["mark"]["type"], "rule")
+        self.assertEqual(spec["layer"][1]["encoding"]["x"]["field"], "x")
+        self.assertEqual(spec["layer"][1]["mark"]["color"], "red")
+        self.assertEqual(spec["layer"][1]["mark"]["strokeWidth"], 2)
+        self.assertNotIn("strokeDash", spec["layer"][1]["mark"])
+
+        self.assertEqual(spec["layer"][2]["mark"]["type"], "text")
+        self.assertEqual(spec["layer"][2]["mark"]["text"], "average")
+        self.assertEqual(spec["layer"][2]["encoding"]["x"]["field"], "x")
+
+        self.assertEqual(spec["layer"][3]["mark"]["type"], "rule")
+        self.assertEqual(spec["layer"][3]["encoding"]["y"]["field"], "y")
+        self.assertEqual(spec["layer"][3]["mark"]["color"], "blue")
+        self.assertEqual(spec["layer"][3]["mark"]["strokeDash"], [6, 4])
+
+
+class DynamicReferenceLineSettingsTests(SimpleTestCase):
+    def test_value_sql_is_resolved_into_vertical_line_x_value(self):
+        class StubDbClient:
+            def run_query(self, sql, params):
+                self.sql = sql
+                self.params = params
+                return pd.DataFrame([[73]], columns=["value"])
+
+        processor = StoryProcessor.__new__(StoryProcessor)
+        processor.dbclient = StubDbClient()
+        processor.logger = None
+        processor.focus = None
+        processor.template = SimpleNamespace(focus_filter_fields="")
+        processor.story = SimpleNamespace(
+            reference_period_start=date(2026, 3, 13),
+            reference_period_end=date(2026, 3, 13),
+            reference_period_expression="13 March 2026",
+            published_date=date(2026, 3, 13),
+        )
+        processor.reference_period_start = date(2026, 3, 13)
+        processor.reference_period_end = date(2026, 3, 13)
+        processor.published_date = date(2026, 3, 13)
+        processor.month = 3
+        processor.year = 2026
+
+        settings = {
+            "reference_lines": [
+                {
+                    "type": "V",
+                    "value_sql": "select extract(doy from %(published_date)s::date)::int",
+                    "label": "Today",
+                }
+            ]
+        }
+
+        resolved = processor._resolve_reference_line_settings(settings)
+
+        self.assertEqual(resolved["reference_lines"][0]["x"], 73)

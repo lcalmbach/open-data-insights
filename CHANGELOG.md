@@ -8,6 +8,13 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - _Nothing yet._
 
 
+## [0.1.4] - 2026-03-13
+### Changed
+- Add configurable line-chart reference lines with labels
+
+### Fixed
+- Resolve SQL-backed reference line positions before rendering charts
+
 ## [0.1.3] - 2026-03-11
 ### Notes
 - Deploy UI updates for dataset preview and formatting
