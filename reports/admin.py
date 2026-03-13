@@ -140,22 +140,18 @@ class StoryTemplateSubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(StoryTemplateDataset)
 class StoryTemplateDatasetAdmin(admin.ModelAdmin):
-    list_display = ("story_template_id", "story_template", "dataset", "dataset_source_url")
+    list_display = ("template_id", "story_template", "dataset", "dataset_source_url")
     list_filter = ("story_template", "dataset")
-    ordering = ("story_template_id","story_template__title",)
+    ordering = ("story_template__id", "dataset__id")
     list_select_related = ("story_template", "dataset")
 
-    def story_template_id(self, obj):
+    @admin.display(ordering="story_template__id", description="Story Template ID")
+    def template_id(self, obj):
         return obj.story_template_id
 
-    story_template_id.admin_order_field = "story_template__id"
-    story_template_id.short_description = "Story Template ID"
-
+    @admin.display(ordering="dataset__source_url", description="Dataset Source URL")
     def dataset_source_url(self, obj):
         return getattr(obj.dataset, "source_url", None)
-
-    dataset_source_url.admin_order_field = "dataset__source_url"
-    dataset_source_url.short_description = "Dataset Source URL"
 
 
 @admin.register(StoryLog)

@@ -3,6 +3,7 @@
 .backup
 figures
 work
+scripts
 logs
 __pycache__/
 daily_tasks/*.pyc

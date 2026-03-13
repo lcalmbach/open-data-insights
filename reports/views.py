@@ -770,6 +770,7 @@ def datasets_view(request):
         .select_related("data_update_frequency")
         .order_by("name")
     )
+    total_dataset_count = dataset_qs.count()
     if source_filter:
         dataset_qs = dataset_qs.filter(source__iexact=source_filter)
     if frequency_filter.isdigit():
@@ -887,6 +888,7 @@ def datasets_view(request):
             "datasets": filtered_datasets,
             "selected_dataset": selected_dataset,
             "dataset_count": dataset_count,
+            "total_dataset_count": total_dataset_count,
             "sources": sources,
             "frequencies": frequency_options,
             "table": table,

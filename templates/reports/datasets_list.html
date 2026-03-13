@@ -53,7 +53,7 @@ This page is intended as a preview only: it shows at most 2,000 records and offe
 
 <div class="row mb-4">
   <div class="col-12">
-    <label for="dataset-select" class="form-label">Select dataset</label>
+    <label for="dataset-select" class="form-label">Select dataset ({{ dataset_count }}/{{ total_dataset_count }})</label>
     <select id="dataset-select" class="form-select">
       {% for dataset in datasets %}
       <option
