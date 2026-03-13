@@ -58,6 +58,9 @@ All stories are based on data from publicly available, official Open Data platfo
   </div>
   <div class="card-body py-3 px-3">
     <p class="mb-1"><strong>Version:</strong> {{ app_info.version }}</p>
+    {% if app_info.version_date %}
+    <p class="mb-1"><strong>Release date:</strong> {{ app_info.version_date }}</p>
+    {% endif %}
     <p class="mb-1">
       <strong>Author:</strong>
       <a href="mailto:{{ app_info.author_email }}">{{ app_info.author_name }}</a>

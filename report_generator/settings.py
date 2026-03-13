@@ -1,5 +1,6 @@
 import dj_database_url
 import os
+import re
 from pathlib import Path
 
 """
@@ -13,8 +14,6 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
-from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -235,9 +234,39 @@ MARKDOWNIFY = {
     }
 }
 
+def _load_project_version() -> str:
+    pyproject_path = BASE_DIR / "pyproject.toml"
+    version_re = re.compile(r'^version\s*=\s*"([^"]+)"\s*$')
+    try:
+        for line in pyproject_path.read_text(encoding="utf-8").splitlines():
+            match = version_re.match(line.strip())
+            if match:
+                return match.group(1)
+    except OSError:
+        pass
+    return "unknown"
+
+
+def _load_version_date(version: str) -> str | None:
+    changelog_path = BASE_DIR / "CHANGELOG.md"
+    release_re = re.compile(rf"^## \[{re.escape(version)}\] - (\d{{4}}-\d{{2}}-\d{{2}})$")
+    try:
+        for line in changelog_path.read_text(encoding="utf-8").splitlines():
+            match = release_re.match(line.strip())
+            if match:
+                return match.group(1)
+    except OSError:
+        pass
+    return None
+
+
+PROJECT_VERSION = _load_project_version()
+PROJECT_VERSION_DATE = _load_version_date(PROJECT_VERSION)
+
+
 APP_INFO = {
-    "version": "0.2.7",
-    "version_date": "2026-03-01",
+    "version": PROJECT_VERSION,
+    "version_date": PROJECT_VERSION_DATE,
     "author_name": "Lukas Calmbach",
     "author_email": "lcalmbach@gmail.com",
     "repo_url": "https://github.com/lcalmbach/open-data-insights",
