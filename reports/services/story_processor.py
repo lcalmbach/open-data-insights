@@ -72,6 +72,22 @@ def to_date_obj(d) -> date:
     return dt.date() if dt is not None else None
 
 
+def normalize_table_value(value: Any) -> Any:
+    """Render SQL null-like values as blank table cells."""
+    if value is None:
+        return ""
+    if isinstance(value, dict):
+        return {key: normalize_table_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [normalize_table_value(item) for item in value]
+    try:
+        if pd.isna(value):
+            return ""
+    except Exception:
+        pass
+    return value
+
+
 # Season mapping
 month_to_season = {
     1: 4,
@@ -381,7 +397,10 @@ class StoryProcessor:
         params = self._get_sql_command_params(sql_cmd)
         try:
             df = self.dbclient.run_query(sql_cmd, params)
-            data = df.to_dict(orient="records")
+            data = [
+                {column: normalize_table_value(value) for column, value in row.items()}
+                for row in df.to_dict(orient="records")
+            ]
             story_table = StoryTable.objects.filter(
                 story=self.story, table_template=table_template
             ).first() or StoryTable(story=self.story, table_template=table_template)
@@ -1005,6 +1024,12 @@ class StoryProcessor:
             self.logger.error(f"Error saving log record: {e}")
             raise
 
+    def _get_focus_subject_instruction(self) -> str:
+        focus_subject = (getattr(self.focus, "focus_subject", None) or "").strip()
+        if not focus_subject:
+            return ""
+        return f"Focus subject: {focus_subject}"
+
     def _generate_insight_text(self, target_language: str | None = None) -> bool:
         """Generate story text using OpenAI API"""
         try:
@@ -1013,6 +1038,7 @@ class StoryProcessor:
                 if target_language
                 else ""
             )
+            focus_subject_instruction = self._get_focus_subject_instruction()
             message = self._replace_reference_period_expression(
                 self.story.template.prompt_text
             )  # Prepare messages for chat completion
@@ -1025,7 +1051,14 @@ class StoryProcessor:
                     {
                         "role": "system",
                         "content": "\n\n".join(
-                            part for part in [message, LLM_FORMATTING_INSTRUCTIONS, language_instruction] if part
+                            part
+                            for part in [
+                                message,
+                                focus_subject_instruction,
+                                LLM_FORMATTING_INSTRUCTIONS,
+                                language_instruction,
+                            ]
+                            if part
                         ),
                     },
                     {
@@ -1042,7 +1075,11 @@ class StoryProcessor:
                         "role": "system",
                         "content": "\n\n".join(
                             part
-                            for part in [self.story.template.system_prompt, language_instruction]
+                            for part in [
+                                self.story.template.system_prompt,
+                                focus_subject_instruction,
+                                language_instruction,
+                            ]
                             if part
                         ),
                     },

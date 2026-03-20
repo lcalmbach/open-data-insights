@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 
 import pandas as pd
 from django.test import SimpleTestCase, TestCase
@@ -15,8 +16,24 @@ from reports.models.lookups import (
 )
 from reports.models.story import Story
 from reports.models.story_rating import StoryRating
+from reports.models.story_table import StoryTable
+from reports.models.story_table_template import StoryTemplateTable
 from reports.models.story_template import StoryTemplate
 from reports.models.story_template import StoryTemplateFocus
+from reports.management.commands.import_commodity_prices import (
+    CommodityMapping,
+    _aggregate_monthly_prices,
+)
+from reports.management.commands.import_eia_oil_prices import (
+    _aggregate_monthly_rows,
+    _excel_serial_to_date,
+    SERIES,
+)
+from reports.management.commands.import_market_events import (
+    _parse_bool,
+    _parse_int,
+    _split_list,
+)
 from reports.services.story_processor import StoryProcessor
 from reports.visualizations.plotting import create_line_chart
 
@@ -259,3 +276,231 @@ class DynamicReferenceLineSettingsTests(SimpleTestCase):
         resolved = processor._resolve_reference_line_settings(settings)
 
         self.assertEqual(resolved["reference_lines"][0]["x"], 73)
+
+
+class FocusSubjectPromptTests(SimpleTestCase):
+    def test_generate_insight_text_includes_focus_subject_when_present(self):
+        captured = {}
+
+        class StubCompletions:
+            def create(self, **kwargs):
+                captured["messages"] = kwargs["messages"]
+                return SimpleNamespace(
+                    choices=[
+                        SimpleNamespace(
+                            message=SimpleNamespace(content="Generated insight")
+                        )
+                    ]
+                )
+
+        processor = StoryProcessor.__new__(StoryProcessor)
+        processor.logger = SimpleNamespace(info=lambda *a, **k: None, warning=lambda *a, **k: None, error=lambda *a, **k: None)
+        processor.ai_client = SimpleNamespace(
+            chat=SimpleNamespace(completions=StubCompletions())
+        )
+        processor.is_data_based = True
+        processor.focus = SimpleNamespace(focus_subject="Focus on the WTI/Brent spread")
+        processor.story = SimpleNamespace(
+            ai_model="test-model",
+            context_values='{"context_data": {}}',
+            content="",
+            prompt_text=None,
+            template=SimpleNamespace(
+                prompt_text="Write an oil market insight.",
+                temperature=0.2,
+            ),
+        )
+        processor._replace_reference_period_expression = lambda value: value
+
+        ok = StoryProcessor._generate_insight_text(processor)
+
+        self.assertTrue(ok)
+        self.assertIn(
+            "Focus subject: Focus on the WTI/Brent spread",
+            captured["messages"][0]["content"],
+        )
+
+
+class CommodityPriceAggregationTests(SimpleTestCase):
+    def test_historical_quotes_are_aggregated_to_monthly_averages(self):
+        mapping = CommodityMapping(
+            code="WTI_USD",
+            commodity="WTI",
+            unit="barrel",
+            market="NYMEX",
+        )
+        prices = [
+            {
+                "price": 50,
+                "currency": "USD",
+                "code": "WTI_USD",
+                "created_at": "2026-01-01T00:00:00.000Z",
+                "type": "daily_average_price",
+                "unit": "barrel",
+                "source": "internal",
+            },
+            {
+                "price": 49,
+                "currency": "USD",
+                "code": "WTI_USD",
+                "created_at": "2026-01-01T00:30:00.000Z",
+                "type": "spot_price",
+                "unit": "barrel",
+                "source": "oilprice.business_insider",
+            },
+            {
+                "price": 70,
+                "currency": "USD",
+                "code": "WTI_USD",
+                "created_at": "2026-01-02T00:00:00.000Z",
+                "type": "daily_average_price",
+                "unit": "barrel",
+                "source": "internal",
+            },
+            {
+                "price": 80,
+                "currency": "USD",
+                "code": "WTI_USD",
+                "created_at": "2026-02-01T00:00:00.000Z",
+                "type": "daily_average_price",
+                "unit": "barrel",
+                "source": "internal",
+            },
+        ]
+
+        rows = _aggregate_monthly_prices(mapping, prices)
+
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0].price, Decimal("60.000000"))
+        self.assertEqual(rows[0].year, 2026)
+        self.assertEqual(rows[0].month, 1)
+        self.assertEqual(rows[0].price_timestamp.isoformat(), "2026-01-01T00:00:00+00:00")
+        self.assertEqual(rows[0].metadata["daily_points"], 2)
+        self.assertEqual(rows[0].quote_type, "monthly_average")
+        self.assertEqual(rows[1].price, Decimal("80.000000"))
+
+
+class EiaOilImportTests(SimpleTestCase):
+    def test_excel_serial_date_conversion(self):
+        self.assertEqual(_excel_serial_to_date("31414"), date(1986, 1, 2))
+
+    def test_daily_rows_are_aggregated_to_monthly_eia_rows(self):
+        wti_series = next(series for series in SERIES if series.commodity_code == "RWTC")
+        rows = _aggregate_monthly_rows(
+            wti_series,
+            [
+                (date(2026, 1, 1), Decimal("70.0")),
+                (date(2026, 1, 2), Decimal("74.0")),
+                (date(2026, 2, 1), Decimal("80.0")),
+            ],
+        )
+
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["commodity"], "WTI")
+        self.assertEqual(rows[0]["year"], 2026)
+        self.assertEqual(rows[0]["month"], 1)
+        self.assertEqual(rows[0]["price"], Decimal("72.000000"))
+        self.assertEqual(rows[0]["currency"], "USD")
+        self.assertEqual(rows[0]["price_timestamp"].isoformat(), "2026-01-01T00:00:00+00:00")
+        self.assertEqual(rows[0]["metadata"]["daily_points"], 2)
+
+
+class MarketEventsImportHelpersTests(SimpleTestCase):
+    def test_split_list_parses_semicolon_values(self):
+        self.assertEqual(_split_list("oil; gold ; middle-east"), ["oil", "gold", "middle-east"])
+        self.assertEqual(_split_list(""), [])
+
+    def test_parse_bool_accepts_common_truthy_values(self):
+        self.assertTrue(_parse_bool("true"))
+        self.assertTrue(_parse_bool("Yes"))
+        self.assertFalse(_parse_bool("false"))
+
+    def test_parse_int_returns_none_for_empty_values(self):
+        self.assertEqual(_parse_int("92"), 92)
+        self.assertIsNone(_parse_int(""))
+
+
+class StoryTableGenerationTests(TestCase):
+    def setUp(self):
+        period_category = LookupCategory.objects.create(
+            id=PERIOD_CATEGORY_ID, name="Period", description=""
+        )
+        direction_category = LookupCategory.objects.create(
+            id=PERIOD_DIRECTION_CATEGORY_ID, name="PeriodDirection", description=""
+        )
+        period = Period.objects.create(
+            category=period_category, value="Daily", description="", sort_order=0
+        )
+        direction = PeriodDirection.objects.create(
+            category=direction_category, value="Backward", description="", sort_order=0
+        )
+        self.template = StoryTemplate.objects.create(
+            title="Template",
+            description="",
+            reference_period=period,
+            period_direction=direction,
+            prompt_text="prompt",
+            active=True,
+        )
+        self.focus = StoryTemplateFocus.objects.create(
+            story_template=self.template,
+            filter_value=None,
+        )
+        self.story = Story.objects.create(
+            templatefocus=self.focus,
+            title="Story",
+            summary="Summary",
+            content="Content",
+            published_date=date(2026, 2, 8),
+            reference_period_start=date(2026, 2, 7),
+            reference_period_end=date(2026, 2, 7),
+        )
+        self.table_template = StoryTemplateTable.objects.create(
+            story_template=self.template,
+            title="Oil Stats",
+            sql_command="SELECT 1",
+            sort_order=0,
+        )
+
+    def test_generate_table_replaces_missing_values_with_blank_strings(self):
+        class StubDbClient:
+            def run_query(self, sql, params):
+                return pd.DataFrame(
+                    [
+                        {
+                            "Metric": "Average",
+                            "WTI": 64.51,
+                            "WTI DATE": None,
+                            "Brent Date": pd.NaT,
+                        }
+                    ]
+                )
+
+        processor = StoryProcessor.__new__(StoryProcessor)
+        processor.dbclient = StubDbClient()
+        processor.story = self.story
+        processor.logger = None
+        processor._replace_sql_expressions = lambda sql: sql
+        processor._get_sql_command_params = lambda sql: {}
+        processor._replace_reference_period_expression = lambda value: value
+
+        table = StoryTable(story=self.story, table_template=self.table_template)
+
+        ok = StoryProcessor.generate_table(processor, table)
+
+        self.assertTrue(ok)
+        saved_table = StoryTable.objects.get(
+            story=self.story,
+            table_template=self.table_template,
+        )
+        self.assertEqual(
+            saved_table.data,
+            [
+                {
+                    "Metric": "Average",
+                    "WTI": 64.51,
+                    "WTI DATE": "",
+                    "Brent Date": "",
+                }
+            ],
+        )

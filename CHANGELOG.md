@@ -8,6 +8,16 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - _Nothing yet._
 
 
+## [0.1.5] - 2026-03-20
+### Added
+- Add management commands for commodity price imports and market event seeding
+
+### Changed
+- Include focus subject instructions in story generation prompts
+
+### Fixed
+- Render null table values as blank cells instead of literal None
+
 ## [0.1.4] - 2026-03-13
 ### Changed
 - Add configurable line-chart reference lines with labels
