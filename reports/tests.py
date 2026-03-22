@@ -1,13 +1,21 @@
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import Decimal
+from io import StringIO
+from pathlib import Path
+import tempfile
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 import pandas as pd
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
-from types import SimpleNamespace
 
 from account.models import CustomUser
+from reports.models.dataset import ImportTypeEnum
 from reports.models.lookups import (
+    LanguageEnum,
     PERIOD_CATEGORY_ID,
     PERIOD_DIRECTION_CATEGORY_ID,
     LookupCategory,
@@ -20,22 +28,33 @@ from reports.models.story_table import StoryTable
 from reports.models.story_table_template import StoryTemplateTable
 from reports.models.story_template import StoryTemplate
 from reports.models.story_template import StoryTemplateFocus
-from reports.management.commands.import_commodity_prices import (
-    CommodityMapping,
-    _aggregate_monthly_prices,
-)
-from reports.management.commands.import_eia_oil_prices import (
-    _aggregate_monthly_rows,
-    _excel_serial_to_date,
-    SERIES,
-)
+from reports.models.subscription import StoryTemplateSubscription
 from reports.management.commands.import_market_events import (
     _parse_bool,
     _parse_int,
     _split_list,
 )
+from reports.services.story_generation import StoryGenerationService
 from reports.services.story_processor import StoryProcessor
-from reports.visualizations.plotting import create_line_chart
+from reports.views import _attach_graphic_chart_ids, _get_story_graphics
+from reports.visualizations.plotting import create_line_chart, generate_chart
+from reports.services.dataset_sync import (
+    DatasetSyncService,
+    EiaDatasetConnector,
+    OdsDatasetConnector,
+    UrlDatasetConnector,
+    create_dataset_processor,
+)
+from reports.services.eia_api import (
+    AVAILABLE_SERIES,
+    fetch_eia_prices_df,
+    list_available_series,
+    resolve_series_configs,
+    _fetch_eia_daily_rows,
+    _build_daily_rows,
+    _filter_recent_daily_rows,
+    SERIES,
+)
 
 
 class StoryRatingsContextTests(TestCase):
@@ -138,6 +157,33 @@ class StoryRatingsContextTests(TestCase):
         self.assertEqual(response.context["selected_story"].id, self.story.id)
         self.assertEqual(response.context["rating_count"], 1)
         self.assertAlmostEqual(float(response.context["rating_avg"]), 4.0)
+
+    def test_home_view_counts_only_active_accessible_subscriptions(self):
+        self.client.force_login(self.user)
+        StoryTemplateSubscription.objects.create(
+            user=self.user,
+            story_template=self.template,
+        )
+
+        inactive_template = StoryTemplate.objects.create(
+            title="Inactive template",
+            description="",
+            reference_period=self.template.reference_period,
+            period_direction=self.template.period_direction,
+            prompt_text="prompt",
+            active=False,
+        )
+        StoryTemplateSubscription.objects.create(
+            user=self.user,
+            story_template=inactive_template,
+        )
+
+        response = self.client.get(reverse("home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["active_subscription_count"], 1)
+        self.assertEqual(response.context["available_subscriptions"], 1)
+        self.assertContains(response, "You have subscribed to 1 of 1 available insights.")
 
 
 class StoryTemplateFocusSqlReplacementTests(TestCase):
@@ -321,88 +367,757 @@ class FocusSubjectPromptTests(SimpleTestCase):
         )
 
 
-class CommodityPriceAggregationTests(SimpleTestCase):
-    def test_historical_quotes_are_aggregated_to_monthly_averages(self):
-        mapping = CommodityMapping(
-            code="WTI_USD",
-            commodity="WTI",
-            unit="barrel",
-            market="NYMEX",
-        )
-        prices = [
-            {
-                "price": 50,
-                "currency": "USD",
-                "code": "WTI_USD",
-                "created_at": "2026-01-01T00:00:00.000Z",
-                "type": "daily_average_price",
-                "unit": "barrel",
-                "source": "internal",
-            },
-            {
-                "price": 49,
-                "currency": "USD",
-                "code": "WTI_USD",
-                "created_at": "2026-01-01T00:30:00.000Z",
-                "type": "spot_price",
-                "unit": "barrel",
-                "source": "oilprice.business_insider",
-            },
-            {
-                "price": 70,
-                "currency": "USD",
-                "code": "WTI_USD",
-                "created_at": "2026-01-02T00:00:00.000Z",
-                "type": "daily_average_price",
-                "unit": "barrel",
-                "source": "internal",
-            },
-            {
-                "price": 80,
-                "currency": "USD",
-                "code": "WTI_USD",
-                "created_at": "2026-02-01T00:00:00.000Z",
-                "type": "daily_average_price",
-                "unit": "barrel",
-                "source": "internal",
-            },
-        ]
-
-        rows = _aggregate_monthly_prices(mapping, prices)
-
-        self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[0].price, Decimal("60.000000"))
-        self.assertEqual(rows[0].year, 2026)
-        self.assertEqual(rows[0].month, 1)
-        self.assertEqual(rows[0].price_timestamp.isoformat(), "2026-01-01T00:00:00+00:00")
-        self.assertEqual(rows[0].metadata["daily_points"], 2)
-        self.assertEqual(rows[0].quote_type, "monthly_average")
-        self.assertEqual(rows[1].price, Decimal("80.000000"))
-
-
 class EiaOilImportTests(SimpleTestCase):
-    def test_excel_serial_date_conversion(self):
-        self.assertEqual(_excel_serial_to_date("31414"), date(1986, 1, 2))
 
-    def test_daily_rows_are_aggregated_to_monthly_eia_rows(self):
-        wti_series = next(series for series in SERIES if series.commodity_code == "RWTC")
-        rows = _aggregate_monthly_rows(
-            wti_series,
+    def test_daily_rows_can_use_custom_dataset_label(self):
+        rows = _build_daily_rows(
+            next(series for series in SERIES if series.series == "RWTC"),
+            [(date(2026, 1, 1), Decimal("70.0"))],
+            source_label="dataset_82_eia",
+        )
+
+        self.assertEqual(rows[0]["source"], "dataset_82_eia")
+
+    @patch("reports.services.eia_api._fetch_eia_daily_rows")
+    def test_fetch_prices_df_fetches_from_api(
+        self,
+        mock_fetch_eia_daily_rows,
+    ):
+        mock_fetch_eia_daily_rows.return_value = {
+            "RWTC": [(date(2026, 1, 1), Decimal("70.0"))],
+            "RBRTE": [(date(2026, 1, 1), Decimal("80.0"))],
+        }
+
+        df = fetch_eia_prices_df(
+            source_label="dataset_82_eia",
+            series_selection=["RWTC", "RBRTE"],
+        )
+
+        self.assertEqual(len(df), 2)
+        self.assertEqual(set(df["quote_type"]), {"daily_close"})
+        mock_fetch_eia_daily_rows.assert_called_once()
+
+    def test_recent_filter_keeps_only_last_week_dates(self):
+        filtered = _filter_recent_daily_rows(
+            {
+                "RWTC": [
+                    (date(2026, 3, 10), Decimal("70.0")),
+                    (date(2026, 3, 15), Decimal("72.0")),
+                    (date(2026, 3, 21), Decimal("74.0")),
+                ]
+            },
+            as_of=date(2026, 3, 21),
+            days=7,
+        )
+
+        self.assertEqual(
+            filtered["RWTC"],
             [
-                (date(2026, 1, 1), Decimal("70.0")),
-                (date(2026, 1, 2), Decimal("74.0")),
-                (date(2026, 2, 1), Decimal("80.0")),
+                (date(2026, 3, 15), Decimal("72.0")),
+                (date(2026, 3, 21), Decimal("74.0")),
             ],
         )
 
-        self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[0]["commodity"], "WTI")
-        self.assertEqual(rows[0]["year"], 2026)
-        self.assertEqual(rows[0]["month"], 1)
-        self.assertEqual(rows[0]["price"], Decimal("72.000000"))
-        self.assertEqual(rows[0]["currency"], "USD")
-        self.assertEqual(rows[0]["price_timestamp"].isoformat(), "2026-01-01T00:00:00+00:00")
-        self.assertEqual(rows[0]["metadata"]["daily_points"], 2)
+    def test_daily_rows_are_built_with_daily_timestamps(self):
+        rows = _build_daily_rows(
+            next(series for series in SERIES if series.series == "RWTC"),
+            [(date(2026, 3, 20), Decimal("71.25"))],
+            source_label="dataset_82_eia",
+        )
+
+        self.assertEqual(rows[0]["quote_type"], "daily_close")
+        self.assertEqual(rows[0]["price_timestamp"], datetime(2026, 3, 20, tzinfo=UTC))
+        self.assertEqual(rows[0]["commodity_code"], "RWTC")
+
+    def test_resolve_series_configs_accepts_registry_codes(self):
+        series = resolve_series_configs(
+            [
+                "RWTC",
+                "EER_EPMRU_PF4_Y35NY_DPG",
+                "EER_EPLLPA_PF4_Y44MB_DPG",
+            ]
+        )
+
+        self.assertEqual(
+            [item.series for item in series],
+            [
+                "RWTC",
+                "EER_EPMRU_PF4_Y35NY_DPG",
+                "EER_EPLLPA_PF4_Y44MB_DPG",
+            ],
+        )
+        self.assertEqual(series[1].unit, "gallon")
+        self.assertEqual(series[2].commodity, "Propane")
+
+    def test_resolve_series_configs_accepts_custom_metadata(self):
+        series = resolve_series_configs(
+            [
+                {
+                    "series": "RAC2D",
+                    "commodity": "Regular Gasoline",
+                    "market": "New York Harbor",
+                    "unit": "gallon",
+                }
+            ]
+        )
+
+        self.assertEqual(series[0].series, "RAC2D")
+        self.assertEqual(series[0].commodity, "Regular Gasoline")
+        self.assertEqual(series[0].unit, "gallon")
+
+    def test_available_series_catalog_lists_all_builtin_eia_series(self):
+        series = list_available_series()
+
+        self.assertEqual(len(series), 11)
+        self.assertEqual(series[0]["series"], "RWTC")
+        self.assertEqual(series[-1]["series"], "EER_EPLLPA_PF4_Y44MB_DPG")
+
+    def test_resolve_series_configs_defaults_to_all_available_series(self):
+        series = resolve_series_configs(None)
+
+        self.assertEqual(len(series), len(AVAILABLE_SERIES))
+        self.assertEqual([item.series for item in series], [item.series for item in AVAILABLE_SERIES])
+
+    @patch("reports.services.eia_api.requests.get")
+    def test_fetch_daily_rows_raises_clear_error_for_non_json_response(self, mock_get):
+        response = Mock()
+        response.raise_for_status.return_value = None
+        response.json.side_effect = ValueError("not json")
+        response.headers = {"content-type": "text/html"}
+        response.text = "<html><body>not json</body></html>"
+        response.url = "https://www.eia.gov/dnav/pet/PET_PRI_SPT_S1_D.htm"
+        mock_get.return_value = response
+
+        with self.assertRaises(CommandError) as exc:
+            _fetch_eia_daily_rows(
+                api_url="https://www.eia.gov/dnav/pet/PET_PRI_SPT_S1_D.htm",
+                api_key="test-key",
+                series_configs=[next(series for series in SERIES if series.series == "RWTC")],
+                start_date=date(2026, 3, 15),
+                end_date=date(2026, 3, 21),
+            )
+
+        self.assertIn("did not return JSON", str(exc.exception))
+
+class DatasetSourceConnectorTests(SimpleTestCase):
+    @patch("reports.services.dataset_sync.OdsDatasetConnector")
+    def test_factory_selects_ods_connector(self, mock_connector):
+        dataset = SimpleNamespace(source="ods")
+
+        create_dataset_processor(dataset)
+
+        mock_connector.assert_called_once_with(dataset)
+
+    @patch("reports.services.dataset_sync.EiaDatasetConnector")
+    def test_factory_selects_eia_connector(self, mock_connector):
+        dataset = SimpleNamespace(source="eia")
+
+        create_dataset_processor(dataset)
+
+        mock_connector.assert_called_once_with(dataset)
+
+    @patch("reports.services.dataset_sync.UrlDatasetConnector")
+    def test_factory_selects_url_connector(self, mock_connector):
+        dataset = SimpleNamespace(source="url")
+
+        create_dataset_processor(dataset)
+
+        mock_connector.assert_called_once_with(dataset)
+
+    def test_factory_rejects_unknown_connector(self):
+        dataset = SimpleNamespace(source="worldbank")
+
+        with self.assertRaises(ValueError):
+            create_dataset_processor(dataset)
+
+    @patch("reports.services.dataset_sync.fetch_eia_prices_df")
+    def test_eia_connector_fetches_dataframe(self, mock_fetch_df):
+        mock_fetch_df.return_value = pd.DataFrame([{"commodity_code": "RWTC"}])
+        dataset = SimpleNamespace(
+            id=82,
+            name="Commodity Price EIA",
+            source="eia",
+            source_identifier="eia_pet_pri_spt_s1_d",
+            source_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            fields_selection=["RWTC", "RBRTE"],
+            target_table_name="commodity_price",
+        )
+
+        connector = EiaDatasetConnector(dataset)
+        df = connector.fetch_dataframe()
+
+        self.assertEqual(len(df), 1)
+        mock_fetch_df.assert_called_once_with(
+            api_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            source_label="eia_pet_pri_spt_s1_d",
+            series_selection=["RWTC", "RBRTE"],
+            recent_days=7,
+            logger=connector.logger,
+        )
+        self.assertEqual(
+            connector.get_unique_fields(),
+            ["commodity_code", "price_timestamp", "quote_type"],
+        )
+
+    @patch("reports.services.dataset_sync.fetch_eia_prices_df")
+    def test_eia_connector_normalizes_comma_separated_series_selection(self, mock_fetch_df):
+        mock_fetch_df.return_value = pd.DataFrame([{"commodity_code": "RWTC"}])
+        dataset = SimpleNamespace(
+            id=83,
+            name="Commodity Price EIA",
+            source="eia",
+            source_identifier="eia_pet_pri_spt_s1_d",
+            source_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            fields_selection="RWTC, RBRTE",
+            target_table_name="commodity_price",
+        )
+
+        connector = EiaDatasetConnector(dataset)
+        connector.fetch_dataframe()
+
+        mock_fetch_df.assert_called_once_with(
+            api_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            source_label="eia_pet_pri_spt_s1_d",
+            series_selection=["RWTC", "RBRTE"],
+            recent_days=7,
+            logger=connector.logger,
+        )
+
+    @patch("reports.services.dataset_sync.fetch_eia_prices_df")
+    def test_eia_connector_normalizes_json_series_selection(self, mock_fetch_df):
+        mock_fetch_df.return_value = pd.DataFrame([{"commodity_code": "RWTC"}])
+        dataset = SimpleNamespace(
+            id=84,
+            name="Commodity Price EIA",
+            source="eia",
+            source_identifier="eia_pet_pri_spt_s1_d",
+            source_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            fields_selection='["RWTC", "RBRTE"]',
+            target_table_name="commodity_price",
+        )
+
+        connector = EiaDatasetConnector(dataset)
+        connector.fetch_dataframe()
+
+        mock_fetch_df.assert_called_once_with(
+            api_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            source_label="eia_pet_pri_spt_s1_d",
+            series_selection=["RWTC", "RBRTE"],
+            recent_days=7,
+            logger=connector.logger,
+        )
+
+    @patch("reports.services.dataset_sync.fetch_eia_prices_df")
+    def test_eia_connector_accepts_series_selection_attribute(self, mock_fetch_df):
+        mock_fetch_df.return_value = pd.DataFrame([{"commodity_code": "RWTC"}])
+        dataset = SimpleNamespace(
+            id=85,
+            name="Commodity Price EIA",
+            source="eia",
+            source_identifier="eia_pet_pri_spt_s1_d",
+            source_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            series_selection=["RWTC", "RBRTE"],
+            target_table_name="commodity_price",
+        )
+
+        connector = EiaDatasetConnector(dataset)
+        connector.fetch_dataframe()
+
+        mock_fetch_df.assert_called_once_with(
+            api_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            source_label="eia_pet_pri_spt_s1_d",
+            series_selection=["RWTC", "RBRTE"],
+            recent_days=7,
+            logger=connector.logger,
+        )
+
+    @patch("reports.services.dataset_sync.fetch_eia_prices_df")
+    def test_eia_connector_falls_back_from_empty_series_selection(self, mock_fetch_df):
+        mock_fetch_df.return_value = pd.DataFrame([{"commodity_code": "RWTC"}])
+        dataset = SimpleNamespace(
+            id=86,
+            name="Commodity Price EIA",
+            source="eia",
+            source_identifier="eia_pet_pri_spt_s1_d",
+            source_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            series_selection=[],
+            fields_selection=["RWTC", "RBRTE"],
+            target_table_name="commodity_price",
+        )
+
+        connector = EiaDatasetConnector(dataset)
+        connector.fetch_dataframe()
+
+        mock_fetch_df.assert_called_once_with(
+            api_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            source_label="eia_pet_pri_spt_s1_d",
+            series_selection=["RWTC", "RBRTE"],
+            recent_days=7,
+            logger=connector.logger,
+        )
+
+    @patch("reports.services.dataset_sync.fetch_eia_prices_df")
+    def test_eia_connector_defaults_to_all_registered_series(self, mock_fetch_df):
+        mock_fetch_df.return_value = pd.DataFrame([{"commodity_code": "RWTC"}])
+        dataset = SimpleNamespace(
+            id=87,
+            name="Commodity Price EIA",
+            source="eia",
+            source_identifier="eia_pet_pri_spt_s1_d",
+            source_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            series_selection=[],
+            fields_selection=[],
+            target_table_name="commodity_price",
+        )
+
+        connector = EiaDatasetConnector(dataset)
+        connector.fetch_dataframe()
+
+        mock_fetch_df.assert_called_once_with(
+            api_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            source_label="eia_pet_pri_spt_s1_d",
+            series_selection=[item.series for item in AVAILABLE_SERIES],
+            recent_days=7,
+            logger=connector.logger,
+        )
+
+    @patch("reports.services.dataset_sync.requests.get")
+    def test_url_connector_fetches_csv_dataframe(self, mock_get):
+        response = Mock()
+        response.raise_for_status.return_value = None
+        response.text = "id,observed_at,value\n1,2026-03-19,11\n2,2026-03-20,12\n"
+        mock_get.return_value = response
+        dataset = SimpleNamespace(
+            id=90,
+            name="CSV URL",
+            source="url",
+            source_url="https://example.com/data.csv",
+        )
+
+        connector = UrlDatasetConnector(dataset)
+        df = connector.fetch_dataframe()
+
+        self.assertEqual(list(df.columns), ["id", "observed_at", "value"])
+        self.assertEqual(len(df), 2)
+        self.assertEqual(connector.get_write_mode(), "replace")
+        mock_get.assert_called_once_with("https://example.com/data.csv", timeout=(10, 60))
+
+
+class OdsConnectorTimestampNormalizationTests(SimpleTestCase):
+    def test_download_ods_data_handles_mixed_dst_offsets(self):
+        connector = OdsDatasetConnector.__new__(OdsDatasetConnector)
+        connector.dataset = SimpleNamespace(
+            base_url="data.bs.ch",
+            source_identifier="100051",
+            source_timestamp_field="event_time",
+            db_timestamp_field="event_time",
+        )
+        connector.has_timestamp = True
+        connector.logger = Mock()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            filename = Path(tmpdir) / "100051.parquet"
+            csv_path = Path(tmpdir) / "100051.csv"
+            csv_path.write_text(
+                "event_time;value\n"
+                "2026-01-01T00:00:00+01:00;1\n"
+                "2026-07-01T00:00:00+02:00;2\n",
+                encoding="utf-8",
+            )
+
+            df = connector.download_ods_data(filename)
+
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertEqual(
+            df["event_time"].dt.strftime("%Y-%m-%dT%H:%M:%S%z").tolist(),
+            [
+                "2026-01-01T00:00:00+0100",
+                "2026-07-01T00:00:00+0200",
+            ],
+        )
+
+
+class DatasetPersistenceTests(SimpleTestCase):
+    @patch("reports.services.dataset_sync.DjangoPostgresClient")
+    def test_shared_dataframe_persistence_uses_upsert(self, mock_dbclient_cls):
+        mock_dbclient = mock_dbclient_cls.return_value
+        mock_dbclient.table_exists.return_value = True
+        mock_dbclient.upsert_dataframe.return_value = 2
+        dataset = SimpleNamespace(
+            id=82,
+            name="EIA",
+            target_table_name="commodity_price",
+            post_create_sql_commands=None,
+            post_import_sql_commands=None,
+        )
+        processor = SimpleNamespace(
+            get_unique_fields=lambda: ["commodity_code", "price_timestamp", "quote_type"],
+            get_update_fields=lambda columns: [col for col in columns if col not in {"commodity_code", "price_timestamp", "quote_type"}],
+        )
+        df = pd.DataFrame(
+            [
+                {
+                    "commodity_code": "RWTC",
+                    "price_timestamp": datetime(2026, 3, 20, tzinfo=UTC),
+                    "quote_type": "daily_close",
+                    "price": Decimal("70.0"),
+                },
+                {
+                    "commodity_code": "RBRTE",
+                    "price_timestamp": datetime(2026, 3, 20, tzinfo=UTC),
+                    "quote_type": "daily_close",
+                    "price": Decimal("72.0"),
+                },
+            ]
+        )
+
+        service = DatasetSyncService()
+        ok = service._persist_connector_dataframe(dataset, processor, df)
+
+        self.assertTrue(ok)
+        mock_dbclient.upsert_dataframe.assert_called_once()
+
+    @patch("reports.services.dataset_sync.DjangoPostgresClient")
+    def test_shared_dataframe_persistence_creates_table_when_missing(self, mock_dbclient_cls):
+        mock_dbclient = mock_dbclient_cls.return_value
+        mock_dbclient.table_exists.return_value = False
+        mock_dbclient.create_table_from_dataframe.return_value = 2
+        dataset = SimpleNamespace(
+            id=91,
+            name="CSV URL",
+            target_table_name="commodity_prices",
+            post_create_sql_commands=None,
+            post_import_sql_commands=None,
+        )
+        processor = SimpleNamespace(
+            get_unique_fields=lambda: ["id"],
+            get_update_fields=lambda columns: [col for col in columns if col != "id"],
+        )
+        df = pd.DataFrame(
+            [
+                {"id": 1, "value": Decimal("10.0")},
+                {"id": 2, "value": Decimal("11.0")},
+            ]
+        )
+
+        service = DatasetSyncService()
+        ok = service._persist_connector_dataframe(dataset, processor, df)
+
+        self.assertTrue(ok)
+        mock_dbclient.create_table_from_dataframe.assert_called_once()
+        mock_dbclient.ensure_unique_index.assert_called_once_with(
+            table_name="commodity_prices",
+            unique_fields=["id"],
+            schema="opendata",
+        )
+        mock_dbclient.upsert_dataframe.assert_not_called()
+
+    @patch("reports.services.dataset_sync.DjangoPostgresClient")
+    def test_shared_dataframe_persistence_replaces_table_for_replace_mode(self, mock_dbclient_cls):
+        mock_dbclient = mock_dbclient_cls.return_value
+        mock_dbclient.replace_table_from_dataframe.return_value = 2
+        dataset = SimpleNamespace(
+            id=92,
+            name="CSV URL",
+            target_table_name="commodity_prices",
+            post_create_sql_commands=None,
+            post_import_sql_commands=None,
+        )
+        processor = SimpleNamespace(get_write_mode=lambda: "replace")
+        df = pd.DataFrame(
+            [
+                {"id": 1, "value": Decimal("10.0")},
+                {"id": 2, "value": Decimal("11.0")},
+            ]
+        )
+
+        service = DatasetSyncService()
+        ok = service._persist_connector_dataframe(dataset, processor, df)
+
+        self.assertTrue(ok)
+        mock_dbclient.replace_table_from_dataframe.assert_called_once_with(
+            df=df,
+            table_name="commodity_prices",
+            schema="opendata",
+        )
+        mock_dbclient.upsert_dataframe.assert_not_called()
+
+
+class DatasetSyncSkipTests(SimpleTestCase):
+    @patch("reports.services.dataset_sync.create_dataset_processor")
+    def test_skip_datasets_are_ignored_before_connector_dispatch(self, mock_create_processor):
+        dataset = SimpleNamespace(
+            id=99,
+            name="Local table",
+            import_type=SimpleNamespace(id=ImportTypeEnum.SKIP.value),
+        )
+
+        service = DatasetSyncService()
+        ok = service.synchronize_dataset(dataset)
+
+        self.assertTrue(ok)
+        mock_create_processor.assert_not_called()
+
+    @patch.object(DatasetSyncService, "synchronize_dataset")
+    @patch("reports.services.dataset_sync.Dataset.objects.filter")
+    def test_synchronize_datasets_omits_explicit_skip_dataset(
+        self,
+        mock_filter,
+        mock_synchronize_dataset,
+    ):
+        class FakeQuerySet:
+            def __init__(self, items):
+                self.items = list(items)
+
+            def filter(self, **kwargs):
+                filtered = self.items
+                for key, value in kwargs.items():
+                    filtered = [
+                        item for item in filtered if getattr(item, key) == value
+                    ]
+                return FakeQuerySet(filtered)
+
+            def exclude(self, **kwargs):
+                filtered = self.items
+                for key, value in kwargs.items():
+                    filtered = [
+                        item for item in filtered if getattr(item, key) != value
+                    ]
+                return FakeQuerySet(filtered)
+
+            def order_by(self, *args):
+                return self
+
+            def count(self):
+                return len(self.items)
+
+            def exists(self):
+                return bool(self.items)
+
+            def first(self):
+                return self.items[0] if self.items else None
+
+            def __iter__(self):
+                return iter(self.items)
+
+        skipped_dataset = SimpleNamespace(
+            id=100,
+            name="Manual table",
+            active=True,
+            import_type_id=ImportTypeEnum.SKIP.value,
+        )
+        mock_filter.return_value = FakeQuerySet([skipped_dataset])
+
+        service = DatasetSyncService()
+        results = service.synchronize_datasets(dataset_id=100)
+
+        self.assertTrue(results["success"])
+        self.assertEqual(results["total_datasets"], 0)
+        self.assertEqual(results["failed"], 0)
+        self.assertEqual(results["details"][0]["skipped"], True)
+        mock_synchronize_dataset.assert_not_called()
+
+    @patch.object(DatasetSyncService, "cleanup_temp_files")
+    @patch.object(DatasetSyncService, "synchronize_dataset")
+    @patch("reports.services.dataset_sync.Dataset.objects.filter")
+    def test_synchronize_datasets_keep_files_skips_cleanup(
+        self,
+        mock_filter,
+        mock_synchronize_dataset,
+        mock_cleanup_temp_files,
+    ):
+        class FakeQuerySet:
+            def __init__(self, items):
+                self.items = list(items)
+
+            def exclude(self, **kwargs):
+                filtered = self.items
+                for key, value in kwargs.items():
+                    filtered = [
+                        item for item in filtered if getattr(item, key) != value
+                    ]
+                return FakeQuerySet(filtered)
+
+            def order_by(self, *args):
+                return self
+
+            def count(self):
+                return len(self.items)
+
+            def exists(self):
+                return bool(self.items)
+
+            def __iter__(self):
+                return iter(self.items)
+
+        dataset = SimpleNamespace(
+            id=101,
+            name="ODS dataset",
+            active=True,
+            import_type_id=ImportTypeEnum.NEW_TIMESTAMP.value,
+        )
+        mock_filter.return_value = FakeQuerySet([dataset])
+        mock_synchronize_dataset.return_value = True
+
+        service = DatasetSyncService()
+        results = service.synchronize_datasets(keep_files=True)
+
+        self.assertTrue(results["success"])
+        self.assertEqual(results["successful"], 1)
+        mock_cleanup_temp_files.assert_not_called()
+
+
+class StoryGenerationLanguageTests(SimpleTestCase):
+    @patch("reports.management.commands.generate_stories.StoryGenerationService")
+    def test_generate_stories_command_passes_language_code(self, mock_service_cls):
+        mock_service = mock_service_cls.return_value
+        mock_service.generate_stories.return_value = {
+            "success": True,
+            "successful": 0,
+            "failed": 0,
+            "skipped": 0,
+            "details": [],
+        }
+
+        out = StringIO()
+        call_command(
+            "generate_stories",
+            "--date",
+            "2026-03-21",
+            "--lang",
+            "en",
+            stdout=out,
+        )
+
+        mock_service.generate_stories.assert_called_once_with(
+            template_id=None,
+            story_focus_id=None,
+            published_date=date(2026, 3, 21),
+            force=False,
+            language_code="en",
+        )
+
+    @patch("reports.management.commands.generate_stories.StoryGenerationService")
+    def test_generate_stories_command_rejects_invalid_language_code(self, mock_service_cls):
+        out = StringIO()
+
+        call_command("generate_stories", "--lang", "it", stdout=out)
+
+        self.assertIn("Invalid language code 'it'", out.getvalue())
+        mock_service_cls.assert_not_called()
+
+    @patch("reports.services.story_generation.StoryProcessor")
+    def test_story_generation_service_passes_language_code_to_processor(self, mock_processor_cls):
+        processor = mock_processor_cls.return_value
+        processor.story = SimpleNamespace(id=42)
+        processor.generate_story.return_value = True
+        focus = SimpleNamespace(
+            id=7,
+            filter_value=None,
+            story_template=SimpleNamespace(id=3, title="Template"),
+        )
+
+        service = StoryGenerationService()
+        result = service.generate_story(
+            focus=focus,
+            published_date=date(2026, 3, 21),
+            force=False,
+            language_code="en",
+        )
+
+        self.assertTrue(result["success"])
+        mock_processor_cls.assert_called_once_with(
+            date(2026, 3, 21),
+            focus.story_template,
+            False,
+            focus=focus,
+            language_code="en",
+        )
+
+    def test_story_processor_skips_variants_for_english_only(self):
+        processor = StoryProcessor.__new__(StoryProcessor)
+        processor.requested_language_id = LanguageEnum.ENGLISH.value
+
+        self.assertFalse(processor._should_generate_language_variants())
+
+    @patch("reports.services.story_processor.Language.objects.exclude")
+    def test_story_processor_limits_variants_to_requested_language(self, mock_exclude):
+        ordered_languages = Mock()
+        filtered_languages = Mock()
+        mock_exclude.return_value.order_by.return_value = ordered_languages
+        ordered_languages.filter.return_value = filtered_languages
+
+        processor = StoryProcessor.__new__(StoryProcessor)
+        processor.requested_language_id = LanguageEnum.GERMAN.value
+
+        result = processor._get_requested_variant_languages()
+
+        ordered_languages.filter.assert_called_once_with(id=LanguageEnum.GERMAN.value)
+        self.assertIs(result, filtered_languages)
+
+
+class GraphicRenderingTests(SimpleTestCase):
+    def test_attach_graphic_chart_ids_normalizes_stale_vis_references(self):
+        graphic = SimpleNamespace(
+            content_html=(
+                '<style>#vis.vega-embed{width:100%}</style>'
+                '<div id="chart-79-b491c7f4"></div>'
+                "<script>"
+                "const el = document.getElementById('vis');"
+                'vegaEmbed("#chart-79-b491c7f4", spec)'
+                "</script>"
+            )
+        )
+
+        _attach_graphic_chart_ids([graphic])
+
+        self.assertEqual(graphic.chart_id, "chart-79-b491c7f4")
+        self.assertIn("#chart-79-b491c7f4.vega-embed", graphic.content_html)
+        self.assertIn(
+            "document.getElementById('chart-79-b491c7f4')",
+            graphic.content_html,
+        )
+
+    @patch("reports.views._resolve_story_for_language")
+    def test_get_story_graphics_falls_back_to_english_variant(self, mock_resolve_story):
+        empty_graphics = Mock()
+        empty_graphics.exists.return_value = False
+        english_graphics = Mock()
+        english_graphics.exists.return_value = True
+        english_story = SimpleNamespace(
+            id=75,
+            story_graphics=SimpleNamespace(all=Mock(return_value=english_graphics)),
+        )
+        translated_story = SimpleNamespace(
+            id=90,
+            language_id=LanguageEnum.GERMAN.value,
+            story_graphics=SimpleNamespace(all=Mock(return_value=empty_graphics)),
+        )
+        mock_resolve_story.return_value = english_story
+
+        graphics = _get_story_graphics(translated_story)
+
+        self.assertIs(graphics, english_graphics)
+
+    @patch("reports.visualizations.plotting.create_line_chart")
+    def test_generate_chart_rewrites_all_vis_placeholders(self, mock_create_line_chart):
+        chart = Mock()
+        chart.to_html.return_value = (
+            '<style>#vis.vega-embed{width:100%}</style>'
+            '<div id="vis"></div>'
+            "<script>"
+            "const el = document.getElementById('vis');"
+            'vegaEmbed("#vis", spec)'
+            "</script>"
+        )
+        mock_create_line_chart.return_value = chart
+
+        html = generate_chart(pd.DataFrame({"x": [], "y": []}), {"type": "line"}, "chart-123")
+
+        self.assertIn('id="chart-123"', html)
+        self.assertIn("#chart-123.vega-embed", html)
+        self.assertIn("document.getElementById('chart-123')", html)
+        self.assertIn('vegaEmbed("#chart-123"', html)
 
 
 class MarketEventsImportHelpersTests(SimpleTestCase):

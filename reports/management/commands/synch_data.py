@@ -13,14 +13,18 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--keep-files', 
-            type=int, 
-            help='Dont delete files after run'
+            action='store_true',
+            help='Do not delete downloaded files after run'
         )
 
     def handle(self, *args, **options):
         dataset_id = options.get('id')
+        keep_files = options.get('keep_files', False)
         service = DatasetSyncService()
-        result = service.synchronize_datasets(dataset_id=dataset_id)
+        result = service.synchronize_datasets(
+            dataset_id=dataset_id,
+            keep_files=keep_files,
+        )
         
         if result['success']:
             self.stdout.write(

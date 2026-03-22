@@ -22,6 +22,11 @@ from tqdm import tqdm
 
 from reports.services.base import ETLBaseService
 from reports.services.database_client import DjangoPostgresClient
+from reports.services.eia_api import (
+    AVAILABLE_SERIES,
+    DEFAULT_DATASET_LABEL,
+    fetch_eia_prices_df,
+)
 from reports.services.utils import (
     get_parquet_row_count,
     make_utc,
@@ -40,12 +45,23 @@ class DatasetSyncService(ETLBaseService):
     def synchronize_dataset(self, dataset: Dataset) -> bool:
         """Synchronize a single dataset"""
         try:
+            if self._is_skipped_dataset(dataset):
+                self.logger.info(
+                    "Skipping dataset ID %s: %s because import type is SKIP.",
+                    dataset.id,
+                    dataset.name,
+                )
+                return True
+
             self.logger.info(
                 f"Starting synchronization for dataset ID {dataset.id}: {dataset.name}"
             )
-            # Create dataset processor
-            processor = DatasetProcessor(dataset)
-            result = processor.synchronize()
+            processor = create_dataset_processor(dataset)
+            if hasattr(processor, "fetch_dataframe"):
+                df = processor.fetch_dataframe()
+                result = self._persist_connector_dataframe(dataset, processor, df)
+            else:
+                result = processor.synchronize()
             if result:
                 # Update last import date
                 dataset.last_import_date = django_timezone.now()
@@ -66,13 +82,103 @@ class DatasetSyncService(ETLBaseService):
             )
             return False
 
-    def synchronize_datasets(self, dataset_id: Optional[int] = None) -> Dict[str, Any]:
+    def _persist_connector_dataframe(self, dataset: Dataset, processor, df: pd.DataFrame) -> bool:
+        try:
+            if df is None or df.empty:
+                self.logger.info(
+                    "No new rows fetched for dataset ID %s: %s",
+                    dataset.id,
+                    dataset.name,
+                )
+                return True
+
+            dbclient = DjangoPostgresClient()
+            write_mode = (
+                processor.get_write_mode()
+                if hasattr(processor, "get_write_mode")
+                else "upsert"
+            )
+
+            if write_mode == "replace":
+                written = dbclient.replace_table_from_dataframe(
+                    df=df,
+                    table_name=dataset.target_table_name,
+                    schema="opendata",
+                )
+                self._run_sql_batch(dataset.post_create_sql_commands)
+            else:
+                unique_fields = processor.get_unique_fields()
+                update_fields = processor.get_update_fields(df.columns.tolist())
+                table_exists = dbclient.table_exists(dataset.target_table_name, schema="opendata")
+
+                if table_exists:
+                    written = dbclient.upsert_dataframe(
+                        df=df,
+                        table_name=dataset.target_table_name,
+                        unique_fields=unique_fields,
+                        update_fields=update_fields,
+                        schema="opendata",
+                    )
+                else:
+                    written = dbclient.create_table_from_dataframe(
+                        df=df,
+                        table_name=dataset.target_table_name,
+                        schema="opendata",
+                    )
+                    dbclient.ensure_unique_index(
+                        table_name=dataset.target_table_name,
+                        unique_fields=unique_fields,
+                        schema="opendata",
+                    )
+                    self._run_sql_batch(dataset.post_create_sql_commands)
+
+            self._run_sql_batch(dataset.post_import_sql_commands)
+            self.logger.info(
+                "Persisted %s row(s) into opendata.%s for dataset ID %s",
+                written,
+                dataset.target_table_name,
+                dataset.id,
+            )
+            return True
+        except Exception as e:
+            self.logger.error(
+                f"Error persisting fetched DataFrame for dataset ID {dataset.id} ({dataset.name}): {str(e)}"
+            )
+            return False
+
+    def _run_sql_batch(self, sql_commands: str | None) -> None:
+        if not sql_commands:
+            return
+
+        dbclient = DjangoPostgresClient()
+        for command in sql_commands.split(";"):
+            command = command.strip()
+            if command:
+                dbclient.run_action_query(command)
+
+    @staticmethod
+    def _is_skipped_dataset(dataset: Dataset) -> bool:
+        import_type_id = getattr(dataset, "import_type_id", None)
+        if import_type_id is None:
+            import_type = getattr(dataset, "import_type", None)
+            import_type_id = getattr(import_type, "id", None)
+        return import_type_id == ImportTypeEnum.SKIP.value
+
+    def synchronize_datasets(
+        self,
+        dataset_id: Optional[int] = None,
+        keep_files: bool = False,
+    ) -> Dict[str, Any]:
         """Synchronize multiple datasets"""
 
         if dataset_id:
-            datasets = Dataset.objects.filter(active=True, id=dataset_id)
+            matching_datasets = Dataset.objects.filter(active=True, id=dataset_id)
         else:
-            datasets = Dataset.objects.filter(active=True).order_by("id")
+            matching_datasets = Dataset.objects.filter(active=True)
+
+        datasets = matching_datasets.exclude(
+            import_type_id=ImportTypeEnum.SKIP.value
+        ).order_by("id")
 
         results = {
             "success": True,
@@ -83,6 +189,23 @@ class DatasetSyncService(ETLBaseService):
         }
 
         if not datasets.exists():
+            if dataset_id and matching_datasets.exists():
+                skipped_dataset = matching_datasets.first()
+                self.logger.info(
+                    "Dataset ID %s: %s is configured with import type SKIP and was omitted from synchronization.",
+                    skipped_dataset.id,
+                    skipped_dataset.name,
+                )
+                results["details"].append(
+                    {
+                        "dataset_id": skipped_dataset.id,
+                        "dataset_name": skipped_dataset.name,
+                        "success": True,
+                        "skipped": True,
+                    }
+                )
+                return results
+
             self.logger.error(f"No active dataset found with ID: {dataset_id}")
             results["failed"] += 1
             results["success"] = False
@@ -129,8 +252,11 @@ class DatasetSyncService(ETLBaseService):
                     }
                 )
 
-        # Cleanup temporary files
-        self.cleanup_temp_files()
+        # Cleanup temporary files unless explicitly preserved for retry/debugging.
+        if keep_files:
+            self.logger.info("Keeping temporary files in %s", self.files_path)
+        else:
+            self.cleanup_temp_files()
 
         # Enhanced logging with failed dataset IDs
         if results["failed"] > 0:
@@ -150,7 +276,119 @@ class DatasetSyncService(ETLBaseService):
         return results
 
 
-class DatasetProcessor:
+def create_dataset_processor(dataset: Dataset):
+    source = (dataset.source or "").strip().lower()
+    connector_map = {
+        "ods": OdsDatasetConnector,
+        "eia": EiaDatasetConnector,
+        "url": UrlDatasetConnector,
+    }
+    connector_cls = connector_map.get(source)
+    if connector_cls is None:
+        raise ValueError(f"Unsupported dataset source: {dataset.source!r}")
+    return connector_cls(dataset)
+
+
+class EiaDatasetConnector:
+    """Connector that fetches EIA API data as a normalized DataFrame."""
+
+    def __init__(self, dataset: Dataset):
+        self.dataset = dataset
+        self.logger = logging.getLogger(f"EiaDatasetConnector.{dataset.name}")
+
+    def fetch_dataframe(self) -> pd.DataFrame:
+        source_label = (self.dataset.source_identifier or "").strip() or DEFAULT_DATASET_LABEL
+        series_selection = getattr(self.dataset, "series_selection", None)
+        if not series_selection:
+            series_selection = getattr(self.dataset, "fields_selection", None)
+        normalized_selection = self._normalize_series_selection(series_selection)
+        if normalized_selection is None:
+            normalized_selection = [item.series for item in AVAILABLE_SERIES]
+        return fetch_eia_prices_df(
+            api_url="https://api.eia.gov/v2/petroleum/pri/spt/data/",
+            source_label=source_label,
+            series_selection=normalized_selection,
+            recent_days=7,
+            logger=self.logger,
+        )
+
+    def get_unique_fields(self) -> list[str]:
+        return ["commodity_code", "price_timestamp", "quote_type"]
+
+    def get_update_fields(self, columns: list[str]) -> list[str]:
+        return [col for col in columns if col not in self.get_unique_fields()]
+
+    def _normalize_series_selection(self, value: Any) -> list[Any] | None:
+        if value is None:
+            return None
+
+        if isinstance(value, list):
+            if not value:
+                return None
+            return value
+
+        if isinstance(value, tuple | set):
+            items = list(value)
+            return items or None
+
+        if isinstance(value, dict):
+            return [value]
+
+        if isinstance(value, str):
+            stripped = value.strip()
+            if not stripped:
+                return None
+            if stripped[0] in "[{":
+                try:
+                    parsed = json.loads(stripped)
+                except json.JSONDecodeError:
+                    pass
+                else:
+                    if isinstance(parsed, list):
+                        return parsed
+                    if isinstance(parsed, dict):
+                        return [parsed]
+                    if isinstance(parsed, str):
+                        return [parsed]
+            if "," in stripped:
+                return [item.strip() for item in stripped.split(",") if item.strip()]
+            return [stripped]
+
+        raise ValueError(
+            f"Unsupported EIA fields_selection type for dataset {self.dataset.id}: {type(value).__name__}"
+        )
+
+
+class UrlDatasetConnector:
+    """Connector that downloads a CSV file from a URL and returns it as a DataFrame."""
+
+    def __init__(self, dataset: Dataset):
+        self.dataset = dataset
+        self.logger = logging.getLogger(f"UrlDatasetConnector.{dataset.name}")
+
+    def fetch_dataframe(self) -> pd.DataFrame:
+        if not self.dataset.source_url:
+            raise ValueError("URL datasets require source_url.")
+
+        response = requests.get(self.dataset.source_url, timeout=(10, 60))
+        response.raise_for_status()
+        df = pd.read_csv(
+            StringIO(response.text),
+            sep=None,
+            engine="python",
+        )
+        self.logger.info(
+            "Downloaded %s row(s) from URL source %s",
+            len(df),
+            self.dataset.source_url,
+        )
+        return df
+
+    def get_write_mode(self) -> str:
+        return "replace"
+
+
+class OdsDatasetConnector:
     """
     Processor for individual dataset operations
     Contains the migrated business logic from the original Dataset class
@@ -393,15 +631,8 @@ class DatasetProcessor:
             self.logger.info(f"Starting import for {identifier}")
             start_time = time.time()
             import_is_due = True
-            
-            # master data is not reloaded each time and these tables are skipped
-            if self.dataset.import_type.id == ImportTypeEnum.SKIP.value:
-                self.logger.info(
-                    f"Dataset {identifier} skipped, change import type to manually import if import required."
-                )
-                return True
 
-            elif self.dataset.source == 'ods' and self.dataset.data_update_frequency.id == PeriodEnum.YEARLY.value and self.dataset.year_field:
+            if self.dataset.source == 'ods' and self.dataset.data_update_frequency.id == PeriodEnum.YEARLY.value and self.dataset.year_field:
                 if self.dataset_covers_period():
                     self.logger.info(
                         f"Dataset {identifier} is already up to date."
@@ -662,13 +893,7 @@ class DatasetProcessor:
             )
 
             # Download full dataset
-            if self.dataset.source.lower() == "url":
-                url = self.dataset.source_url
-                response = requests.get(url)
-                response.raise_for_status()  # Ensure it worked
-                df = pd.read_csv(StringIO(response.text))
-
-            elif self.dataset.source.lower() == "ods":
+            if self.dataset.source.lower() == "ods":
                 where_clause = self.get_time_limit_where_clause()
                 df = self.download_ods_data(
                     filename,
@@ -684,11 +909,6 @@ class DatasetProcessor:
                 df = self.transform_ods_data(df)
                 df.to_parquet(agg_filename)
                 self.dbclient.upload_to_db(str(agg_filename), remote_table)
-                # check if data-time column is of type date, if not force it
-                if self.dataset.db_timestamp_field:
-                    df[self.dataset.db_timestamp_field] = pd.to_datetime(
-                        df[self.dataset.db_timestamp_field], errors="coerce"
-                    )
                 success = True
             else:
                 self.logger.error("Failed to download full dataset")
@@ -705,6 +925,11 @@ class DatasetProcessor:
             self.logger.error(f"Error in new table sync: {e}")
 
         return success
+
+    def _normalize_ods_timestamps(self, values: pd.Series) -> pd.Series:
+        """Normalize ODS timestamps to a single timezone across DST boundaries."""
+        timestamps = pd.to_datetime(values, errors="coerce", utc=True)
+        return timestamps.dt.tz_convert("Europe/Zurich")
 
     def download_ods_data(
         self, filename: Path, where_clause: str = None, fields: list = None
@@ -756,9 +981,12 @@ class DatasetProcessor:
 
             # Convert timestamp if needed
             if self.has_timestamp and self.dataset.source_timestamp_field:
-                df[self.dataset.db_timestamp_field] = pd.to_datetime(
-                    df[self.dataset.source_timestamp_field], errors="coerce"
+                normalized_timestamps = self._normalize_ods_timestamps(
+                    df[self.dataset.source_timestamp_field]
                 )
+                df[self.dataset.source_timestamp_field] = normalized_timestamps
+                if self.dataset.db_timestamp_field:
+                    df[self.dataset.db_timestamp_field] = normalized_timestamps
 
             return df
 
@@ -784,17 +1012,24 @@ class DatasetProcessor:
         }
 
         # Convert timestamp fields
-        if self.has_timestamp and self.dataset.source_timestamp_field:
-            df[self.dataset.source_timestamp_field] = pd.to_datetime(
-                df[self.dataset.source_timestamp_field], errors="coerce", utc=True
+        source_timestamp_field = self.dataset.source_timestamp_field
+        db_timestamp_field = self.dataset.db_timestamp_field
+        if self.has_timestamp and source_timestamp_field and source_timestamp_field in df.columns:
+            df[source_timestamp_field] = self._normalize_ods_timestamps(
+                df[source_timestamp_field]
             )
-            df[self.dataset.source_timestamp_field] = df[
-                self.dataset.source_timestamp_field
-            ].dt.tz_convert("Europe/Zurich")
 
         # Select specific fields if configured
         if self.dataset.fields_selection:
             df = df[self.dataset.fields_selection]
+
+        if (
+            source_timestamp_field
+            and db_timestamp_field
+            and source_timestamp_field in df.columns
+            and db_timestamp_field not in df.columns
+        ):
+            df[db_timestamp_field] = df[source_timestamp_field]
 
         # Apply aggregations if configured
         if self.dataset.aggregations:
@@ -839,11 +1074,6 @@ class DatasetProcessor:
         # ensure df is a real copy before mutating to avoid SettingWithCopyWarning
         df = df.copy()
 
-        if self.dataset.source_timestamp_field in df.columns:
-            df.loc[:, self.dataset.source_timestamp_field] = pd.to_datetime(
-                df[self.dataset.source_timestamp_field], errors="coerce"
-            )
-
         return df
 
     def _apply_aggregations(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -858,8 +1088,8 @@ class DatasetProcessor:
 
             # Ensure timestamp is properly converted
             if self.dataset.source_timestamp_field:
-                df[self.dataset.source_timestamp_field] = pd.to_datetime(
-                    df[self.dataset.source_timestamp_field], errors="coerce"
+                df[self.dataset.source_timestamp_field] = self._normalize_ods_timestamps(
+                    df[self.dataset.source_timestamp_field]
                 )
                 df[self.dataset.db_timestamp_field] = df[
                     self.dataset.source_timestamp_field

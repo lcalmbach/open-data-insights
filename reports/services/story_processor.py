@@ -28,6 +28,7 @@ from reports.models.story_template import StoryTemplateFocus
 from dateutil.relativedelta import relativedelta
 from reports.models.lookups import Language, LanguageEnum, PeriodDirectionEnum
 from reports.constants.reference_period import ReferencePeriod
+from reports.language import get_language_id_for_code
 
 
 LLM_FORMATTING_INSTRUCTIONS = """
@@ -175,6 +176,7 @@ class StoryProcessor:
         force_generation: bool = False,
         story: Story = None,
         focus: StoryTemplateFocus | None = None,
+        language_code: str | None = None,
     ):
         # verify if either template or story is provided
         if not template and not story:
@@ -183,6 +185,12 @@ class StoryProcessor:
         self.dbclient = DjangoPostgresClient()
         self.force_generation = force_generation
         self.published_date = published_date
+        self.requested_language_code = (language_code or "").strip().lower() or None
+        self.requested_language_id = (
+            get_language_id_for_code(self.requested_language_code)
+            if self.requested_language_code
+            else None
+        )
         self._set_story_context(template=template, focus=focus, story=story)
         template_id = getattr(self.template, "id", None)
         focus_id = getattr(self.focus, "id", None)
@@ -626,7 +634,8 @@ class StoryProcessor:
             self._generate_tables()
             self.logger.info("Generating graphics...")
             self._generate_graphics()
-            self._generate_language_variants(mode=generation_mode)
+            if self._should_generate_language_variants():
+                self._generate_language_variants(mode=generation_mode)
             self._save_log_record()
 
             # Execute post-publish commands
@@ -712,8 +721,17 @@ class StoryProcessor:
             target_graphic.language_id = language_id
             target_graphic.save()
 
-    def _generate_language_variants(self, mode: str) -> None:
+    def _should_generate_language_variants(self) -> bool:
+        return self.requested_language_id != LanguageEnum.ENGLISH.value
+
+    def _get_requested_variant_languages(self):
         languages = Language.objects.exclude(id=LanguageEnum.ENGLISH.value).order_by("sort_order", "value")
+        if self.requested_language_id and self.requested_language_id != LanguageEnum.ENGLISH.value:
+            languages = languages.filter(id=self.requested_language_id)
+        return languages
+
+    def _generate_language_variants(self, mode: str) -> None:
+        languages = self._get_requested_variant_languages()
         if not languages.exists():
             return
 
@@ -914,7 +932,7 @@ class StoryProcessor:
     def _season_name(self) -> str:
         """Get season name from season number"""
         season_names = {1: "Spring", 2: "Summer", 3: "Fall", 4: "Winter"}
-        return season_names.get(self.season, "Unknown Season")
+        return season_names.get(getattr(self, "season", None), "Unknown Season")
 
     def _get_context_data(self) -> dict:
         """File "/home/lcalm/Work/Dev/data_news_agent/src/data_news.py", line 329, in get_context_data

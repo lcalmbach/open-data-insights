@@ -44,7 +44,7 @@
 
     {% if user.is_authenticated %}
         Welcome back {{ user.first_name }}!
-        You have subscribed to {{ user.story_template_subscriptions.count }} of {{ available_subscriptions }} available insights.
+        You have subscribed to {{ active_subscription_count|default:"0" }} of {{ available_subscriptions }} available insights.
         <a href="{% url 'account:profile' %}">Manage</a> your subscriptions. <a href="{% url 'stories' %}">Explore</a> all {{num_insights}} curated insights. 
     {% else %}
         Data Insights are generated from a wide range of open-data sources—on daily, monthly, and yearly schedules, or whenever predefined conditions are met (for example, pollutant limits exceeded or values rising above the historical 95th percentile).

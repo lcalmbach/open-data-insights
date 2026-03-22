@@ -183,6 +183,15 @@ def generate_chart(data, settings, chart_id):
             )
 
             html = html.replace('id="vis"', f'id="{chart_id}"')
+            html = html.replace("#vis.vega-embed", f"#{chart_id}.vega-embed")
+            html = html.replace(
+                "document.getElementById('vis')",
+                f"document.getElementById('{chart_id}')",
+            )
+            html = html.replace(
+                'document.getElementById("vis")',
+                f'document.getElementById("{chart_id}")',
+            )
             html = html.replace('vegaEmbed("#vis"', f'vegaEmbed("#{chart_id}"')
             embed_hook = ".then(function(result) {"
             if embed_hook in html:

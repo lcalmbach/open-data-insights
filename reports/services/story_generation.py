@@ -24,6 +24,7 @@ class StoryGenerationService(ETLBaseService):
         focus: StoryTemplateFocus,  # Second argument
         published_date: Optional[date] = None,  # Third argument with default
         force: bool = False,  # Fourth argument with default
+        language_code: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate a single story from a template"""
         try:
@@ -46,7 +47,13 @@ class StoryGenerationService(ETLBaseService):
             if isinstance(published_date, datetime):
                 published_date = published_date.date()
 
-            story_processor = StoryProcessor(published_date, template, force, focus=focus)
+            story_processor = StoryProcessor(
+                published_date,
+                template,
+                force,
+                focus=focus,
+                language_code=language_code,
+            )
 
             # Check if story should be generated
             if not force and not story_processor.story:
@@ -104,6 +111,7 @@ class StoryGenerationService(ETLBaseService):
         published_date: Optional[date] = None,
         force: bool = False,
         exclude_template_ids: Optional[List[int]] = None,
+        language_code: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate multiple stories from templates"""
         focuses = StoryTemplateFocus.objects.select_related("story_template").filter(
@@ -182,7 +190,10 @@ class StoryGenerationService(ETLBaseService):
                 )
 
                 result = self.generate_story(
-                    focus=focus, published_date=published_date, force=force
+                    focus=focus,
+                    published_date=published_date,
+                    force=force,
+                    language_code=language_code,
                 )
             except Exception as e:  # noqa: BLE001
                 self.logger.exception(

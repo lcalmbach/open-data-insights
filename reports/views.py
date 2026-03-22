@@ -42,6 +42,7 @@ from .models.story import Story
 from .models.story_table import StoryTable
 from .models.lookups import Period
 from .models.story_rating import StoryRating
+from .models.subscription import StoryTemplateSubscription
 from .models.user_comment import UserComment
 from .models.quote import Quote
 from .services.database_client import DjangoPostgresClient
@@ -483,6 +484,20 @@ def _accessible_template_ids(user):
     )
 
 
+def _active_subscription_count(user, template_ids):
+    """Count the user's live subscriptions among currently accessible templates."""
+    if not user or not getattr(user, "is_authenticated", False):
+        return 0
+    if not template_ids:
+        return 0
+    return StoryTemplateSubscription.objects.filter(
+        user=user,
+        cancellation_date__isnull=True,
+        story_template_id__in=template_ids,
+        story_template__active=True,
+    ).count()
+
+
 def _extract_chart_id(content_html: str | None) -> str | None:
     if not content_html:
         return None
@@ -496,6 +511,43 @@ def _extract_chart_id(content_html: str | None) -> str | None:
 def _attach_graphic_chart_ids(graphics):
     for graphic in graphics:
         graphic.chart_id = _extract_chart_id(graphic.content_html)
+        if graphic.chart_id and graphic.content_html:
+            graphic.content_html = _normalize_embedded_chart_html(
+                graphic.content_html,
+                graphic.chart_id,
+            )
+
+
+def _normalize_embedded_chart_html(content_html: str | None, chart_id: str | None) -> str | None:
+    if not content_html or not chart_id:
+        return content_html
+    normalized = content_html.replace("#vis.vega-embed", f"#{chart_id}.vega-embed")
+    normalized = normalized.replace(
+        "document.getElementById('vis')",
+        f"document.getElementById('{chart_id}')",
+    )
+    normalized = normalized.replace(
+        'document.getElementById("vis")',
+        f'document.getElementById("{chart_id}")',
+    )
+    return normalized
+
+
+def _get_story_graphics(story: Story | None):
+    if not story:
+        return []
+
+    graphics = story.story_graphics.all()
+    if graphics.exists() or story.language_id == ENGLISH_LANGUAGE_ID:
+        return graphics
+
+    english_story = _resolve_story_for_language(story, ENGLISH_LANGUAGE_ID)
+    if english_story and english_story.id != story.id:
+        fallback_graphics = english_story.story_graphics.all()
+        if fallback_graphics.exists():
+            return fallback_graphics
+
+    return graphics
 
 
 def _extract_leaflet_requirements(content_html: str | None) -> tuple[bool, bool]:
@@ -531,6 +583,7 @@ def home_view(request):
     random_quote = _get_daily_quote()
     splash_image = _get_daily_splash_image()
     template_ids = _accessible_template_ids(request.user)
+    active_subscription_count = _active_subscription_count(request.user, template_ids)
     stories = list(
         Story.objects.filter(templatefocus__story_template_id__in=template_ids).order_by(
             "-published_date"
@@ -552,7 +605,7 @@ def home_view(request):
         selected_story.content, extras=MARKDOWN_EXTRAS
     )
     tables = get_tables(selected_story) if selected_story else []
-    graphics = selected_story.story_graphics.all() if selected_story else []
+    graphics = _get_story_graphics(selected_story)
     _attach_graphic_chart_ids(graphics)
     needs_leaflet, needs_markercluster = _attach_graphic_requirements(graphics)
     data_source = selected_story.template.data_source if selected_story else None
@@ -573,6 +626,7 @@ def home_view(request):
             "data_source": data_source,
             "other_ressources": other_ressources,
             "available_subscriptions": available_subscriptions,
+            "active_subscription_count": active_subscription_count,
             "random_quote": random_quote,
             "num_insights": Story.objects.count(),
             "splash_image": splash_image,
@@ -700,7 +754,7 @@ def stories_view(request):
 
     # Process story content
     if selected_story:
-        graphics = selected_story.story_graphics.all() if selected_story else []
+        graphics = _get_story_graphics(selected_story)
         _attach_graphic_chart_ids(graphics)
         needs_leaflet, needs_markercluster = _attach_graphic_requirements(graphics)
         data_source = selected_story.template.data_source if selected_story else None
@@ -1046,6 +1100,7 @@ def view_story(request, story_id=None):
     random_quote = _get_daily_quote()
     splash_image = _get_daily_splash_image()
     template_ids = _accessible_template_ids(request.user)
+    active_subscription_count = _active_subscription_count(request.user, template_ids)
     preferred_language_id = get_content_language_id(request)
     stories_qs = Story.objects.filter(
         templatefocus__story_template_id__in=template_ids
@@ -1081,7 +1136,7 @@ def view_story(request, story_id=None):
     prev_story_id = stories[index - 1].id if index > 0 else None
     next_story_id = stories[index + 1].id if index < len(stories) - 1 else None
     tables = get_tables(selected_story) if selected_story else []
-    graphics = selected_story.story_graphics.all() if selected_story else []
+    graphics = _get_story_graphics(selected_story)
     _attach_graphic_chart_ids(graphics)
     needs_leaflet, needs_markercluster = _attach_graphic_requirements(graphics)
     data_source = selected_story.template.data_source if selected_story else None
@@ -1105,7 +1160,9 @@ def view_story(request, story_id=None):
             "other_ressources": other_ressources,
             "data_source": data_source,
             "available_subscriptions": available_subscriptions,
+            "active_subscription_count": active_subscription_count,
             "random_quote": random_quote,
+            "num_insights": Story.objects.count(),
             "splash_image": splash_image,
             "needs_leaflet": needs_leaflet,
             "needs_markercluster": needs_markercluster,
@@ -1125,7 +1182,7 @@ def story_detail(request, story_id=None):
     if resolved_story.id != selected_story.id:
         return redirect("story_detail", story_id=resolved_story.id)
     tables = get_tables(selected_story) if selected_story else []
-    graphics = selected_story.story_graphics.all() if selected_story else []
+    graphics = _get_story_graphics(selected_story)
     _attach_graphic_chart_ids(graphics)
     needs_leaflet, needs_markercluster = _attach_graphic_requirements(graphics)
     data_source = selected_story.template.data_source if selected_story else None

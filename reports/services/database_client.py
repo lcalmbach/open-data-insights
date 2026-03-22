@@ -4,10 +4,12 @@ Replaces the standalone PostgresClient with Django ORM integration
 """
 
 import logging
+import json
 import pandas as pd
 from typing import Optional, Dict, Any, List
 from django.db import connection, transaction
 from django.conf import settings
+from psycopg2.extras import execute_values
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from tqdm import tqdm
@@ -161,3 +163,113 @@ class DjangoPostgresClient:
         except Exception as e:
             self.logger.error(f"Error uploading file to database: {e}")
             raise
+
+    @staticmethod
+    def _prepare_dataframe_for_sql(df: pd.DataFrame) -> pd.DataFrame:
+        prepared = df.copy()
+        for column in prepared.columns:
+            prepared[column] = prepared[column].map(
+                lambda value: json.dumps(value)
+                if isinstance(value, (dict, list))
+                else (None if pd.isna(value) else value)
+            )
+        return prepared
+
+    def create_table_from_dataframe(
+        self,
+        df: pd.DataFrame,
+        table_name: str,
+        schema: str | None = None,
+    ) -> int:
+        if df.empty:
+            return 0
+
+        schema = schema or self.schema
+        prepared = self._prepare_dataframe_for_sql(df)
+        prepared.to_sql(
+            table_name,
+            con=self.engine,
+            schema=schema,
+            if_exists="fail",
+            index=False,
+            method="multi",
+        )
+        return len(prepared)
+
+    def replace_table_from_dataframe(
+        self,
+        df: pd.DataFrame,
+        table_name: str,
+        schema: str | None = None,
+    ) -> int:
+        if df.empty:
+            return 0
+
+        schema = schema or self.schema
+        prepared = self._prepare_dataframe_for_sql(df)
+        prepared.to_sql(
+            table_name,
+            con=self.engine,
+            schema=schema,
+            if_exists="replace",
+            index=False,
+            method="multi",
+        )
+        return len(prepared)
+
+    def ensure_unique_index(
+        self,
+        table_name: str,
+        unique_fields: list[str],
+        schema: str | None = None,
+    ) -> None:
+        if not unique_fields:
+            return
+
+        schema = schema or self.schema
+        index_name = f'{table_name}_{"_".join(unique_fields)}_uniq'
+        quoted_unique = ", ".join(f'"{field}"' for field in unique_fields)
+        sql = f'''
+            CREATE UNIQUE INDEX IF NOT EXISTS "{index_name}"
+            ON "{schema}"."{table_name}" ({quoted_unique})
+        '''
+        self.run_action_query(sql)
+
+    def upsert_dataframe(
+        self,
+        df: pd.DataFrame,
+        table_name: str,
+        unique_fields: list[str],
+        update_fields: list[str] | None = None,
+        schema: str | None = None,
+    ) -> int:
+        if df.empty:
+            return 0
+        if not unique_fields:
+            raise ValueError("unique_fields must not be empty for upsert_dataframe")
+
+        schema = schema or self.schema
+        prepared = self._prepare_dataframe_for_sql(df)
+        columns = list(prepared.columns)
+        update_fields = update_fields or [col for col in columns if col not in unique_fields]
+
+        prepared_rows = []
+        for row in prepared.itertuples(index=False, name=None):
+            prepared_rows.append(tuple(row))
+
+        quoted_columns = ", ".join(f'"{col}"' for col in columns)
+        quoted_unique = ", ".join(f'"{col}"' for col in unique_fields)
+        update_clause = ", ".join(
+            f'"{col}" = EXCLUDED."{col}"' for col in update_fields
+        )
+        sql = f"""
+            INSERT INTO "{schema}"."{table_name}" ({quoted_columns})
+            VALUES %s
+            ON CONFLICT ({quoted_unique}) DO UPDATE
+            SET {update_clause}
+        """
+
+        with connection.cursor() as cursor:
+            execute_values(cursor, sql, prepared_rows)
+
+        return len(prepared_rows)

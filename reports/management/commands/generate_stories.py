@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from reports.services import StoryGenerationService
+from reports.language import SUPPORTED_LANGUAGE_CODES
 from datetime import date, datetime
 
 
@@ -27,16 +28,30 @@ class Command(BaseCommand):
             action='store_true',
             help='Force generation even if conditions are not met'
         )
+        parser.add_argument(
+            '--lang',
+            type=str,
+            help='Limit generation to a single language code (en, de, fr)'
+        )
 
     def handle(self, *args, **options):
         template_id = options.get('id')
         story_focus_id = options.get('story_focus_id')
         force = options.get('force', False)
+        language_code = (options.get('lang') or '').strip().lower() or None
 
         if template_id and story_focus_id:
             self.stdout.write(
                 self.style.ERROR(
                     "Use either --id (template) or --story_focus_id (focus), not both."
+                )
+            )
+            return
+
+        if language_code and language_code not in SUPPORTED_LANGUAGE_CODES:
+            self.stdout.write(
+                self.style.ERROR(
+                    f"Invalid language code '{language_code}'. Use one of: {', '.join(SUPPORTED_LANGUAGE_CODES)}."
                 )
             )
             return
@@ -61,6 +76,7 @@ class Command(BaseCommand):
             story_focus_id=story_focus_id,
             published_date=published_date,
             force=force,
+            language_code=language_code,
         )
         
         if result.get('success', False):
