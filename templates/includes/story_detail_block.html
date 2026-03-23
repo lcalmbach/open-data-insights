@@ -58,39 +58,56 @@
       <!-- debug: story id / template 
       storyid: {{selected_story.id}} templatefocus_id: {{selected_story.templatefocus.id}} template_id: {{selected_story.templatefocus.story_template.id}} ({{selected_story.templatefocus.story_template.title}})
       -->
-      <p class="card-text mt-3">{{ selected_story.summary|safe }}</p>
+      <div class="card-text mt-3">{{ selected_story.summary_html|safe }}</div>
     </b>
-    {% with focus_images=selected_story.templatefocus.focus_image_links.all %}
-	          {% if focus_images %}
-	        {% for link in focus_images %}
-	          {% if link.image.image %}
-	            <img
-	              src="{{ link.image.image.url }}"
-	              class="img-fluid rounded mt-3 story-focus-image"
-	              alt="{{ selected_story.title|striptags }}"
-	            >
-	            {% if link.image.credit_line_html %}
-	              <small class="d-block text-muted mt-1">
-	                {{ link.image.credit_line_html }}
-              </small>
-            {% elif link.image.credit_line %}
+    {% with focus_images=selected_story.resolved_focus_images %}
+      {% if focus_images %}
+        {% for image in focus_images %}
+          {% if image.display_url %}
+            <div class="text-center mt-3">
+              <a
+                href="{{ image.display_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="d-inline-block"
+              >
+                <img
+                  src="{{ image.display_url }}"
+                  class="img-fluid rounded story-focus-image"
+                  alt="{{ image.title|default:selected_story.title|striptags }}"
+                >
+              </a>
+            </div>
+            {% if image.credit_line_html %}
               <small class="d-block text-muted mt-1">
-                {{ link.image.credit_line }}
+                {{ image.credit_line_html }}
               </small>
-            {% elif link.image.image_source %}
+            {% elif image.credit_line %}
+              <small class="d-block text-muted mt-1">
+                {{ image.credit_line }}
+              </small>
+            {% elif image.image_source_url %}
               <small class="d-block text-muted mt-1">
                 <a
-                  href="{{ link.image.image_source }}"
+                  href="{{ image.image_source_url }}"
                   target="_blank"
                   rel="noopener noreferrer"
                 >Image source</a>
+              </small>
+            {% elif image.display_url %}
+              <small class="d-block text-muted mt-1">
+                <a
+                  href="{{ image.display_url }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >Open image</a>
               </small>
             {% endif %}
           {% endif %}
         {% endfor %}
       {% endif %}
     {% endwith %}
-    <p class="card-text mt-3">{{ selected_story.content_html|safe }}</p>
+    <div class="card-text mt-3">{{ selected_story.content_html|safe }}</div>
   </div>
 
   {% if tables %}

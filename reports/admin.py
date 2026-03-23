@@ -80,8 +80,8 @@ class StoryTemplateFocusAdmin(admin.ModelAdmin):
 
 @admin.register(StoryImage)
 class StoryImageAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "image_source")
-    search_fields = ("title", "image_source")
+    list_display = ("id", "title", "image_source", "remote_url")
+    search_fields = ("title", "image_source", "remote_url")
 
 
 @admin.register(StoryTemplateContext)

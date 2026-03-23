@@ -769,7 +769,9 @@ class StoryProcessor:
                 variant.context_values = english_story.context_values
                 variant.content = self._translate_text(english_story.content or "", language.value, max_tokens=3000)
                 variant.summary = self._translate_text(english_story.summary or "", language.value, max_tokens=500)
-                variant.title = self._translate_text(english_story.title or "", language.value, max_tokens=120)
+                variant.title = self._fit_story_title(
+                    self._translate_text(english_story.title or "", language.value, max_tokens=120)
+                )
                 variant.prompt_text = f"Translated from English story {english_story.id} to {language.value}"
                 variant.full_clean()
                 variant.save()
@@ -1191,19 +1193,33 @@ class StoryProcessor:
             self.logger.error(f"Error generating {kind} with OpenAI: {e}")
             return None
 
+    def _fit_story_title(self, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = " ".join(str(value).split()).strip()
+        max_length = self.story._meta.get_field("title").max_length or 255
+        if len(normalized) <= max_length:
+            return normalized
+        self.logger.warning(
+            "Truncating generated title from %s to %s characters",
+            len(normalized),
+            max_length,
+        )
+        return normalized[:max_length].rstrip()
+
     def generate_title(self, target_language: str | None = None) -> Optional[str]:
         """Generate title using the unified LLM helper"""
         self.logger.info("Generating title...")
         # Generate lead (summary) and an engaging title using the unified LLM helper
 
         if self.story.template.create_title:
-            self.story.title = self._generate_summary(
+            self.story.title = self._fit_story_title(self._generate_summary(
                 kind="title", target_language=target_language
-            )
+            ))
         else:
-            self.story.title = self._replace_reference_period_expression(
+            self.story.title = self._fit_story_title(self._replace_reference_period_expression(
                 self.story.template.default_title
-            )
+            ))
         return bool(self.story.title)
 
     def generate_lead(self, target_language: str | None = None) -> Optional[str]:

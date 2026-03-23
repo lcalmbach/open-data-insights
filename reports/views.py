@@ -46,6 +46,7 @@ from .models.subscription import StoryTemplateSubscription
 from .models.user_comment import UserComment
 from .models.quote import Quote
 from .services.database_client import DjangoPostgresClient
+from .services.focus_images import resolve_story_images
 from .services.utils import normalize_sql_query
 from .language import ENGLISH_LANGUAGE_ID, get_content_language_id
 
@@ -578,6 +579,19 @@ def _attach_graphic_requirements(graphics):
     return needs_leaflet, needs_markercluster
 
 
+def _attach_resolved_focus_images(story: Story | None) -> None:
+    if story is None:
+        return
+    story.resolved_focus_images = resolve_story_images(story)
+
+
+def _attach_story_render_fields(story: Story | None) -> None:
+    if story is None:
+        return
+    story.summary_html = markdown2.markdown(story.summary or "", extras=MARKDOWN_EXTRAS)
+    story.content_html = markdown2.markdown(story.content or "", extras=MARKDOWN_EXTRAS)
+
+
 @never_cache
 def home_view(request):
     random_quote = _get_daily_quote()
@@ -601,9 +615,8 @@ def home_view(request):
         )
     selected_story = stories[0]
     next_story_id = stories[1].id if len(stories) > 1 else None
-    selected_story.content_html = markdown2.markdown(
-        selected_story.content, extras=MARKDOWN_EXTRAS
-    )
+    _attach_resolved_focus_images(selected_story)
+    _attach_story_render_fields(selected_story)
     tables = get_tables(selected_story) if selected_story else []
     graphics = _get_story_graphics(selected_story)
     _attach_graphic_chart_ids(graphics)
@@ -754,6 +767,8 @@ def stories_view(request):
 
     # Process story content
     if selected_story:
+        _attach_resolved_focus_images(selected_story)
+        _attach_story_render_fields(selected_story)
         graphics = _get_story_graphics(selected_story)
         _attach_graphic_chart_ids(graphics)
         needs_leaflet, needs_markercluster = _attach_graphic_requirements(graphics)
@@ -763,9 +778,6 @@ def stories_view(request):
         )
         # Get tables and convert directly to DataFrames
         tables = get_tables(selected_story) if selected_story else []
-        selected_story.content_html = markdown2.markdown(
-            selected_story.content, extras=MARKDOWN_EXTRAS
-        )
         rating_ctx = _get_story_rating_context(selected_story)
     else:
         graphics = []
@@ -1181,6 +1193,8 @@ def story_detail(request, story_id=None):
     resolved_story = _resolve_story_for_language(selected_story, preferred_language_id)
     if resolved_story.id != selected_story.id:
         return redirect("story_detail", story_id=resolved_story.id)
+    _attach_resolved_focus_images(selected_story)
+    _attach_story_render_fields(selected_story)
     tables = get_tables(selected_story) if selected_story else []
     graphics = _get_story_graphics(selected_story)
     _attach_graphic_chart_ids(graphics)
@@ -1190,9 +1204,6 @@ def story_detail(request, story_id=None):
         selected_story.template.other_ressources if selected_story else None
     )
 
-    selected_story.content_html = markdown2.markdown(
-        selected_story.content, extras=MARKDOWN_EXTRAS
-    )
     rating_ctx = _get_story_rating_context(selected_story)
     return render(
         request,

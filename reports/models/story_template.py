@@ -227,6 +227,12 @@ class StoryImage(models.Model):
         upload_to="story_template_focus/",
         help_text="Image file.",
     )
+    remote_url = models.URLField(
+        max_length=1000,
+        blank=True,
+        null=True,
+        help_text="Remote image URL used when the image is not uploaded locally.",
+    )
     title = models.CharField(
         max_length=255,
         blank=True,
@@ -341,11 +347,22 @@ class StoryImage(models.Model):
             format_html_join(", ", "{}", ((seg,) for seg in tail)),
         )
 
+    @property
+    def display_url(self) -> str | None:
+        if self.image:
+            try:
+                return self.image.url
+            except ValueError:
+                pass
+        return (self.remote_url or "").strip() or None
+
     def __str__(self) -> str:
         if self.title:
             return self.title
         if self.image_source_url:
             return self.image_source_url
+        if self.remote_url:
+            return self.remote_url
         if self.image:
             return getattr(self.image, "name", "") or "Image"
         return f"StoryImage {self.pk}" if self.pk else "StoryImage"
