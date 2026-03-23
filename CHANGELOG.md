@@ -8,6 +8,16 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - _Nothing yet._
 
 
+## [0.1.6] - 2026-03-23
+### Added
+- Add StoryImage image_identifier_key support
+
+### Changed
+- Render story leads as markdown and simplify story image source handling
+
+### Fixed
+- Truncate generated story titles to the model field length
+
 ## [0.1.5] - 2026-03-20
 ### Added
 - Add management commands for commodity price imports and market event seeding
