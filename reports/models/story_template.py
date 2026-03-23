@@ -281,6 +281,13 @@ class StoryImage(models.Model):
         null=True,
         help_text="If you modified the image, describe changes (e.g. cropped, resized). Leave blank for no changes.",
     )
+    image_identifier_key = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Optional external key used to associate this image with a story focus or source record, for example an inventory id.",
+    )
 
 
     @property
