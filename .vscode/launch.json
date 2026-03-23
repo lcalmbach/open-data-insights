@@ -32,7 +32,7 @@
       "args": [
         "generate_stories",
         "--id",
-        "70",
+        "75",
         "-v",
         "2"
       ],
@@ -55,7 +55,7 @@
       "args": [
         "synch_data",
         "--id",
-        "70",
+        "75",
         "-v",
         "2"
       ],
@@ -109,7 +109,7 @@
         "PYTHONPATH": "${workspaceFolder}"
       },
       "console": "integratedTerminal"
-    },graphics
+    },
 
     {
       "name": "Django: Send Stories",
@@ -141,7 +141,7 @@
       "args": [
         "generate_appendices",
         "--graphic_template_id",
-        "72",
+        "79",
         "--graphics",
         "-v",
         "2"

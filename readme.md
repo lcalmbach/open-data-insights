@@ -285,6 +285,37 @@ Media storage on S3 (recommended on Heroku):
    uv run python manage.py sync_datasets --dataset-id NEW_ID --test
    ```
 
+### Automated Testing
+
+This project supports automated testing with `pytest` and `pytest-django`.
+
+Install development dependencies:
+
+```bash
+uv sync --group dev
+```
+
+Run the full test suite:
+
+```bash
+uv run --group dev pytest
+```
+
+Run one test module:
+
+```bash
+uv run --group dev pytest reports/tests.py
+```
+
+Run one test class or one test method:
+
+```bash
+uv run --group dev pytest reports/tests.py::StoryTableGenerationTests
+uv run --group dev pytest reports/tests.py::StoryTableGenerationTests::test_generate_table_replaces_missing_values_with_blank_strings
+```
+
+`pytest-django` boots Django using `DJANGO_SETTINGS_MODULE=report_generator.settings`, discovers tests automatically, and shows a concise failure report. Tests that inherit from `django.test.TestCase` use a temporary test database; `SimpleTestCase` tests do not need the database.
+
 ## 📈 Monitoring and Logging
 
 - **Application logs**: Available via `heroku logs --tail`
