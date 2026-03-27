@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import requests
 import os
+import sys
 import time
 import urllib.parse
 from datetime import date, timedelta, datetime, timezone
@@ -970,6 +971,7 @@ class OdsDatasetConnector:
                         unit="B",
                         unit_scale=True,
                         unit_divisor=1024,
+                        disable=not sys.stderr.isatty(),
                     ) as bar:
                         for chunk in r.iter_content(chunk_size=8192):
                             f.write(chunk)

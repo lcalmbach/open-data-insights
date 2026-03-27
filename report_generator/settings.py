@@ -295,17 +295,66 @@ if DEBUG:  # or use a custom flag for your environment
     EMAIL_REDIRECT_MAX_EMAILS = int(os.environ.get("EMAIL_REDIRECT_MAX_EMAILS", "1"))
 
 
-#LOGGING = {
-#    'version': 1,
-#    'handlers': {
-#        'console': {'class': 'logging.StreamHandler'},
-#    },
-#    'loggers': {
-#        'django.db.backends': {
-#            'level': 'DEBUG',
-#            'handlers': ['console'],
-#        },
-#    }
-#}
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s %(levelname)s %(name)s: %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": os.environ.get("LOG_LEVEL", "WARNING"),
+    },
+    "loggers": {
+        "reports": {
+            "handlers": ["console"],
+            "level": os.environ.get("REPORTS_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "account": {
+            "handlers": ["console"],
+            "level": os.environ.get("ACCOUNT_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "DatasetSync": {
+            "handlers": ["console"],
+            "level": os.environ.get("ETL_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "DatasetProcessor": {
+            "handlers": ["console"],
+            "level": os.environ.get("ETL_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "EiaDatasetConnector": {
+            "handlers": ["console"],
+            "level": os.environ.get("ETL_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "UrlDatasetConnector": {
+            "handlers": ["console"],
+            "level": os.environ.get("ETL_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "DjangoPostgresClient": {
+            "handlers": ["console"],
+            "level": os.environ.get("ETL_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "StoryProcessor": {
+            "handlers": ["console"],
+            "level": os.environ.get("ETL_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+    },
+}
 
 SHOW_DEV_BANNER = DEBUG

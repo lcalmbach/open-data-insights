@@ -4,11 +4,9 @@ Provides common functionality for all ETL operations
 """
 
 import logging
-from django.conf import settings
 from pathlib import Path
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict
 import pandas as pd
-from pathlib import Path
 from reports.services.utils import delete_all_files_in_folder
 
 
@@ -17,24 +15,6 @@ class ETLBaseService:
 
     def __init__(self, logger_name: str = None):
         self.logger = logging.getLogger(logger_name or self.__class__.__name__)
-        self.setup_logger()
-
-    def setup_logger(self):
-        """Setup logging configuration"""
-        if not self.logger.handlers:
-            # Ensure logs directory exists
-
-            log_dir = Path(settings.BASE_DIR) / "logs"
-            log_dir.mkdir(exist_ok=True)
-
-            handler = logging.FileHandler(log_dir / "etl.log")
-            formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            )
-
-            handler.setFormatter(formatter)
-            self.logger.addHandler(handler)
-            self.logger.setLevel(logging.INFO)
 
     def execute_sql_query(
         self, query: str, params: Optional[Dict] = None

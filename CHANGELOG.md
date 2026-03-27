@@ -7,6 +7,13 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 ### Added
 - _Nothing yet._
 
+## [0.1.7] - 2026-03-27
+### Changed
+- Send ETL sync logging to stdout/stderr through Django logging for Heroku visibility
+
+### Fixed
+- Disable non-interactive dataset download progress bars so Heroku logs stay readable
+
 
 ## [0.1.6] - 2026-03-23
 ### Added
