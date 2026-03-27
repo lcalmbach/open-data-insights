@@ -7,6 +7,13 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 ### Added
 - _Nothing yet._
 
+## [0.1.8] - 2026-03-27
+### Changed
+- Stream URL-backed CSV imports to temporary files and load them into Postgres in chunks
+
+### Fixed
+- Reduce memory usage during replace-mode URL dataset syncs on Heroku
+
 ## [0.1.7] - 2026-03-27
 ### Changed
 - Send ETL sync logging to stdout/stderr through Django logging for Heroku visibility

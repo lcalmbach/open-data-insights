@@ -685,7 +685,10 @@ class DatasetSourceConnectorTests(SimpleTestCase):
     def test_url_connector_fetches_csv_dataframe(self, mock_get):
         response = Mock()
         response.raise_for_status.return_value = None
-        response.text = "id,observed_at,value\n1,2026-03-19,11\n2,2026-03-20,12\n"
+        response.iter_content.return_value = [
+            b"id,observed_at,value\n",
+            b"1,2026-03-19,11\n2,2026-03-20,12\n",
+        ]
         mock_get.return_value = response
         dataset = SimpleNamespace(
             id=90,
@@ -700,7 +703,39 @@ class DatasetSourceConnectorTests(SimpleTestCase):
         self.assertEqual(list(df.columns), ["id", "observed_at", "value"])
         self.assertEqual(len(df), 2)
         self.assertEqual(connector.get_write_mode(), "replace")
-        mock_get.assert_called_once_with("https://example.com/data.csv", timeout=(10, 60))
+        mock_get.assert_called_once_with(
+            "https://example.com/data.csv",
+            stream=True,
+            timeout=(10, 60),
+        )
+
+    @patch("reports.services.dataset_sync.requests.get")
+    def test_url_connector_persists_csv_in_chunks(self, mock_get):
+        response = Mock()
+        response.raise_for_status.return_value = None
+        response.iter_content.return_value = [
+            b"id,observed_at,value\n",
+            b"1,2026-03-19,11\n2,2026-03-20,12\n",
+        ]
+        mock_get.return_value = response
+        dataset = SimpleNamespace(
+            id=90,
+            name="CSV URL",
+            source="url",
+            source_url="https://example.com/data.csv",
+        )
+        dbclient = Mock()
+        dbclient.replace_table_from_csv.return_value = 2
+
+        connector = UrlDatasetConnector(dataset)
+        written = connector.persist_data(
+            dbclient=dbclient,
+            table_name="csv_url",
+            schema="opendata",
+        )
+
+        self.assertEqual(written, 2)
+        dbclient.replace_table_from_csv.assert_called_once()
 
 
 class OdsConnectorTimestampNormalizationTests(SimpleTestCase):
@@ -738,6 +773,30 @@ class OdsConnectorTimestampNormalizationTests(SimpleTestCase):
 
 
 class DatasetPersistenceTests(SimpleTestCase):
+    @patch("reports.services.dataset_sync.DjangoPostgresClient")
+    def test_streamed_connector_persistence_uses_direct_persist(self, mock_dbclient_cls):
+        mock_dbclient = mock_dbclient_cls.return_value
+        dataset = SimpleNamespace(
+            id=93,
+            name="CSV URL",
+            target_table_name="commodity_prices",
+            post_create_sql_commands=None,
+            post_import_sql_commands=None,
+        )
+        processor = SimpleNamespace(
+            persist_data=Mock(return_value=2),
+        )
+
+        service = DatasetSyncService()
+        ok = service._persist_connector_data(dataset, processor)
+
+        self.assertTrue(ok)
+        processor.persist_data.assert_called_once_with(
+            dbclient=mock_dbclient,
+            table_name="commodity_prices",
+            schema="opendata",
+        )
+
     @patch("reports.services.dataset_sync.DjangoPostgresClient")
     def test_shared_dataframe_persistence_uses_upsert(self, mock_dbclient_cls):
         mock_dbclient = mock_dbclient_cls.return_value

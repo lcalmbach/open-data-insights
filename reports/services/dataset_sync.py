@@ -4,13 +4,13 @@ Handles importing and synchronizing datasets from external sources
 """
 
 import json
-from io import StringIO
 import logging
 import pandas as pd
 import numpy as np
 import requests
 import os
 import sys
+import tempfile
 import time
 import urllib.parse
 from datetime import date, timedelta, datetime, timezone
@@ -58,7 +58,9 @@ class DatasetSyncService(ETLBaseService):
                 f"Starting synchronization for dataset ID {dataset.id}: {dataset.name}"
             )
             processor = create_dataset_processor(dataset)
-            if hasattr(processor, "fetch_dataframe"):
+            if hasattr(processor, "persist_data"):
+                result = self._persist_connector_data(dataset, processor)
+            elif hasattr(processor, "fetch_dataframe"):
                 df = processor.fetch_dataframe()
                 result = self._persist_connector_dataframe(dataset, processor, df)
             else:
@@ -80,6 +82,29 @@ class DatasetSyncService(ETLBaseService):
         except Exception as e:
             self.logger.error(
                 f"Error synchronizing dataset ID {dataset.id} ({dataset.name}): {str(e)}"
+            )
+            return False
+
+    def _persist_connector_data(self, dataset: Dataset, processor) -> bool:
+        try:
+            dbclient = DjangoPostgresClient()
+            written = processor.persist_data(
+                dbclient=dbclient,
+                table_name=dataset.target_table_name,
+                schema="opendata",
+            )
+            self._run_sql_batch(dataset.post_create_sql_commands)
+            self._run_sql_batch(dataset.post_import_sql_commands)
+            self.logger.info(
+                "Persisted %s row(s) into opendata.%s for dataset ID %s",
+                written,
+                dataset.target_table_name,
+                dataset.id,
+            )
+            return True
+        except Exception as e:
+            self.logger.error(
+                f"Error persisting fetched data for dataset ID {dataset.id} ({dataset.name}): {str(e)}"
             )
             return False
 
@@ -146,6 +171,7 @@ class DatasetSyncService(ETLBaseService):
                 f"Error persisting fetched DataFrame for dataset ID {dataset.id} ({dataset.name}): {str(e)}"
             )
             return False
+
 
     def _run_sql_batch(self, sql_commands: str | None) -> None:
         if not sql_commands:
@@ -361,7 +387,7 @@ class EiaDatasetConnector:
 
 
 class UrlDatasetConnector:
-    """Connector that downloads a CSV file from a URL and returns it as a DataFrame."""
+    """Connector that downloads a CSV file from a URL and replaces the target table."""
 
     def __init__(self, dataset: Dataset):
         self.dataset = dataset
@@ -371,22 +397,59 @@ class UrlDatasetConnector:
         if not self.dataset.source_url:
             raise ValueError("URL datasets require source_url.")
 
-        response = requests.get(self.dataset.source_url, timeout=(10, 60))
-        response.raise_for_status()
-        df = pd.read_csv(
-            StringIO(response.text),
-            sep=None,
-            engine="python",
-        )
-        self.logger.info(
-            "Downloaded %s row(s) from URL source %s",
-            len(df),
-            self.dataset.source_url,
-        )
-        return df
+        csv_path = self._download_csv_to_temp_file()
+        try:
+            df = pd.read_csv(
+                csv_path,
+                sep=None,
+                engine="python",
+            )
+            self.logger.info(
+                "Downloaded %s row(s) from URL source %s",
+                len(df),
+                self.dataset.source_url,
+            )
+            return df
+        finally:
+            Path(csv_path).unlink(missing_ok=True)
 
     def get_write_mode(self) -> str:
         return "replace"
+
+    def persist_data(self, dbclient: DjangoPostgresClient, table_name: str, schema: str = "opendata") -> int:
+        csv_path = self._download_csv_to_temp_file()
+        try:
+            written = dbclient.replace_table_from_csv(
+                csv_path,
+                table_name=table_name,
+                schema=schema,
+                sep=None,
+                engine="python",
+            )
+            self.logger.info(
+                "Downloaded %s row(s) from URL source %s",
+                written,
+                self.dataset.source_url,
+            )
+            return written
+        finally:
+            Path(csv_path).unlink(missing_ok=True)
+
+    def _download_csv_to_temp_file(self) -> str:
+        response = requests.get(
+            self.dataset.source_url,
+            stream=True,
+            timeout=(10, 60),
+        )
+        try:
+            response.raise_for_status()
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp_file:
+                for chunk in response.iter_content(chunk_size=1024 * 1024):
+                    if chunk:
+                        tmp_file.write(chunk)
+                return tmp_file.name
+        finally:
+            response.close()
 
 
 class OdsDatasetConnector:

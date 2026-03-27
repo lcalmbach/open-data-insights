@@ -217,6 +217,40 @@ class DjangoPostgresClient:
         )
         return len(prepared)
 
+    def replace_table_from_csv(
+        self,
+        csv_path: str,
+        table_name: str,
+        schema: str | None = None,
+        chunksize: int = 5000,
+        **read_csv_kwargs,
+    ) -> int:
+        schema = schema or self.schema
+        total_rows = 0
+
+        reader = pd.read_csv(
+            csv_path,
+            chunksize=chunksize,
+            **read_csv_kwargs,
+        )
+
+        for chunk_index, chunk in enumerate(reader):
+            if chunk.empty:
+                continue
+
+            prepared = self._prepare_dataframe_for_sql(chunk)
+            prepared.to_sql(
+                table_name,
+                con=self.engine,
+                schema=schema,
+                if_exists="replace" if chunk_index == 0 else "append",
+                index=False,
+                method="multi",
+            )
+            total_rows += len(prepared)
+
+        return total_rows
+
     def ensure_unique_index(
         self,
         table_name: str,
