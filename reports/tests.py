@@ -1,4 +1,4 @@
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from io import StringIO
 from pathlib import Path
@@ -26,8 +26,12 @@ from reports.models.story import Story
 from reports.models.story_rating import StoryRating
 from reports.models.story_table import StoryTable
 from reports.models.story_table_template import StoryTemplateTable
-from reports.models.story_template import StoryTemplate
-from reports.models.story_template import StoryTemplateFocus
+from reports.models.story_template import (
+    StoryImage,
+    StoryTemplate,
+    StoryTemplateFocus,
+    StoryTemplateFocusImage,
+)
 from reports.models.subscription import StoryTemplateSubscription
 from reports.management.commands.import_market_events import (
     _parse_bool,
@@ -158,6 +162,123 @@ class StoryRatingsContextTests(TestCase):
         self.assertEqual(response.context["rating_count"], 1)
         self.assertAlmostEqual(float(response.context["rating_avg"]), 4.0)
 
+    def test_home_view_exposes_recent_stories_grid(self):
+        self.client.force_login(self.user)
+
+        for offset in range(1, 10):
+            story_date = date(2026, 2, 8) - timedelta(days=offset)
+            Story.objects.create(
+                templatefocus=self.focus,
+                title=f"Story {offset}",
+                summary=f"Summary {offset}",
+                content=f"Content {offset}",
+                published_date=story_date,
+                reference_period_start=story_date,
+                reference_period_end=story_date,
+            )
+
+        response = self.client.get(reverse("home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["featured_story"].id, self.story.id)
+        self.assertEqual(len(response.context["recent_stories"]), 8)
+        self.assertContains(response, "Recent insights")
+        self.assertContains(response, "?page=2")
+
+    def test_home_view_paginates_recent_stories(self):
+        self.client.force_login(self.user)
+
+        for offset in range(1, 19):
+            story_date = date(2026, 2, 8) - timedelta(days=offset)
+            Story.objects.create(
+                templatefocus=self.focus,
+                title=f"Story {offset}",
+                summary=f"Summary {offset}",
+                content=f"Content {offset}",
+                published_date=story_date,
+                reference_period_start=story_date,
+                reference_period_end=story_date,
+            )
+
+        response = self.client.get(reverse("home"), {"page": 2})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["recent_page_obj"].number, 2)
+        self.assertEqual(len(response.context["recent_stories"]), 8)
+        self.assertEqual(response.context["recent_stories"][0].title, "Story 9")
+        self.assertEqual(response.context["recent_stories"][-1].title, "Story 16")
+        self.assertContains(response, "?page=3")
+
+    def test_home_view_limits_pager_to_four_pages_with_arrows(self):
+        self.client.force_login(self.user)
+
+        for offset in range(1, 35):
+            story_date = date(2026, 2, 8) - timedelta(days=offset)
+            Story.objects.create(
+                templatefocus=self.focus,
+                title=f"Story {offset}",
+                summary=f"Summary {offset}",
+                content=f"Content {offset}",
+                published_date=story_date,
+                reference_period_start=story_date,
+                reference_period_end=story_date,
+            )
+
+        response = self.client.get(reverse("home"), {"page": 3})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["recent_page_obj"].number, 3)
+        self.assertEqual(response.context["recent_page_numbers"], [1, 2, 3, 4])
+        self.assertContains(response, 'aria-label="First page"')
+        self.assertContains(response, 'aria-label="Previous page"')
+        self.assertContains(response, 'aria-label="Next page"')
+        self.assertContains(response, 'aria-label="Last page"')
+
+    def test_home_view_shows_image_in_recent_card_and_hides_its_lead(self):
+        self.client.force_login(self.user)
+
+        image_focus = StoryTemplateFocus.objects.create(
+            story_template=self.template,
+            focus_filter="district = 'A'",
+            filter_value="A",
+        )
+        image_story = Story.objects.create(
+            templatefocus=image_focus,
+            title="Story With Image",
+            summary="Lead that should not appear in the card",
+            content="Content",
+            published_date=date(2026, 2, 7),
+            reference_period_start=date(2026, 2, 7),
+            reference_period_end=date(2026, 2, 7),
+        )
+        image = StoryImage.objects.create(
+            title="Card image",
+            remote_url="https://example.com/card-image.jpg",
+        )
+        StoryTemplateFocusImage.objects.create(
+            focus=image_focus,
+            image=image,
+            sort_order=0,
+        )
+
+        Story.objects.create(
+            templatefocus=self.focus,
+            title="Story Without Image",
+            summary="Lead that should remain visible in the card",
+            content="Content",
+            published_date=date(2026, 2, 6),
+            reference_period_start=date(2026, 2, 6),
+            reference_period_end=date(2026, 2, 6),
+        )
+
+        response = self.client.get(reverse("home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(image_story, response.context["recent_stories"])
+        self.assertContains(response, "https://example.com/card-image.jpg")
+        self.assertNotContains(response, "Lead that should not appear in the card")
+        self.assertContains(response, "Lead that should remain visible in the card")
+
     def test_home_view_counts_only_active_accessible_subscriptions(self):
         self.client.force_login(self.user)
         StoryTemplateSubscription.objects.create(
@@ -183,7 +304,16 @@ class StoryRatingsContextTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["active_subscription_count"], 1)
         self.assertEqual(response.context["available_subscriptions"], 1)
-        self.assertContains(response, "You have subscribed to 1 of 1 available insights.")
+        self.assertContains(response, "1/1")
+
+    def test_view_story_uses_story_detail_template(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("view_story", args=(self.story.id,)))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "reports/story_detail.html")
+        self.assertContains(response, "All insights")
 
 
 class StoryTemplateFocusSqlReplacementTests(TestCase):

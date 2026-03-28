@@ -7,9 +7,7 @@
       <div>
         <h2 class="card-title mb-0 text-primary">{{ selected_story.title|safe }}</h2>
         <small class="d-block text-muted mt-1">
-          Published: {{ selected_story.published_date|date:"F j, Y" }}
-          &nbsp;&middot;&nbsp;
-          Period: {{ selected_story.reference_period }}
+          {{ selected_story.published_date|date:"F j, Y" }}
         </small>
         {% if user.is_authenticated and not user.is_staff %}
         <div class="mt-2">

@@ -1,0 +1,36 @@
+<article class="story-teaser-card h-100">
+  <div class="story-teaser-card__inner">
+    <div class="story-teaser-card__meta">
+      <span>{{ story.published_date|date:"M j, Y" }}</span>
+    </div>
+    <h3 class="story-teaser-card__title">
+      <a href="{% url 'view_story' story.id %}" class="story-teaser-card__title-link">
+        {{ story.title|safe }}
+      </a>
+    </h3>
+    {% if story.primary_focus_image and story.primary_focus_image.display_url %}
+      <a href="{% url 'view_story' story.id %}" class="story-teaser-card__visual">
+        <img
+          src="{{ story.primary_focus_image.display_url }}"
+          alt="{{ story.primary_focus_image.title|default:story.title|striptags }}"
+          class="story-teaser-card__image"
+          loading="lazy"
+        >
+      </a>
+    {% else %}
+      <p class="story-teaser-card__excerpt">
+        {% if story.summary_html %}
+          {{ story.summary_html|striptags|truncatewords:26 }}
+        {% else %}
+          {{ story.content_html|striptags|truncatewords:26 }}
+        {% endif %}
+      </p>
+    {% endif %}
+    <div class="story-teaser-card__footer">
+      <span class="story-teaser-card__template">{{ story.template.title }}</span>
+      <a href="{% url 'view_story' story.id %}" class="story-teaser-card__link">
+        Read insight
+      </a>
+    </div>
+  </div>
+</article>

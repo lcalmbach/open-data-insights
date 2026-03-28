@@ -18,9 +18,9 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.management import get_commands
 import importlib.util
-from pathlib import Path
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.core.paginator import Paginator
 from django.core.validators import validate_email
 from django.db import connection
 from django.db.models import Avg, Case, Count, IntegerField, Q, When
@@ -457,27 +457,6 @@ def _get_daily_quote(for_date=None) -> Quote | None:
     return quote_qs[index]
 
 
-def _get_daily_splash_image(for_date=None) -> str:
-    """Return a deterministic splash image path relative to static/."""
-    images_dir = Path(settings.BASE_DIR) / "static" / "reports"
-    if not images_dir.is_dir():
-        return "reports/splash.png"
-    images = sorted(
-        [
-            path.name
-            for path in images_dir.iterdir()
-            if path.is_file()
-            and path.suffix.lower() == ".png"
-            and path.stem.lower().startswith("splash")
-        ]
-    )
-    if not images:
-        return "reports/splash.png"
-    day = for_date or timezone.localdate()
-    index = day.toordinal() % len(images)
-    return f"reports/{images[index]}"
-
-
 def _accessible_template_ids(user):
     """Return the story template IDs accessible to the current user."""
     return list(
@@ -583,68 +562,88 @@ def _attach_resolved_focus_images(story: Story | None) -> None:
     if story is None:
         return
     story.resolved_focus_images = resolve_story_images(story)
+    story.primary_focus_image = story.resolved_focus_images[0] if story.resolved_focus_images else None
 
 
 def _attach_story_render_fields(story: Story | None) -> None:
     if story is None:
         return
-    story.summary_html = markdown2.markdown(story.summary or "", extras=MARKDOWN_EXTRAS)
-    story.content_html = markdown2.markdown(story.content or "", extras=MARKDOWN_EXTRAS)
+    summary = (story.summary or "").strip()
+    content = (story.content or "").strip()
+    story.summary_html = (
+        markdown2.markdown(summary, extras=MARKDOWN_EXTRAS) if summary else ""
+    )
+    story.content_html = (
+        markdown2.markdown(content, extras=MARKDOWN_EXTRAS) if content else ""
+    )
 
 
 @never_cache
 def home_view(request):
     random_quote = _get_daily_quote()
-    splash_image = _get_daily_splash_image()
     template_ids = _accessible_template_ids(request.user)
     active_subscription_count = _active_subscription_count(request.user, template_ids)
-    stories = list(
-        Story.objects.filter(templatefocus__story_template_id__in=template_ids).order_by(
-            "-published_date"
-        )
+    preferred_language_id = get_content_language_id(request)
+    stories = _dedupe_stories_by_language(
+        Story.objects.select_related("templatefocus__story_template").filter(
+            templatefocus__story_template_id__in=template_ids
+        ),
+        preferred_language_id,
     )
     if not stories:
         return render(
             request,
             "home.html",
             {
-                "story": None,
+                "selected_story": None,
+                "featured_story": None,
+                "recent_stories": [],
                 "random_quote": random_quote,
-                "splash_image": splash_image,
+                "active_subscription_count": active_subscription_count,
+                "available_subscriptions": len(template_ids),
+                "num_insights": Story.objects.count(),
             },
         )
-    selected_story = stories[0]
-    next_story_id = stories[1].id if len(stories) > 1 else None
-    _attach_resolved_focus_images(selected_story)
-    _attach_story_render_fields(selected_story)
-    tables = get_tables(selected_story) if selected_story else []
-    graphics = _get_story_graphics(selected_story)
-    _attach_graphic_chart_ids(graphics)
-    needs_leaflet, needs_markercluster = _attach_graphic_requirements(graphics)
-    data_source = selected_story.template.data_source if selected_story else None
-    other_ressources = (
-        selected_story.template.other_ressources if selected_story else None
-    )
+
+    featured_story = stories[0]
+    older_stories = stories[1:]
+    recent_page_obj = None
+    recent_page_numbers: list[int] = []
+    recent_stories = []
+    if older_stories:
+        recent_page_obj = Paginator(older_stories, 8).get_page(
+            request.GET.get("page") or 1
+        )
+        recent_stories = list(recent_page_obj.object_list)
+        total_pages = recent_page_obj.paginator.num_pages
+        start_page = max(1, recent_page_obj.number - 2)
+        end_page = start_page + 3
+        if end_page > total_pages:
+            end_page = total_pages
+            start_page = max(1, end_page - 3)
+        recent_page_numbers = list(range(start_page, end_page + 1))
+
+    _attach_story_render_fields(featured_story)
+    _attach_resolved_focus_images(featured_story)
+    for story in recent_stories:
+        _attach_story_render_fields(story)
+        _attach_resolved_focus_images(story)
+
     available_subscriptions = len(template_ids)
-    rating_ctx = _get_story_rating_context(selected_story)
+    rating_ctx = _get_story_rating_context(featured_story)
     return render(
         request,
         "home.html",
         {
-            "selected_story": selected_story,
-            "prev_story_id": None,
-            "next_story_id": next_story_id,
-            "tables": tables,
-            "graphics": graphics,
-            "data_source": data_source,
-            "other_ressources": other_ressources,
+            "selected_story": featured_story,
+            "featured_story": featured_story,
+            "recent_stories": recent_stories,
+            "recent_page_obj": recent_page_obj,
+            "recent_page_numbers": recent_page_numbers,
             "available_subscriptions": available_subscriptions,
             "active_subscription_count": active_subscription_count,
             "random_quote": random_quote,
             "num_insights": Story.objects.count(),
-            "splash_image": splash_image,
-            "needs_leaflet": needs_leaflet,
-            "needs_markercluster": needs_markercluster,
             **rating_ctx,
         },
     )
@@ -1110,7 +1109,6 @@ class AboutView(TemplateView):
 
 def view_story(request, story_id=None):
     random_quote = _get_daily_quote()
-    splash_image = _get_daily_splash_image()
     template_ids = _accessible_template_ids(request.user)
     active_subscription_count = _active_subscription_count(request.user, template_ids)
     preferred_language_id = get_content_language_id(request)
@@ -1125,7 +1123,6 @@ def view_story(request, story_id=None):
             {
                 "story": None,
                 "random_quote": random_quote,
-                "splash_image": splash_image,
             },
         )
 
@@ -1147,6 +1144,8 @@ def view_story(request, story_id=None):
     index = stories.index(selected_story)
     prev_story_id = stories[index - 1].id if index > 0 else None
     next_story_id = stories[index + 1].id if index < len(stories) - 1 else None
+    _attach_resolved_focus_images(selected_story)
+    _attach_story_render_fields(selected_story)
     tables = get_tables(selected_story) if selected_story else []
     graphics = _get_story_graphics(selected_story)
     _attach_graphic_chart_ids(graphics)
@@ -1156,13 +1155,10 @@ def view_story(request, story_id=None):
         selected_story.template.other_ressources if selected_story else None
     )
     available_subscriptions = len(template_ids)
-    selected_story.content_html = markdown2.markdown(
-        selected_story.content, extras=MARKDOWN_EXTRAS
-    )
     rating_ctx = _get_story_rating_context(selected_story)
     return render(
         request,
-        "home.html",
+        "reports/story_detail.html",
         {
             "selected_story": selected_story,
             "prev_story_id": prev_story_id,
@@ -1175,7 +1171,6 @@ def view_story(request, story_id=None):
             "active_subscription_count": active_subscription_count,
             "random_quote": random_quote,
             "num_insights": Story.objects.count(),
-            "splash_image": splash_image,
             "needs_leaflet": needs_leaflet,
             "needs_markercluster": needs_markercluster,
             **rating_ctx,

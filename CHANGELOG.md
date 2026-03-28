@@ -7,6 +7,18 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 ### Added
 - _Nothing yet._
 
+
+## [1.0.0] - 2026-03-28
+### Added
+- Add publish_story_images command to upload StoryImage files to S3 and sync remote StoryImage records plus focus links
+
+### Changed
+- Redesign the home page with a featured story, image-aware teaser cards, compact pagination, and a cleaner quote/header layout
+- Move story detail pages to a dedicated template with navigation controls and date-only top metadata
+
+### Fixed
+- Resolve seasonal reference-period SQL placeholders and %(season_year)s parameters using the computed season year
+
 ## [0.1.8] - 2026-03-27
 ### Changed
 - Stream URL-backed CSV imports to temporary files and load them into Postgres in chunks
