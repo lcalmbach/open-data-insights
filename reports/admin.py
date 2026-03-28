@@ -35,6 +35,7 @@ class StoryAdmin(admin.ModelAdmin):
         "id",
         "title",
         "template",
+        "language",
         "published_date",
         "reference_period_start",
         "reference_period_end",
@@ -43,7 +44,7 @@ class StoryAdmin(admin.ModelAdmin):
         "template",
         "published_date",
     )
-    list_filter = ("templatefocus__story_template",)
+    list_filter = ("language", "templatefocus__story_template")
     search_fields = (
         "id",
         "title",
@@ -68,14 +69,35 @@ class StoryTemplateAdmin(admin.ModelAdmin):
 class StoryTemplateFocusAdmin(admin.ModelAdmin):
     list_display = (
         "id",
+        "story_template_id",
         "story_template",
         "filter_value",
         "filter_expression",
+        "image_names",
     )
     list_select_related = ("story_template",)
     search_fields = ("story_template__title", "filter_value", "filter_expression")
     list_filter = ("story_template","filter_expression")
     inlines = (StoryTemplateFocusImageInline,)
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.prefetch_related("focus_image_links__image")
+
+    @admin.display(description="Images")
+    def image_names(self, obj):
+        names = []
+        for link in obj.focus_image_links.all():
+            image = getattr(link, "image", None)
+            if image is None:
+                continue
+            names.append(
+                image.title
+                or getattr(getattr(image, "image", None), "name", "")
+                or image.remote_url
+                or f"Image {image.pk}"
+            )
+        return ", ".join(names) if names else "—"
 
 
 @admin.register(StoryImage)

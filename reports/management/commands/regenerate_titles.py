@@ -56,10 +56,11 @@ class Command(BaseCommand):
 
                 old_title = story.title or ""
                 processor = StoryProcessor(
-                    anchor_date=story.published_date or date.today(),
+                    published_date=story.published_date or date.today(),
                     template=None,
                     force_generation=False,
                     story=story,
+                    language_code=getattr(getattr(story, "language", None), "code", None),
                 )
                 ok = processor.generate_title()
                 new_title = story.title if ok else None

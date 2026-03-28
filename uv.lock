@@ -955,7 +955,7 @@ wheels = [
 
 [[package]]
 name = "open-data-insights"
-version = "1.0.0"
+version = "1.0.1"
 source = { virtual = "." }
 dependencies = [
     { name = "altair" },

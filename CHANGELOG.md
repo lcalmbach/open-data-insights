@@ -7,6 +7,13 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 ### Added
 - _Nothing yet._
 
+## [1.0.1] - 2026-03-28
+### Changed
+- Show associated image names and `story_template_id` in the StoryTemplateFocus admin list
+- Add language as a visible column and filter in the Story admin list
+
+### Fixed
+- Update the `regenerate_titles` command to use the current StoryProcessor signature when regenerating a single story title
 
 ## [1.0.0] - 2026-03-28
 ### Added
