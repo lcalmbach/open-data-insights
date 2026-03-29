@@ -12,9 +12,11 @@ from django.conf import settings
 # ---- Modelle dynamisch auflösen (vermeidet Import-Loops) ----
 Dataset = apps.get_model("reports", "Dataset")
 StoryTemplate = apps.get_model("reports", "StoryTemplate")
+StoryTemplateFocus = apps.get_model("reports", "StoryTemplateFocus")
 StoryTemplateGraphic = apps.get_model("reports", "StoryTemplateGraphic")
 StoryTemplateTable = apps.get_model("reports", "StoryTemplateTable")
 StoryTemplateContext = apps.get_model("reports", "StoryTemplateContext")
+LookupValue = apps.get_model("reports", "LookupValue")
 
 # Resolve the project's custom user model from settings.AUTH_USER_MODEL
 user_app_label, user_model_name = settings.AUTH_USER_MODEL.rsplit(".", 1)
@@ -22,6 +24,7 @@ CustomUser = apps.get_model(user_app_label, user_model_name)
 
 PARENT_MODELS = [Dataset, StoryTemplate, CustomUser]
 CHILD_SPECS = [
+    (StoryTemplateFocus, "story_template", StoryTemplate),
     (StoryTemplateGraphic, "story_template", StoryTemplate),
     (StoryTemplateTable, "story_template", StoryTemplate),
     (StoryTemplateContext, "story_template", StoryTemplate),
@@ -30,6 +33,7 @@ CHILD_SPECS = [
 MODEL_NAME = {
     Dataset: "Dataset",
     StoryTemplate: "StoryTemplate",
+    StoryTemplateFocus: "StoryTemplateFocus",
     StoryTemplateGraphic: "StoryTemplateGraphic",
     StoryTemplateTable: "StoryTemplateTable",
     StoryTemplateContext: "StoryTemplateContext",
@@ -39,6 +43,7 @@ MODEL_NAME = {
 EXCLUDE_FIELDS_BY_MODEL = {
     Dataset: {"id", "slug"},
     StoryTemplate: {"id", "slug"},
+    StoryTemplateFocus: {"id"},
     StoryTemplateGraphic: {"id", "slug"},
     StoryTemplateTable: {"id", "slug"},
     StoryTemplateContext: {"id", "slug"},
@@ -109,6 +114,95 @@ class SyncStats:
 class Command(BaseCommand):
     help = "Sync reports models between databases using slugs. Upsert only, no deletions."
 
+    def _lookupvalue_match_kwargs(self, src_lookup) -> Optional[Dict[str, Any]]:
+        if src_lookup is None:
+            return None
+        if getattr(src_lookup, "key", None):
+            return {"category_id": src_lookup.category_id, "key": src_lookup.key}
+        return {"category_id": src_lookup.category_id, "value": src_lookup.value}
+
+    def _resolve_lookupvalue_pk(self, src_lookup_id: Optional[int], src_alias: str, dst_alias: str) -> Optional[int]:
+        if not src_lookup_id:
+            return None
+        try:
+            src_lookup = LookupValue.objects.using(src_alias).get(pk=src_lookup_id)
+        except LookupValue.DoesNotExist:
+            return None
+        match_kwargs = self._lookupvalue_match_kwargs(src_lookup)
+        if not match_kwargs:
+            return None
+        try:
+            return LookupValue.objects.using(dst_alias).get(**match_kwargs).pk
+        except LookupValue.DoesNotExist:
+            return None
+
+    def _prepare_story_template_defaults(
+        self,
+        obj,
+        data: Dict[str, Any],
+        src_alias: str,
+        dst_alias: str,
+    ) -> Dict[str, Any]:
+        prepared = dict(data)
+        prepared["region_id"] = self._resolve_lookupvalue_pk(
+            getattr(obj, "region_id", None),
+            src_alias,
+            dst_alias,
+        )
+        return prepared
+
+    def _sync_story_template_topics(self, src_obj, dst_obj, src_alias: str, dst_alias: str, dry: bool) -> None:
+        src_topics = (
+            LookupValue.objects.using(src_alias)
+            .filter(pk__in=src_obj.topics.using(src_alias).values_list("pk", flat=True))
+            .order_by("pk")
+        )
+        dst_topic_ids = []
+        missing = []
+        for src_topic in src_topics:
+            match_kwargs = self._lookupvalue_match_kwargs(src_topic)
+            if not match_kwargs:
+                continue
+            try:
+                dst_topic_ids.append(
+                    LookupValue.objects.using(dst_alias).get(**match_kwargs).pk
+                )
+            except LookupValue.DoesNotExist:
+                missing.append(src_topic.value)
+
+        if missing:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"    · Missing destination topics for template '{src_obj.title}': {', '.join(missing)}"
+                )
+            )
+
+        if not dry:
+            dst_obj.topics.set(dst_topic_ids)
+
+    def _get_child_lookup(self, obj, parent_field: str, dst_parent_obj) -> tuple[Dict[str, Any], bool]:
+        slug = getattr(obj, "slug", None)
+        if slug:
+            return ({parent_field: dst_parent_obj, "slug": slug}, False)
+
+        if obj.__class__ is StoryTemplateFocus:
+            filter_value = (getattr(obj, "filter_value", None) or "").strip()
+            if filter_value:
+                return ({parent_field: dst_parent_obj, "filter_value": filter_value}, False)
+            return ({parent_field: dst_parent_obj}, True)
+
+        unique_fields = getattr(obj.__class__, "UNIQUE_FIELDS", None)
+        if unique_fields:
+            return ({parent_field: dst_parent_obj, **{k: getattr(obj, k) for k in unique_fields}}, False)
+
+        raise obj.__class__.DoesNotExist
+
+    def _find_child(self, manager, lookup: Dict[str, Any], default_focus: bool = False):
+        qs = manager.filter(**lookup)
+        if default_focus:
+            qs = qs.filter(models.Q(filter_value__isnull=True) | models.Q(filter_value=""))
+        return qs.first()
+
     def add_arguments(self, parser):
         parser.add_argument(
             "--direction",
@@ -133,6 +227,7 @@ class Command(BaseCommand):
         mt = parser.add_mutually_exclusive_group()
         mt.add_argument("--dataset", action="store_true", help="Interpret --id as Dataset.id")
         mt.add_argument("--story_template", action="store_true", help="Interpret --id as StoryTemplate.id (sync incl. children)")
+        mt.add_argument("--focus", action="store_true", help="Interpret --id as StoryTemplateFocus.id")
         mt.add_argument("--table_template", action="store_true", help="Interpret --id as StoryTemplateTable.id")
         mt.add_argument("--graphic_template", action="store_true", help="Interpret --id as StoryTemplateGraphic.id")
         mt.add_argument("--context", action="store_true", help="Interpret --id as StoryTemplateContext.id")
@@ -142,7 +237,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--only",
             nargs="*",
-            choices=[MODEL_NAME[m] for m in [Dataset, StoryTemplate, StoryTemplateGraphic, StoryTemplateTable, StoryTemplateContext, CustomUser]],
+            choices=[MODEL_NAME[m] for m in [Dataset, StoryTemplate, StoryTemplateFocus, StoryTemplateGraphic, StoryTemplateTable, StoryTemplateContext, CustomUser]],
             help="(Batch mode) Limit to specific models.",
         )
 
@@ -192,9 +287,9 @@ class Command(BaseCommand):
     def _sync_single(self, opts, src_alias: str, dst_alias: str, dry: bool):
         entity_id: int = opts["id"]
 
-        flags = [k for k in ("dataset", "story_template", "table_template", "graphic_template", "context", "user") if opts.get(k)]
+        flags = [k for k in ("dataset", "story_template", "focus", "table_template", "graphic_template", "context", "user") if opts.get(k)]
         if len(flags) != 1:
-            raise CommandError("Provide exactly one of --dataset / --story_template / --table_template / --graphic_template / --context / --user together with --id.")
+            raise CommandError("Provide exactly one of --dataset / --story_template / --focus / --table_template / --graphic_template / --context / --user together with --id.")
 
         flag = flags[0]
 
@@ -209,6 +304,8 @@ class Command(BaseCommand):
             for (child_model, parent_field, parent_model) in CHILD_SPECS:
                 if parent_model is StoryTemplate:
                     self._sync_children_of_parent_slug(child_model, parent_field, parent.slug, src_alias, dst_alias, dry)
+        elif flag == "focus":
+            self._sync_one_child_by_id(StoryTemplateFocus, "story_template", entity_id, src_alias, dst_alias, dry)
         elif flag == "table_template":
             self._sync_one_child_by_id(StoryTemplateTable, "story_template", entity_id, src_alias, dst_alias, dry)
         elif flag == "graphic_template":
@@ -244,6 +341,8 @@ class Command(BaseCommand):
 
         exclude = set(EXCLUDE_FIELDS_BY_MODEL.get(model, set())) | {"id"}
         data = _values_dict_from_instance(obj, exclude=exclude)
+        if model is StoryTemplate:
+            data = self._prepare_story_template_defaults(obj, data, src_alias, dst_alias)
         dst_mgr = model.objects.using(dst_alias)
 
         if dry:
@@ -256,6 +355,8 @@ class Command(BaseCommand):
 
         with transaction.atomic(using=dst_alias):
             dst_obj, created = dst_mgr.update_or_create(**{lookup_field: lookup_value}, defaults=data)
+            if model is StoryTemplate:
+                self._sync_story_template_topics(obj, dst_obj, src_alias, dst_alias, dry=False)
             self.stdout.write(self.style.SUCCESS(
                 f"  -> {'CREATED' if created else 'UPDATED'} {name} {lookup_field}={lookup_value}"
             ))
@@ -275,8 +376,8 @@ class Command(BaseCommand):
         parent = getattr(child, parent_field, None)
         parent_slug = getattr(parent, "slug", None) if parent else None
 
-        if not slug or not parent or not parent_slug:
-            self.stdout.write(self.style.WARNING(f"  - Skipped {name} id={pk} (missing slug/parent)."))
+        if not parent or not parent_slug:
+            self.stdout.write(self.style.WARNING(f"  - Skipped {name} id={pk} (missing parent)."))
             return
 
         # Stelle sicher, dass Parent in Ziel existiert (Upsert Parent)
@@ -294,29 +395,35 @@ class Command(BaseCommand):
             if not parent_exists:
                 self.stdout.write(self.style.WARNING(f"    · Parent missing in dst: {parent.__class__.__name__} slug={parent_slug}"))
                 return
-            exists = dst_child_mgr.filter(**{parent_field + "__slug": parent_slug, "slug": slug}).exists()
+            dst_parent_obj = dst_parent_mgr.get(slug=parent_slug)
+            lookup, default_focus = self._get_child_lookup(child, parent_field, dst_parent_obj)
+            exists = self._find_child(dst_child_mgr, lookup, default_focus=default_focus) is not None
             self.stdout.write(self.style.SUCCESS(
-                f"  -> would {'UPDATE' if exists else 'CREATE'} {name} parent={parent_slug} slug={slug}"
+                f"  -> would {'UPDATE' if exists else 'CREATE'} {name} parent={parent_slug}"
             ))
             return
 
         with transaction.atomic(using=dst_alias):
             dst_parent_obj = dst_parent_mgr.get(slug=parent_slug)
-            try:
-                dst_obj = dst_child_mgr.get(**{parent_field: dst_parent_obj, "slug": slug})
+            lookup, default_focus = self._get_child_lookup(child, parent_field, dst_parent_obj)
+            dst_obj = self._find_child(dst_child_mgr, lookup, default_focus=default_focus)
+            if dst_obj is not None:
                 # update
                 for k, v in data.items():
                     setattr(dst_obj, k, v)
-                dst_obj.save(update_fields=list(data.keys()))
+                dst_obj.save(using=dst_alias, update_fields=list(data.keys()))
                 self.stdout.write(self.style.SUCCESS(
-                    f"  -> UPDATED {name} parent={parent_slug} slug={slug}"
+                    f"  -> UPDATED {name} parent={parent_slug}"
                 ))
-            except child_model.DoesNotExist:
+            else:
                 # create
-                dst_obj = child_model(**data, **{parent_field: dst_parent_obj}, slug=slug)
+                create_kwargs = {parent_field: dst_parent_obj}
+                if slug:
+                    create_kwargs["slug"] = slug
+                dst_obj = child_model(**data, **create_kwargs)
                 dst_obj.save(using=dst_alias)
                 self.stdout.write(self.style.SUCCESS(
-                    f"  -> CREATED {name} parent={parent_slug} slug={slug}"
+                    f"  -> CREATED {name} parent={parent_slug}"
                 ))
 
     # ----------------- Batch-Helfer (wie zuvor) -----------------
@@ -344,6 +451,8 @@ class Command(BaseCommand):
                 continue
 
             data = _values_dict_from_instance(obj, exclude=exclude)
+            if model is StoryTemplate:
+                data = self._prepare_story_template_defaults(obj, data, src_alias, dst_alias)
 
             if dry:
                 if dst_mgr.filter(**{lookup_field: lookup_value}).exists():
@@ -354,6 +463,8 @@ class Command(BaseCommand):
 
             with transaction.atomic(using=dst_alias):
                 dst_obj, created = dst_mgr.update_or_create(**{lookup_field: lookup_value}, defaults=data)
+                if model is StoryTemplate:
+                    self._sync_story_template_topics(obj, dst_obj, src_alias, dst_alias, dry=False)
                 if created: stats.created += 1
                 else: stats.updated += 1
 
@@ -389,10 +500,9 @@ class Command(BaseCommand):
                 if not dst_parent.filter(**{lookup_field: lookup_value}).exists():
                     stats.skipped += 1
                     continue
-                if slug:
-                    exists = dst_child.filter(**{f"{parent_field}__{lookup_field}": lookup_value, "slug": slug}).exists()
-                else:
-                    exists = dst_child.filter(**{f"{parent_field}__{lookup_field}": lookup_value}).exists()
+                dst_parent_obj = dst_parent.get(**{lookup_field: lookup_value})
+                lookup, default_focus = self._get_child_lookup(obj, parent_field, dst_parent_obj)
+                exists = self._find_child(dst_child, lookup, default_focus=default_focus) is not None
                 if exists: stats.updated += 1
                 else: stats.created += 1
                 continue
@@ -406,22 +516,14 @@ class Command(BaseCommand):
                     dst_parent_obj = dst_parent.get(**{lookup_field: lookup_value})
 
                 defaults = _values_dict_from_instance(obj, exclude=exclude)
-
-                try:
-                    if slug:
-                        dst_obj = dst_child.get(**{parent_field: dst_parent_obj, "slug": slug})
-                    else:
-                        # try a UNIQUE_FIELDS lookup if available, else create new
-                        if hasattr(child_model, "UNIQUE_FIELDS"):
-                            lookup = {k: getattr(obj, k) for k in child_model.UNIQUE_FIELDS}
-                            dst_obj = dst_child.get(**{parent_field: dst_parent_obj}, **lookup)
-                        else:
-                            raise child_model.DoesNotExist
+                lookup, default_focus = self._get_child_lookup(obj, parent_field, dst_parent_obj)
+                dst_obj = self._find_child(dst_child, lookup, default_focus=default_focus)
+                if dst_obj is not None:
                     for k, v in defaults.items():
                         setattr(dst_obj, k, v)
-                    dst_obj.save(update_fields=list(defaults.keys()))
+                    dst_obj.save(using=dst_alias, update_fields=list(defaults.keys()))
                     stats.updated += 1
-                except child_model.DoesNotExist:
+                else:
                     # create
                     kwargs = {parent_field: dst_parent_obj}
                     if slug:
@@ -463,31 +565,35 @@ class Command(BaseCommand):
         exclude = set(EXCLUDE_FIELDS_BY_MODEL.get(child_model, set())) | {"id", parent_field + "_id"}
 
         for obj in src_qs.iterator(chunk_size=1000):
-            slug = getattr(obj, "slug")
+            slug = getattr(obj, "slug", None)
             defaults = _values_dict_from_instance(obj, exclude=exclude)
 
             if dry:
-                exists = dst_child.filter(**{parent_field + "__slug": parent_slug, "slug": slug}).exists()
+                lookup, default_focus = self._get_child_lookup(obj, parent_field, dst_parent_obj)
+                exists = self._find_child(dst_child, lookup, default_focus=default_focus) is not None
                 self.stdout.write(self.style.SUCCESS(
-                    f"      -> {'UPDATE' if exists else 'CREATE'} {name} slug={slug}"
+                    f"      -> {'UPDATE' if exists else 'CREATE'} {name}{f' slug={slug}' if slug else ''}"
                 ))
                 continue
 
             with transaction.atomic(using=dst_alias):
-                try:
-                    dst_obj = dst_child.get(**{parent_field: dst_parent_obj, "slug": slug})
+                lookup, default_focus = self._get_child_lookup(obj, parent_field, dst_parent_obj)
+                dst_obj = self._find_child(dst_child, lookup, default_focus=default_focus)
+                if dst_obj is not None:
                     # Always ensure the FK points at the freshly synced parent
                     setattr(dst_obj, parent_field, dst_parent_obj)
                     for k, v in defaults.items():
                         setattr(dst_obj, k, v)
                     update_fields = list(defaults.keys()) + [f"{parent_field}_id"]
                     dst_obj.save(using=dst_alias, update_fields=update_fields)
-                    self.stdout.write(self.style.SUCCESS(f"      -> UPDATED {name} slug={slug}"))
-                except child_model.DoesNotExist:
-                    dst_obj = child_model(**defaults, **{parent_field: dst_parent_obj}, slug=slug)
-                    setattr(dst_obj, parent_field + "_id", dst_parent_obj.pk)
+                    self.stdout.write(self.style.SUCCESS(f"      -> UPDATED {name}{f' slug={slug}' if slug else ''}"))
+                else:
+                    create_kwargs = {parent_field: dst_parent_obj}
+                    if slug:
+                        create_kwargs["slug"] = slug
+                    dst_obj = child_model(**defaults, **create_kwargs)
                     dst_obj.save(using=dst_alias)
-                    self.stdout.write(self.style.SUCCESS(f"      -> CREATED {name} slug={slug}"))
+                    self.stdout.write(self.style.SUCCESS(f"      -> CREATED {name}{f' slug={slug}' if slug else ''}"))
 
     def _sync_children_of_parent_pk(self, child_model, parent_field: str, parent_pk: int, src_alias: str, dst_alias: str, dry: bool):
         """

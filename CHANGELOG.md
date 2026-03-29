@@ -7,6 +7,13 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 ### Added
 - _Nothing yet._
 
+## [1.0.2] - 2026-03-29
+### Changed
+- Sync `StoryTemplate` taxonomy metadata across databases, including `region`, `topics`, and `StoryTemplateFocus` children
+
+### Fixed
+- Make `synch_prod --story_template` handle lookup-backed taxonomy fields without relying on source-database foreign key ids
+
 ## [1.0.1] - 2026-03-28
 ### Changed
 - Show associated image names and `story_template_id` in the StoryTemplateFocus admin list
