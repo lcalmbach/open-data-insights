@@ -12,6 +12,8 @@ PERIOD_DIRECTION_CATEGORY_ID = 7
 IMPORT_TYPE_CATEGORY_ID = 8
 TAG_CATEGORY_ID = 9
 LANGUAGE_CATEGORY_ID = 10
+REGION_CATEGORY_ID = 11
+TOPIC_CATEGORY_ID = 12
 
 class LanguageEnum(Enum):
     ENGLISH=94
@@ -74,6 +76,29 @@ class LookupValue(models.Model):
 
     def __str__(self):
         return self.value
+
+
+class ScopedLookupManager(models.Manager):
+    category_id = None
+
+    def get_queryset(self):
+        return super().get_queryset().filter(category_id=self.category_id)
+
+    def create(self, **kwargs):
+        kwargs.setdefault("category_id", self.category_id)
+        return super().create(**kwargs)
+
+    def get_or_create(self, defaults=None, **kwargs):
+        kwargs.setdefault("category_id", self.category_id)
+        defaults = dict(defaults or {})
+        defaults.setdefault("category_id", self.category_id)
+        return super().get_or_create(defaults=defaults, **kwargs)
+
+    def update_or_create(self, defaults=None, **kwargs):
+        kwargs.setdefault("category_id", self.category_id)
+        defaults = dict(defaults or {})
+        defaults.setdefault("category_id", self.category_id)
+        return super().update_or_create(defaults=defaults, **kwargs)
 
 
 class TagManager(models.Manager):
@@ -201,6 +226,32 @@ class Language(LookupValue):
         proxy = True
         verbose_name = "Language"
         verbose_name_plural = "Languages"
+
+
+class RegionManager(ScopedLookupManager):
+    category_id = REGION_CATEGORY_ID
+
+
+class Region(LookupValue):
+    objects = RegionManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Region"
+        verbose_name_plural = "Regions"
+
+
+class TopicManager(ScopedLookupManager):
+    category_id = TOPIC_CATEGORY_ID
+
+
+class Topic(LookupValue):
+    objects = TopicManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Topic"
+        verbose_name_plural = "Topics"
 
 
 class TagDataset(models.Model):

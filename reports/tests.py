@@ -18,9 +18,13 @@ from reports.models.lookups import (
     LanguageEnum,
     PERIOD_CATEGORY_ID,
     PERIOD_DIRECTION_CATEGORY_ID,
+    REGION_CATEGORY_ID,
+    TOPIC_CATEGORY_ID,
     LookupCategory,
     Period,
     PeriodDirection,
+    Region,
+    Topic,
 )
 from reports.models.story import Story
 from reports.models.story_rating import StoryRating
@@ -161,6 +165,7 @@ class StoryRatingsContextTests(TestCase):
         self.assertEqual(response.context["selected_story"].id, self.story.id)
         self.assertEqual(response.context["rating_count"], 1)
         self.assertAlmostEqual(float(response.context["rating_avg"]), 4.0)
+
 
     def test_home_view_exposes_recent_stories_grid(self):
         self.client.force_login(self.user)
@@ -314,6 +319,147 @@ class StoryRatingsContextTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "reports/story_detail.html")
         self.assertContains(response, "All insights")
+
+
+class StoryExplorerFilteringTests(TestCase):
+    def setUp(self):
+        period_category = LookupCategory.objects.create(
+            id=PERIOD_CATEGORY_ID, name="Period", description=""
+        )
+        direction_category = LookupCategory.objects.create(
+            id=PERIOD_DIRECTION_CATEGORY_ID, name="PeriodDirection", description=""
+        )
+        period = Period.objects.create(
+            category=period_category, value="Daily", description="", sort_order=0
+        )
+        direction = PeriodDirection.objects.create(
+            category=direction_category, value="Backward", description="", sort_order=0
+        )
+        region_category = LookupCategory.objects.create(
+            id=REGION_CATEGORY_ID, name="Region", description=""
+        )
+        topic_category = LookupCategory.objects.create(
+            id=TOPIC_CATEGORY_ID, name="Topic", description=""
+        )
+
+        self.switzerland = Region.objects.create(value="Switzerland", key="CH", sort_order=1)
+        self.baselland = Region.objects.create(
+            value="Baselland",
+            key="BL",
+            predecessor=self.switzerland,
+            level=1,
+            sort_order=1,
+        )
+        self.europe = Region.objects.create(
+            value="Europe",
+            key="EU",
+            sort_order=2,
+        )
+
+        self.energy = Topic.objects.create(value="Energy", key="ENERGY", sort_order=1)
+        self.electricity = Topic.objects.create(
+            value="Electricity",
+            key="ELECTRICITY",
+            predecessor=self.energy,
+            level=1,
+            sort_order=1,
+        )
+        self.population = Topic.objects.create(
+            value="Population",
+            key="POPULATION",
+            sort_order=2,
+        )
+
+        self.template_energy = StoryTemplate.objects.create(
+            title="Municipality energy profile",
+            description="Energy indicators for municipalities",
+            reference_period=period,
+            period_direction=direction,
+            prompt_text="prompt",
+            active=True,
+            region=self.baselland,
+        )
+        self.template_energy.topics.add(self.electricity)
+        self.focus_energy = StoryTemplateFocus.objects.create(
+            story_template=self.template_energy,
+            filter_value="Liestal",
+        )
+        self.story_energy = Story.objects.create(
+            templatefocus=self.focus_energy,
+            title="Electricity use in Liestal",
+            summary="Energy summary",
+            content="Electricity consumption rose in the municipality.",
+            published_date=date(2026, 2, 8),
+            reference_period_start=date(2026, 2, 7),
+            reference_period_end=date(2026, 2, 7),
+        )
+
+        self.template_population = StoryTemplate.objects.create(
+            title="European population profile",
+            description="Population indicators across Europe",
+            reference_period=period,
+            period_direction=direction,
+            prompt_text="prompt",
+            active=True,
+            region=self.europe,
+        )
+        self.template_population.topics.add(self.population)
+        self.focus_population = StoryTemplateFocus.objects.create(
+            story_template=self.template_population,
+            filter_value="Europe",
+        )
+        self.story_population = Story.objects.create(
+            templatefocus=self.focus_population,
+            title="Population change in Europe",
+            summary="Population summary",
+            content="Population growth remained stable across Europe.",
+            published_date=date(2026, 2, 9),
+            reference_period_start=date(2026, 2, 8),
+            reference_period_end=date(2026, 2, 8),
+        )
+
+        self.user = CustomUser.objects.create_user(
+            email="filter@example.com",
+            password="password",
+            first_name="Filter",
+            last_name="User",
+            country="US",
+        )
+        self.client.force_login(self.user)
+
+    def test_region_filter_includes_descendant_regions(self):
+        response = self.client.get(reverse("stories"), {"region": self.switzerland.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [story.id for story in response.context["stories"]],
+            [self.story_energy.id],
+        )
+
+    def test_topic_filter_includes_descendant_topics(self):
+        response = self.client.get(reverse("stories"), {"topic": self.energy.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [story.id for story in response.context["stories"]],
+            [self.story_energy.id],
+        )
+
+    def test_search_matches_story_content(self):
+        response = self.client.get(reverse("stories"), {"search": "consumption rose"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [story.id for story in response.context["stories"]],
+            [self.story_energy.id],
+        )
+
+    def test_home_view_filters_by_region(self):
+        response = self.client.get(reverse("home"), {"region": self.switzerland.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["featured_story"].id, self.story_energy.id)
+        self.assertEqual(response.context["recent_stories"], [])
 
 
 class StoryTemplateFocusSqlReplacementTests(TestCase):

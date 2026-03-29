@@ -96,6 +96,7 @@ TEMPLATES = [
                 "reports.context_processors.ai_disclaimer",
                 "reports.context_processors.show_dev_banner",
                 "reports.context_processors.content_language",
+                "reports.context_processors.navbar_story_filters",
             ],
         },
     },

@@ -1,7 +1,7 @@
 from .dataset import Dataset
 from .graphic import Graphic
 from .graphic_template import StoryTemplateGraphic
-from .lookups import LookupCategory, LookupValue
+from .lookups import LookupCategory, LookupValue, Region, Topic
 from .quote import Quote
 from .story import Story
 from .story_table import StoryTable

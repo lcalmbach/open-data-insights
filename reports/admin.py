@@ -16,6 +16,7 @@ from .models.story_table import StoryTable
 from .models.graphic import Graphic, StoryTemplateGraphic
 from .models.story_table_template import StoryTemplateTable
 from .models.user_comment import UserComment
+from .models.lookups import Region, Topic, REGION_CATEGORY_ID, TOPIC_CATEGORY_ID
 
 
 class StoryTemplateFocusInline(admin.TabularInline):
@@ -57,12 +58,30 @@ class StoryTemplateAdmin(admin.ModelAdmin):
         "id",
         "title",
         "reference_period",
+        "region",
+        "topic_names",
         "organisation",
         "active",
     )
+    list_select_related = ("reference_period", "organisation", "region")
     inlines = (StoryTemplateFocusInline,)
-    search_fields = ("title", "reference_period__value")
-    list_filter = ["reference_period", "organisation"]  # shows a filter sidebar
+    search_fields = ("title", "reference_period__value", "region__value", "topics__value")
+    list_filter = ["reference_period", "organisation", "region", "topics"]
+    filter_horizontal = ("topics",)
+
+    @admin.display(description="Topics")
+    def topic_names(self, obj):
+        return ", ".join(obj.topics.values_list("value", flat=True)) or "—"
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "region":
+            kwargs["queryset"] = Region.objects.order_by("sort_order", "value")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == "topics":
+            kwargs["queryset"] = Topic.objects.order_by("sort_order", "value")
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 @admin.register(StoryTemplateFocus)
@@ -253,3 +272,35 @@ class UserCommentAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "sentiment", "date")
     list_filter = ("sentiment", "date")
     search_fields = ("comment", "user__email", "user__first_name", "user__last_name")
+
+
+class TaxonomyLookupAdmin(admin.ModelAdmin):
+    fields = ("value", "key", "description", "predecessor", "sort_order")
+    list_display = ("id", "value", "key", "predecessor", "sort_order")
+    search_fields = ("value", "key", "description")
+    ordering = ("sort_order", "value")
+    category_id = None
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("predecessor")
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "predecessor" and self.category_id is not None:
+            model = Region if self.category_id == REGION_CATEGORY_ID else Topic
+            kwargs["queryset"] = model.objects.order_by("sort_order", "value")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        obj.category_id = self.category_id
+        obj.level = (getattr(obj.predecessor, "level", -1) + 1) if obj.predecessor else 0
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(Region)
+class RegionAdmin(TaxonomyLookupAdmin):
+    category_id = REGION_CATEGORY_ID
+
+
+@admin.register(Topic)
+class TopicAdmin(TaxonomyLookupAdmin):
+    category_id = TOPIC_CATEGORY_ID

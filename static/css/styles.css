@@ -15,6 +15,10 @@
 
 .custom-navbar {
   background-color: steelblue !important;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.12);
 }
 
 .custom-navbar .nav-link,
@@ -28,6 +32,36 @@
 
 .custom-navbar .dropdown-item:hover {
   background-color: #d0e0f0;
+}
+
+.navbar-search-toggle {
+  color: white !important;
+  font-size: 1rem;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.navbar-search-toggle:hover,
+.navbar-search-toggle:focus {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.navbar-search-panel {
+  background-color: #f8fbff;
+  border: 1px solid rgba(15, 42, 61, 0.14);
+  box-shadow: 0 1rem 2rem rgba(15, 42, 61, 0.16);
+  min-width: 18rem;
+  width: min(24rem, calc(100vw - 2rem));
+}
+
+.navbar-search-panel .form-label {
+  color: #355267;
+}
+
+@media (max-width: 991.98px) {
+  .navbar-search-panel {
+    width: min(24rem, calc(100vw - 3rem));
+  }
 }
 
 .star-rating {

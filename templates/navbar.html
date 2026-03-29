@@ -58,43 +58,96 @@
         {% endif %}
       </ul>
 
-	      <!-- Rechtsbündige Initialen-Anzeige -->
-	      {% if user.is_authenticated %}
-	      <ul class="navbar-nav ms-auto">
-	        {% if available_languages %}
-	        <li class="nav-item me-2 d-flex align-items-center">
-	          <form method="post" action="{% url 'account:set_language' %}" class="d-flex align-items-center">
-	            {% csrf_token %}
-	            <input type="hidden" name="next" value="{{ request.get_full_path }}">
-	            <select
-	              name="language_id"
-	              class="form-select form-select-sm"
-	              onchange="this.form.submit()"
-	              aria-label="Language"
-	            >
-	              {% for lang in available_languages %}
-	                <option value="{{ lang.id }}" {% if lang.id == content_language_id %}selected{% endif %}>
-	                  {{ lang.value }}
-	                </option>
-	              {% endfor %}
-	            </select>
-	          </form>
-	        </li>
-	        {% endif %}
-	        <li class="nav-item">
-	          <a class="nav-link" text-white href="{% url 'account:profile' %}">
-	            {% with user.first_name|slice:":1" as fi %}
-	            {% with user.last_name|slice:":1" as li %}
-	            <span class="badge bg-secondary rounded-circle p-2 text-uppercase"
-              style="width: 2.5rem; height: 2.5rem; display: inline-flex; align-items: center; justify-content: center;">
-              {{ fi }}{{ li }}
-            </span>
-            {% endwith %}
-            {% endwith %}
-          </a>
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <li class="nav-item dropdown me-lg-2">
+          <button
+            class="nav-link btn btn-link border-0 px-2 navbar-search-toggle"
+            id="navbarSearchDropdown"
+            type="button"
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="outside"
+            aria-expanded="false"
+            aria-label="Filter insights"
+          >
+            <i class="bi bi-search"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end p-3 navbar-search-panel" aria-labelledby="navbarSearchDropdown">
+            <form method="get" action="{% url 'home' %}">
+              <div class="mb-3">
+                <label for="navbar-search-text" class="form-label small mb-1">Search in text</label>
+                <input
+                  id="navbar-search-text"
+                  type="text"
+                  name="search"
+                  class="form-control form-control-sm"
+                  value="{{ request.GET.search|default:'' }}"
+                  placeholder="Title or story text"
+                >
+              </div>
+              <div class="mb-3">
+                <label for="navbar-search-region" class="form-label small mb-1">Region</label>
+                <select id="navbar-search-region" name="region" class="form-select form-select-sm">
+                  <option value="">All regions</option>
+                  {% for region in navbar_region_choices %}
+                    <option value="{{ region.id }}" {% if request.GET.region == region.id|stringformat:"s" %}selected{% endif %}>
+                      {{ region.display_name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="navbar-search-topic" class="form-label small mb-1">Topic</label>
+                <select id="navbar-search-topic" name="topic" class="form-select form-select-sm">
+                  <option value="">All topics</option>
+                  {% for topic in navbar_topic_choices %}
+                    <option value="{{ topic.id }}" {% if request.GET.topic == topic.id|stringformat:"s" %}selected{% endif %}>
+                      {{ topic.display_name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="d-flex justify-content-between gap-2">
+                <a class="btn btn-outline-secondary btn-sm" href="{% url 'home' %}">Reset</a>
+                <button type="submit" class="btn btn-light btn-sm">Apply</button>
+              </div>
+            </form>
+          </div>
         </li>
+        {% if user.is_authenticated %}
+          {% if available_languages %}
+          <li class="nav-item me-2 d-flex align-items-center">
+            <form method="post" action="{% url 'account:set_language' %}" class="d-flex align-items-center">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <select
+                name="language_id"
+                class="form-select form-select-sm"
+                onchange="this.form.submit()"
+                aria-label="Language"
+              >
+                {% for lang in available_languages %}
+                  <option value="{{ lang.id }}" {% if lang.id == content_language_id %}selected{% endif %}>
+                    {{ lang.value }}
+                  </option>
+                {% endfor %}
+              </select>
+            </form>
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" text-white href="{% url 'account:profile' %}">
+              {% with user.first_name|slice:":1" as fi %}
+              {% with user.last_name|slice:":1" as li %}
+              <span class="badge bg-secondary rounded-circle p-2 text-uppercase"
+                style="width: 2.5rem; height: 2.5rem; display: inline-flex; align-items: center; justify-content: center;">
+                {{ fi }}{{ li }}
+              </span>
+              {% endwith %}
+              {% endwith %}
+            </a>
+          </li>
+        {% endif %}
       </ul>
-      {% endif %}
     </div>
   </div>
 </nav>

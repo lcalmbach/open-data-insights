@@ -5,7 +5,7 @@
 
 <h2 class="mb-3">Explore Insights (<span id="stories-count">{{ stories|length }}</span>)</h2>
 <p>
-    Insights are automatically generated short analyses that highlight noteworthy events or patterns detected in the underlying open datasets. The list below can be filtered by date, category, or a keyword in the title or text. Select an insight to view the full story, including charts, tables, and data sources.
+    Insights are automatically generated short analyses that highlight noteworthy events or patterns detected in the underlying open datasets. The list below can be filtered by publication date, region, topic, or a keyword in the title and story text. Select an insight to view the full story, including charts, tables, and data sources.
   </p>
 <!-- Filter Form in a Card -->
 <div class="card mb-4 shadow-sm">
@@ -48,8 +48,8 @@
       </div>
 
       <div class="col-md-4">
-        <label for="search" class="form-label">Title contains...</label>
-        <input type="text" class="form-control" id="search" name="search" value="{{ request.GET.search }}" placeholder="Title or description...">
+        <label for="search" class="form-label">Keyword</label>
+        <input type="text" class="form-control" id="search" name="search" value="{{ request.GET.search }}" placeholder="Title or story text...">
       </div>
 
       <div class="col-md-4">
@@ -61,6 +61,30 @@
                     data-reference-period="{{ template.reference_period }}"
                     {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
               {{ template.title }} ({{ template.reference_period }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label for="region" class="form-label">Region</label>
+        <select class="form-select" id="region" name="region">
+          <option value="">All regions</option>
+          {% for region in region_choices %}
+            <option value="{{ region.id }}" {% if request.GET.region == region.id|stringformat:"s" %}selected{% endif %}>
+              {{ region.display_name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label for="topic" class="form-label">Topic</label>
+        <select class="form-select" id="topic" name="topic">
+          <option value="">All topics</option>
+          {% for topic in topic_choices %}
+            <option value="{{ topic.id }}" {% if request.GET.topic == topic.id|stringformat:"s" %}selected{% endif %}>
+              {{ topic.display_name }}
             </option>
           {% endfor %}
         </select>
@@ -121,6 +145,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const templateSelect = document.getElementById('template');
   const periodSelect = document.getElementById('reference_period');
   const searchInput = document.getElementById('search');
+  const regionSelect = document.getElementById('region');
+  const topicSelect = document.getElementById('topic');
   const storySelect = document.getElementById('story-select');
   const publishedFromInput = document.getElementById('published_from');
   const publishedToInput = document.getElementById('published_to');
@@ -182,6 +208,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (templateSelect) {
     templateSelect.addEventListener('change', function () {
+      form.requestSubmit();
+    });
+  }
+
+  if (regionSelect) {
+    regionSelect.addEventListener('change', function () {
+      form.requestSubmit();
+    });
+  }
+
+  if (topicSelect) {
+    topicSelect.addEventListener('change', function () {
       form.requestSubmit();
     });
   }

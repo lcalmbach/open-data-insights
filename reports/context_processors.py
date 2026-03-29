@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from .language import get_content_language_id
+from .taxonomy_utils import taxonomy_choices
 
 
 def ai_disclaimer(request):
@@ -37,4 +38,20 @@ def content_language(request):
     return {
         "available_languages": languages,
         "content_language_id": get_content_language_id(request),
+    }
+
+
+def navbar_story_filters(request):
+    try:
+        from reports.models.lookups import Region, Topic
+
+        region_choices = taxonomy_choices(Region)
+        topic_choices = taxonomy_choices(Topic)
+    except Exception:  # noqa: BLE001
+        region_choices = []
+        topic_choices = []
+
+    return {
+        "navbar_region_choices": region_choices,
+        "navbar_topic_choices": topic_choices,
     }

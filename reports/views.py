@@ -40,7 +40,7 @@ from .models.graphic import Graphic
 from .models.story_template import StoryTemplate, StoryTemplateDataset
 from .models.story import Story
 from .models.story_table import StoryTable
-from .models.lookups import Period
+from .models.lookups import Period, Region, Topic
 from .models.story_rating import StoryRating
 from .models.subscription import StoryTemplateSubscription
 from .models.user_comment import UserComment
@@ -48,6 +48,7 @@ from .models.quote import Quote
 from .services.database_client import DjangoPostgresClient
 from .services.focus_images import resolve_story_images
 from .services.utils import normalize_sql_query
+from .taxonomy_utils import collect_descendant_ids, taxonomy_choices
 from .language import ENGLISH_LANGUAGE_ID, get_content_language_id
 
 MARKDOWN_EXTRAS = ["tables", "fenced-code-blocks"]
@@ -81,16 +82,20 @@ _NEGATIVE_KEYWORDS = {
 def _dedupe_stories_by_language(stories_qs, preferred_language_id: int) -> list[Story]:
     """
     Return at most one Story per (templatefocus, reference period, published_date),
-    preferring `preferred_language_id`, otherwise English.
+    preferring `preferred_language_id`, otherwise English only.
     """
     preferred_language_id = int(preferred_language_id)
     qs = (
         stories_qs
+        .filter(
+            Q(language_id=preferred_language_id)
+            | Q(language_id=ENGLISH_LANGUAGE_ID)
+        )
         .annotate(
             _lang_rank=Case(
                 When(language_id=preferred_language_id, then=0),
                 When(language_id=ENGLISH_LANGUAGE_ID, then=1),
-                default=2,
+                default=99,
                 output_field=IntegerField(),
             )
         )
@@ -124,7 +129,7 @@ def _story_group_key(story: Story) -> tuple:
 def _resolve_story_for_language(story: Story, preferred_language_id: int) -> Story:
     """
     Given a story (any language), return the preferred-language variant if it exists,
-    otherwise fall back to English, otherwise keep the original.
+    otherwise fall back to English, otherwise return None.
     """
     preferred_language_id = int(preferred_language_id)
     if story.language_id == preferred_language_id:
@@ -151,7 +156,7 @@ def _resolve_story_for_language(story: Story, preferred_language_id: int) -> Sto
         if english:
             return english
 
-    return story
+    return None
 
 _POSITIVE_KEYWORDS = {
     "good",
@@ -578,18 +583,84 @@ def _attach_story_render_fields(story: Story | None) -> None:
     )
 
 
+def _apply_story_filters(request, stories, *, allowed_template_ids=None):
+    template_id = (request.GET.get("template") or "").strip()
+    region_id = (request.GET.get("region") or "").strip()
+    topic_id = (request.GET.get("topic") or "").strip()
+    search = (request.GET.get("search") or "").strip()
+    published_from = parse_date(request.GET.get("published_from") or "")
+    published_to = parse_date(request.GET.get("published_to") or "")
+
+    if (
+        template_id
+        and template_id.isdigit()
+        and (
+            allowed_template_ids is None
+            or int(template_id) in allowed_template_ids
+        )
+    ):
+        stories = stories.filter(templatefocus__story_template_id=template_id)
+
+    if region_id.isdigit():
+        stories = stories.filter(
+            templatefocus__story_template__region_id__in=collect_descendant_ids(
+                Region, int(region_id)
+            )
+        )
+
+    if topic_id.isdigit():
+        stories = stories.filter(
+            templatefocus__story_template__topics__id__in=collect_descendant_ids(
+                Topic, int(topic_id)
+            )
+        ).distinct()
+
+    if search:
+        stories = stories.filter(
+            Q(title__icontains=search)
+            | Q(summary__icontains=search)
+            | Q(content__icontains=search)
+        )
+
+    if published_from:
+        stories = stories.filter(published_date__gte=published_from)
+    if published_to:
+        stories = stories.filter(published_date__lte=published_to)
+
+    return stories
+
+
+def _querystring_without_page(request) -> str:
+    params = request.GET.copy()
+    params.pop("page", None)
+    return params.urlencode()
+
+
 @never_cache
 def home_view(request):
     random_quote = _get_daily_quote()
     template_ids = _accessible_template_ids(request.user)
     active_subscription_count = _active_subscription_count(request.user, template_ids)
     preferred_language_id = get_content_language_id(request)
-    stories = _dedupe_stories_by_language(
-        Story.objects.select_related("templatefocus__story_template").filter(
-            templatefocus__story_template_id__in=template_ids
-        ),
-        preferred_language_id,
+    stories_qs = Story.objects.select_related("templatefocus__story_template").filter(
+        templatefocus__story_template_id__in=template_ids
     )
+    stories_qs = _apply_story_filters(
+        request,
+        stories_qs,
+        allowed_template_ids=template_ids,
+    )
+    stories = _dedupe_stories_by_language(stories_qs, preferred_language_id)
+    home_filter_query = _querystring_without_page(request)
+    filter_summary = {
+        "search": (request.GET.get("search") or "").strip(),
+        "region": Region.objects.filter(id=request.GET.get("region")).first()
+        if (request.GET.get("region") or "").isdigit()
+        else None,
+        "topic": Topic.objects.filter(id=request.GET.get("topic")).first()
+        if (request.GET.get("topic") or "").isdigit()
+        else None,
+    }
     if not stories:
         return render(
             request,
@@ -602,6 +673,8 @@ def home_view(request):
                 "active_subscription_count": active_subscription_count,
                 "available_subscriptions": len(template_ids),
                 "num_insights": Story.objects.count(),
+                "home_filter_query": home_filter_query,
+                "filter_summary": filter_summary,
             },
         )
 
@@ -644,6 +717,8 @@ def home_view(request):
             "active_subscription_count": active_subscription_count,
             "random_quote": random_quote,
             "num_insights": Story.objects.count(),
+            "home_filter_query": home_filter_query,
+            "filter_summary": filter_summary,
             **rating_ctx,
         },
     )
@@ -716,7 +791,11 @@ def templates_view(request):
 def stories_view(request):
     accessible_templates = StoryTemplate.objects.accessible_to(request.user)
     template_ids = list(accessible_templates.values_list("id", flat=True))
-    templates = accessible_templates.order_by("title")
+    templates = (
+        accessible_templates.select_related("region")
+        .prefetch_related("topics")
+        .order_by("title")
+    )
 
     # Base queryset (all languages; we'll pick preferred language later)
     stories = (
@@ -725,27 +804,13 @@ def stories_view(request):
         .order_by("-published_date")
     )
     periods = Period.objects.order_by("value")
-    # Filter by selected template
-    template_id = request.GET.get("template")
-    if template_id and template_id.isdigit() and int(template_id) not in template_ids:
-        template_id = None
-    if template_id:
-        stories = stories.filter(templatefocus__story_template_id=template_id)
-
-    # Filter by search query
-    search = request.GET.get("search")
-    if search:
-        stories = stories.filter(
-            Q(title__icontains=search) | Q(content__icontains=search)
-        )
-
-    # Filter by published date range
-    published_from = parse_date(request.GET.get("published_from") or "")
-    published_to = parse_date(request.GET.get("published_to") or "")
-    if published_from:
-        stories = stories.filter(published_date__gte=published_from)
-    if published_to:
-        stories = stories.filter(published_date__lte=published_to)
+    region_choices = taxonomy_choices(Region)
+    topic_choices = taxonomy_choices(Topic)
+    stories = _apply_story_filters(
+        request,
+        stories,
+        allowed_template_ids=template_ids,
+    )
 
     preferred_language_id = get_content_language_id(request)
     stories_list = _dedupe_stories_by_language(stories, preferred_language_id)
@@ -806,6 +871,8 @@ def stories_view(request):
             "other_ressources": other_ressources,
             "data_source": data_source,
             "periods": periods,
+            "region_choices": region_choices,
+            "topic_choices": topic_choices,
             "needs_leaflet": needs_leaflet,
             "needs_markercluster": needs_markercluster,
             **rating_ctx,

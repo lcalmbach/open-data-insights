@@ -38,8 +38,8 @@
     <section class="home-section">
       <div class="home-section__header">
         <div>
-          <p class="home-eyebrow mb-2">Lead story</p>
-          <h2 class="home-section__title">Latest insight</h2>
+          <p class="home-eyebrow mb-2">{% if filter_summary.search or filter_summary.region or filter_summary.topic %}Filtered result{% else %}Lead story{% endif %}</p>
+          <h2 class="home-section__title">{% if filter_summary.search or filter_summary.region or filter_summary.topic %}Matching insight{% else %}Latest insight{% endif %}</h2>
         </div>
       </div>
       <article class="feature-story">
@@ -93,10 +93,10 @@
     <section class="home-section">
       <div class="home-section__header">
         <div>
-          <p class="home-eyebrow mb-2">Fresh from the feed</p>
-          <h2 class="home-section__title">Recent insights</h2>
+          <p class="home-eyebrow mb-2">{% if filter_summary.search or filter_summary.region or filter_summary.topic %}Filtered feed{% else %}Fresh from the feed{% endif %}</p>
+          <h2 class="home-section__title">{% if filter_summary.search or filter_summary.region or filter_summary.topic %}Matching insights{% else %}Recent insights{% endif %}</h2>
         </div>
-        <a href="{% url 'stories' %}" class="home-section__link">Browse archive</a>
+        <a href="{% url 'stories' %}{% if home_filter_query %}?{{ home_filter_query }}{% endif %}" class="home-section__link">Browse archive</a>
       </div>
       <div class="row g-4">
         {% for story in recent_stories %}
@@ -110,17 +110,17 @@
           <ul class="pagination justify-content-center mb-0">
             {% if recent_page_obj.has_previous %}
               <li class="page-item">
-                <a class="page-link" href="?page=1" aria-label="First page">&lt;&lt;</a>
+                <a class="page-link" href="?{% if home_filter_query %}{{ home_filter_query }}&amp;{% endif %}page=1" aria-label="First page">&lt;&lt;</a>
               </li>
               <li class="page-item">
-                <a class="page-link" href="?page={{ recent_page_obj.previous_page_number }}" aria-label="Previous page">&lt;</a>
+                <a class="page-link" href="?{% if home_filter_query %}{{ home_filter_query }}&amp;{% endif %}page={{ recent_page_obj.previous_page_number }}" aria-label="Previous page">&lt;</a>
               </li>
             {% endif %}
             {% for page_number in recent_page_numbers %}
               <li class="page-item{% if page_number == recent_page_obj.number %} active{% endif %}">
                 <a
                   class="page-link"
-                  href="?page={{ page_number }}"
+                  href="?{% if home_filter_query %}{{ home_filter_query }}&amp;{% endif %}page={{ page_number }}"
                   {% if page_number == recent_page_obj.number %}aria-current="page"{% endif %}
                 >
                   {{ page_number }}
@@ -129,12 +129,12 @@
             {% endfor %}
             {% if recent_page_obj.has_next %}
               <li class="page-item">
-                <a class="page-link" href="?page={{ recent_page_obj.next_page_number }}" aria-label="Next page">
+                <a class="page-link" href="?{% if home_filter_query %}{{ home_filter_query }}&amp;{% endif %}page={{ recent_page_obj.next_page_number }}" aria-label="Next page">
                   &gt;
                 </a>
               </li>
               <li class="page-item">
-                <a class="page-link" href="?page={{ recent_page_obj.paginator.num_pages }}" aria-label="Last page">
+                <a class="page-link" href="?{% if home_filter_query %}{{ home_filter_query }}&amp;{% endif %}page={{ recent_page_obj.paginator.num_pages }}" aria-label="Last page">
                   &gt;&gt;
                 </a>
               </li>
@@ -142,6 +142,14 @@
           </ul>
         </nav>
       {% endif %}
+    </section>
+  {% endif %}
+
+  {% if not featured_story %}
+    <section class="home-section">
+      <div class="card p-4 text-muted">
+        No insights match the current filter.
+      </div>
     </section>
   {% endif %}
 </div>

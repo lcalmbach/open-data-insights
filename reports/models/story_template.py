@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from .managers import NaturalKeyManager
-from .lookups import Period, PeriodDirection
+from .lookups import Period, PeriodDirection, REGION_CATEGORY_ID, TOPIC_CATEGORY_ID
 
 logger = logging.getLogger(__name__)
 
@@ -142,6 +142,22 @@ class StoryTemplate(models.Model):
         on_delete=models.SET_NULL,
         related_name="story_templates",
         help_text="Limit this template to members of a single organisation.",
+    )
+    region = models.ForeignKey(
+        "reports.LookupValue",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="story_templates_as_region",
+        limit_choices_to={"category_id": REGION_CATEGORY_ID},
+        help_text="Primary geographic coverage for this template.",
+    )
+    topics = models.ManyToManyField(
+        "reports.LookupValue",
+        blank=True,
+        related_name="story_templates_by_topic",
+        limit_choices_to={"category_id": TOPIC_CATEGORY_ID},
+        help_text="Editorial topics associated with this template.",
     )
     ai_model = models.CharField(
         max_length=255,
