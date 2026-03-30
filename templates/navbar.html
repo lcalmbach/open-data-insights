@@ -85,6 +85,28 @@
                 >
               </div>
               <div class="mb-3">
+                <label for="navbar-search-template" class="form-label small mb-1">Story template</label>
+                <select id="navbar-search-template" name="template" class="form-select form-select-sm">
+                  <option value="">All templates</option>
+                  {% for template in navbar_template_choices %}
+                    <option value="{{ template.id }}" {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
+                      {{ template.title }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="navbar-search-reference-period" class="form-label small mb-1">Time frequency</label>
+                <select id="navbar-search-reference-period" name="reference_period" class="form-select form-select-sm">
+                  <option value="">All frequencies</option>
+                  {% for option_value, option_label in navbar_time_frequency_choices %}
+                    <option value="{{ option_value }}" {% if selected_time_frequency == option_value %}selected{% endif %}>
+                      {{ option_label }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
                 <label for="navbar-search-region" class="form-label small mb-1">Region</label>
                 <select id="navbar-search-region" name="region" class="form-select form-select-sm">
                   <option value="">All regions</option>

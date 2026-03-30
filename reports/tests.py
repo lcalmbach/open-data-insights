@@ -329,8 +329,11 @@ class StoryExplorerFilteringTests(TestCase):
         direction_category = LookupCategory.objects.create(
             id=PERIOD_DIRECTION_CATEGORY_ID, name="PeriodDirection", description=""
         )
-        period = Period.objects.create(
+        self.daily_period = Period.objects.create(
             category=period_category, value="Daily", description="", sort_order=0
+        )
+        self.monthly_period = Period.objects.create(
+            category=period_category, value="Monthly", description="", sort_order=1
         )
         direction = PeriodDirection.objects.create(
             category=direction_category, value="Backward", description="", sort_order=0
@@ -373,7 +376,7 @@ class StoryExplorerFilteringTests(TestCase):
         self.template_energy = StoryTemplate.objects.create(
             title="Municipality energy profile",
             description="Energy indicators for municipalities",
-            reference_period=period,
+            reference_period=self.daily_period,
             period_direction=direction,
             prompt_text="prompt",
             active=True,
@@ -397,7 +400,7 @@ class StoryExplorerFilteringTests(TestCase):
         self.template_population = StoryTemplate.objects.create(
             title="European population profile",
             description="Population indicators across Europe",
-            reference_period=period,
+            reference_period=self.monthly_period,
             period_direction=direction,
             prompt_text="prompt",
             active=True,
@@ -460,6 +463,37 @@ class StoryExplorerFilteringTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["featured_story"].id, self.story_energy.id)
         self.assertEqual(response.context["recent_stories"], [])
+
+    def test_home_view_filters_by_time_frequency(self):
+        response = self.client.get(reverse("home"), {"reference_period": "day"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["featured_story"].id, self.story_energy.id)
+        self.assertEqual(response.context["recent_stories"], [])
+        self.assertEqual(response.context["filter_summary"]["reference_period"], "Day")
+
+    def test_home_view_filters_by_template(self):
+        response = self.client.get(
+            reverse("home"),
+            {"template": self.template_population.id},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["featured_story"].id, self.story_population.id)
+        self.assertEqual(response.context["recent_stories"], [])
+        self.assertEqual(
+            response.context["filter_summary"]["template"].id,
+            self.template_population.id,
+        )
+
+    def test_stories_view_filters_by_time_frequency(self):
+        response = self.client.get(reverse("stories"), {"reference_period": "month"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [story.id for story in response.context["stories"]],
+            [self.story_population.id],
+        )
 
 
 class StoryTemplateFocusSqlReplacementTests(TestCase):

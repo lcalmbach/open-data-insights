@@ -49,6 +49,7 @@ from .services.database_client import DjangoPostgresClient
 from .services.focus_images import resolve_story_images
 from .services.utils import normalize_sql_query
 from .taxonomy_utils import collect_descendant_ids, taxonomy_choices
+from .utils import TIME_FREQUENCY_CHOICES, get_matching_reference_period_ids, normalize_time_frequency
 from .language import ENGLISH_LANGUAGE_ID, get_content_language_id
 
 MARKDOWN_EXTRAS = ["tables", "fenced-code-blocks"]
@@ -585,6 +586,7 @@ def _attach_story_render_fields(story: Story | None) -> None:
 
 def _apply_story_filters(request, stories, *, allowed_template_ids=None):
     template_id = (request.GET.get("template") or "").strip()
+    reference_period = (request.GET.get("reference_period") or "").strip()
     region_id = (request.GET.get("region") or "").strip()
     topic_id = (request.GET.get("topic") or "").strip()
     search = (request.GET.get("search") or "").strip()
@@ -600,6 +602,12 @@ def _apply_story_filters(request, stories, *, allowed_template_ids=None):
         )
     ):
         stories = stories.filter(templatefocus__story_template_id=template_id)
+
+    reference_period_ids = get_matching_reference_period_ids(reference_period)
+    if reference_period_ids:
+        stories = stories.filter(
+            templatefocus__story_template__reference_period_id__in=reference_period_ids
+        )
 
     if region_id.isdigit():
         stories = stories.filter(
@@ -652,7 +660,16 @@ def home_view(request):
     )
     stories = _dedupe_stories_by_language(stories_qs, preferred_language_id)
     home_filter_query = _querystring_without_page(request)
+    selected_time_frequency = normalize_time_frequency(
+        request.GET.get("reference_period")
+    ) or ""
     filter_summary = {
+        "template": StoryTemplate.objects.accessible_to(request.user)
+        .filter(id=request.GET.get("template"))
+        .first()
+        if (request.GET.get("template") or "").isdigit()
+        else None,
+        "reference_period": dict(TIME_FREQUENCY_CHOICES).get(selected_time_frequency),
         "search": (request.GET.get("search") or "").strip(),
         "region": Region.objects.filter(id=request.GET.get("region")).first()
         if (request.GET.get("region") or "").isdigit()
@@ -675,6 +692,7 @@ def home_view(request):
                 "num_insights": Story.objects.count(),
                 "home_filter_query": home_filter_query,
                 "filter_summary": filter_summary,
+                "selected_time_frequency": selected_time_frequency,
             },
         )
 
@@ -719,6 +737,7 @@ def home_view(request):
             "num_insights": Story.objects.count(),
             "home_filter_query": home_filter_query,
             "filter_summary": filter_summary,
+            "selected_time_frequency": selected_time_frequency,
             **rating_ctx,
         },
     )
@@ -791,11 +810,15 @@ def templates_view(request):
 def stories_view(request):
     accessible_templates = StoryTemplate.objects.accessible_to(request.user)
     template_ids = list(accessible_templates.values_list("id", flat=True))
-    templates = (
+    templates = list(
         accessible_templates.select_related("region")
         .prefetch_related("topics")
         .order_by("title")
     )
+    for template in templates:
+        template.time_frequency_key = normalize_time_frequency(
+            template.reference_period.value
+        ) or ""
 
     # Base queryset (all languages; we'll pick preferred language later)
     stories = (
@@ -803,9 +826,11 @@ def stories_view(request):
         .filter(templatefocus__story_template_id__in=template_ids)
         .order_by("-published_date")
     )
-    periods = Period.objects.order_by("value")
     region_choices = taxonomy_choices(Region)
     topic_choices = taxonomy_choices(Topic)
+    selected_time_frequency = normalize_time_frequency(
+        request.GET.get("reference_period")
+    ) or ""
     stories = _apply_story_filters(
         request,
         stories,
@@ -870,9 +895,10 @@ def stories_view(request):
             "tables": tables,
             "other_ressources": other_ressources,
             "data_source": data_source,
-            "periods": periods,
             "region_choices": region_choices,
             "topic_choices": topic_choices,
+            "time_frequency_choices": TIME_FREQUENCY_CHOICES,
+            "selected_time_frequency": selected_time_frequency,
             "needs_leaflet": needs_leaflet,
             "needs_markercluster": needs_markercluster,
             **rating_ctx,

@@ -187,6 +187,10 @@ h1.headline { text-align: center !important; }
   transform: translateY(0.02em);
 }
 
+.home-hero__accent {
+  color: var(--odi-accent);
+}
+
 .home-hero__visual {
   align-items: center;
   display: flex;

@@ -7,6 +7,14 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 ### Added
 - _Nothing yet._
 
+
+## [1.1.0] - 2026-03-30
+### Added
+- Add landing-page filters for time frequency and story template
+
+### Changed
+- Refine the home page wordmark accent and simplify the featured-story header
+
 ## [1.0.2] - 2026-03-29
 ### Changed
 - Sync `StoryTemplate` taxonomy metadata across databases, including `region`, `topics`, and `StoryTemplateFocus` children

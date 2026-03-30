@@ -2,6 +2,7 @@ from django.conf import settings
 
 from .language import get_content_language_id
 from .taxonomy_utils import taxonomy_choices
+from .utils import TIME_FREQUENCY_CHOICES
 
 
 def ai_disclaimer(request):
@@ -44,14 +45,21 @@ def content_language(request):
 def navbar_story_filters(request):
     try:
         from reports.models.lookups import Region, Topic
+        from reports.models.story_template import StoryTemplate
 
         region_choices = taxonomy_choices(Region)
         topic_choices = taxonomy_choices(Topic)
+        template_choices = StoryTemplate.objects.accessible_to(request.user).order_by(
+            "title"
+        )
     except Exception:  # noqa: BLE001
         region_choices = []
         topic_choices = []
+        template_choices = []
 
     return {
+        "navbar_template_choices": template_choices,
         "navbar_region_choices": region_choices,
         "navbar_topic_choices": topic_choices,
+        "navbar_time_frequency_choices": TIME_FREQUENCY_CHOICES,
     }

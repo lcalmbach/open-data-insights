@@ -8,7 +8,7 @@
     <div class="home-hero__copy">
       <h1 class="home-hero__title">
         <span class="home-hero__icon" aria-hidden="true"><i class="fas fa-magnifying-glass"></i></span>
-        <span>pen Data Insights</span>
+        <span>pen <span class="home-hero__accent">D</span>ata <span class="home-hero__accent">I</span>nsights</span>
       </h1>
     </div>
     <div class="home-hero__visual">
@@ -36,12 +36,6 @@
 
   {% if featured_story %}
     <section class="home-section">
-      <div class="home-section__header">
-        <div>
-          <p class="home-eyebrow mb-2">{% if filter_summary.search or filter_summary.region or filter_summary.topic %}Filtered result{% else %}Lead story{% endif %}</p>
-          <h2 class="home-section__title">{% if filter_summary.search or filter_summary.region or filter_summary.topic %}Matching insight{% else %}Latest insight{% endif %}</h2>
-        </div>
-      </div>
       <article class="feature-story">
         <div class="row g-0 align-items-stretch">
           <div class="col-lg-5">
@@ -93,8 +87,8 @@
     <section class="home-section">
       <div class="home-section__header">
         <div>
-          <p class="home-eyebrow mb-2">{% if filter_summary.search or filter_summary.region or filter_summary.topic %}Filtered feed{% else %}Fresh from the feed{% endif %}</p>
-          <h2 class="home-section__title">{% if filter_summary.search or filter_summary.region or filter_summary.topic %}Matching insights{% else %}Recent insights{% endif %}</h2>
+          <p class="home-eyebrow mb-2">{% if filter_summary.template or filter_summary.reference_period or filter_summary.search or filter_summary.region or filter_summary.topic %}Filtered feed{% else %}Fresh from the feed{% endif %}</p>
+          <h2 class="home-section__title">{% if filter_summary.template or filter_summary.reference_period or filter_summary.search or filter_summary.region or filter_summary.topic %}Matching insights{% else %}Recent insights{% endif %}</h2>
         </div>
         <a href="{% url 'stories' %}{% if home_filter_query %}?{{ home_filter_query }}{% endif %}" class="home-section__link">Browse archive</a>
       </div>

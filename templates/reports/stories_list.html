@@ -18,12 +18,12 @@
     <form id="filter-form" method="get" class="row g-3" autocomplete="off">
       
       <div class="col-md-4">
-        <label for="reference_period" class="form-label">Reference period</label>
+        <label for="reference_period" class="form-label">Time frequency</label>
         <select class="form-select" id="reference_period" name="reference_period">
-          <option value="">All periods</option>
-          {% for period in periods %}
-            <option value="{{ period }}" {% if request.GET.reference_period == period|stringformat:"s" %}selected{% endif %}>
-              {{ period }}
+          <option value="">All frequencies</option>
+          {% for option_value, option_label in time_frequency_choices %}
+            <option value="{{ option_value }}" {% if selected_time_frequency == option_value %}selected{% endif %}>
+              {{ option_label }}
             </option>
           {% endfor %}
         </select>
@@ -58,7 +58,7 @@
           <option value="">All templates</option>
           {% for template in templates %}
             <option value="{{ template.id }}"
-                    data-reference-period="{{ template.reference_period }}"
+                    data-reference-period="{{ template.time_frequency_key }}"
                     {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
               {{ template.title }} ({{ template.reference_period }})
             </option>
