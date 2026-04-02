@@ -8,6 +8,10 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - _Nothing yet._
 
 
+## [1.2.0] - 2026-04-02
+### Notes
+- Production deployment
+
 ## [1.1.0] - 2026-03-30
 ### Added
 - Add landing-page filters for time frequency and story template
