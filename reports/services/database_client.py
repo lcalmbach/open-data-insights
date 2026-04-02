@@ -6,7 +6,7 @@ Replaces the standalone PostgresClient with Django ORM integration
 import logging
 import json
 import pandas as pd
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Callable
 from django.db import connection, transaction
 from django.conf import settings
 from psycopg2.extras import execute_values
@@ -223,6 +223,7 @@ class DjangoPostgresClient:
         table_name: str,
         schema: str | None = None,
         chunksize: int = 5000,
+        chunk_transform: Callable[[pd.DataFrame], pd.DataFrame] | None = None,
         **read_csv_kwargs,
     ) -> int:
         schema = schema or self.schema
@@ -237,6 +238,9 @@ class DjangoPostgresClient:
         for chunk_index, chunk in enumerate(reader):
             if chunk.empty:
                 continue
+
+            if chunk_transform is not None:
+                chunk = chunk_transform(chunk)
 
             prepared = self._prepare_dataframe_for_sql(chunk)
             prepared.to_sql(

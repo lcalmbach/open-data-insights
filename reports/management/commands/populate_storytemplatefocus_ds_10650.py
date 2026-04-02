@@ -101,7 +101,7 @@ class Command(BaseCommand):
                 skipped += 1
                 continue
             if bfs in existing:
-                skipped += 1
+                skipped += 1AWS rocks!26
                 continue
 
             publish_day = anchor + timedelta(days=idx)

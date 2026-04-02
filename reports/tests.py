@@ -996,7 +996,7 @@ class DatasetSourceConnectorTests(SimpleTestCase):
         response = Mock()
         response.raise_for_status.return_value = None
         response.iter_content.return_value = [
-            b"id,observed_at,value\n",
+            "\ufeff ID , Observed_At , VALUE \n".encode("utf-8"),
             b"1,2026-03-19,11\n2,2026-03-20,12\n",
         ]
         mock_get.return_value = response
@@ -1046,6 +1046,20 @@ class DatasetSourceConnectorTests(SimpleTestCase):
 
         self.assertEqual(written, 2)
         dbclient.replace_table_from_csv.assert_called_once()
+        _, kwargs = dbclient.replace_table_from_csv.call_args
+        self.assertEqual(kwargs["sep"], None)
+        self.assertEqual(kwargs["engine"], "python")
+        normalized = kwargs["chunk_transform"](
+            pd.DataFrame([[1, 2]], columns=['\ufeff "ID" ', " Value "])
+        )
+        self.assertEqual(list(normalized.columns), ["id", "value"])
+
+    def test_url_connector_normalizes_wrapped_quotes_in_column_names(self):
+        normalized = UrlDatasetConnector._normalize_dataframe_columns(
+            pd.DataFrame([[1]], columns=['\ufeff "Jahr" '])
+        )
+
+        self.assertEqual(list(normalized.columns), ["jahr"])
 
 
 class OdsConnectorTimestampNormalizationTests(SimpleTestCase):

@@ -399,10 +399,12 @@ class UrlDatasetConnector:
 
         csv_path = self._download_csv_to_temp_file()
         try:
-            df = pd.read_csv(
-                csv_path,
-                sep=None,
-                engine="python",
+            df = self._normalize_dataframe_columns(
+                pd.read_csv(
+                    csv_path,
+                    sep=None,
+                    engine="python",
+                )
             )
             self.logger.info(
                 "Downloaded %s row(s) from URL source %s",
@@ -423,6 +425,7 @@ class UrlDatasetConnector:
                 csv_path,
                 table_name=table_name,
                 schema=schema,
+                chunk_transform=self._normalize_dataframe_columns,
                 sep=None,
                 engine="python",
             )
@@ -450,6 +453,24 @@ class UrlDatasetConnector:
                 return tmp_file.name
         finally:
             response.close()
+
+    @staticmethod
+    def _normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
+        normalized = df.copy()
+        normalized.columns = [
+            UrlDatasetConnector._normalize_column_name(column)
+            for column in normalized.columns
+        ]
+        return normalized
+
+    @staticmethod
+    def _normalize_column_name(column):
+        if not isinstance(column, str):
+            return column
+        normalized = column.replace("\ufeff", "").strip()
+        if len(normalized) >= 2 and normalized[0] == normalized[-1] and normalized[0] in {'"', "'"}:
+            normalized = normalized[1:-1].strip()
+        return normalized.lower()
 
 
 class OdsDatasetConnector:

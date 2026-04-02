@@ -287,6 +287,7 @@ class StoryProcessor:
         result = result.replace(":filter_expression", self.focus.filter_expression if self.focus and self.focus.filter_expression else "")
         return result
 
+
     def _get_focus_filter_expression(self) -> str:
         """
         Return the SQL snippet used to restrict queries to the current focus.
