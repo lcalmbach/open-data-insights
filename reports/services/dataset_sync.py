@@ -717,12 +717,16 @@ class OdsDatasetConnector:
             start_time = time.time()
             import_is_due = True
 
-            if self.dataset.source == 'ods' and self.dataset.data_update_frequency.id == PeriodEnum.YEARLY.value and self.dataset.year_field:
-                if self.dataset_covers_period():
+            if (
+                self.dataset.source == "ods"
+                and self.dataset.data_update_frequency.id == PeriodEnum.YEARLY.value
+                and self.dataset.year_field
+            ):
+                if self.target_table_exists and self.dataset_covers_period():
                     self.logger.info(
                         f"Dataset {identifier} is already up to date."
                     )
-                return True
+                    return True
             
             elif self.dataset.import_month or self.dataset.import_day:
                 month, day = self.dataset.import_month, self.dataset.import_day

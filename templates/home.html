@@ -12,22 +12,30 @@
       </h1>
     </div>
     <div class="home-hero__visual">
-      {% if random_quote %}
+      {% if user.is_authenticated %}
+        {% if random_quote %}
+          <aside class="home-quote">
+            <p class="home-quote__text">
+              "{{ random_quote.quote }}"
+              <span class="home-quote__author-inline">
+                {% if random_quote.author_wiki_url %}
+                  <a href="{{ random_quote.author_wiki_url }}" target="_blank" rel="noopener noreferrer">
+                    {{ random_quote.author }}
+                  </a>
+                {% else %}
+                  {{ random_quote.author }}
+                {% endif %}
+                {% if random_quote.lifespan %}
+                  <span>{{ random_quote.lifespan }}</span>
+                {% endif %}
+              </span>
+            </p>
+          </aside>
+        {% endif %}
+      {% else %}
         <aside class="home-quote">
           <p class="home-quote__text">
-            “{{ random_quote.quote }}”
-            <span class="home-quote__author-inline">
-              {% if random_quote.author_wiki_url %}
-                <a href="{{ random_quote.author_wiki_url }}" target="_blank" rel="noopener noreferrer">
-                  {{ random_quote.author }}
-                </a>
-              {% else %}
-                {{ random_quote.author }}
-              {% endif %}
-              {% if random_quote.lifespan %}
-                <span>{{ random_quote.lifespan }}</span>
-              {% endif %}
-            </span>
+            <strong>Welcome to Open Data Insights.</strong> Discover <strong>{{ total_datasets }}</strong> public datasets and <strong>{{ total_insights }}</strong> data-driven insights about your region. <a href="{% url 'about' %}">Learn more about our mission</a>, then <a href="{% url 'account:login' %}">log in</a> or <a href="{% url 'account:register' %}">join our community</a> to get full access to our analysis tools, explore detailed datasets, and receive regular email updates on new publications and findings.
           </p>
         </aside>
       {% endif %}

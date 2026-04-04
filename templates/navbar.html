@@ -10,7 +10,8 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <!-- Linksbündige Navigation -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <!-- Dropdown menu -->
+        <!-- Explore dropdown - only for logged-in users -->
+        {% if user.is_authenticated %}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown"
             aria-expanded="false">
@@ -19,9 +20,10 @@
           <ul class="dropdown-menu" aria-labelledby="exploreDropdown">
             {% comment %}<li><a class="dropdown-item" href="{% url 'stories' %}">Published Insights</a></li>{% endcomment %}
             <li><a class="dropdown-item" href="{% url 'datasets' %}">Datasets</a></li>
-            <li><a class="dropdown-item" href="{% url 'templates' %}">Insight Templates</a></li>  
+            <li><a class="dropdown-item" href="{% url 'templates' %}">Insight Templates</a></li>
           </ul>
         </li>
+        {% endif %}
         {% if user.is_authenticated %}
         {% if user.is_staff %}
         <li class="nav-item dropdown">

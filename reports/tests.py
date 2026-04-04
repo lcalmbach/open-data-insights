@@ -13,7 +13,7 @@ from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
 from account.models import CustomUser
-from reports.models.dataset import ImportTypeEnum
+from reports.models.dataset import ImportTypeEnum, PeriodEnum
 from reports.models.lookups import (
     LanguageEnum,
     PERIOD_CATEGORY_ID,
@@ -1227,6 +1227,37 @@ class DatasetPersistenceTests(SimpleTestCase):
 
 
 class DatasetSyncSkipTests(SimpleTestCase):
+    def test_yearly_ods_dataset_without_table_runs_initial_import(self):
+        dataset = SimpleNamespace(
+            source="ods",
+            source_identifier="100508",
+            target_table_name="ds_100508",
+            data_update_frequency=SimpleNamespace(id=PeriodEnum.YEARLY.value),
+            year_field="jahr",
+            import_month=None,
+            import_day=None,
+            import_type=SimpleNamespace(id=ImportTypeEnum.NEW_YEAR.value),
+            post_import_sql_commands=None,
+            save=Mock(),
+        )
+
+        connector = OdsDatasetConnector.__new__(OdsDatasetConnector)
+        connector.dataset = dataset
+        connector.logger = Mock()
+        connector.dbclient = Mock()
+        connector.files_path = Path("/tmp")
+        connector.target_table_exists = False
+        connector.dataset_covers_period = Mock(return_value=True)
+        connector._sync_new_table = Mock(return_value=True)
+        connector._sync = Mock(return_value=False)
+
+        ok = connector.synchronize()
+
+        self.assertTrue(ok)
+        connector._sync_new_table.assert_called_once()
+        connector._sync.assert_not_called()
+        dataset.save.assert_called_once()
+
     @patch("reports.services.dataset_sync.create_dataset_processor")
     def test_skip_datasets_are_ignored_before_connector_dispatch(self, mock_create_processor):
         dataset = SimpleNamespace(

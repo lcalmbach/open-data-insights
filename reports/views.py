@@ -650,6 +650,12 @@ def home_view(request):
     template_ids = _accessible_template_ids(request.user)
     active_subscription_count = _active_subscription_count(request.user, template_ids)
     preferred_language_id = get_content_language_id(request)
+
+    # Get counts for hero text
+    from reports.models import Dataset, Story as StoryModel
+    total_datasets = Dataset.objects.count()
+    total_insights = StoryModel.objects.filter(language_id=94).count()
+
     stories_qs = Story.objects.select_related("templatefocus__story_template").filter(
         templatefocus__story_template_id__in=template_ids
     )
@@ -690,6 +696,8 @@ def home_view(request):
                 "active_subscription_count": active_subscription_count,
                 "available_subscriptions": len(template_ids),
                 "num_insights": Story.objects.count(),
+                "total_datasets": total_datasets,
+                "total_insights": total_insights,
                 "home_filter_query": home_filter_query,
                 "filter_summary": filter_summary,
                 "selected_time_frequency": selected_time_frequency,
@@ -735,6 +743,8 @@ def home_view(request):
             "active_subscription_count": active_subscription_count,
             "random_quote": random_quote,
             "num_insights": Story.objects.count(),
+            "total_datasets": total_datasets,
+            "total_insights": total_insights,
             "home_filter_query": home_filter_query,
             "filter_summary": filter_summary,
             "selected_time_frequency": selected_time_frequency,

@@ -145,8 +145,6 @@ def generate_chart(data, settings, chart_id):
             "bar": create_bar_chart,
             "bar_stacked": create_bar_stacked_chart,
             "bar-stacked": create_bar_stacked_chart,
-            "horizontal_bar": create_horizontal_bar_chart,
-            "bar-horizontal": create_horizontal_bar_chart,
             "area": create_area_chart,
             "point": create_point_chart,
             "scatter": create_point_chart,
@@ -305,8 +303,13 @@ def create_bar_chart(data, settings):
     x_field = settings.get('x')
     y_field = settings.get('y')
     x_format = settings.get('x_format')
-    x_label_angle = settings.get('x_label_angle')
     color_field = settings.get('color')
+    is_horizontal = settings.get('horizontal', False)
+
+    # For bar sizing: count distinct values of the field that will be on the categorical axis
+    # For vertical bars: that's x_field
+    # For horizontal bars: that's y_field (after swap)
+    categorical_field = y_field if is_horizontal else x_field
 
     # sensible defaults for bar sizing
     total_plot_width = settings.get('plot_width') or settings.get('width') or 700
@@ -315,7 +318,7 @@ def create_bar_chart(data, settings):
 
     # compute number of distinct bars and size (wider when fewer bars, narrower when many)
     try:
-        n_bars = int(data[x_field].nunique()) if x_field else 1
+        n_bars = int(data[categorical_field].nunique()) if categorical_field else 1
     except Exception:
         n_bars = 1
     if n_bars > 0:
@@ -388,8 +391,6 @@ def create_bar_chart(data, settings):
     else:
         tt = []
         if x_field:
-            # if x is temporal and you want the same formatting in tooltip, you can do:
-            # tt.append(alt.Tooltip(f"{x_field}:T", format=x_format) if x_type == "T" and x_format else x_field)
             tt.append(x_field)
         if y_field:
             tt.append(y_field)
@@ -401,7 +402,7 @@ def create_bar_chart(data, settings):
     chart = chart.encode(**encodings)
 
     # Horizontal bars: swap axes encoding
-    if settings.get('horizontal', False):
+    if is_horizontal:
         # swap x and y encoding by re-encoding
         swapped = {}
         if 'x' in encodings:
@@ -410,8 +411,13 @@ def create_bar_chart(data, settings):
             swapped['x'] = encodings['y']
         if 'color' in encodings:
             swapped['color'] = encodings['color']
-        if 'tooltip' in encodings:
-            swapped['tooltip'] = encodings['tooltip']
+
+        # Apply y-axis configuration to show all category labels
+        if 'y' in swapped:
+            y_encoding = swapped['y']
+            # Update the axis on the existing encoding
+            y_encoding.axis = alt.Axis(labelOverlap=False, labelBound=True)
+
         chart = chart.encode(**swapped)
 
     # Apply chart properties (title/height/width)
@@ -423,16 +429,6 @@ def create_bar_chart(data, settings):
     chart = chart.properties(**props)
 
     return chart
-
-
-def create_horizontal_bar_chart(data, settings):
-    """Create a horizontal bar chart by forcing the horizontal flag before delegating."""
-    if hasattr(settings, "copy"):
-        horizontal_settings = settings.copy()
-    else:
-        horizontal_settings = dict(settings)
-    horizontal_settings["horizontal"] = True
-    return create_bar_chart(data, horizontal_settings)
 
 
 def create_bar_stacked_chart(data, settings):
