@@ -14,6 +14,7 @@ TAG_CATEGORY_ID = 9
 LANGUAGE_CATEGORY_ID = 10
 REGION_CATEGORY_ID = 11
 TOPIC_CATEGORY_ID = 12
+AI_MODEL_CATEGORY_ID = 13
 
 class LanguageEnum(Enum):
     ENGLISH=94
@@ -252,6 +253,19 @@ class Topic(LookupValue):
         proxy = True
         verbose_name = "Topic"
         verbose_name_plural = "Topics"
+
+
+class AiModelManager(ScopedLookupManager):
+    category_id = AI_MODEL_CATEGORY_ID
+
+
+class AiModel(LookupValue):
+    objects = AiModelManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "AI Model"
+        verbose_name_plural = "AI Models"
 
 
 class TagDataset(models.Model):

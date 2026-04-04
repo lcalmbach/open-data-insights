@@ -14,6 +14,8 @@ from typing import Optional, Dict, Any, Tuple
 from decimal import Decimal
 from django.conf import settings
 from openai import OpenAI
+import anthropic
+
 from ..visualizations.plotting import generate_chart
 from django.db.models import Max
 
@@ -249,17 +251,57 @@ class StoryProcessor:
             self._set_story_context(template=template, focus=focus, story=self.story)
 
             if not getattr(self.story, "ai_model", None):
-                self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
+                template_model = getattr(self.template, "ai_model", None)
+                if template_model and getattr(template_model, "key", None):
+                    self.story.ai_model = template_model.key
+                else:
+                    self.story.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
             self.ai_client = self.get_ai_client()
 
 
-    def get_ai_client(self) -> OpenAI:
-        if self.story.ai_model == "deepseek-chat":
+    def _is_anthropic_model(self) -> bool:
+        return (self.story.ai_model or "").startswith("claude-")
+
+    def get_ai_client(self):
+        if self._is_anthropic_model():
+            api_key = getattr(settings, "ANTHROPIC_API_KEY", None)
+            return anthropic.Anthropic(api_key=api_key)
+        elif self.story.ai_model == "deepseek-chat":
             api_key = getattr(settings, "DEEPSEEK_API_KEY", None)
             return OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
         else:
             api_key = getattr(settings, "OPENAI_API_KEY", None)
             return OpenAI(api_key=api_key)
+
+    def _call_llm(self, messages: list, temperature: float, max_tokens: int) -> str:
+        """Call the configured LLM and return the text response.
+
+        Handles both OpenAI-compatible clients (OpenAI, DeepSeek) and the
+        Anthropic client, which uses a different API shape (system as a
+        top-level parameter, different response structure).
+        """
+        if self._is_anthropic_model():
+            system_parts = [m["content"] for m in messages if m["role"] == "system"]
+            user_messages = [m for m in messages if m["role"] != "system"]
+            kwargs = dict(
+                model=self.story.ai_model,
+                messages=user_messages,
+                max_tokens=max_tokens,
+            )
+            if system_parts:
+                kwargs["system"] = "\n\n".join(system_parts)
+            if temperature is not None:
+                kwargs["temperature"] = temperature
+            response = self.ai_client.messages.create(**kwargs)
+            return (response.content[0].text or "").strip()
+        else:
+            response = self.ai_client.chat.completions.create(
+                model=self.story.ai_model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            return (response.choices[0].message.content or "").strip()
 
 
     def _replace_reference_period_expression(self, expression: str) -> str:
@@ -672,13 +714,7 @@ class StoryProcessor:
             },
             {"role": "user", "content": text},
         ]
-        response = self.ai_client.chat.completions.create(
-            model=self.story.ai_model,
-            messages=messages,
-            temperature=0.0,
-            max_tokens=max_tokens,
-        )
-        translated = (response.choices[0].message.content or "").strip()
+        translated = self._call_llm(messages, temperature=0.0, max_tokens=max_tokens)
         return translated or text
 
     def _upsert_story_for_language(self, language_id: int) -> Story:
@@ -1116,13 +1152,11 @@ class StoryProcessor:
                 ]
 
                 # Generate response
-            response = self.ai_client.chat.completions.create(
-                model=self.story.ai_model,
-                messages=messages,
+            self.story.content = self._call_llm(
+                messages,
                 temperature=self.story.template.temperature,
                 max_tokens=3000,
             )
-            self.story.content = (response.choices[0].message.content or "").strip()
             self.story.prompt_text = messages
             if not self.story.content:
                 self.logger.warning(
@@ -1131,7 +1165,7 @@ class StoryProcessor:
             return bool(self.story.content)
 
         except Exception as e:
-            self.logger.error(f"Error generating report text with OpenAI: {e}")
+            self.logger.error(f"Error generating report text: {e}")
             return None
 
     def _generate_summary(self, kind: str, target_language: str | None = None) -> Optional[str]:
@@ -1182,14 +1216,7 @@ class StoryProcessor:
                 },
             ]
 
-            response = self.ai_client.chat.completions.create(
-                model=self.story.ai_model,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-            )
-
-            return response.choices[0].message.content.strip()
+            return self._call_llm(messages, temperature=temperature, max_tokens=max_tokens)
 
         except Exception as e:
             self.logger.error(f"Error generating {kind} with OpenAI: {e}")

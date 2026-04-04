@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from .managers import NaturalKeyManager
-from .lookups import Period, PeriodDirection, REGION_CATEGORY_ID, TOPIC_CATEGORY_ID
+from .lookups import Period, PeriodDirection, REGION_CATEGORY_ID, TOPIC_CATEGORY_ID, AI_MODEL_CATEGORY_ID
 
 logger = logging.getLogger(__name__)
 
@@ -159,12 +159,13 @@ class StoryTemplate(models.Model):
         limit_choices_to={"category_id": TOPIC_CATEGORY_ID},
         help_text="Editorial topics associated with this template.",
     )
-    ai_model = models.CharField(
-        max_length=255,
-        default="gpt-4o",
+    ai_model = models.ForeignKey(
+        "reports.LookupValue",
         null=True,
         blank=True,
-        help_text="AI model to use for generating the story. This can be set to 'deepseek-chat' to use the Deepseek API instead of OpenAI.",
+        on_delete=models.SET_NULL,
+        limit_choices_to={"category_id": AI_MODEL_CATEGORY_ID},
+        help_text="AI model to use for story generation. Add models via the AI Model lookup category.",
     )
     generation_mode = models.CharField(
         max_length=16,
