@@ -8,6 +8,18 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - _Nothing yet._
 
 
+## [1.2.1] - 2026-04-04
+### Added
+- Add total datasets and insights counts to home page hero text
+
+### Changed
+- Improve horizontal bar chart handling in plotting module
+- Code cleanup and formatting in dataset sync
+
+### Fixed
+- Fix dataset sync logic for yearly ODS datasets without existing tables (check target_table_exists before checking if dataset covers period)
+- Remove deprecated horizontal bar chart aliases
+
 ## [1.2.0] - 2026-04-02
 ### Notes
 - Production deployment
