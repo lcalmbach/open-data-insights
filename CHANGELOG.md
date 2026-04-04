@@ -11,6 +11,8 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 ## [1.2.1] - 2026-04-04
 ### Added
 - Add total datasets and insights counts to home page hero text
+- Differentiate home page views for authenticated and unauthenticated users (quote for logged in, welcome CTA for guests)
+- Add unit tests for yearly ODS dataset sync logic
 
 ### Changed
 - Improve horizontal bar chart handling in plotting module
