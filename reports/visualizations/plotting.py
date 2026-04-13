@@ -154,7 +154,9 @@ def generate_chart(data, settings, chart_id):
             "map-markers": create_map_markers,
             "choropleth": create_chloropleth,
             "chloropleth": create_chloropleth,
-            "wordcloud": create_word_cloud
+            "wordcloud": create_word_cloud,
+            "radar": create_radar_chart,
+            "ranking_bar": create_ranking_bar_chart,
         }
         chart_settings = settings.copy() if hasattr(settings, "copy") else dict(settings)
         chart_settings.setdefault("chart_id", chart_id)
@@ -1664,6 +1666,407 @@ def create_word_cloud(data, settings):
         f'<div id="{chart_id}" class="word-cloud-chart" aria-label="{title}">'
         f'<img src="data:image/png;base64,{img_b64}" alt="{title}" style="{img_style}"/></div>'
     )
+
+
+def create_radar_chart(data, settings):
+    """Create a radar / spider chart using Altair (Vega-Embed, interactive tooltips).
+
+    Expected settings:
+        category       – column of spoke/axis labels (falls back to first column)
+        value          – column of numeric values to plot (falls back to second column)
+        series         – optional column for multiple overlapping polygons
+        tooltip_fields – list of extra column names to include in hover tooltip
+        min_value      – scale minimum (default 0)
+        max_value      – scale maximum (auto if omitted)
+        invert         – if true, lower values map to outer edge (useful for ranks
+                         where rank 1 = best; default false)
+        grid_lines     – number of concentric grid rings (default 5)
+        color_scheme   – Vega colour scheme for multi-series (default "category10")
+        fill_alpha     – polygon fill opacity 0–1 (default 0.15)
+        line_width     – polygon stroke width (default 2)
+        width / height – chart size in pixels (default container × 420)
+        title          – chart title
+
+    Data format (long):
+        indikator_label  rang  wert
+        Speed            3     82.5
+        Strength         7     65.0
+        ...
+
+    Settings for rank-on-axis with real value in tooltip:
+        {
+          "category": "indikator_label",
+          "value": "rang",
+          "tooltip_fields": ["wert"],
+          "min_value": 1,
+          "max_value": 21,
+          "invert": true,
+          "title": "Quartier 1 – Rang 2024"
+        }
+    With invert=true rank 1 (best) sits at the outer edge, rank 21 at the centre.
+    """
+    df = pd.DataFrame(data).copy()
+
+    # ── field resolution ─────────────────────────────────────────────────────
+    cat_field = settings.get("category") or settings.get("x")
+    val_field = settings.get("value") or settings.get("y")
+    ser_field = settings.get("series") or settings.get("color")
+    tooltip_extra = [c for c in (settings.get("tooltip_fields") or []) if c]
+
+    if not cat_field or cat_field not in df.columns:
+        cat_field = df.columns[0] if len(df.columns) > 0 else None
+    if not val_field or val_field not in df.columns:
+        remaining = [c for c in df.columns if c != cat_field]
+        val_field = remaining[0] if remaining else None
+
+    if not cat_field or not val_field:
+        logger.error("Radar chart requires category and value fields")
+        return alt.Chart(pd.DataFrame({"_x": [0], "_y": [0]})).mark_point()
+
+    df[val_field] = pd.to_numeric(df[val_field], errors="coerce").fillna(0)
+    # Only convert genuinely numeric extra-tooltip columns — never touch text fields
+    # (e.g. the category column itself if mistakenly listed in tooltip_fields).
+    for c in tooltip_extra:
+        if c in df.columns and c not in (cat_field, val_field):
+            converted = pd.to_numeric(df[c], errors="coerce")
+            if converted.notna().any():           # at least some values parsed → numeric
+                df[c] = converted
+
+    categories = list(df[cat_field].unique())
+    N = len(categories)
+    if N < 3:
+        logger.error("Radar chart requires at least 3 categories")
+        return alt.Chart(pd.DataFrame({"_x": [0], "_y": [0]})).mark_point()
+
+    # ── scale ────────────────────────────────────────────────────────────────
+    min_val = float(settings.get("min_value", 0))
+    max_val = settings.get("max_value")
+    if max_val is None:
+        max_val = float(df[val_field].max())
+    max_val = float(max_val)
+    rng = max_val - min_val or 1.0
+    invert = bool(settings.get("invert", False))
+    
+    def normalize(v):
+        n = (float(v) - min_val) / rng
+        return max(0.0, min(1.0, 1.0 - n if invert else n))
+
+    # ── angles: first spoke at top (π/2), clockwise ──────────────────────────
+    cat_index = {cat: i for i, cat in enumerate(categories)}
+
+    def spoke_angle(cat):
+        return np.pi / 2 - 2 * np.pi * cat_index[cat] / N
+
+    # ── series ───────────────────────────────────────────────────────────────
+    has_series = bool(ser_field and ser_field in df.columns)
+    series_vals = list(df[ser_field].unique()) if has_series else [None]
+
+    # ── polygon data ─────────────────────────────────────────────────────────
+    polygon_rows = []
+    for s_val in series_vals:
+        subset = df[df[ser_field] == s_val] if has_series else df
+        cat_to_row = {str(r[cat_field]): r for _, r in subset.iterrows()}
+
+        for i, cat in enumerate(categories + [categories[0]]):  # +1 closes the polygon
+            row = cat_to_row.get(str(cat))
+            raw_val = float(row[val_field]) if row is not None else min_val
+            r = normalize(raw_val)
+            a = spoke_angle(cat)
+            prow = {
+                "_x": r * np.cos(a),
+                "_y": r * np.sin(a),
+                "_order": i,
+                cat_field: cat,
+                val_field: raw_val,
+            }
+            if has_series:
+                prow[ser_field] = s_val
+            for c in tooltip_extra:
+                if c in df.columns and row is not None:
+                    prow[c] = row[c]
+            polygon_rows.append(prow)
+
+    polygon_df = pd.DataFrame(polygon_rows)
+    # hover points exclude the closing duplicate
+    hover_df = polygon_df[polygon_df["_order"] < N].copy()
+
+    # ── grid circles ─────────────────────────────────────────────────────────
+    grid_n = int(settings.get("grid_lines", 5))
+    grid_radii = np.linspace(0, 1, grid_n + 1)[1:]
+    circle_rows = []
+    thetas = np.linspace(0, 2 * np.pi, 121)
+    for r in grid_radii:
+        for j, theta in enumerate(thetas):
+            circle_rows.append({"_x": r * np.cos(theta), "_y": r * np.sin(theta), "_r": str(r), "_ord": j})
+    circle_df = pd.DataFrame(circle_rows)
+
+    # ── spoke lines ───────────────────────────────────────────────────────────
+    spoke_rows = []
+    for cat in categories:
+        a = spoke_angle(cat)
+        spoke_rows += [
+            {"_x": 0.0, "_y": 0.0, "_spoke": cat, "_ord": 0},
+            {"_x": np.cos(a), "_y": np.sin(a), "_spoke": cat, "_ord": 1},
+        ]
+    spoke_df = pd.DataFrame(spoke_rows)
+
+    # ── scale tick labels (between first and second spoke for readability) ────
+    # Place labels halfway between spoke 0 (top) and spoke 1 so they sit in
+    # an open gap and don't overlap either spoke or the category labels.
+    angle_0 = np.pi / 2                       # first spoke (top)
+    angle_1 = np.pi / 2 - 2 * np.pi / N      # second spoke (clockwise)
+    tick_angle = (angle_0 + angle_1) / 2      # midpoint between them
+    # Also include r=0 with the minimum value label so the centre is labelled.
+    tick_radii = np.concatenate([[0.0], grid_radii])
+    tick_rows = []
+    for r in tick_radii:
+        actual = (min_val + (1.0 - r) * rng) if invert else (min_val + r * rng)
+        tick_rows.append({
+            "_x": r * np.cos(tick_angle),
+            "_y": r * np.sin(tick_angle),
+            "_tick": f"{actual:.4g}",
+        })
+    tick_df = pd.DataFrame(tick_rows)
+
+    # ── category labels (outside outer ring) ─────────────────────────────────
+    label_r = 1.18
+    clabel_rows = []
+    for cat in categories:
+        a = spoke_angle(cat)
+        x, y = label_r * np.cos(a), label_r * np.sin(a)
+        clabel_rows.append({"_x": x, "_y": y, "_label": str(cat)})
+    clabel_df = pd.DataFrame(clabel_rows)
+
+    # ── Altair layers ─────────────────────────────────────────────────────────
+    domain = [-1.38, 1.38]
+    h = int(settings.get("height", 420))
+    # Radar must be square so grid circles aren't distorted into ellipses.
+    # If the user passes width="container" or omits it, default to height.
+    w_raw = settings.get("width")
+    w = h if (w_raw is None or w_raw == "container") else int(w_raw)
+
+    def xy(extra_x=None, extra_y=None):
+        return dict(
+            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
+            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
+        )
+
+    grid_layer = (
+        alt.Chart(circle_df)
+        .mark_line(color="#cccccc", strokeWidth=0.6, strokeDash=[3, 3])
+        .encode(
+            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
+            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
+            detail=alt.Detail("_r:N"),
+            order=alt.Order("_ord:Q"),
+        )
+    )
+
+    spoke_layer = (
+        alt.Chart(spoke_df)
+        .mark_line(color="#cccccc", strokeWidth=0.6)
+        .encode(
+            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
+            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
+            detail=alt.Detail("_spoke:N"),
+            order=alt.Order("_ord:Q"),
+        )
+    )
+
+    tick_layer = (
+        alt.Chart(tick_df)
+        .mark_text(fontSize=8, color="#999999", align="left", baseline="middle")
+        .encode(
+            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
+            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
+            text=alt.Text("_tick:N"),
+        )
+    )
+
+    clabel_layer = (
+        alt.Chart(clabel_df)
+        .mark_text(fontSize=10, align="center", baseline="middle")
+        .encode(
+            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
+            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
+            text=alt.Text("_label:N"),
+        )
+    )
+
+    color_scheme = settings.get("color_scheme", "category10")
+    fill_alpha = float(settings.get("fill_alpha", 0.15))
+    line_width = float(settings.get("line_width", 2))
+
+    if has_series:
+        color_enc = alt.Color(f"{ser_field}:N", scale=alt.Scale(scheme=color_scheme))
+        detail_enc = alt.Detail(f"{ser_field}:N")
+    else:
+        color_enc = alt.value("steelblue")
+        detail_enc = alt.Undefined
+
+    # Outline: polygon_df has N+1 points per series (last = first) to close the stroke.
+    polygon_line = (
+        alt.Chart(polygon_df)
+        .mark_line(strokeWidth=line_width)
+        .encode(
+            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
+            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
+            color=color_enc,
+            detail=detail_enc,
+            order=alt.Order("_order:Q"),
+        )
+    )
+
+    # Fill: mark_line with fill + interpolate="linear-closed" closes the path
+    # and fills the enclosed polygon area.  mark_area is wrong here because it
+    # fills toward the y=0 baseline rather than the polygon interior.
+    area_df = polygon_df[polygon_df["_order"] < N].copy()
+    fill_color = "steelblue" if not has_series else alt.Undefined
+    polygon_area = (
+        alt.Chart(area_df)
+        .mark_line(
+            interpolate="linear-closed",
+            fill=fill_color,
+            fillOpacity=fill_alpha,
+            strokeWidth=0,
+        )
+        .encode(
+            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
+            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
+            color=color_enc if has_series else alt.Undefined,
+            detail=detail_enc,
+            order=alt.Order("_order:Q"),
+        )
+    )
+
+    already_in_tooltip = {cat_field, val_field, ser_field}
+    tooltip_enc = [
+        alt.Tooltip(f"{cat_field}:N", title=cat_field),
+        alt.Tooltip(f"{val_field}:Q", title=val_field),
+    ]
+    for c in tooltip_extra:
+        if c not in hover_df.columns or c in already_in_tooltip:
+            continue
+        vtype = "Q" if pd.api.types.is_numeric_dtype(hover_df[c]) else "N"
+        tooltip_enc.append(alt.Tooltip(f"{c}:{vtype}", title=c))
+    if has_series:
+        tooltip_enc.insert(0, alt.Tooltip(f"{ser_field}:N", title=ser_field))
+
+    point_layer = (
+        alt.Chart(hover_df)
+        .mark_point(size=80, filled=True)
+        .encode(
+            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
+            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
+            color=color_enc,
+            tooltip=tooltip_enc,
+        )
+    )
+
+    chart = alt.layer(
+        grid_layer, spoke_layer, tick_layer,
+        polygon_area, polygon_line, point_layer,
+        clabel_layer,
+    ).properties(width=w, height=h)
+
+    if settings.get("title"):
+        chart = chart.properties(title=settings["title"])
+
+    return chart
+
+
+def create_ranking_bar_chart(data, settings):
+    """Create a horizontal ranking bar chart.
+
+    All bars are grey; one bar is highlighted in a distinct colour based on a
+    label match.  Bars are sorted so the highest value is at the top.
+
+    Expected settings:
+        category        – column with bar labels (falls back to first column)
+        value           – column with numeric values (falls back to second column)
+        highlight       – label value that should be coloured differently
+        highlight_color – colour for the highlighted bar  (default "#e45756")
+        bar_color       – colour for all other bars        (default "#bbbbbb")
+        sort            – "descending" (default) or "ascending"
+        width / height  – chart dimensions (defaults: "container" / 400)
+        title           – optional chart title
+        x_title / y_title – axis labels
+        tooltip_fields  – extra columns to include in tooltip
+    """
+    df = data.copy()
+
+    cat_field = settings.get("category") or (df.columns[0] if len(df.columns) > 0 else "category")
+    val_field = settings.get("value") or (df.columns[1] if len(df.columns) > 1 else "value")
+
+    highlight_label = settings.get("highlight", "")
+    highlight_color = settings.get("highlight_color", "#e45756")
+    bar_color = settings.get("bar_color", "#bbbbbb")
+    sort_order = settings.get("sort", "descending")
+
+    w = settings.get("width", "container")
+    h = settings.get("height", 400)
+    if isinstance(h, str) and h.lower() != "container":
+        try:
+            h = int(h)
+        except ValueError:
+            h = 400
+
+    # Sort the dataframe so Altair sees the desired order
+    ascending = sort_order == "ascending"
+    df = df.sort_values(val_field, ascending=ascending).reset_index(drop=True)
+
+    # Ordered list of categories after sorting (top of chart = last in ascending list)
+    sorted_categories = df[cat_field].tolist()
+
+    # Conditional colour: highlighted bar vs all others
+    color_condition = alt.condition(
+        alt.datum[cat_field] == highlight_label,
+        alt.value(highlight_color),
+        alt.value(bar_color),
+    )
+
+    # Tooltip
+    tooltip_extra = settings.get("tooltip_fields") or []
+    for c in tooltip_extra:
+        if c in df.columns:
+            converted = pd.to_numeric(df[c], errors="coerce")
+            if converted.notna().any() and c not in (cat_field, val_field):
+                df[c] = converted
+
+    tooltip_enc = [
+        alt.Tooltip(f"{cat_field}:N", title=settings.get("y_title", cat_field)),
+        alt.Tooltip(f"{val_field}:Q", title=settings.get("x_title", val_field)),
+    ]
+    already_in_tooltip = {cat_field, val_field}
+    for c in tooltip_extra:
+        if c not in df.columns or c in already_in_tooltip:
+            continue
+        vtype = "Q" if pd.api.types.is_numeric_dtype(df[c]) else "N"
+        tooltip_enc.append(alt.Tooltip(f"{c}:{vtype}", title=c))
+
+    chart = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=alt.X(
+                f"{val_field}:Q",
+                title=settings.get("x_title", val_field),
+            ),
+            y=alt.Y(
+                f"{cat_field}:N",
+                sort=sorted_categories,
+                title=settings.get("y_title", cat_field),
+            ),
+            color=color_condition,
+            tooltip=tooltip_enc,
+        )
+        .properties(width=w, height=h)
+    )
+
+    if settings.get("title"):
+        chart = chart.properties(title=settings["title"])
+
+    return chart
 
 
 def apply_common_settings(chart, settings):

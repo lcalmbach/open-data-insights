@@ -32,7 +32,8 @@
       "args": [
         "generate_stories",
         "--id",
-        "75",
+        "82",
+        "--force",
         "-v",
         "2"
       ],
@@ -141,7 +142,7 @@
       "args": [
         "generate_appendices",
         "--graphic_template_id",
-        "79",
+        "94",
         "--graphics",
         "-v",
         "2"

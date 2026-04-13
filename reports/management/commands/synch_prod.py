@@ -149,6 +149,11 @@ class Command(BaseCommand):
             src_alias,
             dst_alias,
         )
+        prepared["ai_model_id"] = self._resolve_lookupvalue_pk(
+            getattr(obj, "ai_model_id", None),
+            src_alias,
+            dst_alias,
+        )
         return prepared
 
     def _sync_story_template_topics(self, src_obj, dst_obj, src_alias: str, dst_alias: str, dry: bool) -> None:
