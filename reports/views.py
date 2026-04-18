@@ -1259,6 +1259,7 @@ def view_story(request, story_id=None):
         selected_story.template.other_ressources if selected_story else None
     )
     available_subscriptions = len(template_ids)
+    StoryAccess.log(request, selected_story)
     rating_ctx = _get_story_rating_context(selected_story)
     return render(
         request,
