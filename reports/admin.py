@@ -17,6 +17,7 @@ from .models.graphic import Graphic, StoryTemplateGraphic
 from .models.story_table_template import StoryTemplateTable
 from .models.user_comment import UserComment
 from .models.lookups import Region, Topic, REGION_CATEGORY_ID, TOPIC_CATEGORY_ID
+from .models.story_access import StoryAccess
 
 
 class StoryTemplateFocusInline(admin.TabularInline):
@@ -304,3 +305,35 @@ class RegionAdmin(TaxonomyLookupAdmin):
 @admin.register(Topic)
 class TopicAdmin(TaxonomyLookupAdmin):
     category_id = TOPIC_CATEGORY_ID
+
+
+@admin.register(StoryAccess)
+class StoryAccessAdmin(admin.ModelAdmin):
+    list_display = (
+        "accessed_at",
+        "story_title_snapshot",
+        "story_id_snapshot",
+        "user",
+        "ip_address",
+        "is_bot",
+    )
+    list_filter = ("is_bot", "accessed_at")
+    search_fields = ("story_title_snapshot", "user__username", "user__email", "ip_address")
+    date_hierarchy = "accessed_at"
+    readonly_fields = (
+        "story",
+        "story_id_snapshot",
+        "story_title_snapshot",
+        "user",
+        "accessed_at",
+        "ip_address",
+        "user_agent",
+        "is_bot",
+    )
+    ordering = ("-accessed_at",)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

@@ -44,6 +44,7 @@ from .models.lookups import Period, Region, Topic
 from .models.story_rating import StoryRating
 from .models.subscription import StoryTemplateSubscription
 from .models.user_comment import UserComment
+from .models.story_access import StoryAccess
 from .models.quote import Quote
 from .services.database_client import DjangoPostgresClient
 from .services.focus_images import resolve_story_images
@@ -1302,6 +1303,7 @@ def story_detail(request, story_id=None):
         selected_story.template.other_ressources if selected_story else None
     )
 
+    StoryAccess.log(request, selected_story)
     rating_ctx = _get_story_rating_context(selected_story)
     return render(
         request,
@@ -1329,7 +1331,11 @@ def delete_story(request, story_id):
     )
     if request.method != "POST":
         return redirect("story_detail", story_id=story_id)
-    story_to_delete.delete()
+    # Delete all stories that share the same focus and reference period start date
+    Story.objects.filter(
+        templatefocus_id=story_to_delete.templatefocus_id,
+        reference_period_start=story_to_delete.reference_period_start,
+    ).delete()
     return redirect("stories")
 
 
