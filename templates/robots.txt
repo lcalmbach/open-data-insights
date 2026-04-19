@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /about/
+Allow: /stories/
+Allow: /story/
+
+Disallow: /admin/
+Disallow: /account/
+Disallow: /accounts/
+Disallow: /management/
+Disallow: /story_detail/
+Disallow: /stories/*/rate/
+Disallow: /tables/*/download/
+Disallow: /feedback/
+
+Sitemap: https://www.open-data-insights.org/sitemap.xml
