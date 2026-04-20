@@ -684,7 +684,11 @@ class OdsDatasetConnector:
         try:
             record_year = int(record_year)
         except (TypeError, ValueError):
-            return False
+            # year_field may be a date type; extract just the year component
+            try:
+                record_year = int(self._to_date_str(record_year)[:4])
+            except Exception:
+                return False
 
         now = datetime.now(timezone.utc)
         if freq_id == PeriodEnum.YEARLY.value:
@@ -884,22 +888,34 @@ class OdsDatasetConnector:
         db_identifiers = self.get_db_identifiers(remote_table)
         db_identifiers = list(set(db_identifiers))
 
+        field_type = self._get_ods_field_type(self.dataset.record_identifier_field)
+
         # Check for type mismatch
         if ods_identifiers and db_identifiers:
             ods_type = type(ods_identifiers[0]).__name__
             db_type = type(db_identifiers[0]).__name__
-            if ods_type != db_type:
+            if ods_type != db_type or field_type == "date":
                 self.logger.warning(
                     f"Type mismatch detected: ODS returns {ods_type}, DB returns {db_type}. "
                     "Normalizing both to strings for comparison."
                 )
 
-                ods_identifiers = sorted(
-                    {str(x).strip() for x in ods_identifiers if x is not None}
-                )
-                db_identifiers = sorted(
-                    {str(x).strip() for x in db_identifiers if x is not None}
-                )
+                if field_type == "date":
+                    # Normalize to YYYY-MM-DD so ODS and DB representations compare equal.
+                    # ODS CSV exports dates as full ISO timestamps; DB returns date objects.
+                    ods_identifiers = sorted(
+                        {self._to_date_str(x) for x in ods_identifiers if x is not None}
+                    )
+                    db_identifiers = sorted(
+                        {self._to_date_str(x) for x in db_identifiers if x is not None}
+                    )
+                else:
+                    ods_identifiers = sorted(
+                        {str(x).strip() for x in ods_identifiers if x is not None}
+                    )
+                    db_identifiers = sorted(
+                        {str(x).strip() for x in db_identifiers if x is not None}
+                    )
 
         new_identifiers = list(set(ods_identifiers) - set(db_identifiers))
 
@@ -917,7 +933,7 @@ class OdsDatasetConnector:
             f"New record IDs: {new_identifiers[:10]}..."
         )  # Log first 10 for brevity
 
-        identifiers_clause = self._format_identifier_clause(new_identifiers)
+        identifiers_clause = self._format_identifier_clause(new_identifiers, field_type=field_type)
         where_clause = (
             f"{self.dataset.record_identifier_field} IN ({identifiers_clause})"
         )
@@ -1207,8 +1223,32 @@ class OdsDatasetConnector:
 
         return df
 
-    def _format_identifier_clause(self, identifiers: list) -> str:
-        """Return a SQL IN-clause string for identifier values with safe escaping."""
+    def _get_ods_field_type(self, field_name: str) -> Optional[str]:
+        """Look up the ODS type for a field from dataset metadata."""
+        if not self.ods_metadata:
+            return None
+        for field in self.ods_metadata.get("fields", []):
+            if field.get("name") == field_name:
+                return field.get("type")
+        return None
+
+    @staticmethod
+    def _to_date_str(value) -> str:
+        """Convert a date, datetime, Timestamp or ISO string to YYYY-MM-DD."""
+        if hasattr(value, "strftime"):
+            return value.strftime("%Y-%m-%d")
+        return str(value).strip()[:10]
+
+    def _format_identifier_clause(self, identifiers: list, field_type: Optional[str] = None) -> str:
+        """Return a SQL IN-clause string for identifier values with safe escaping.
+
+        For ODS date fields the API requires the date literal syntax:
+        ``date'YYYY-MM-DD'`` instead of a plain quoted string.
+        """
+        if field_type == "date":
+            return ", ".join(
+                f"date'{self._to_date_str(v)}'" for v in identifiers
+            )
         safe_identifiers = [
             str(identifier).replace("'", "''") for identifier in identifiers
         ]
