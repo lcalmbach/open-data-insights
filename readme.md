@@ -2,379 +2,256 @@
 
 ## Introduction
 
-Open data portals host thousands of datasets on weather, mobility, environment, economics, and more. The problem is not a lack of data — it’s that users are **drowning in it**. Most open data is raw, low-level, and requires filtering, querying, and analysis before it becomes meaningful. Keeping track of what actually matters over time is hard, even for experts.
+Open data portals host thousands of datasets on weather, mobility, environment, economics, and more. The problem is not a lack of data — it is that most of it is raw, low-level, and requires filtering, querying, and analysis before it becomes meaningful.
 
 **Open Data Insights** is a thin, opinionated layer on top of open data portals that turns selected datasets into **actionable stories** instead of raw tables.
 
-Rather than asking every user to write their own queries, the platform:
+The platform:
 
-* **Synchronizes selected datasets** from open data portals onto the ODI platform.
-* Uses **insight templates** that describe *what story should be told* (via a prompt) and *which numbers matter* (via a set of predefined queries).
-* Optionally attaches **tables and charts** to each story to support the narrative.
-* Uses **time frames and triggers** so that stories are generated only when they are relevant:
+- **Synchronizes selected datasets** from open data portals on a configurable schedule.
+- Uses **story templates** that describe *what story should be told* (via an LLM prompt) and *which numbers matter* (via a set of predefined SQL queries).
+- Optionally attaches **charts and tables** to each story to support the narrative.
+- Applies **time frames and publish conditions** so stories are created only when relevant — monthly stories appear as soon as a full month of data is available; event-based stories fire only when conditions are met (extreme weather, bad air quality, etc.).
+- Lets users **subscribe** to story types and receive **email notifications** when new stories are published.
 
-  * Monthly stories are created as soon as a full month of data is available.
-  * Daily or event-based stories are generated only when certain conditions are met (e.g. extreme weather, bad air quality, dry spells).
-* Lets users **subscribe** to specific story types and receive **email notifications** when new stories are published.
-
-For example, for a weather dataset you might define several insight templates:
-
-* **Very hot weather** – generated when the daily maximum temperature exceeds the 95th percentile for that month.
-* **Bad air quality** – triggered when the air quality index rises above a configured threshold.
-* **Heat or drought spells** – published when there are a given number of consecutive days with high temperatures, no precipitation, or both.
-
-In other words, instead of forcing users to monitor dashboards or query raw data, Open Data Insights sends them **curated, narrative summaries** only when something noteworthy happens — helping them **avoid drowning in data** by focusing on the stories that matter. 
-
-While insight templates provide strong contextual grounding — forcing the language model to use the actual reported numbers — the quality of the generated narratives naturally varies. Hallucinations are rare, but the stories are not intended to be polished news articles. Instead, they serve as lightweight, automatically produced summaries that can inspire further reporting or support deeper personal analysis. Every story includes a prominent link back to the underlying dataset, encouraging users to explore the raw data themselves and dig deeper into the trends behind the narrative.
-
+Stories are lightweight, automatically produced summaries — not polished journalism. Every story links back to the underlying dataset so readers can explore the raw data themselves.
 
 ## 🌐 Live Demo
 
-👉 [https://ogd-data-insights.org](https://ogd-data-insights.org/)
+👉 [https://www.open-data-insights.org](https://www.open-data-insights.org/)
 
 ## 📦 Features
 
-- ✅ **Automated Data Pipeline**: Daily data synchronization from public APIs (e.g., OpenDataSoft)
-- ✅ **AI-Powered Insights**: Automatic generation of natural-language reports using OpenAI GPT
-- ✅ **Email Notifications**: Automated email delivery to subscribed users
-- ✅ **Template-Based Stories**: Configurable story templates for different data types
-- ✅ **Multi-Dataset Support**: Handles various data sources (weather, tourism, economics, etc.)
-- ✅ **Extensible Design**: New datasets and story types can be added easily
-- ✅ **Django Admin Interface**: Easy management of datasets, templates, and subscriptions
-
-## 🗺️ Leaflet Map Markers
-
-The `map-markers` chart type now renders Leaflet fragments (no full HTML page). Each map returns a `<div>` plus an inline `<script>` that initializes the Leaflet map. Assets are injected once in the main template when at least one map is present.
-
-Key settings (same as before unless noted):
-
-- `latitude` / `longitude` (or `lat`/`lon`): required coordinate fields.
-- `center_lat` / `center_lon`: optional map center (defaults to mean of points).
-- `zoom_start`: initial zoom (default `11`).
-- `tiles`: `"OpenStreetMap"` or a URL template like `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`.
-- `tile_attribution`: override attribution text for tiles.
-- `width` / `height`: numbers are treated as pixels; `"container"`/`"100%"` uses `width:100%` and a 400px height fallback.
-- `marker_style`: `"circle"` or `"marker"`.
-- `cluster`: `true` enables marker clustering for regular markers.
-
-Notes:
-
-- Circle markers are **not clustered** (they render directly on the map even if `cluster` is enabled).
-- Each map container gets a unique ID, so multiple maps per page are safe.
-
-Demo script:
-
-- `reports/visualizations/map_demo.py` prints a minimal HTML page containing two maps. It also shows how assets are included only when maps are present.
-
-## 🗺️ Leaflet Choropleth
-
-The `choropleth` (alias: `chloropleth`) chart type renders a Leaflet choropleth from GeoJSON + a joined value column. It returns the same kind of Leaflet fragment (a `<div>` + inline `<script>`), so assets are injected the same way as for `map-markers`.
-
-Demo script:
-
-- `reports/visualizations/choropleth_demo.py` prints a minimal HTML page containing a small, inline GeoJSON choropleth.
+| Feature | Notes |
+|---|---|
+| **Multi-LLM story generation** | OpenAI GPT-4o, Anthropic Claude (Opus / Sonnet / Haiku), DeepSeek Chat — switchable per template via a lookup table |
+| **Story templates** | Prompt, system prompt, context queries, publish conditions, focus areas (multi-neighbourhood / multi-topic), reference period |
+| **Charts** | Line, bar, stacked bar, area, scatter, pie, heatmap, histogram, radar/spider, horizontal ranking bar, choropleth, map markers, word cloud |
+| **Tables** | SQL-driven data tables attached to stories |
+| **Email subscriptions** | Users subscribe to templates; stories are emailed on publish |
+| **Story access logging** | Every page view logged with user, IP, timestamp; bots detected from User-Agent; 5-minute deduplication for human visitors |
+| **Multi-language** | Stories generated natively in each language or translated from English |
+| **DB sync** | `synch_prod` command syncs templates and child objects between environments |
+| **Template cloning** | `clone_story_template` duplicates a template with all focus areas, graphics, contexts, and tables |
+| **SEO** | `/robots.txt` and `/sitemap.xml` included |
+| **Django Admin** | Full admin interface for all models |
 
 ## 🔧 Tech Stack
 
-- **Backend**: Python 3.12, Django 4.x
-- **Database**: PostgreSQL (production), SQLite (development)
-- **Data Processing**: Pandas, NumPy, SQLAlchemy
-- **AI Integration**: OpenAI GPT-4 for story generation
-- **Email**: Django's built-in email system with SMTP/SES support
-- **Task Scheduling**: Heroku Scheduler (production), Django management commands
-- **Deployment**: Heroku with PostgreSQL addon
-- **Version Control**: GitHub
+| Layer | Technology |
+|---|---|
+| Backend | Python 3.12, Django 4.2 |
+| Database | PostgreSQL |
+| Data processing | Pandas, NumPy |
+| Charting | Altair / Vega-Lite, Leaflet |
+| AI | OpenAI, Anthropic Claude, DeepSeek |
+| Email | Django email + SMTP / AWS SES |
+| Media storage | AWS S3 (via django-storages) |
+| Static files | WhiteNoise |
+| Deployment | Heroku (gunicorn) |
+| Dependency management | uv + uv.lock |
 
 ## 📂 Project Structure
 
 ```
 open-data-insights/
-├── account/                   # User authentication and management
-├── daily_tasks_obsolete/      # Legacy scripts (being migrated)
-├── reports/                   # Main Django app
-│   ├── management/commands/   # Django management commands
-│   │   ├── daily_job.py      # Main daily pipeline
-│   │   ├── sync_datasets.py  # Data synchronization
-│   │   └── generate_stories.py # Story generation
-│   ├── models.py             # Database models
-│   ├── services/             # Business logic services
-│   │   ├── dataset_sync.py   # Dataset synchronization service
-│   │   ├── story_generation.py # Story generation service
-│   │   ├── email_service.py  # Email delivery service
-│   │   └── database_client.py # Database abstraction
-│   └── views.py              # Web views
-├── templates/                # Django templates
-├── static/                   # CSS/JS/Images
-├── pyproject.toml           # Project metadata + dependencies (uv)
-├── uv.lock                  # Locked dependency versions (generated by uv)
-├── Procfile                  # Heroku configuration
-└── manage.py                 # Django management script
+├── account/                        # User authentication and profiles
+├── report_generator/               # Django project settings and root URLs
+├── reports/                        # Main application
+│   ├── management/commands/        # Management commands
+│   │   ├── generate_stories.py     # Run story generation pipeline
+│   │   ├── run_etl_pipeline.py     # Sync datasets + generate stories
+│   │   ├── send_stories.py         # Email published stories
+│   │   ├── synch_data.py           # Sync data tables between DBs
+│   │   ├── synch_prod.py           # Sync template objects between environments
+│   │   └── clone_story_template.py # Clone a template with all children
+│   ├── migrations/                 # Django migrations
+│   ├── models/                     # One file per model
+│   │   ├── story_template.py       # StoryTemplate, StoryTemplateFocus
+│   │   ├── story.py                # Story
+│   │   ├── graphic_template.py     # StoryTemplateGraphic
+│   │   ├── story_context.py        # StoryTemplateContext
+│   │   ├── story_table_template.py # StoryTemplateTable
+│   │   ├── story_access.py         # StoryAccess (access log)
+│   │   ├── lookups.py              # LookupCategory, LookupValue + proxies
+│   │   └── ...
+│   ├── services/                   # Business logic
+│   │   ├── story_processor.py      # LLM story generation
+│   │   ├── dataset_sync.py         # Dataset synchronisation
+│   │   ├── email_service.py        # Email delivery
+│   │   └── database_client.py      # Query runner
+│   ├── sitemaps.py                 # Sitemap classes
+│   └── visualizations/
+│       └── plotting.py             # All chart types (Altair + Leaflet)
+├── templates/                      # Django HTML templates + robots.txt
+├── static/                         # CSS / JS / images
+├── deploy.sh                       # One-command deploy script
+├── pyproject.toml                  # Project metadata + dependencies
+├── uv.lock                         # Locked dependency versions
+└── Procfile                        # Heroku: gunicorn
 ```
 
-## 🚀 Getting Started
+## 🚀 Local Development Setup
 
 ### Prerequisites
 
 - Python 3.12+
-- PostgreSQL (for production) or SQLite (for development)
-- OpenAI API key (for story generation)
-- Email service configuration (SMTP/SES)
+- PostgreSQL
+- API key for at least one LLM (OpenAI, Anthropic, or DeepSeek)
 
-### Local Development Setup
+### Setup
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/lcalmbach/open-data-insights.git
-   cd open-data-insights
-   ```
-
-2. **Install uv** (if not already installed):
-   ```bash
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-   ```
-
-3. **Create virtual environment**:
-   ```bash
-   uv venv --python 3.12
-   ```
-
-4. **Install dependencies**:
-   ```bash
-   uv sync
-   ```
-
-5. **Set up environment variables**:
-   ```bash
-   # Create .env file with:
-   SECRET_KEY=your-secret-key
-   OPENAI_API_KEY=your-openai-api-key
-   EMAIL_HOST=your-smtp-host
-   EMAIL_HOST_USER=your-email
-   EMAIL_HOST_PASSWORD=your-password
-   ```
-
-6. **Run migrations**:
-   ```bash
-   uv run python manage.py migrate
-   ```
-
-7. **Create superuser**:
-   ```bash
-   uv run python manage.py createsuperuser
-   ```
-
-8. **Run development server**:
-   ```bash
-   uv run python manage.py runserver
-   ```
-
-## 📊 Running the Daily Pipeline
-
-### Full Daily Job
 ```bash
-uv run python manage.py daily_job
+# 1. Clone
+git clone https://github.com/lcalmbach/open-data-insights.git
+cd open-data-insights
+
+# 2. Install uv (if needed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 3. Create virtualenv and install dependencies
+uv venv --python 3.12
+uv sync
+
+# 4. Configure environment — create a .env file (see Environment Variables below)
+
+# 5. Migrate and create superuser
+python manage.py migrate
+python manage.py createsuperuser
+
+# 6. Run
+python manage.py runserver
 ```
-
-This executes the complete pipeline:
-1. **Sync datasets** from configured APIs
-2. **Generate insights** using AI-powered analysis
-3. **Send email notifications** to subscribers
-
-### Individual Commands
-
-**Sync specific dataset**:
-```bash
-uv run python manage.py sync_datasets --dataset-id 42
-```
-
-**Generate stories for specific date**:
-```bash
-uv run python manage.py generate_stories --date 2025-06-28 --force
-```
-
-**Send email notifications**:
-```bash
-uv run python manage.py send_emails --template-id 1
-```
-
-## 📬 Email Subscriptions
-
-Users can subscribe to receive automated data stories via email:
-- **Daily summaries**: Weather, traffic, economic indicators
-- **Weekly reports**: Tourism trends, housing market analysis
-- **Monthly insights**: Long-term trend analysis
-
-Email delivery supports both HTML and plain text formats with embedded charts and visualizations.
-
-## 🤖 AI-Powered Story Generation
-
-The platform uses OpenAI's GPT models to transform raw data into human-readable narratives:
-
-- **Template-based prompts**: Each story type has customizable prompts
-- **Context-aware generation**: Incorporates historical data and trends
-- **Multi-language support**: Stories can be generated in multiple languages
-- **Configurable tone**: Formal reports vs. casual summaries
-
-## 🛠 Deployment
-
-### Heroku Deployment
-
-1. **Create Heroku app**:
-   ```bash
-   heroku create your-app-name
-   ```
-
-2. **Set environment variables**:
-   ```bash
-   heroku config:set SECRET_KEY=your-secret-key
-   heroku config:set OPENAI_API_KEY=your-openai-api-key
-   ```
-
-3. **Deploy**:
-   ```bash
-   git push heroku main
-   ```
-
-4. **Run migrations**:
-   ```bash
-   heroku run python manage.py migrate
-   ```
-
-5. **Set up scheduler**:
-   ```bash
-   heroku addons:create scheduler:standard
-   heroku addons:open scheduler
-   ```
-   Add daily job: `python manage.py daily_job`
 
 ### Environment Variables
 
-Required environment variables:
-- `SECRET_KEY`: Django secret key
-- `OPENAI_API_KEY`: OpenAI API key for story generation
-- `EMAIL_HOST`: SMTP server host
-- `EMAIL_HOST_USER`: Email username
-- `EMAIL_HOST_PASSWORD`: Email password
-- `DATABASE_URL`: PostgreSQL connection string (auto-set by Heroku)
+| Variable | Required | Notes |
+|---|---|---|
+| `SECRET_KEY` | ✅ | Django secret key |
+| `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | ✅ | PostgreSQL connection |
+| `OPENAI_API_KEY` | one of three | For GPT-4o |
+| `ANTHROPIC_API_KEY` | one of three | For Claude models |
+| `DEEPSEEK_API_KEY` | one of three | For DeepSeek Chat |
+| `DEFAULT_AI_MODEL` | ✅ | e.g. `gpt-4o`, `claude-sonnet-4-6`, `deepseek-chat` |
+| `EMAIL_HOST` / `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | ✅ | SMTP credentials |
+| `USE_S3_MEDIA` | optional | `True` to store media on S3 |
+| `AWS_STORAGE_BUCKET_NAME` | if S3 | |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_S3_REGION_NAME` | if S3 | |
+| `SYNC_DATABASE_URL` | optional | Second DB for `synch_prod` |
 
-Media storage on S3 (recommended on Heroku):
-- `USE_S3_MEDIA=True`
-- `AWS_STORAGE_BUCKET_NAME=<your-bucket>`
-- `AWS_ACCESS_KEY_ID=<aws-access-key>`
-- `AWS_SECRET_ACCESS_KEY=<aws-secret-key>`
-- `AWS_S3_REGION_NAME=<region>` (for example `eu-central-1`)
-- Optional: `AWS_MEDIA_LOCATION=media`
-- Optional: `AWS_S3_CUSTOM_DOMAIN=<cdn-or-custom-domain>`
+## 🛠 Deployment
 
-## 🔧 Configuration
-
-### Adding New Datasets
-
-1. **Define dataset in Django Admin**:
-   - Source URL and API configuration
-   - Field mappings and transformations
-   - Sync schedule and filters
-
-2. **Create story templates**:
-   - Define prompts for AI generation
-   - Set up data queries and context
-   - Configure email templates
-
-3. **Test and deploy**:
-   ```bash
-   uv run python manage.py sync_datasets --dataset-id NEW_ID --test
-   ```
-
-### Automated Testing
-
-This project supports automated testing with `pytest` and `pytest-django`.
-
-Install development dependencies:
+### First-time Heroku setup
 
 ```bash
-uv sync --group dev
+heroku create your-app-name
+heroku addons:create heroku-postgresql:essential-0
+heroku config:set SECRET_KEY=... OPENAI_API_KEY=...   # etc.
+git push heroku main
+heroku run python manage.py migrate
+heroku run python manage.py createsuperuser
 ```
 
-Run the full test suite:
+### Ongoing deploys — `deploy.sh`
+
+Commit your feature work first, then run the deploy script:
 
 ```bash
-uv run --group dev pytest
+./deploy.sh          # patch bump  1.3.1 → 1.3.2  (default)
+./deploy.sh minor    # minor bump  1.3.1 → 1.4.0
+./deploy.sh major    # major bump  1.3.1 → 2.0.0
+./deploy.sh 2.0.0    # set exact version
 ```
 
-Run one test module:
+The script automatically:
+1. Bumps the version in `pyproject.toml`
+2. Regenerates `uv.lock`
+3. Commits the version files
+4. Pushes to **GitHub** (`origin/main`)
+5. Pushes to **Heroku** and runs `python manage.py migrate`
+
+## 📊 Running the Pipeline
 
 ```bash
-uv run --group dev pytest reports/tests.py
+# Sync all datasets and generate stories
+python manage.py run_etl_pipeline
+
+# Generate stories only (data already synced)
+python manage.py generate_stories
+
+# Send published stories by email
+python manage.py send_stories
+
+# Clone a story template (by ID or slug)
+python manage.py clone_story_template 42
+python manage.py clone_story_template my-slug --title "Copy of My Template"
+python manage.py clone_story_template 42 --dry-run
 ```
 
-Run one test class or one test method:
+## 📈 Chart Types
 
-```bash
-uv run --group dev pytest reports/tests.py::StoryTableGenerationTests
-uv run --group dev pytest reports/tests.py::StoryTableGenerationTests::test_generate_table_replaces_missing_values_with_blank_strings
+Chart settings are stored as JSON on each `StoryTemplateGraphic`. The `type` field selects the renderer:
+
+| type | Description |
+|---|---|
+| `line` | Line chart |
+| `bar` | Vertical bar (add `"horizontal": true` for horizontal) |
+| `bar_stacked` | Stacked bar |
+| `area` | Area chart |
+| `point` / `scatter` | Scatter / point chart |
+| `pie` | Pie chart |
+| `heatmap` | Heatmap |
+| `histogram` | Histogram with auto-binning |
+| `radar` | Radar / spider chart |
+| `ranking_bar` | Horizontal ranking bars — all grey, one highlighted |
+| `choropleth` | Leaflet choropleth from GeoJSON |
+| `map-markers` | Leaflet marker map |
+| `wordcloud` | Word cloud |
+
+### Ranking Bar example
+
+```json
+{
+  "type": "ranking_bar",
+  "category": "Neighborhood",
+  "value": "Value",
+  "highlight": ":filter_expression",
+  "highlight_color": "#e45756",
+  "bar_color": "#bbbbbb",
+  "sort": "descending",
+  "tooltips": ["Neighborhood", "Value", "Rank"]
+}
 ```
 
-`pytest-django` boots Django using `DJANGO_SETTINGS_MODULE=report_generator.settings`, discovers tests automatically, and shows a concise failure report. Tests that inherit from `django.test.TestCase` use a temporary test database; `SimpleTestCase` tests do not need the database.
+## 📬 Story Access Log
 
-## 📈 Monitoring and Logging
+Every story page view is recorded in `reports_storyaccess`:
 
-- **Application logs**: Available via `heroku logs --tail`
-- **Email delivery tracking**: Built-in Django logging
-- **Data sync monitoring**: Automated error notifications
-- **Performance metrics**: Database query optimization
+- **Authenticated users**: deduplicated per user + story within 5 minutes
+- **Anonymous visitors**: deduplicated per IP + story within 5 minutes
+- **Bots** (detected via User-Agent regex): always logged, never deduplicated
+
+Visible in Django Admin under **Reports → Story Accesses**.
+
+## 🗺️ SEO
+
+- `GET /robots.txt` — disallows admin and staff-only routes
+- `GET /sitemap.xml` — lists all published story URLs and static pages
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes: `git commit -m 'Add my feature'`
+4. Push: `git push origin feature/my-feature`
 5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🏷️ Versioning & Changelog
-
-This project uses:
-- **Semantic Versioning** (`MAJOR.MINOR.PATCH`) in `pyproject.toml`
-- **Keep a Changelog** format in `CHANGELOG.md`
-
-For releases/deploys, use the release helper script. It bumps the version and creates a dated changelog entry:
-
-```bash
-# Patch release (e.g. bugfix deploy)
-uv run python release.py --bump patch \
-  --changed "Improve ETL stability" \
-  --fixed "Prevent duplicate subscription emails"
-```
-
-Other examples:
-
-```bash
-# Minor release
-uv run python release.py --bump minor --added "New dashboard filters"
-
-# Explicit version
-uv run python release.py --set-version 1.4.0 --notes "Production deployment"
-```
-
-Preview without writing files:
-
-```bash
-uv run python release.py --bump patch --dry-run
-```
+MIT License — see [LICENSE](LICENSE).
 
 ## 🙋‍♂️ About
 
 Created by **Lukas Calmbach** to make public data more transparent and actionable.
 
-**Mission**: Democratize data insights by automatically transforming complex datasets into accessible, human-readable stories that inform and engage the public.
-
----
-
-**Links**:
-- 🌐 [Live Demo](https://ogd-data-insights.herokuapp.com)
-- 📧 [Contact](mailto:lcalmbach@gmail.com)
-- 🐙 [GitHub](https://github.com/lcalmbach/open-data-insights)
+**Links**: [Live Demo](https://www.open-data-insights.org) · [GitHub](https://github.com/lcalmbach/open-data-insights) · [Contact](mailto:lcalmbach@gmail.com)

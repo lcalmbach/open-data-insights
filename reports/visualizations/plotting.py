@@ -1991,7 +1991,7 @@ def create_ranking_bar_chart(data, settings):
         width / height  – chart dimensions (defaults: "container" / 400)
         title           – optional chart title
         x_title / y_title – axis labels
-        tooltip_fields  – extra columns to include in tooltip
+        tooltips        – ordered list of column names to show in tooltip
     """
     df = data.copy()
 
@@ -2025,24 +2025,32 @@ def create_ranking_bar_chart(data, settings):
         alt.value(bar_color),
     )
 
-    # Tooltip
-    tooltip_extra = settings.get("tooltip_fields") or []
-    for c in tooltip_extra:
-        if c in df.columns:
+    # Tooltip — accept both "tooltips" and "tooltip_fields" keys
+    tooltip_fields = settings.get("tooltips") or settings.get("tooltip_fields") or []
+
+    # Numeric-convert any extra columns (guard against corrupting text columns)
+    for c in tooltip_fields:
+        if c in df.columns and c not in (cat_field, val_field):
             converted = pd.to_numeric(df[c], errors="coerce")
-            if converted.notna().any() and c not in (cat_field, val_field):
+            if converted.notna().any():
                 df[c] = converted
 
-    tooltip_enc = [
-        alt.Tooltip(f"{cat_field}:N", title=settings.get("y_title", cat_field)),
-        alt.Tooltip(f"{val_field}:Q", title=settings.get("x_title", val_field)),
-    ]
-    already_in_tooltip = {cat_field, val_field}
-    for c in tooltip_extra:
-        if c not in df.columns or c in already_in_tooltip:
-            continue
-        vtype = "Q" if pd.api.types.is_numeric_dtype(df[c]) else "N"
-        tooltip_enc.append(alt.Tooltip(f"{c}:{vtype}", title=c))
+    if tooltip_fields:
+        # User supplied an explicit ordered list — honour it exactly
+        seen = set()
+        tooltip_enc = []
+        for c in tooltip_fields:
+            if c not in df.columns or c in seen:
+                continue
+            seen.add(c)
+            vtype = "Q" if pd.api.types.is_numeric_dtype(df[c]) else "N"
+            tooltip_enc.append(alt.Tooltip(f"{c}:{vtype}", title=c))
+    else:
+        # Fallback: category + value only, using column names as labels
+        tooltip_enc = [
+            alt.Tooltip(f"{cat_field}:N", title=cat_field),
+            alt.Tooltip(f"{val_field}:Q", title=val_field),
+        ]
 
     chart = (
         alt.Chart(df)

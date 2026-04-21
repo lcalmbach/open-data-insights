@@ -525,7 +525,10 @@ class StoryProcessor:
             )
             settings["type"] = graphic_template.graphic_type
             settings = self._resolve_reference_line_settings(settings)
-
+            if "highlight" in settings:
+                 settings["highlight"] = self._replace_reference_period_expression(settings["highlight"])
+            settings["highlight"] = self._replace_reference_period_expression(settings["highlight"])
+            print(settings)
             # Generate chart HTML
             self.logger.info(f"Generating chart for: {graphic_template.title}")
             if "y" in settings:
