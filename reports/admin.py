@@ -316,9 +316,10 @@ class StoryAccessAdmin(admin.ModelAdmin):
         "user",
         "ip_address",
         "is_bot",
+        "bot_name",
     )
-    list_filter = ("is_bot", "accessed_at")
-    search_fields = ("story_title_snapshot", "user__username", "user__email", "ip_address")
+    list_filter = ("is_bot", "bot_name", "accessed_at")
+    search_fields = ("story_title_snapshot", "user__username", "user__email", "ip_address", "bot_name")
     date_hierarchy = "accessed_at"
     readonly_fields = (
         "story",
@@ -329,6 +330,7 @@ class StoryAccessAdmin(admin.ModelAdmin):
         "ip_address",
         "user_agent",
         "is_bot",
+        "bot_name",
     )
     ordering = ("-accessed_at",)
 

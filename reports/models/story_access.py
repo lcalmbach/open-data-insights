@@ -8,25 +8,58 @@ from django.db import models
 from django.utils import timezone
 
 
-# Common bot / crawler / scraper signatures in the User-Agent string.
-_BOT_RE = re.compile(
-    r"bot|crawl|spider|slurp|mediapartners|facebookexternalhit|"
-    r"python-requests|python-urllib|curl|wget|axios|scrapy|"
-    r"go-http-client|java/|ruby|php|perl|libwww|httpie|insomnia|postman|"
-    r"okhttp|apache-httpclient|aiohttp|node-fetch|got/|undici|"
-    r"check_http|uptimerobot|pingdom|statuscake|site24x7|"
-    r"sentry|datadog|newrelic|nagios",
-    re.IGNORECASE,
-)
+# Ordered list of (label, pattern) pairs.  First match wins, so put the most
+# specific / well-known bots first and the generic catch-alls last.
+_BOT_PATTERNS: list[tuple[str, re.Pattern]] = [
+    ("Googlebot",           re.compile(r"Googlebot", re.IGNORECASE)),
+    ("Google-Extended",     re.compile(r"Google-Extended", re.IGNORECASE)),
+    ("Bingbot",             re.compile(r"bingbot", re.IGNORECASE)),
+    ("Baiduspider",         re.compile(r"Baiduspider", re.IGNORECASE)),
+    ("YandexBot",           re.compile(r"YandexBot", re.IGNORECASE)),
+    ("DuckDuckBot",         re.compile(r"DuckDuckBot", re.IGNORECASE)),
+    ("Applebot",            re.compile(r"Applebot", re.IGNORECASE)),
+    ("Yahoo Slurp",         re.compile(r"Slurp", re.IGNORECASE)),
+    ("FacebookBot",         re.compile(r"facebookexternalhit|FacebookBot", re.IGNORECASE)),
+    ("Twitterbot",          re.compile(r"Twitterbot", re.IGNORECASE)),
+    ("LinkedInBot",         re.compile(r"LinkedInBot", re.IGNORECASE)),
+    ("GPTBot",              re.compile(r"GPTBot", re.IGNORECASE)),
+    ("ChatGPT-User",        re.compile(r"ChatGPT-User", re.IGNORECASE)),
+    ("ClaudeBot",           re.compile(r"ClaudeBot|anthropic-ai", re.IGNORECASE)),
+    ("PerplexityBot",       re.compile(r"PerplexityBot", re.IGNORECASE)),
+    ("Semrushbot",          re.compile(r"SemrushBot", re.IGNORECASE)),
+    ("AhrefsBot",           re.compile(r"AhrefsBot", re.IGNORECASE)),
+    ("MJ12bot",             re.compile(r"MJ12bot", re.IGNORECASE)),
+    ("DotBot",              re.compile(r"DotBot", re.IGNORECASE)),
+    ("Screaming Frog",      re.compile(r"Screaming Frog", re.IGNORECASE)),
+    ("UptimeRobot",         re.compile(r"UptimeRobot", re.IGNORECASE)),
+    ("Pingdom",             re.compile(r"pingdom", re.IGNORECASE)),
+    ("StatusCake",          re.compile(r"statuscake", re.IGNORECASE)),
+    ("Site24x7",            re.compile(r"site24x7", re.IGNORECASE)),
+    ("Scrapy",              re.compile(r"Scrapy", re.IGNORECASE)),
+    ("Python-requests",     re.compile(r"python-requests|python-urllib", re.IGNORECASE)),
+    ("curl",                re.compile(r"\bcurl\b", re.IGNORECASE)),
+    ("wget",                re.compile(r"\bwget\b", re.IGNORECASE)),
+    ("Postman",             re.compile(r"PostmanRuntime|insomnia", re.IGNORECASE)),
+    ("Generic crawler",     re.compile(r"crawl|spider|bot", re.IGNORECASE)),
+    ("HTTP library",        re.compile(
+        r"axios|go-http-client|java/|libwww|httpie|okhttp|"
+        r"apache-httpclient|aiohttp|node-fetch|got/|undici|php|perl|ruby",
+        re.IGNORECASE,
+    )),
+]
 
 # How long a revisit from the same visitor counts as a duplicate (no re-log).
 _DEDUP_WINDOW = timedelta(minutes=5)
 
 
-def _is_bot(user_agent: str) -> bool:
+def _get_bot_name(user_agent: str) -> str | None:
+    """Return a human-readable bot name if the UA matches a known pattern, else None."""
     if not user_agent:
-        return False
-    return bool(_BOT_RE.search(user_agent))
+        return None
+    for name, pattern in _BOT_PATTERNS:
+        if pattern.search(user_agent):
+            return name
+    return None
 
 
 class StoryAccess(models.Model):
@@ -70,6 +103,12 @@ class StoryAccess(models.Model):
         db_index=True,
         help_text="True when the User-Agent matches a known bot/crawler pattern.",
     )
+    bot_name = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Human-readable bot/crawler name detected from User-Agent.",
+    )
 
     class Meta:
         verbose_name = "Story Access"
@@ -97,7 +136,8 @@ class StoryAccess(models.Model):
         Bots are always logged without deduplication.
         """
         ua = request.META.get("HTTP_USER_AGENT", "")[:512]
-        bot = _is_bot(ua)
+        bot_name = _get_bot_name(ua)
+        bot = bot_name is not None
         ip = _get_client_ip(request)
         user = request.user if request.user.is_authenticated else None
 
@@ -126,6 +166,7 @@ class StoryAccess(models.Model):
             ip_address=ip,
             user_agent=ua,
             is_bot=bot,
+            bot_name=bot_name,
         )
 
 
