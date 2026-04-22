@@ -952,19 +952,132 @@ class OdsDatasetConnector:
         self, filename: Path, agg_filename: Path, remote_table: str
     ) -> bool:
         """Handle incremental sync when import type is based on new years."""
-        self.logger.warning(
-            "NEW_YEAR import type handler has not been implemented yet."
+        year_field = self.dataset.year_field
+        if not year_field:
+            self.logger.error("NEW_YEAR sync requires year_field to be configured.")
+            return False
+
+        last_db_record = self.dbclient.get_target_last_record(remote_table, year_field)
+        if not last_db_record:
+            self.logger.warning("Could not read last year from DB; falling back to full download.")
+            return self._sync_new_table(filename, agg_filename, remote_table)
+
+        try:
+            db_last_year = int(last_db_record[year_field])
+        except (TypeError, ValueError, KeyError):
+            self.logger.error("Could not parse last year from DB record: %r", last_db_record)
+            return False
+
+        ods_year = None
+        if self.ods_last_record:
+            try:
+                ods_year = int(self.ods_last_record.get(year_field))
+            except (TypeError, ValueError):
+                pass
+
+        if ods_year is None:
+            self.logger.warning("Could not determine last year from ODS; skipping.")
+            return True
+
+        if ods_year <= db_last_year:
+            self.logger.info(
+                "No new year data for %s (ODS: %s, DB: %s).", remote_table, ods_year, db_last_year
+            )
+            return True
+
+        self.logger.info(
+            "New year data available for %s (ODS: %s, DB: %s).", remote_table, ods_year, db_last_year
         )
-        return False
+        where_clause = f"{year_field} > {db_last_year}"
+        df = self.download_ods_data(
+            filename,
+            where_clause=where_clause,
+            fields=self.dataset.fields_selection if self.dataset.fields_selection else None,
+        )
+
+        if df is False:
+            self.logger.warning("Failed to download new year data.")
+            return False
+
+        if df.empty:
+            self.logger.info("No new rows returned for %s.", remote_table)
+            return True
+
+        df = self.transform_ods_data(df)
+        df.to_parquet(agg_filename)
+        self.dbclient.upload_to_db(str(agg_filename), self.dataset.target_table_name)
+        self.logger.info("%s record(s) added to %s.", get_parquet_row_count(str(agg_filename)), remote_table)
+        return True
 
     def _sync_new_year_month(
         self, filename: Path, agg_filename: Path, remote_table: str
     ) -> bool:
         """Handle incremental sync when import type is based on new year/month combinations."""
-        self.logger.warning(
-            "NEW_YEAR_MONTH import type handler has not been implemented yet."
+        year_field = self.dataset.year_field
+        month_field = self.dataset.month_field
+        if not year_field or not month_field:
+            self.logger.error("NEW_YEAR_MONTH sync requires both year_field and month_field to be configured.")
+            return False
+
+        last_db_record = self.dbclient.get_target_last_record(remote_table, year_field)
+        if not last_db_record:
+            self.logger.warning("Could not read last year/month from DB; falling back to full download.")
+            return self._sync_new_table(filename, agg_filename, remote_table)
+
+        try:
+            db_last_year = int(last_db_record[year_field])
+            db_last_month = int(last_db_record[month_field])
+        except (TypeError, ValueError, KeyError):
+            self.logger.error("Could not parse last year/month from DB record: %r", last_db_record)
+            return False
+
+        ods_year = ods_month = None
+        if self.ods_last_record:
+            try:
+                ods_year = int(self.ods_last_record.get(year_field))
+                ods_month = int(self.ods_last_record.get(month_field))
+            except (TypeError, ValueError):
+                pass
+
+        if ods_year is None or ods_month is None:
+            self.logger.warning("Could not determine last year/month from ODS; skipping.")
+            return True
+
+        ods_is_newer = (ods_year, ods_month) > (db_last_year, db_last_month)
+        if not ods_is_newer:
+            self.logger.info(
+                "No new year/month data for %s (ODS: %s-%02d, DB: %s-%02d).",
+                remote_table, ods_year, ods_month, db_last_year, db_last_month,
+            )
+            return True
+
+        self.logger.info(
+            "New year/month data available for %s (ODS: %s-%02d, DB: %s-%02d).",
+            remote_table, ods_year, ods_month, db_last_year, db_last_month,
         )
-        return False
+        where_clause = (
+            f"{year_field} > {db_last_year} OR "
+            f"({year_field} = {db_last_year} AND {month_field} > {db_last_month})"
+        )
+        df = self.download_ods_data(
+            filename,
+            where_clause=where_clause,
+            fields=self.dataset.fields_selection if self.dataset.fields_selection else None,
+        )
+
+        if df is False:
+            self.logger.warning("Failed to download new year/month data.")
+            return False
+
+        if df.empty:
+            self.logger.info("No new rows returned for %s.", remote_table)
+            return True
+
+        df = self.transform_ods_data(df)
+        df.to_parquet(agg_filename)
+        self.dbclient.upload_to_db(str(agg_filename), self.dataset.target_table_name)
+        self.logger.info("%s record(s) added to %s.", get_parquet_row_count(str(agg_filename)), remote_table)
+        return True
 
     def _sync_default(self, remote_table: str) -> bool:
         """Fallback when no import type handler is configured."""
