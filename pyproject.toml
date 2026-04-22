@@ -1,6 +1,6 @@
 [project]
 name = "open-data-insights"
-version = "1.5.0"
+version = "1.5.1"
 description = "Open Data Insights Django application"
 readme = "readme.md"
 requires-python = ">=3.12"
