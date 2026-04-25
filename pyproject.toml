@@ -1,6 +1,6 @@
 [project]
 name = "open-data-insights"
-version = "1.5.1"
+version = "1.5.2"
 description = "Open Data Insights Django application"
 readme = "readme.md"
 requires-python = ">=3.12"
@@ -17,6 +17,7 @@ dependencies = [
   "django-markdownify",
   "django-storages",
   "django-widget-tweaks==1.5.0",
+  "geoip2",
   "gunicorn",
   "iommi",
   "markdown",
