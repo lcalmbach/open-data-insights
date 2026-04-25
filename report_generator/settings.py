@@ -286,6 +286,7 @@ ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
 DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL', 'deepseek-chat')
 
 APP_ROOT = "https://www.open-data-insights.org/"
+GEOIP_PATH = os.environ.get("GEOIP_PATH", str(BASE_DIR / "geoip"))
 DEVELOPER_EMAIL = DEFAULT_FROM_EMAIL
 FEEDBACK_NOTIFY_EMAIL = os.environ.get("FEEDBACK_NOTIFY_EMAIL", "lcalmbach@gmail.com")
 RATING_NOTIFY_EMAIL = os.environ.get("RATING_NOTIFY_EMAIL", FEEDBACK_NOTIFY_EMAIL)

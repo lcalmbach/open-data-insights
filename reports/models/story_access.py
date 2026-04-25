@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import ipaddress
 import re
 from datetime import timedelta
+from pathlib import Path
 
+import geoip2.database
+import geoip2.errors
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -15,6 +19,8 @@ _BOT_PATTERNS: list[tuple[str, re.Pattern]] = [
     ("Google-Extended",     re.compile(r"Google-Extended", re.IGNORECASE)),
     ("Bingbot",             re.compile(r"bingbot", re.IGNORECASE)),
     ("Baiduspider",         re.compile(r"Baiduspider", re.IGNORECASE)),
+    ("Sogou",               re.compile(r"Sogou", re.IGNORECASE)),
+    ("360Spider",           re.compile(r"360Spider", re.IGNORECASE)),
     ("YandexBot",           re.compile(r"YandexBot", re.IGNORECASE)),
     ("DuckDuckBot",         re.compile(r"DuckDuckBot", re.IGNORECASE)),
     ("Applebot",            re.compile(r"Applebot", re.IGNORECASE)),
@@ -48,6 +54,23 @@ _BOT_PATTERNS: list[tuple[str, re.Pattern]] = [
     )),
 ]
 
+# Known bot IP ranges (name → list of networks).  Sources: published provider docs.
+_IP_BOT_RANGES: list[tuple[str, list]] = [
+    ("Googlebot", [
+        ipaddress.ip_network("66.249.64.0/19"),   # primary crawler range
+        ipaddress.ip_network("64.233.160.0/19"),
+        ipaddress.ip_network("72.14.192.0/18"),
+        ipaddress.ip_network("74.125.0.0/16"),
+        ipaddress.ip_network("209.85.128.0/17"),
+        ipaddress.ip_network("216.239.32.0/19"),
+    ]),
+    ("Bingbot", [
+        ipaddress.ip_network("157.55.39.0/24"),
+        ipaddress.ip_network("207.46.13.0/24"),
+        ipaddress.ip_network("40.77.167.0/24"),
+    ]),
+]
+
 # How long a revisit from the same visitor counts as a duplicate (no re-log).
 _DEDUP_WINDOW = timedelta(minutes=5)
 
@@ -62,6 +85,36 @@ def _get_bot_name(user_agent: str) -> str | None:
     return None
 
 
+def _get_bot_name_by_ip(ip: str | None) -> str | None:
+    """Return bot name if the IP falls in a known bot network range, else None."""
+    if not ip:
+        return None
+    try:
+        addr = ipaddress.ip_address(ip)
+    except ValueError:
+        return None
+    for name, networks in _IP_BOT_RANGES:
+        if any(addr in network for network in networks):
+            return name
+    return None
+
+
+def _get_country_code(ip: str | None) -> str | None:
+    """Return ISO-3166-1 alpha-2 country code for *ip* using the local GeoLite2 DB."""
+    if not ip:
+        return None
+    db_path = Path(getattr(settings, "GEOIP_PATH", "")) / "GeoLite2-Country.mmdb"
+    if not db_path.exists():
+        return None
+    try:
+        with geoip2.database.Reader(str(db_path)) as reader:
+            return reader.country(ip).country.iso_code
+    except (geoip2.errors.AddressNotFoundError, ValueError):
+        return None
+    except Exception:
+        return None
+
+
 class StoryAccess(models.Model):
     story = models.ForeignKey(
         "reports.Story",
@@ -73,11 +126,6 @@ class StoryAccess(models.Model):
     )
     story_id_snapshot = models.IntegerField(
         help_text="Original story PK at time of access (preserved after deletion).",
-    )
-    story_title_snapshot = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text="Story title at time of access.",
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -109,6 +157,13 @@ class StoryAccess(models.Model):
         null=True,
         help_text="Human-readable bot/crawler name detected from User-Agent.",
     )
+    country_code = models.CharField(
+        max_length=2,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="ISO 3166-1 alpha-2 country code resolved from the client IP.",
+    )
 
     class Meta:
         verbose_name = "Story Access"
@@ -121,7 +176,7 @@ class StoryAccess(models.Model):
 
     def __str__(self):
         who = self.user or self.ip_address or "anonymous"
-        return f"{self.story_title_snapshot} – {who} @ {self.accessed_at:%Y-%m-%d %H:%M}"
+        return f"Story #{self.story_id_snapshot} – {who} @ {self.accessed_at:%Y-%m-%d %H:%M}"
 
     # ------------------------------------------------------------------
     # Public API
@@ -136,9 +191,10 @@ class StoryAccess(models.Model):
         Bots are always logged without deduplication.
         """
         ua = request.META.get("HTTP_USER_AGENT", "")[:512]
-        bot_name = _get_bot_name(ua)
-        bot = bot_name is not None
         ip = _get_client_ip(request)
+        bot_name = _get_bot_name(ua) or _get_bot_name_by_ip(ip)
+        bot = bot_name is not None
+        country_code = _get_country_code(ip)
         user = request.user if request.user.is_authenticated else None
 
         if not bot:
@@ -161,12 +217,12 @@ class StoryAccess(models.Model):
         return cls.objects.create(
             story=story,
             story_id_snapshot=story.pk,
-            story_title_snapshot=(story.title or "")[:255],
             user=user,
             ip_address=ip,
             user_agent=ua,
             is_bot=bot,
             bot_name=bot_name,
+            country_code=country_code,
         )
 
 

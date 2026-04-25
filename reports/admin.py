@@ -311,23 +311,23 @@ class TopicAdmin(TaxonomyLookupAdmin):
 class StoryAccessAdmin(admin.ModelAdmin):
     list_display = (
         "accessed_at",
-        "story_title_snapshot",
         "story_id_snapshot",
         "user",
         "ip_address",
+        "country_code",
         "is_bot",
         "bot_name",
     )
-    list_filter = ("is_bot", "bot_name", "accessed_at")
-    search_fields = ("story_title_snapshot", "user__username", "user__email", "ip_address", "bot_name")
+    list_filter = ("is_bot", "bot_name", "country_code", "accessed_at")
+    search_fields = ("user__username", "user__email", "ip_address", "bot_name", "country_code")
     date_hierarchy = "accessed_at"
     readonly_fields = (
         "story",
         "story_id_snapshot",
-        "story_title_snapshot",
         "user",
         "accessed_at",
         "ip_address",
+        "country_code",
         "user_agent",
         "is_bot",
         "bot_name",
