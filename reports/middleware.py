@@ -12,7 +12,7 @@ from reports.language import (
     with_language_prefix,
 )
 
-EXEMPT_PATH_PREFIXES = ("/admin/", "/static/", "/media/", "/accounts/")
+EXEMPT_PATH_PREFIXES = ("/admin/", "/static/", "/media/", "/accounts/", "/feed/")
 EXEMPT_EXACT_PATHS = ("/favicon.ico", "/robots.txt")
 
 
