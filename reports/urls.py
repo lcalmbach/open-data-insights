@@ -1,6 +1,7 @@
 from django.urls import path
 from django.views.generic import TemplateView
 from . import views
+from .feeds import StoryFeed
 
 urlpatterns = [
     path("", views.home_view, name="home"),
@@ -28,4 +29,5 @@ urlpatterns = [
     path("management/commands/", views.run_commands_view, name="run_commands"),
     path("management/query/", views.query_datasets_view, name="query_datasets"),
     path("management/email/", views.email_users_view, name="email_users"),
+    path("feed/rss/<str:lang_code>/", StoryFeed(), name="rss_feed"),
 ]

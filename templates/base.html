@@ -27,6 +27,9 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin=""></script>
   {% endif %}
 
+  <link rel="alternate" type="application/rss+xml" title="Open Data Insights – English" href="{% url 'rss_feed' 'en' %}">
+  <link rel="alternate" type="application/rss+xml" title="Open Data Insights – Deutsch" href="{% url 'rss_feed' 'de' %}">
+  <link rel="alternate" type="application/rss+xml" title="Open Data Insights – Français" href="{% url 'rss_feed' 'fr' %}">
   {% block extra_head %}{% endblock %}
 </head>
 
