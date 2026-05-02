@@ -640,8 +640,7 @@ class StoryProcessor:
                 getattr(self.story, "published_date", None).strftime("%Y-%m-%d") if getattr(self.story, "published_date", None) else "",
                 getattr(self.story, "id", None),
             )
-            if self.is_data_based:
-                self.story.context_values = self._get_context_data()
+            self.story.context_values = self._get_context_data()
 
             self.story.language_id = LanguageEnum.ENGLISH.value
             generation_mode = (
@@ -649,18 +648,13 @@ class StoryProcessor:
                 or StoryTemplate.GENERATION_MODE_TRANSLATE
             )
 
-            # Generate content
-            self.logger.info("Generating story content...")
-            # generate main content
-            self._generate_insight_text()
-            if not self.story.content:
-                raise RuntimeError(
-                    f"Failed to generate story content for template {self.story.template.id}"
-                )
-            self.logger.info("Generating lead...")
-            self.generate_lead()
-            self.logger.info("Generating title...")
-            self.generate_title()
+            story_source = self._get_story_source()
+            if story_source == StoryTemplate.STORY_SOURCE_LLM:
+                self._generate_story_from_llm()
+            elif story_source == StoryTemplate.STORY_SOURCE_CONTEXT:
+                self._generate_story_from_static()
+            else:
+                raise RuntimeError(f"Unknown story_source: {story_source!r}")
 
             self.logger.info("Saving story to database...")
             try:
@@ -799,6 +793,28 @@ class StoryProcessor:
                         )
                     finally:
                         self.story = previous_story
+                    continue
+
+                if mode == StoryTemplate.GENERATION_MODE_STATIC:
+                    variant = self._upsert_story_for_language(language.id)
+                    variant.language_id = language.id
+                    variant.context_values = english_story.context_values
+                    variant.published_date = english_story.published_date
+                    variant.ai_model = english_story.ai_model
+                    record = self._get_static_article(language.value)
+                    if not record:
+                        self.logger.warning(
+                            "No static content found for language %s, skipping variant",
+                            language.value,
+                        )
+                        continue
+                    variant.content = self._coerce_context_text(record.get("text")) + self._format_sources_block(record.get("sources"))
+                    variant.summary = self._coerce_context_text(record.get("lead"))
+                    variant.title = self._fit_story_title(self._coerce_context_text(record.get("title")))
+                    variant.prompt_text = None
+                    variant.full_clean()
+                    variant.save()
+                    self._copy_story_assets(source_story=english_story, target_story=variant, language_id=language.id)
                     continue
 
                 variant = self._upsert_story_for_language(language.id)
@@ -1089,9 +1105,108 @@ class StoryProcessor:
             return ""
         return f"Focus subject: {focus_subject}"
 
+    def _get_story_source(self) -> str:
+        story_source = getattr(self.story.template, "story_source", None)
+        if story_source:
+            return story_source
+        prompt_text = getattr(self.story.template, "prompt_text", None)
+        if not bool((prompt_text or "").strip()):
+            return StoryTemplate.STORY_SOURCE_CONTEXT
+        return StoryTemplate.STORY_SOURCE_LLM
+
+    def _uses_context_story_content(self) -> bool:
+        return self._get_story_source() == StoryTemplate.STORY_SOURCE_CONTEXT
+
+    @staticmethod
+    def _normalize_context_key(value: Any) -> str:
+        return re.sub(r"[^a-z0-9]+", "_", str(value).strip().lower()).strip("_")
+
+    @staticmethod
+    def _coerce_context_text(value: Any) -> Optional[str]:
+        if value is None:
+            return None
+        if isinstance(value, str):
+            text = value.strip()
+            return text or None
+        if isinstance(value, (int, float, Decimal)):
+            text = str(value).strip()
+            return text or None
+        return None
+
+    def _get_story_context_payload(self) -> dict[str, Any]:
+        payload = getattr(self.story, "context_values", None)
+        if not payload:
+            return {}
+        if isinstance(payload, str):
+            try:
+                payload = json.loads(payload)
+            except json.JSONDecodeError:
+                self.logger.warning("Story context JSON is invalid and cannot be used for direct content")
+                return {}
+        if not isinstance(payload, dict):
+            self.logger.warning(
+                "Story context payload must be a JSON object for direct content, got %s",
+                type(payload).__name__,
+            )
+            return {}
+        return payload.get("context_data", {}).get("article", {}).get("data", {})
+
+    def _get_static_article(self, language_code: str | None = None) -> dict[str, Any]:
+        data = self._get_story_context_payload()
+        if isinstance(data, list):
+            if language_code:
+                for record in data:
+                    if isinstance(record, dict) and record.get("language") == language_code:
+                        return record
+            return data[0] if data else {}
+        return data
+
+    @staticmethod
+    def _format_sources_block(sources: Any) -> str:
+        block = (sources or "").strip() if isinstance(sources, str) else ""
+        return f"\n\n{block}" if block else ""
+
+    def _populate_story_from_context(self) -> bool:
+        record = self._get_static_article()
+        content = self._coerce_context_text(record.get("text"))
+        if not content:
+            self.logger.error(
+                "Static template %s requires 'text' in context JSON",
+                getattr(self.story.template, "id", None),
+            )
+            return False
+
+        self.story.content = content + self._format_sources_block(record.get("sources"))
+        self.story.summary = self._coerce_context_text(record.get("lead"))
+        self.story.title = self._fit_story_title(self._coerce_context_text(record.get("title")))
+        self.story.prompt_text = None
+        return True
+
+    def _generate_story_from_llm(self) -> None:
+        self.logger.info("Generating story content...")
+        self._generate_insight_text()
+        if not self.story.content:
+            raise RuntimeError(
+                f"Failed to generate story content for template {self.story.template.id}"
+            )
+        self.logger.info("Generating lead...")
+        self.generate_lead()
+        self.logger.info("Generating title...")
+        self.generate_title()
+
+    def _generate_story_from_static(self) -> None:
+        self.logger.info("Reading story content from context JSON...")
+        if not self._populate_story_from_context():
+            raise RuntimeError(
+                f"Failed to populate story from context for template {self.story.template.id}"
+            )
+
     def _generate_insight_text(self, target_language: str | None = None) -> bool:
         """Generate story text using OpenAI API"""
         try:
+            if self._uses_context_story_content():
+                return self._populate_story_from_context()
+
             language_instruction = (
                 f"Write the final output in {target_language}."
                 if target_language
@@ -1237,19 +1352,55 @@ class StoryProcessor:
         )
         return normalized[:max_length].rstrip()
 
+    def _get_default_story_title(self) -> str | None:
+        focus_title = getattr(getattr(self, "focus", None), "default_title", None)
+        if (focus_title or "").strip():
+            return self._replace_reference_period_expression(focus_title)
+
+        default_title = getattr(self.story.template, "default_title", None)
+        if (default_title or "").strip():
+            return self._replace_reference_period_expression(default_title)
+
+        template_title = getattr(self.story.template, "title", None)
+        if (template_title or "").strip():
+            return self._replace_reference_period_expression(template_title)
+        return None
+
+    def _get_default_story_lead(self, include_template_summary: bool = False) -> str | None:
+        focus_lead = getattr(getattr(self, "focus", None), "default_lead", None)
+        if (focus_lead or "").strip():
+            return self._replace_reference_period_expression(focus_lead)
+
+        template_default_lead = getattr(self.story.template, "default_lead", None)
+        if (template_default_lead or "").strip():
+            return self._replace_reference_period_expression(template_default_lead)
+
+        if include_template_summary:
+            template_summary = getattr(self.story.template, "summary", None)
+            if (template_summary or "").strip():
+                return self._replace_reference_period_expression(template_summary)
+        return None
+
     def generate_title(self, target_language: str | None = None) -> Optional[str]:
         """Generate title using the unified LLM helper"""
         self.logger.info("Generating title...")
         # Generate lead (summary) and an engaging title using the unified LLM helper
+
+        if self._uses_context_story_content():
+            record = self._get_static_article(target_language)
+            title = self._coerce_context_text(record.get("title"))
+            if title:
+                self.story.title = self._fit_story_title(title)
+            elif not self.story.title:
+                self.story.title = self._fit_story_title(self._get_default_story_title())
+            return bool(self.story.title)
 
         if self.story.template.create_title:
             self.story.title = self._fit_story_title(self._generate_summary(
                 kind="title", target_language=target_language
             ))
         else:
-            self.story.title = self._fit_story_title(self._replace_reference_period_expression(
-                self.story.template.default_title
-            ))
+            self.story.title = self._fit_story_title(self._get_default_story_title())
         return bool(self.story.title)
 
     def generate_lead(self, target_language: str | None = None) -> Optional[str]:
@@ -1259,13 +1410,25 @@ class StoryProcessor:
               "title" -> single-line engaging analytical title
         """
         self.logger.info("Generating lead...")
-        if self.template.create_lead and self.template.default_lead:
-            self.story.summary = self._replace_reference_period_expression(self.template.default_lead)
-        elif self.template.create_lead:
-            self.story.summary = self._generate_summary(
-                kind="lead", target_language=target_language
-            )
+        if self._uses_context_story_content():
+            record = self._get_static_article(target_language)
+            summary = self._coerce_context_text(record.get("lead"))
+            if summary:
+                self.story.summary = summary
+            elif not self.story.summary:
+                self.story.summary = self._get_default_story_lead(include_template_summary=True)
+            return bool(self.story.summary)
+
+        if self.template.create_lead:
+            default_lead = self._get_default_story_lead(include_template_summary=False)
+            if default_lead:
+                self.story.summary = default_lead
+            else:
+                self.story.summary = self._generate_summary(
+                    kind="lead", target_language=target_language
+                )
         else:
-            self.story.summary = self._replace_reference_period_expression(
-                self.story.template.summary
+            self.story.summary = self._get_default_story_lead(
+                include_template_summary=True
             )
+        return bool(self.story.summary)

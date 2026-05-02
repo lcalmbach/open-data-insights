@@ -2,6 +2,7 @@ import uuid
 import logging
 from django.db import models
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from .managers import NaturalKeyManager
@@ -37,11 +38,20 @@ class StoryTemplateManager(NaturalKeyManager):
 class StoryTemplate(models.Model):
     """Model representing a configurable template for generating stories."""
 
+    STORY_SOURCE_LLM = "llm"
+    STORY_SOURCE_CONTEXT = "context_json"
+    STORY_SOURCE_CHOICES = (
+        (STORY_SOURCE_LLM, "Generate article with LLM"),
+        (STORY_SOURCE_CONTEXT, "Read article directly from context JSON"),
+    )
+
     GENERATION_MODE_TRANSLATE = "translate"
     GENERATION_MODE_NATIVE = "native"
+    GENERATION_MODE_STATIC = "static"
     GENERATION_MODE_CHOICES = (
         (GENERATION_MODE_TRANSLATE, "Generate English and translate"),
         (GENERATION_MODE_NATIVE, "Generate each language natively"),
+        (GENERATION_MODE_STATIC, "Read each language directly from context JSON"),
     )
 
     slug = models.SlugField(unique=True, blank=True, null=True, editable=False)
@@ -97,7 +107,17 @@ class StoryTemplate(models.Model):
         null=True,
         help_text="Additional ressource, e.g., [{'text': 'meteoblue', 'url': 'https://meteoblue.ch/station_346353']",
     )
-    prompt_text = models.TextField(help_text="The prompt used to generate the story.")
+    story_source = models.CharField(
+        max_length=16,
+        choices=STORY_SOURCE_CHOICES,
+        default=STORY_SOURCE_LLM,
+        help_text="Where the article content comes from: generate it with an LLM or read title/lead/body directly from context JSON.",
+    )
+    prompt_text = models.TextField(
+        blank=True,
+        null=True,
+        help_text="The prompt used to generate the story. Leave empty when the story body is provided directly via context JSON.",
+    )
     temperature = models.FloatField(
         default=0.3,
         help_text="Temperature parameter for the AI model. Controls the randomness of the output.",
@@ -186,6 +206,13 @@ class StoryTemplate(models.Model):
         if not self.slug:
             self.slug = uuid.uuid4().hex[:8]  # or shortuuid.uuid()[:10]
         super().save(*args, **kwargs)
+
+    def clean(self):
+        super().clean()
+        if self.story_source == self.STORY_SOURCE_LLM and not (self.prompt_text or "").strip():
+            raise ValidationError(
+                {"prompt_text": "Prompt text is required when story source is set to LLM."}
+            )
 
     def natural_key(self):
         return (self.slug,)
@@ -432,6 +459,17 @@ class StoryTemplateFocus(models.Model):
         StoryTemplate,
         on_delete=models.CASCADE,
         related_name="focus_areas",
+    )
+    default_title = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Optional focus-specific default title used when title generation is disabled or no title is provided by context JSON.",
+    )
+    default_lead = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Optional focus-specific default lead used when lead generation is disabled or no lead is provided by context JSON.",
     )
     publish_conditions = models.TextField(
         blank=True,

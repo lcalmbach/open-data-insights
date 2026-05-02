@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import pandas as pd
+from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import SimpleTestCase, TestCase
@@ -675,6 +676,183 @@ class FocusSubjectPromptTests(SimpleTestCase):
             "Focus subject: Focus on the WTI/Brent spread",
             captured["messages"][0]["content"],
         )
+
+
+class DirectContextStoryTests(SimpleTestCase):
+    def _build_processor(self, context_values):
+        processor = StoryProcessor.__new__(StoryProcessor)
+        processor.logger = SimpleNamespace(
+            info=lambda *a, **k: None,
+            warning=lambda *a, **k: None,
+            error=lambda *a, **k: None,
+        )
+        processor.story = SimpleNamespace(
+            context_values=context_values,
+            content="stale content",
+            summary="stale summary",
+            title="stale title",
+            prompt_text="stale prompt",
+            template=SimpleNamespace(
+                id=11,
+                story_source=StoryTemplate.STORY_SOURCE_CONTEXT,
+                prompt_text=None,
+                default_title=None,
+                default_lead=None,
+                summary=None,
+                create_title=True,
+                create_lead=True,
+            ),
+        )
+        processor.template = processor.story.template
+        processor._replace_reference_period_expression = lambda value: value
+        processor._fit_story_title = lambda value: value
+        return processor
+
+    def test_promptless_story_reads_full_article_from_context_json(self):
+        processor = self._build_processor(
+            {
+                "context_data": {
+                    "full_article": {
+                        "description": "Stored article",
+                        "data": [
+                            {
+                                "title": "Interactive oil outlook",
+                                "lead": "Lead written during the interactive session.",
+                                "article_text": "The complete article is already available in the context payload.",
+                            }
+                        ],
+                    }
+                }
+            }
+        )
+
+        ok = StoryProcessor._generate_insight_text(processor)
+
+        self.assertTrue(ok)
+        self.assertEqual(processor.story.title, "Interactive oil outlook")
+        self.assertEqual(
+            processor.story.summary,
+            "Lead written during the interactive session.",
+        )
+        self.assertEqual(
+            processor.story.content,
+            "The complete article is already available in the context payload.",
+        )
+        self.assertIsNone(processor.story.prompt_text)
+
+    def test_promptless_story_keeps_context_title_and_lead_without_llm(self):
+        processor = self._build_processor(
+            {
+                "story": {
+                    "title": "AI co-written market recap",
+                    "summary": "Short lead stored directly in JSON.",
+                    "content": "Body text stored directly in the story payload.",
+                }
+            }
+        )
+
+        StoryProcessor._generate_insight_text(processor)
+        lead_ok = StoryProcessor.generate_lead(processor)
+        title_ok = StoryProcessor.generate_title(processor)
+
+        self.assertTrue(lead_ok)
+        self.assertTrue(title_ok)
+        self.assertEqual(processor.story.title, "AI co-written market recap")
+        self.assertEqual(processor.story.summary, "Short lead stored directly in JSON.")
+
+
+class StoryTemplateValidationTests(SimpleTestCase):
+    def test_llm_story_source_requires_prompt_text(self):
+        template = StoryTemplate(
+            story_source=StoryTemplate.STORY_SOURCE_LLM,
+            prompt_text="",
+        )
+
+        with self.assertRaises(ValidationError) as exc_info:
+            template.clean()
+
+        self.assertEqual(
+            exc_info.exception.message_dict,
+            {"prompt_text": ["Prompt text is required when story source is set to LLM."]},
+        )
+
+    def test_context_story_source_allows_blank_prompt_text(self):
+        template = StoryTemplate(
+            story_source=StoryTemplate.STORY_SOURCE_CONTEXT,
+            prompt_text="",
+        )
+
+        template.clean()
+
+
+class FocusTitleFallbackTests(SimpleTestCase):
+    def test_generate_title_uses_focus_title_when_create_title_is_false(self):
+        processor = StoryProcessor.__new__(StoryProcessor)
+        processor.logger = SimpleNamespace(info=lambda *a, **k: None)
+        processor.focus = SimpleNamespace(
+            default_title="Focus-specific fallback title",
+            default_lead="Focus-specific fallback lead",
+        )
+        processor.story = SimpleNamespace(
+            title=None,
+            template=SimpleNamespace(
+                create_title=False,
+                default_title="Template default title",
+                title="Template label",
+            ),
+        )
+        processor._replace_reference_period_expression = lambda value: value
+        processor._fit_story_title = lambda value: value
+
+        ok = StoryProcessor.generate_title(processor)
+
+        self.assertTrue(ok)
+        self.assertEqual(processor.story.title, "Focus-specific fallback title")
+
+    def test_context_mode_title_fallback_uses_focus_title(self):
+        processor = StoryProcessor.__new__(StoryProcessor)
+        processor.logger = SimpleNamespace(info=lambda *a, **k: None)
+        processor.focus = SimpleNamespace(
+            default_title="Context fallback focus title",
+            default_lead="Context fallback focus lead",
+        )
+        processor.story = SimpleNamespace(
+            title=None,
+            context_values={"context_data": {}},
+            template=SimpleNamespace(
+                story_source=StoryTemplate.STORY_SOURCE_CONTEXT,
+                default_title="Template default title",
+                title="Template label",
+            ),
+        )
+        processor._replace_reference_period_expression = lambda value: value
+        processor._fit_story_title = lambda value: value
+
+        ok = StoryProcessor.generate_title(processor)
+
+        self.assertTrue(ok)
+        self.assertEqual(processor.story.title, "Context fallback focus title")
+
+    def test_generate_lead_uses_focus_default_lead(self):
+        processor = StoryProcessor.__new__(StoryProcessor)
+        processor.logger = SimpleNamespace(info=lambda *a, **k: None)
+        processor.focus = SimpleNamespace(default_lead="Focus lead fallback")
+        processor.template = SimpleNamespace(create_lead=False, default_lead="Template lead")
+        processor.story = SimpleNamespace(
+            summary=None,
+            template=SimpleNamespace(
+                story_source=StoryTemplate.STORY_SOURCE_CONTEXT,
+                default_lead="Template lead",
+                summary="Template summary",
+            ),
+            context_values={"context_data": {}},
+        )
+        processor._replace_reference_period_expression = lambda value: value
+
+        ok = StoryProcessor.generate_lead(processor)
+
+        self.assertTrue(ok)
+        self.assertEqual(processor.story.summary, "Focus lead fallback")
 
 
 class EiaOilImportTests(SimpleTestCase):

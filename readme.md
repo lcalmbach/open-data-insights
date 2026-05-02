@@ -29,6 +29,7 @@ Stories are lightweight, automatically produced summaries — not polished journ
 | **Charts** | Line, bar, stacked bar, area, scatter, pie, heatmap, histogram, radar/spider, horizontal ranking bar, choropleth, map markers, word cloud |
 | **Tables** | SQL-driven data tables attached to stories |
 | **Email subscriptions** | Users subscribe to templates; stories are emailed on publish |
+| **RSS feeds** | Per-language RSS 2.0 feeds at `/feed/rss/en/`, `/feed/rss/de/`, `/feed/rss/fr/` — up to 20 stories, max 90 days old; auto-discovery links in every page |
 | **Story access logging** | Every page view logged with user, IP, timestamp; bots detected from User-Agent; 5-minute deduplication for human visitors |
 | **Multi-language** | Stories generated natively in each language or translated from English |
 | **DB sync** | `synch_prod` command syncs templates and child objects between environments |
@@ -81,6 +82,7 @@ open-data-insights/
 │   │   ├── email_service.py        # Email delivery
 │   │   └── database_client.py      # Query runner
 │   ├── sitemaps.py                 # Sitemap classes
+│   ├── feeds.py                    # RSS feed classes (per language)
 │   └── visualizations/
 │       └── plotting.py             # All chart types (Altair + Leaflet)
 ├── templates/                      # Django HTML templates + robots.txt
@@ -237,6 +239,18 @@ Visible in Django Admin under **Reports → Story Accesses**.
 
 - `GET /robots.txt` — disallows admin and staff-only routes
 - `GET /sitemap.xml` — lists all published story URLs and static pages
+
+## 📡 RSS Feeds
+
+Per-language RSS 2.0 feeds are available for use with any feed reader (Feedly, Inoreader, etc.):
+
+| Language | URL |
+|---|---|
+| English | `GET /feed/rss/en/` |
+| German | `GET /feed/rss/de/` |
+| French | `GET /feed/rss/fr/` |
+
+Each feed returns up to 20 stories published within the last 90 days. Auto-discovery `<link>` tags are included in every page so browsers and feed readers detect the feeds automatically.
 
 ## 🤝 Contributing
 

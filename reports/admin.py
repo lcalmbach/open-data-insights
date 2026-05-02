@@ -23,6 +23,14 @@ from .models.story_access import StoryAccess
 class StoryTemplateFocusInline(admin.TabularInline):
     model = StoryTemplateFocus
     extra = 0
+    fields = (
+        "default_title",
+        "default_lead",
+        "filter_value",
+        "filter_expression",
+        "publish_conditions",
+        "focus_subject",
+    )
 
 
 class StoryTemplateFocusImageInline(admin.TabularInline):
@@ -58,6 +66,7 @@ class StoryTemplateAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "title",
+        "story_source",
         "reference_period",
         "region",
         "topic_names",
@@ -67,7 +76,7 @@ class StoryTemplateAdmin(admin.ModelAdmin):
     list_select_related = ("reference_period", "organisation", "region")
     inlines = (StoryTemplateFocusInline,)
     search_fields = ("title", "reference_period__value", "region__value", "topics__value")
-    list_filter = ["reference_period", "organisation", "region", "topics"]
+    list_filter = ["story_source", "reference_period", "organisation", "region", "topics"]
     filter_horizontal = ("topics",)
 
     @admin.display(description="Topics")
@@ -91,12 +100,20 @@ class StoryTemplateFocusAdmin(admin.ModelAdmin):
         "id",
         "story_template_id",
         "story_template",
+        "default_title",
+        "default_lead",
         "filter_value",
         "filter_expression",
         "image_names",
     )
     list_select_related = ("story_template",)
-    search_fields = ("story_template__title", "filter_value", "filter_expression")
+    search_fields = (
+        "story_template__title",
+        "default_title",
+        "default_lead",
+        "filter_value",
+        "filter_expression",
+    )
     list_filter = ("story_template","filter_expression")
     inlines = (StoryTemplateFocusImageInline,)
 

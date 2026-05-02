@@ -61,6 +61,8 @@ class Command(BaseCommand):
             else:
                 new_focus = StoryTemplateFocus.objects.create(
                     story_template=dst,
+                    default_title=focus.default_title,
+                    default_lead=focus.default_lead,
                     filter_value=focus.filter_value,
                     filter_expression=focus.filter_expression,
                     publish_conditions=focus.publish_conditions,
@@ -176,6 +178,7 @@ class Command(BaseCommand):
                     period_direction=src.period_direction,
                     data_source=src.data_source,
                     other_ressources=src.other_ressources,
+                    story_source=src.story_source,
                     prompt_text=src.prompt_text,
                     temperature=src.temperature,
                     system_prompt=src.system_prompt,
