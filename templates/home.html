@@ -95,8 +95,8 @@
     <section class="home-section">
       <div class="home-section__header">
         <div>
-          <p class="home-eyebrow mb-2">{% if filter_summary.template or filter_summary.reference_period or filter_summary.search or filter_summary.region or filter_summary.topic %}Filtered feed{% else %}Fresh from the feed{% endif %}</p>
-          <h2 class="home-section__title">{% if filter_summary.template or filter_summary.reference_period or filter_summary.search or filter_summary.region or filter_summary.topic %}Matching insights{% else %}Recent insights{% endif %}</h2>
+          <p class="home-eyebrow mb-2">{% if filter_summary.template or filter_summary.reference_period or filter_summary.search or filter_summary.region or filter_summary.topic or filter_summary.published_on %}Filtered feed{% else %}Fresh from the feed{% endif %}</p>
+          <h2 class="home-section__title">{% if filter_summary.template or filter_summary.reference_period or filter_summary.search or filter_summary.region or filter_summary.topic or filter_summary.published_on %}Matching insights{% else %}Recent insights{% endif %}</h2>
         </div>
         <a href="{% url 'stories' %}{% if home_filter_query %}?{{ home_filter_query }}{% endif %}" class="home-section__link">Browse archive</a>
       </div>

@@ -28,6 +28,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from datetime import date, timedelta
 from django.utils.dateparse import parse_date
 from django.utils.text import slugify
 from django.views.decorators.cache import never_cache
@@ -585,12 +586,21 @@ def _attach_story_render_fields(story: Story | None) -> None:
     )
 
 
+_PUBLISHED_ON_LABELS = {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last_week": "Last week",
+    "last_month": "Last month",
+}
+
+
 def _apply_story_filters(request, stories, *, allowed_template_ids=None):
     template_id = (request.GET.get("template") or "").strip()
     reference_period = (request.GET.get("reference_period") or "").strip()
     region_id = (request.GET.get("region") or "").strip()
     topic_id = (request.GET.get("topic") or "").strip()
     search = (request.GET.get("search") or "").strip()
+    published_on = (request.GET.get("published_on") or "").strip()
     published_from = parse_date(request.GET.get("published_from") or "")
     published_to = parse_date(request.GET.get("published_to") or "")
 
@@ -630,6 +640,17 @@ def _apply_story_filters(request, stories, *, allowed_template_ids=None):
             | Q(summary__icontains=search)
             | Q(content__icontains=search)
         )
+
+    if published_on:
+        today = date.today()
+        if published_on == "today":
+            stories = stories.filter(published_date=today)
+        elif published_on == "yesterday":
+            stories = stories.filter(published_date=today - timedelta(days=1))
+        elif published_on == "last_week":
+            stories = stories.filter(published_date__gte=today - timedelta(days=7))
+        elif published_on == "last_month":
+            stories = stories.filter(published_date__gte=today - timedelta(days=30))
 
     if published_from:
         stories = stories.filter(published_date__gte=published_from)
@@ -684,6 +705,7 @@ def home_view(request):
         "topic": Topic.objects.filter(id=request.GET.get("topic")).first()
         if (request.GET.get("topic") or "").isdigit()
         else None,
+        "published_on": _PUBLISHED_ON_LABELS.get(request.GET.get("published_on") or ""),
     }
     if not stories:
         return render(

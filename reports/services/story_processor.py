@@ -30,7 +30,7 @@ from reports.models.story_template import StoryTemplateFocus
 from dateutil.relativedelta import relativedelta
 from reports.models.lookups import Language, LanguageEnum, PeriodDirectionEnum
 from reports.constants.reference_period import ReferencePeriod
-from reports.language import get_language_id_for_code
+from reports.language import get_language_id_for_code, get_language_code_for_id
 
 
 LLM_FORMATTING_INSTRUCTIONS = """
@@ -801,7 +801,7 @@ class StoryProcessor:
                     variant.context_values = english_story.context_values
                     variant.published_date = english_story.published_date
                     variant.ai_model = english_story.ai_model
-                    record = self._get_static_article(language.value)
+                    record = self._get_static_article(get_language_code_for_id(language.id))
                     if not record:
                         self.logger.warning(
                             "No static content found for language %s, skipping variant",
@@ -1167,7 +1167,8 @@ class StoryProcessor:
         return f"\n\n{block}" if block else ""
 
     def _populate_story_from_context(self) -> bool:
-        record = self._get_static_article()
+        lang_code = get_language_code_for_id(getattr(self.story, "language_id", None))
+        record = self._get_static_article(lang_code)
         content = self._coerce_context_text(record.get("text"))
         if not content:
             self.logger.error(

@@ -848,7 +848,7 @@ class OdsDatasetConnector:
             f"{self.dataset.source_timestamp_field} > '{target_db_date.strftime('%Y-%m-%d')}' "
         ) if self.dataset.allow_future_data else (
             f"{self.dataset.source_timestamp_field} > '{target_db_date.strftime('%Y-%m-%d')}' "
-            f"and {self.dataset.source_timestamp_field} < '{(datetime.now(timezone.utc) - timedelta(days=1)).strftime('%Y-%m-%d')}'"
+            f"and {self.dataset.source_timestamp_field} < '{datetime.now(timezone.utc).strftime('%Y-%m-%d')}'"
         )
         df = self.download_ods_data(
             filename,

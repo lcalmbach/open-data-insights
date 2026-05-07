@@ -76,6 +76,16 @@
           <div class="dropdown-menu dropdown-menu-end p-3 navbar-search-panel" aria-labelledby="navbarSearchDropdown">
             <form method="get" action="{% url 'home' %}">
               <div class="mb-3">
+                <label for="navbar-search-published-on" class="form-label small mb-1">Published on</label>
+                <select id="navbar-search-published-on" name="published_on" class="form-select form-select-sm">
+                  <option value="">All time</option>
+                  <option value="today" {% if request.GET.published_on == "today" %}selected{% endif %}>Today</option>
+                  <option value="yesterday" {% if request.GET.published_on == "yesterday" %}selected{% endif %}>Yesterday</option>
+                  <option value="last_week" {% if request.GET.published_on == "last_week" %}selected{% endif %}>Last week</option>
+                  <option value="last_month" {% if request.GET.published_on == "last_month" %}selected{% endif %}>Last month</option>
+                </select>
+              </div>
+              <div class="mb-3">
                 <label for="navbar-search-text" class="form-label small mb-1">Search in text</label>
                 <input
                   id="navbar-search-text"
