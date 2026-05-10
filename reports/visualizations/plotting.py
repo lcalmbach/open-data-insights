@@ -383,7 +383,7 @@ def create_bar_chart(data, settings):
     if color_field:
         encodings["color"] = alt.Color(
             color_field,
-            scale=alt.Scale(scheme=settings.get("color_scheme", "category10")),
+            scale=alt.Scale(**_color_scale_kwargs(settings)),
         )
 
     # Tooltip support
@@ -422,6 +422,9 @@ def create_bar_chart(data, settings):
 
         chart = chart.encode(**swapped)
 
+    if color_field and settings.get("legend_order"):
+        chart = _apply_legend_order(chart, color_field, settings["legend_order"])
+
     # Apply chart properties (title/height/width)
     props = {}
     if 'title' in settings:
@@ -431,6 +434,27 @@ def create_bar_chart(data, settings):
     chart = chart.properties(**props)
 
     return chart
+
+
+def _color_scale_kwargs(settings: dict) -> dict:
+    """Return kwargs for alt.Scale based on color_scheme and optional legend_order."""
+    kw = {"scheme": settings.get("color_scheme", "category10")}
+    legend_order = settings.get("legend_order")
+    if legend_order:
+        kw["domain"] = legend_order
+    return kw
+
+
+def _apply_legend_order(chart, color_field: str, legend_order: list):
+    """Enforce custom stacking order via a calculated rank field."""
+    bare = color_field.split(":")[0]
+    parts = [f"datum['{bare}'] === '{v}' ? {i}" for i, v in enumerate(legend_order)]
+    expr = " : ".join(parts) + f" : {len(legend_order)}"
+    return (
+        chart
+        .transform_calculate(_stack_order=expr)
+        .encode(order=alt.Order("_stack_order:Q"))
+    )
 
 
 def create_bar_stacked_chart(data, settings):
@@ -486,16 +510,19 @@ def create_bar_stacked_chart(data, settings):
         'color': alt.Color(
             color_field,
             title=settings.get('color_title', color_field),
-            scale=alt.Scale(scheme=settings.get('color_scheme', 'category10'))
+            scale=alt.Scale(**_color_scale_kwargs(settings))
         )
     }
-    
+
     # Add tooltip
     if settings.get('show_tooltip', True):
         encodings['tooltip'] = settings.get('tooltips')
-    
+
     # Apply encodings
     chart = chart.encode(**encodings)
+
+    if settings.get('legend_order'):
+        chart = _apply_legend_order(chart, color_field, settings['legend_order'])
     
     # Apply percentage normalization if requested
     if settings.get('percentage', False):
@@ -1893,12 +1920,11 @@ def create_radar_chart(data, settings):
         )
     )
 
-    color_scheme = settings.get("color_scheme", "category10")
     fill_alpha = float(settings.get("fill_alpha", 0.15))
     line_width = float(settings.get("line_width", 2))
 
     if has_series:
-        color_enc = alt.Color(f"{ser_field}:N", scale=alt.Scale(scheme=color_scheme))
+        color_enc = alt.Color(f"{ser_field}:N", scale=alt.Scale(**_color_scale_kwargs(settings)))
         detail_enc = alt.Detail(f"{ser_field}:N")
     else:
         color_enc = alt.value("steelblue")

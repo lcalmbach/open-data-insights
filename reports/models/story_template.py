@@ -493,6 +493,15 @@ class StoryTemplateFocus(models.Model):
         blank=True,
         null=True,
     )
+    web_search_flag = models.BooleanField(
+        default=False,
+        help_text="When enabled, the LLM may use web search to enrich the generated insight.",
+    )
+    search_context_prompt = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Optional prompt fragment that guides what to search for when web_search_flag is enabled.",
+    )
     images = models.ManyToManyField(
         StoryImage,
         through=StoryTemplateFocusImage,

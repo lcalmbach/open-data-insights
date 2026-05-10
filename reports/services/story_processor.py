@@ -1105,6 +1105,33 @@ class StoryProcessor:
             return ""
         return f"Focus subject: {focus_subject}"
 
+    def _fetch_web_context(self) -> str:
+        """Send search_context_prompt to the LLM (with web search when using Anthropic)
+        and return the result as a plain string to inject into the story prompt."""
+        search_prompt = (getattr(self.focus, "search_context_prompt", None) or "").strip()
+        if not search_prompt:
+            return ""
+        try:
+            if self._is_anthropic_model():
+                response = self.ai_client.messages.create(
+                    model=self.story.ai_model,
+                    max_tokens=1500,
+                    tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 5}],
+                    messages=[{"role": "user", "content": search_prompt}],
+                )
+                return "\n".join(
+                    block.text for block in response.content if hasattr(block, "text")
+                ).strip()
+            else:
+                messages = [
+                    {"role": "system", "content": "Provide factual, up-to-date background information on the requested topic."},
+                    {"role": "user", "content": search_prompt},
+                ]
+                return self._call_llm(messages, temperature=0.3, max_tokens=1500)
+        except Exception as exc:
+            self.logger.warning(f"Web search context fetch failed: {exc}", exc_info=True)
+            return ""
+
     def _get_story_source(self) -> str:
         story_source = getattr(self.story.template, "story_source", None)
         if story_source:
@@ -1217,11 +1244,33 @@ class StoryProcessor:
             message = self._replace_reference_period_expression(
                 self.story.template.prompt_text
             )  # Prepare messages for chat completion
-            
-            #if self.focus.additional_context:
-            #    message += f"\n\nAdditional context: {self.focus.additional_context}"
-            
+
+            web_context = ""
+            web_search_flag = getattr(self.focus, "web_search_flag", False)
+            self.logger.info(f"web_search_flag={web_search_flag!r} (focus id={getattr(self.focus, 'id', None)})")
+            if web_search_flag:
+                self.logger.info("Fetching web search context...")
+                web_context = self._fetch_web_context()
+                self.logger.info(f"Web context length: {len(web_context)} chars")
+
+            web_context_section = (
+                f"Recent context from web search:\n\n{web_context}" if web_context else ""
+            )
+
+            web_search_instruction = (
+                "You have been provided with recent background information retrieved "
+                "from a web search. Use it to enrich the insight with real-world context, "
+                "recent developments, or relevant commentary where appropriate."
+                if web_context_section
+                else ""
+            )
+
             if self.is_data_based:
+                user_parts = ["Write an insight about the following data in JSON format."]
+                if web_context_section:
+                    user_parts.append(web_context_section)
+                user_parts.append("```json\n" + self.story.context_values + "\n```")
+
                 messages = [
                     {
                         "role": "system",
@@ -1230,6 +1279,7 @@ class StoryProcessor:
                             for part in [
                                 message,
                                 focus_subject_instruction,
+                                web_search_instruction,
                                 LLM_FORMATTING_INSTRUCTIONS,
                                 language_instruction,
                             ]
@@ -1238,10 +1288,7 @@ class StoryProcessor:
                     },
                     {
                         "role": "user",
-                        "content": (
-                            "Write an insight about the following data in JSON format.\n\n"
-                            "```json\n" + self.story.context_values + "\n```"
-                        ),
+                        "content": "\n\n".join(user_parts),
                     },
                 ]
             else:
@@ -1253,6 +1300,7 @@ class StoryProcessor:
                             for part in [
                                 self.story.template.system_prompt,
                                 focus_subject_instruction,
+                                web_search_instruction,
                                 language_instruction,
                             ]
                             if part
@@ -1260,10 +1308,15 @@ class StoryProcessor:
                     },
                     {
                         "role": "user",
-                        "content": (
-                            self._replace_reference_period_expression(
-                                self.story.template.prompt_text
-                            )
+                        "content": "\n\n".join(
+                            part
+                            for part in [
+                                web_context_section,
+                                self._replace_reference_period_expression(
+                                    self.story.template.prompt_text
+                                ),
+                            ]
+                            if part
                         ),
                     },
                 ]
