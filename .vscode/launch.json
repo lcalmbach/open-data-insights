@@ -32,7 +32,9 @@
       "args": [
         "generate_stories",
         "--id",
-        "34",
+        "35",
+        "--date",
+        "2024-02-28",
         "--force",
         "-v",
         "2"
