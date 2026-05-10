@@ -36,10 +36,10 @@ from reports.language import get_language_id_for_code, get_language_code_for_id
 LLM_FORMATTING_INSTRUCTIONS = """
 Format the output as plain Markdown.
 Do not use bold or italic text for emphasis.
-Avoid using bullet points, numbered lists, or subheadings.
+If the prompt explicitly requests a specific structure — such as a bullet list, numbered list, or subheadings — follow that structure exactly. Explicit formatting instructions in the prompt always take priority over these defaults.
+Otherwise, write using only paragraphs: no bullet points, numbered lists, or subheadings.
 Write in concise, complete sentences.
-Ensure that the structure is clean and easy to read using only paragraphs.
-""".strip()
+"""
 
 
 class DecimalEncoder(json.JSONEncoder):
@@ -1347,7 +1347,11 @@ class StoryProcessor:
             )
             # Kind-specific instructions
             if kind == "title":
-                system = "You are a concise editorial assistant producing sharp, data-driven insight titles"
+                current_year = date.today().year
+                system = (
+                    f"You are a concise editorial assistant producing sharp, data-driven insight titles. "
+                    f"The current year is {current_year}. Use this when calculating how many years ago an event occurred."
+                )
                 user_instruction = (
                     self._replace_reference_period_expression(self.story.template.title_prompt)
                     if self.story.template.title_prompt
