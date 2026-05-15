@@ -1487,6 +1487,7 @@ def create_map_markers(data, settings):
 
 def create_histogram(data, settings):
     """Create a histogram by pre-binning the data with numpy."""
+    reference_line_layers = _build_reference_line_layers(settings)
     x_field = settings.get("x")
     if not x_field:
         logger.error("Histogram requires an 'x' field to bin.")
@@ -1608,7 +1609,10 @@ def create_histogram(data, settings):
     if "title" in settings:
         props["title"] = settings["title"]
 
-    return chart.properties(**props)
+    chart = chart.properties(**props)
+    if reference_line_layers:
+        chart = alt.layer(chart, *reference_line_layers)
+    return chart
 
 
 def create_word_cloud(data, settings):

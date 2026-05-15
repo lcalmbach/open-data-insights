@@ -6,7 +6,11 @@
       "Bash(PGPASSWORD=password psql -h localhost -U postgres -d postgres -c \"\\\\dt *.concepts\")",
       "Bash(PGPASSWORD=password psql -h localhost -U postgres -d postgres -c \"SELECT table_schema, table_name FROM information_schema.tables WHERE table_name ILIKE '%concept%';\")",
       "Bash(PGPASSWORD=password psql -h localhost -U postgres -d postgres -c \"SELECT 'opendata' as schema, count\\(*\\) FROM opendata.concepts UNION ALL SELECT 'public', count\\(*\\) FROM public.concepts;\")",
-      "Bash(PGPASSWORD=password psql -h localhost -U postgres -d postgres -c \"\\\\d opendata.concepts\")"
+      "Bash(PGPASSWORD=password psql -h localhost -U postgres -d postgres -c \"\\\\d opendata.concepts\")",
+      "Bash(find /home/lcalm -maxdepth 5 -type f -name \"*.ipynb\" 2>/dev/null | head -20)",
+      "Read(//home/lcalm/**)",
+      "Read(//media/lcalm/rhyno/sbb/db/**)",
+      "Read(//media/lcalm/rhyno/sbb/**)"
     ]
   }
 }
