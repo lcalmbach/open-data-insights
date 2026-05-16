@@ -24,6 +24,7 @@ from django.core.paginator import Paginator
 from django.core.validators import validate_email
 from django.db import connection
 from django.db.models import Avg, Case, Count, IntegerField, Q, When
+from django.db.models.functions import TruncDate
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -1360,6 +1361,79 @@ def delete_story(request, story_id):
         reference_period_start=story_to_delete.reference_period_start,
     ).delete()
     return redirect("stories")
+
+
+@login_required
+def story_access_stats(request, story_id):
+    template_ids = _accessible_template_ids(request.user)
+    story = get_object_or_404(
+        Story.objects.filter(templatefocus__story_template_id__in=template_ids),
+        id=story_id,
+    )
+    accesses = StoryAccess.objects.filter(story_id=story_id)
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = today_start - timedelta(days=6)
+
+    stats = {
+        "first_publish": story.published_date,
+        "total_human": accesses.filter(is_bot=False).count(),
+        "total_bot": accesses.filter(is_bot=True).count(),
+        "today_human": accesses.filter(is_bot=False, accessed_at__gte=today_start).count(),
+        "today_bot": accesses.filter(is_bot=True, accessed_at__gte=today_start).count(),
+        "week_human": accesses.filter(is_bot=False, accessed_at__gte=week_start).count(),
+        "week_bot": accesses.filter(is_bot=True, accessed_at__gte=week_start).count(),
+    }
+
+    daily_qs = (
+        accesses
+        .annotate(date=TruncDate("accessed_at"))
+        .values("date", "is_bot")
+        .annotate(count=Count("id"))
+        .order_by("date")
+    )
+
+    chart_html = None
+    if daily_qs.exists():
+        df = pd.DataFrame(list(daily_qs))
+        df["type"] = df["is_bot"].map({True: "Bot", False: "Human"})
+        df["date"] = pd.to_datetime(df["date"])
+        chart = (
+            alt.Chart(df)
+            .mark_bar()
+            .encode(
+                x=alt.X("date:T", title="Date"),
+                y=alt.Y("count:Q", title="Accesses", stack="zero"),
+                color=alt.Color(
+                    "type:N",
+                    scale=alt.Scale(domain=["Human", "Bot"], range=["steelblue", "orange"]),
+                    legend=alt.Legend(title="Visitor type"),
+                ),
+                tooltip=[
+                    alt.Tooltip("date:T", title="Date"),
+                    alt.Tooltip("type:N", title="Type"),
+                    alt.Tooltip("count:Q", title="Count"),
+                ],
+            )
+            .properties(width="container", height=250, title="Daily access history")
+        )
+        raw_html = chart.to_html(embed_options={"actions": False, "renderer": "svg"})
+        chart_html = (
+            raw_html
+            .replace('id="vis"', 'id="access-history-chart"')
+            .replace("#vis.vega-embed", "#access-history-chart.vega-embed")
+            .replace('vegaEmbed("#vis"', 'vegaEmbed("#access-history-chart"')
+        )
+
+    return render(
+        request,
+        "reports/story_access_stats.html",
+        {
+            "story": story,
+            "stats": stats,
+            "chart_html": chart_html,
+        },
+    )
 
 
 _READ_ONLY_SQL_FORBIDDEN = re.compile(

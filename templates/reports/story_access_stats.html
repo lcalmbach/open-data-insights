@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Access statistics – {{ story.title|striptags }}{% endblock %}
+
+{% block content %}
+
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="{% url 'story_detail' story.id %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>Back to story
+  </a>
+  <h4 class="mb-0">Access statistics</h4>
+</div>
+
+<p class="text-muted">{{ story.title|striptags }}</p>
+
+<div class="row g-3 mb-4">
+
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small mb-1">First published</div>
+        <div class="fs-5 fw-semibold">{{ stats.first_publish|date:"j F Y" }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small mb-1">Total accesses</div>
+        <div class="fs-5 fw-semibold">{{ stats.total_human }} <small class="text-muted fw-normal">human</small></div>
+        <div class="fs-5 fw-semibold">{{ stats.total_bot }} <small class="text-muted fw-normal">bot</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small mb-1">Today</div>
+        <div class="fs-5 fw-semibold">{{ stats.today_human }} <small class="text-muted fw-normal">human</small></div>
+        <div class="fs-5 fw-semibold">{{ stats.today_bot }} <small class="text-muted fw-normal">bot</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small mb-1">This week</div>
+        <div class="fs-5 fw-semibold">{{ stats.week_human }} <small class="text-muted fw-normal">human</small></div>
+        <div class="fs-5 fw-semibold">{{ stats.week_bot }} <small class="text-muted fw-normal">bot</small></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% if chart_html %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    {{ chart_html|safe }}
+  </div>
+</div>
+{% else %}
+<p class="text-muted">No access data recorded yet.</p>
+{% endif %}
+
+{% endblock %}

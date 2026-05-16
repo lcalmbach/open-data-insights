@@ -10,7 +10,8 @@
       "Bash(find /home/lcalm -maxdepth 5 -type f -name \"*.ipynb\" 2>/dev/null | head -20)",
       "Read(//home/lcalm/**)",
       "Read(//media/lcalm/rhyno/sbb/db/**)",
-      "Read(//media/lcalm/rhyno/sbb/**)"
+      "Read(//media/lcalm/rhyno/sbb/**)",
+      "Bash(python manage.py check)"
     ]
   }
 }

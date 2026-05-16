@@ -26,6 +26,7 @@ urlpatterns = [
         views.download_story_table_csv,
         name="story_table_download",
     ),
+    path("stories/<int:story_id>/access-stats/", views.story_access_stats, name="story_access_stats"),
     path("management/commands/", views.run_commands_view, name="run_commands"),
     path("management/query/", views.query_datasets_view, name="query_datasets"),
     path("management/email/", views.email_users_view, name="email_users"),
