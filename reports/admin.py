@@ -1,3 +1,5 @@
+import copy
+
 from django.contrib import admin
 from .models.story import Story
 from .models.story_template import (
@@ -61,6 +63,75 @@ class StoryAdmin(admin.ModelAdmin):
     )
 
 
+@admin.action(description="Duplicate selected story templates (full copy)")
+def duplicate_story_template(modeladmin, request, queryset):
+    for original in queryset:
+        original_pk = original.pk
+        original_title = original.title
+        topics = list(original.topics.all())
+
+        new_template = copy.copy(original)
+        new_template.pk = None
+        new_template.id = None
+        new_template.slug = None
+        new_template.title = f"Copy of {original_title}"
+        new_template.active = False
+        new_template.is_published = False
+        new_template.save()
+        new_template.topics.set(topics)
+
+        for ds in StoryTemplateDataset.objects.filter(story_template_id=original_pk):
+            StoryTemplateDataset.objects.create(story_template=new_template, dataset=ds.dataset)
+
+        for ctx in StoryTemplateContext.objects.filter(story_template_id=original_pk).order_by("sort_order"):
+            StoryTemplateContext.objects.create(
+                story_template=new_template,
+                description=ctx.description,
+                key=ctx.key,
+                sql_command=ctx.sql_command,
+                sort_order=ctx.sort_order,
+            )
+
+        for gt in StoryTemplateGraphic.objects.filter(story_template_id=original_pk).order_by("sort_order"):
+            StoryTemplateGraphic.objects.create(
+                story_template=new_template,
+                title=gt.title,
+                settings=gt.settings,
+                sql_command=gt.sql_command,
+                graphic_type=gt.graphic_type,
+                sort_order=gt.sort_order,
+            )
+
+        for tt in StoryTemplateTable.objects.filter(story_template_id=original_pk).order_by("sort_order"):
+            StoryTemplateTable.objects.create(
+                story_template=new_template,
+                title=tt.title,
+                sql_command=tt.sql_command,
+                sort_order=tt.sort_order,
+            )
+
+        for focus in StoryTemplateFocus.objects.filter(story_template_id=original_pk):
+            new_focus = StoryTemplateFocus.objects.create(
+                story_template=new_template,
+                default_title=focus.default_title,
+                default_lead=focus.default_lead,
+                publish_conditions=focus.publish_conditions,
+                filter_expression=focus.filter_expression,
+                filter_value=focus.filter_value,
+                focus_subject=focus.focus_subject,
+                web_search_flag=focus.web_search_flag,
+                search_context_prompt=focus.search_context_prompt,
+            )
+            for img_link in StoryTemplateFocusImage.objects.filter(focus=focus):
+                StoryTemplateFocusImage.objects.create(
+                    focus=new_focus,
+                    image=img_link.image,
+                    sort_order=img_link.sort_order,
+                )
+
+        modeladmin.message_user(request, f"Duplicated '{original_title}' → 'Copy of {original_title}'.")
+
+
 @admin.register(StoryTemplate)
 class StoryTemplateAdmin(admin.ModelAdmin):
     list_display = (
@@ -74,6 +145,7 @@ class StoryTemplateAdmin(admin.ModelAdmin):
         "active",
     )
     list_select_related = ("reference_period", "organisation", "region")
+    actions = [duplicate_story_template]
     inlines = (StoryTemplateFocusInline,)
     search_fields = ("title", "reference_period__value", "region__value", "topics__value")
     list_filter = ["story_source", "reference_period", "organisation", "region", "topics"]

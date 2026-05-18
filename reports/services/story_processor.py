@@ -1271,16 +1271,24 @@ class StoryProcessor:
                     user_parts.append(web_context_section)
                 user_parts.append("```json\n" + self.story.context_values + "\n```")
 
+                # Use system_prompt as a per-template formatting override when set;
+                # otherwise fall back to the global defaults. The prompt (message)
+                # always comes last so its explicit instructions take precedence.
+                template_system_prompt = (
+                    getattr(self.story.template, "system_prompt", None) or ""
+                ).strip()
+                formatting_instruction = template_system_prompt or LLM_FORMATTING_INSTRUCTIONS
+
                 messages = [
                     {
                         "role": "system",
                         "content": "\n\n".join(
                             part
                             for part in [
-                                message,
+                                formatting_instruction,
                                 focus_subject_instruction,
                                 web_search_instruction,
-                                LLM_FORMATTING_INSTRUCTIONS,
+                                message,
                                 language_instruction,
                             ]
                             if part
