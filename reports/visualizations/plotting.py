@@ -663,11 +663,12 @@ def create_heatmap(data, settings):
         # fallback: string sort stable
         return [str(v) for v in sorted(set(values), key=lambda x: (str(x)))]
 
-    x_sort = _sorted_category_list(x_unique) if x_unique else None
-    if x_sort:
-        x_enc = alt.X(f"{x_field}:O", title=settings.get("x_title", x_field), sort=x_sort, axis=alt.Axis(labelAngle=0))
+    x_sort_field = settings.get("x_sort_field")
+    if x_sort_field:
+        x_sort = alt.EncodingSortField(field=x_sort_field, order="ascending")
     else:
-        x_enc = alt.X(f"{x_field}:O", title=settings.get("x_title", x_field), axis=alt.Axis(labelAngle=0))
+        x_sort = _sorted_category_list(x_unique) if x_unique else None
+    x_enc = alt.X(f"{x_field}:O", title=settings.get("x_title", x_field), sort=x_sort, axis=alt.Axis(labelAngle=0))
 
     # allow y domain from settings: prefer explicit y_domain, fallback to generic domain
     domain = settings.get('y_domain', settings.get('domain'))
