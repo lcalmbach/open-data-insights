@@ -508,7 +508,6 @@ class StoryProcessor:
 
             # Execute SQL to get data
             data = self.dbclient.run_query(sql_command, params)
-
             if data is None or len(data) == 0:
                 self.logger.warning(
                     f"No data returned for graphic template: {graphic_template.title}"

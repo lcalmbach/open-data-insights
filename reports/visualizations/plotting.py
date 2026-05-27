@@ -222,7 +222,10 @@ def create_line_chart(data, settings):
     settings = settings.copy() if hasattr(settings, "copy") else dict(settings)
     data[settings['y']] = pd.to_numeric(data[settings['y']], errors='coerce')
     if settings.get('x_type') == "T":
-        data[settings.get('x')] = pd.to_datetime(data[settings.get('x')], errors='coerce')
+        x_col = settings.get('x')
+        parsed = pd.to_datetime(data[x_col], errors='coerce')
+        data[x_col] = parsed                                   # datetime64 for the temporal axis
+        data[f"{x_col}_label"] = parsed.dt.strftime('%Y-%m-%d')  # ISO string for tooltips
 
     x_field = settings.get("x")
     if (
@@ -2221,7 +2224,17 @@ def apply_common_settings(chart, settings):
     # Tooltip (optional)
     tooltip_fields = settings.get('tooltips')
     if tooltip_fields:
-        encodings['tooltip'] = tooltip_fields  # can be list of strings or alt.Tooltip instances
+        x_field = settings.get("x")
+        x_type = (settings.get("x_type") or "").upper()
+        processed = []
+        for t in tooltip_fields:
+            if isinstance(t, str) and t == x_field and x_type == "T":
+                # Use the _label column (ISO string) so the tooltip shows a
+                # readable date rather than the datetime64 millisecond value.
+                processed.append(alt.Tooltip(f"{t}_label:N", title=t))
+            else:
+                processed.append(t)
+        encodings['tooltip'] = processed
 
     # Apply encodings
     chart = chart.encode(**encodings)
