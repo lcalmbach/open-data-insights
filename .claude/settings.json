@@ -11,7 +11,14 @@
       "Read(//home/lcalm/**)",
       "Read(//media/lcalm/rhyno/sbb/db/**)",
       "Read(//media/lcalm/rhyno/sbb/**)",
-      "Bash(python manage.py check)"
+      "Bash(python manage.py check)",
+      "Bash(.venv/bin/python -c ' *)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -c \"import pandas; print\\('pandas ok'\\)\")",
+      "Bash(python3 -c \"import xlrd; print\\('xlrd ok'\\)\")",
+      "Bash(pip install *)",
+      "Bash(python3 work/bfs/import_fertility.py)",
+      "Bash(psql -U postgres -d postgres -c \"SELECT canton, year, fertility_rate FROM opendata.bfs_fertility_rate ORDER BY canton, year LIMIT 10;\")"
     ]
   }
 }

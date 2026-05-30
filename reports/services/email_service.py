@@ -21,6 +21,18 @@ from reports.models.lookups import Language
 
 from reports.services.base import ETLBaseService
 from reports.services.database_client import DjangoPostgresClient
+
+
+def _story_lead(story) -> str:
+    """Return the story's summary, or the first 2 sentences of content as fallback."""
+    if (story.summary or "").strip():
+        return story.summary.strip()
+    content = (story.content or "").strip()
+    if not content:
+        return ""
+    import re
+    sentences = re.split(r'(?<=[.!?])\s+', content)
+    return " ".join(sentences[:2])
 from reports.language import (
     ENGLISH_LANGUAGE_ID,
     get_language_code_for_id,
@@ -167,7 +179,7 @@ class EmailService(ETLBaseService):
                     insights.append(
                         {
                             "title": story.title,
-                            "summary": story.summary,
+                            "summary": _story_lead(story),
                             "url": rewrite_url_language(story_url, language_code),
                         }
                     )

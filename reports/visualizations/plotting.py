@@ -36,6 +36,9 @@ def _build_reference_line_layers(settings):
     x_type = (settings.get("x_type") or "Q").upper()
     y_type = (settings.get("y_type") or "Q").upper()
 
+    x_field = settings.get("x", "x")
+    y_field = settings.get("y", "y")
+
     for line in reference_lines:
         if not isinstance(line, dict):
             continue
@@ -43,13 +46,15 @@ def _build_reference_line_layers(settings):
         line_type = str(line.get("type") or "").upper()
         label = line.get("label")
         if line_type == "V" and "x" in line:
-            line_data = pd.DataFrame([{"x": line["x"], "label": label}])
+            # Use the same field name as the main chart so Vega-Lite merges
+            # the x-scale domain and the rule is visible.
+            line_data = pd.DataFrame([{x_field: line["x"], "label": label}])
             chart = alt.Chart(line_data).mark_rule(
                 color=line.get("color", "red"),
                 strokeWidth=line.get("width", 1),
                 strokeDash=_stroke_dash_for_style(line.get("stroke")),
             ).encode(
-                x=alt.X(f"x:{x_type}")
+                x=alt.X(f"{x_field}:{x_type}")
             )
             layers.append(chart)
             if label:
@@ -61,18 +66,20 @@ def _build_reference_line_layers(settings):
                     dx=4,
                     dy=4,
                 ).encode(
-                    x=alt.X(f"x:{x_type}"),
+                    x=alt.X(f"{x_field}:{x_type}"),
                     y=alt.value(0),
                 )
                 layers.append(label_chart)
         elif line_type == "H" and "y" in line:
-            line_data = pd.DataFrame([{"y": line["y"], "label": label}])
+            # Use the same field name as the main chart so Vega-Lite merges
+            # the y-scale domain and the rule is visible.
+            line_data = pd.DataFrame([{y_field: line["y"], "label": label}])
             chart = alt.Chart(line_data).mark_rule(
                 color=line.get("color", "red"),
                 strokeWidth=line.get("width", 1),
                 strokeDash=_stroke_dash_for_style(line.get("stroke")),
             ).encode(
-                y=alt.Y(f"y:{y_type}")
+                y=alt.Y(f"{y_field}:{y_type}")
             )
             layers.append(chart)
             if label:
@@ -85,7 +92,7 @@ def _build_reference_line_layers(settings):
                     dy=-4,
                 ).encode(
                     x=alt.value(0),
-                    y=alt.Y(f"y:{y_type}"),
+                    y=alt.Y(f"{y_field}:{y_type}"),
                 )
                 layers.append(label_chart)
 

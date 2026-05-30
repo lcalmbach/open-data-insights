@@ -2,9 +2,7 @@ import csv
 from decimal import Decimal
 import json
 import logging
-import random
 import re
-import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -275,8 +273,7 @@ def _send_story_rating_email(
     try:
         send_mail(subject, message, from_email, [recipient])
     except Exception:
-        # Keep rating submission successful even if email delivery fails.
-        pass
+        logger.warning("Failed to send story rating email to %s", recipient, exc_info=True)
 
 
 def _send_user_feedback_notification_email(
@@ -1675,6 +1672,7 @@ def run_commands_view(request):
         command = (request.POST.get("command") or "").strip()
         if command:
             try:
+                import shlex
                 args = shlex.split(command)
                 manage_py = settings.BASE_DIR / "manage.py"
                 completed = subprocess.run(
@@ -1755,7 +1753,7 @@ def get_tables(selected_story):
                 }
             )
         except Exception as e:
-            print(f"Error processing table {t.id}: {e}")
+            logger.error("Error processing table %s: %s", t.id, e)
 
     return tables
 
