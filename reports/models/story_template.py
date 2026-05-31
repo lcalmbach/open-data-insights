@@ -193,6 +193,13 @@ class StoryTemplate(models.Model):
         default=GENERATION_MODE_TRANSLATE,
         help_text="How multilingual stories are produced: generate in English then translate, or generate each language from the prompt.",
     )
+    run_validation_tier2 = models.BooleanField(
+        default=True,
+        help_text=(
+            "Run the LLM-based hallucination check (Tier 2) after story generation. "
+            "Disable for low-risk templates (e.g. simple data summaries) to save time and cost."
+        ),
+    )
 
     class Meta:
         verbose_name = "Story Template"

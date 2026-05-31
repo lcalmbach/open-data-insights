@@ -101,6 +101,35 @@ class EmailService(ETLBaseService):
             self.logger.error(f"Error sending story email: {str(e)}")
             return {"success": False, "error": str(e)}
 
+    def send_validation_failure_email(self, story, notes: str) -> None:
+        """Notify the developer when a story fails automated validation."""
+        recipient = getattr(settings, "DEVELOPER_EMAIL", None) or self.from_email
+        if not recipient:
+            self.logger.warning("No DEVELOPER_EMAIL configured — skipping validation failure notification.")
+            return
+
+        template_title = getattr(
+            getattr(getattr(story, "templatefocus", None), "story_template", None),
+            "title", "unknown template",
+        )
+        story_id = getattr(story, "id", "unsaved")
+        subject = f"[ODI] Story validation failed — {template_title}"
+        body = (
+            f"A story failed automated quality validation and will not be shown publicly.\n\n"
+            f"Story ID   : {story_id}\n"
+            f"Template   : {template_title}\n"
+            f"Title      : {getattr(story, 'title', '') or '(no title)'}\n"
+            f"Period     : {getattr(story, 'reference_period_start', '')} – {getattr(story, 'reference_period_end', '')}\n"
+            f"Reason     : {notes}\n\n"
+            f"Content preview:\n{(story.content or '')[:500]}\n"
+        )
+        try:
+            from django.core.mail import send_mail
+            send_mail(subject, body, self.from_email, [recipient], fail_silently=True)
+            self.logger.info("Validation failure notification sent to %s", recipient)
+        except Exception as exc:
+            self.logger.warning("Could not send validation failure notification: %s", exc)
+
     def send_stories_for_date(self, send_date: date = None) -> Dict[str, Any]:
         """Send all stories for a specific date using Django ORM and new template"""
         try:
@@ -163,6 +192,8 @@ class EmailService(ETLBaseService):
                     templatefocus__story_template_id__in=template_ids,
                     published_date=send_date,
                     language_id=ENGLISH_LANGUAGE_ID,
+                ).exclude(
+                    validation_status=Story.VALIDATION_FAILED,
                 ).select_related("templatefocus__story_template")
 
                 if not stories.exists():

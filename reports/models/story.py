@@ -77,6 +77,28 @@ class Story(models.Model):
         null=True,
     )
     content = models.TextField(help_text="Content of the story.", blank=True, null=True)
+
+    VALIDATION_PENDING = "pending"
+    VALIDATION_PASSED = "passed"
+    VALIDATION_FAILED = "failed"
+    VALIDATION_STATUS_CHOICES = [
+        (VALIDATION_PENDING, "Pending"),
+        (VALIDATION_PASSED, "Passed"),
+        (VALIDATION_FAILED, "Failed"),
+    ]
+    validation_status = models.CharField(
+        max_length=10,
+        choices=VALIDATION_STATUS_CHOICES,
+        default=VALIDATION_PENDING,
+        db_index=True,
+        help_text="Result of the automated quality check. Only 'passed' stories are shown on the website and included in newsletters.",
+    )
+    validation_notes = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Reason for failing validation, or notes from the LLM judge.",
+    )
+
     language = models.ForeignKey(
         Language,
         blank=True,     

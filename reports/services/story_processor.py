@@ -20,6 +20,7 @@ from ..visualizations.plotting import generate_chart
 from django.db.models import Max
 
 from reports.services.database_client import DjangoPostgresClient
+from reports.services.story_validator import StoryValidator
 from reports.models.story_context import StoryTemplateContext
 from reports.models.story_log import StoryLog
 from reports.models.story_context import StoryTemplate
@@ -668,6 +669,24 @@ class StoryProcessor:
                 return False
 
             self.story.save()
+
+            self.logger.info("Validating story...")
+            validator = StoryValidator()
+            result = validator.validate(self.story, self.ai_client)
+            self.story.save(update_fields=["validation_status", "validation_notes"])
+            if not result.passed:
+                self.logger.warning(
+                    "Story failed validation — will not be shown publicly. Notes: %s",
+                    result.notes,
+                )
+                try:
+                    from reports.services.email_service import EmailService
+                    EmailService().send_validation_failure_email(self.story, result.notes or "")
+                except Exception as exc:
+                    self.logger.warning("Could not send validation failure email: %s", exc)
+            else:
+                self.logger.info("Story passed validation. Notes: %s", result.notes or "none")
+
             self.logger.info("Generating tables...")
             self._generate_tables()
             self.logger.info("Generating graphics...")

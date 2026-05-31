@@ -593,6 +593,12 @@ _PUBLISHED_ON_LABELS = {
 
 
 def _apply_story_filters(request, stories, *, allowed_template_ids=None):
+    # Exclude stories that failed automated validation; also include legacy
+    # stories that predate the field (validation_status='pending') so they
+    # remain visible until they are re-validated.
+    from reports.models.story import Story as _Story
+    stories = stories.exclude(validation_status=_Story.VALIDATION_FAILED)
+
     template_id = (request.GET.get("template") or "").strip()
     reference_period = (request.GET.get("reference_period") or "").strip()
     region_id = (request.GET.get("region") or "").strip()
