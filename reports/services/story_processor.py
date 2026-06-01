@@ -515,6 +515,11 @@ class StoryProcessor:
                 )
                 return
 
+            # psycopg2 returns NUMERIC columns as Python Decimal, which Altair
+            # cannot serialise to JSON. Convert all Decimal values to float.
+            from decimal import Decimal
+            data = data.map(lambda x: float(x) if isinstance(x, Decimal) else x)
+
             # Generate unique chart ID
             chart_id = f"chart-{graphic_template.id}-{uuid.uuid4().hex[:8]}"
             # Use settings from template
@@ -526,7 +531,15 @@ class StoryProcessor:
             settings["type"] = graphic_template.graphic_type
             settings = self._resolve_reference_line_settings(settings)
             if "highlight" in settings:
-                 settings["highlight"] = self._replace_reference_period_expression(settings["highlight"])
+                settings["highlight"] = self._replace_reference_period_expression(settings["highlight"])
+            if "focus_line" in settings and isinstance(settings["focus_line"], dict):
+                cv = settings["focus_line"].get("color_value")
+                if isinstance(cv, str):
+                    resolved = self._replace_reference_period_expression(cv)
+                    try:
+                        settings["focus_line"]["color_value"] = int(resolved)
+                    except (ValueError, TypeError):
+                        settings["focus_line"]["color_value"] = resolved
             # Generate chart HTML
             self.logger.info(f"Generating chart for: {graphic_template.title}")
             if "y" in settings:
