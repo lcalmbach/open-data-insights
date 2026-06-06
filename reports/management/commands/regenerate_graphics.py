@@ -87,7 +87,7 @@ class Command(BaseCommand):
         for g in graphics:
             gtype = g.graphic_template.graphic_type.value
             processor = StoryProcessor(
-                published_date=None, template=None, force_generation=False, story=g.story
+                published_date=g.story.published_date, template=None, force_generation=False, story=g.story
             )
             ok = processor.generate_graphic(g)
             if ok:

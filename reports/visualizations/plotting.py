@@ -209,6 +209,11 @@ def create_line_chart(data, settings: dict) -> dict:
         "yAxis": {"type": "value", "name": settings.get("y_title", y_col)},
     }
 
+    y_domain = settings.get("y_domain")
+    if y_domain and len(y_domain) == 2:
+        option["yAxis"]["min"] = y_domain[0]
+        option["yAxis"]["max"] = y_domain[1]
+
     if settings.get("focus_line"):
         fl = settings["focus_line"]
         focus_val = str(fl["color_value"])
@@ -338,6 +343,10 @@ def create_bar_chart(data, settings: dict) -> dict:
             "series": series,
         }
 
+    y_domain = settings.get("y_domain")
+    if y_domain and len(y_domain) == 2:
+        option["yAxis"]["min"] = y_domain[0]
+        option["yAxis"]["max"] = y_domain[1]
     if settings.get("color_range"):
         option["color"] = list(settings["color_range"])
     return option
@@ -462,7 +471,7 @@ def create_area_chart(data, settings: dict) -> dict:
         series = [s]
 
     y_fmt = "{value}%" if settings.get("percentage") else "{value}"
-    return {
+    option = {
         "_width": w, "_height": h,
         "title": {"text": settings.get("title", "")},
         "tooltip": {"trigger": "axis"},
@@ -471,6 +480,11 @@ def create_area_chart(data, settings: dict) -> dict:
         "yAxis": {"type": "value", "name": settings.get("y_title", y_col), "axisLabel": {"formatter": y_fmt}},
         "series": series,
     }
+    y_domain = settings.get("y_domain")
+    if y_domain and len(y_domain) == 2:
+        option["yAxis"]["min"] = y_domain[0]
+        option["yAxis"]["max"] = y_domain[1]
+    return option
 
 
 # ---------------------------------------------------------------------------

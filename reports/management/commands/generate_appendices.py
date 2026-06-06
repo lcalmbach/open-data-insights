@@ -88,13 +88,13 @@ class Command(BaseCommand):
         
         if options.get('graphics'):
             for graphic in graphics:
-                processor = StoryProcessor(published_date=None, template=None, force_generation=False, story=graphic.story)
+                processor = StoryProcessor(published_date=graphic.story.published_date, template=None, force_generation=False, story=graphic.story)
                 if not processor.generate_graphic(graphic):
                     errors += 1
                 processed += 1
         if options.get('tables'):            
             for table in tables:
-                processor = StoryProcessor(published_date=None, template=None, force_generation=False, story=table.story)
+                processor = StoryProcessor(published_date=table.story.published_date, template=None, force_generation=False, story=table.story)
                 if not processor.generate_table(table):
                     errors += 1
                 processed += 1
