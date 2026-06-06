@@ -7,7 +7,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import altair as alt
 import markdown2
 import pandas as pd
 from iommi import Column, Table
@@ -1398,34 +1397,26 @@ def story_access_stats(request, story_id):
 
     chart_html = None
     if daily_qs.exists():
+        from .visualizations.plotting import generate_chart
         df = pd.DataFrame(list(daily_qs))
         df["type"] = df["is_bot"].map({True: "Bot", False: "Human"})
-        df["date"] = pd.to_datetime(df["date"])
-        chart = (
-            alt.Chart(df)
-            .mark_bar()
-            .encode(
-                x=alt.X("date:T", title="Date"),
-                y=alt.Y("count:Q", title="Accesses", stack="zero"),
-                color=alt.Color(
-                    "type:N",
-                    scale=alt.Scale(domain=["Human", "Bot"], range=["steelblue", "orange"]),
-                    legend=alt.Legend(title="Visitor type"),
-                ),
-                tooltip=[
-                    alt.Tooltip("date:T", title="Date"),
-                    alt.Tooltip("type:N", title="Type"),
-                    alt.Tooltip("count:Q", title="Count"),
-                ],
-            )
-            .properties(width="container", height=250, title="Daily access history")
-        )
-        raw_html = chart.to_html(embed_options={"actions": False, "renderer": "svg"})
-        chart_html = (
-            raw_html
-            .replace('id="vis"', 'id="access-history-chart"')
-            .replace("#vis.vega-embed", "#access-history-chart.vega-embed")
-            .replace('vegaEmbed("#vis"', 'vegaEmbed("#access-history-chart"')
+        df["date"] = df["date"].astype(str)
+        chart_html = generate_chart(
+            data=df,
+            settings={
+                "type": "bar_stacked",
+                "x": "date",
+                "y": "count",
+                "color": "type",
+                "legend_order": ["Human", "Bot"],
+                "color_range": ["steelblue", "orange"],
+                "title": "Daily access history",
+                "x_title": "Date",
+                "y_title": "Accesses",
+                "height": 250,
+                "width": "container",
+            },
+            chart_id="access-history-chart",
         )
 
     return render(

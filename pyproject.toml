@@ -6,7 +6,6 @@ readme = "readme.md"
 requires-python = ">=3.12"
 dependencies = [
   "Django>=4.2,<5.0",
-  "altair",
   "anthropic",
   "beautifulsoup4",
   "boto3",

@@ -1,3 +1,15 @@
+"""
+Chart generation for Open Data Insights.
+
+Every ECharts chart function returns a plain Python dict that is the ECharts
+option object (plus the private keys _width, _height and optionally
+__js_functions__). _chart_to_html() serialises it to an embeddable HTML
+fragment. No third-party Python wrapper is used — just json.dumps and the
+ECharts CDN loaded in base.html.
+
+Non-ECharts functions (Leaflet maps, word cloud) return ready-made HTML strings
+and are listed in NON_ECHARTS_TYPES in generate_chart().
+"""
 from __future__ import annotations
 import base64
 import json
@@ -5,748 +17,924 @@ import logging
 import re
 import uuid
 from io import BytesIO
-from typing import List
 
 import numpy as np
 import pandas as pd
-import altair as alt
 from wordcloud import WordCloud
-
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Small helpers
+# ---------------------------------------------------------------------------
 
-def _stroke_dash_for_style(stroke_style):
-    style = str(stroke_style or "solid").lower()
-    if style == "dashed":
-        return [6, 4]
-    if style == "dotted":
-        return [2, 2]
-    if style == "dashdot":
-        return [6, 4, 2, 4]
-    return alt.Undefined
+def _css_width(value) -> str:
+    if value is None:
+        return "100%"
+    if isinstance(value, (int, float)):
+        return f"{int(value)}px"
+    text = str(value).strip()
+    return "100%" if text.lower() == "container" else text
 
 
-def _build_reference_line_layers(settings):
+def _css_height(value, fallback: int = 300) -> str:
+    if value is None:
+        return f"{fallback}px"
+    if isinstance(value, (int, float)):
+        return f"{int(value)}px"
+    return str(value).strip()
+
+
+def _x_label_rotate(data: pd.DataFrame, x_field, settings: dict) -> int:
+    angle = settings.get("x_label_angle")
+    if angle is not None:
+        return int(angle)
+    try:
+        n = int(data[x_field].nunique()) if x_field else 0
+        ml = max((len(str(v)) for v in data[x_field].dropna().unique()), default=0)
+    except Exception:
+        n, ml = 0, 0
+    if n > 12 or ml > 10:
+        return -40
+    if n > 8 or ml > 6:
+        return -25
+    return 0
+
+
+def _x_labels(series) -> list:
+    """Convert a Series/iterable to string category labels, collapsing float-like ints."""
+    result = []
+    for v in series:
+        try:
+            iv = int(float(v))
+            if float(iv) == float(v):
+                result.append(str(iv))
+                continue
+        except (TypeError, ValueError):
+            pass
+        result.append(str(v))
+    return result
+
+
+def _clean_vals(series) -> list:
+    """Convert a Series to plain Python floats; NaN/None → None (ECharts gap)."""
+    return [None if pd.isna(v) else float(v) for v in series]
+
+
+def _fill_vals(series, fill: float = 0.0) -> list:
+    """Like _clean_vals but replaces NaN with fill instead of None."""
+    return [fill if pd.isna(v) else float(v) for v in series]
+
+
+def _mark_line_opt(settings: dict) -> dict | None:
+    """Build an ECharts markLine option from reference_lines settings, or None."""
     reference_lines = settings.get("reference_lines") or []
     if not isinstance(reference_lines, list):
-        return []
-
-    layers = []
-    x_type = (settings.get("x_type") or "Q").upper()
-    y_type = (settings.get("y_type") or "Q").upper()
-
-    x_field = settings.get("x", "x")
-    y_field = settings.get("y", "y")
-
+        return None
+    items = []
     for line in reference_lines:
         if not isinstance(line, dict):
             continue
-
-        line_type = str(line.get("type") or "").upper()
-        label = line.get("label")
-        if line_type == "V" and "x" in line:
-            # Use the same field name as the main chart so Vega-Lite merges
-            # the x-scale domain and the rule is visible.
-            line_data = pd.DataFrame([{x_field: line["x"], "label": label}])
-            chart = alt.Chart(line_data).mark_rule(
-                color=line.get("color", "red"),
-                strokeWidth=line.get("width", 1),
-                strokeDash=_stroke_dash_for_style(line.get("stroke")),
-            ).encode(
-                x=alt.X(f"{x_field}:{x_type}")
-            )
-            layers.append(chart)
-            if label:
-                label_chart = alt.Chart(line_data).mark_text(
-                    text=label,
-                    color=line.get("color", "red"),
-                    align="left",
-                    baseline="top",
-                    dx=4,
-                    dy=4,
-                ).encode(
-                    x=alt.X(f"{x_field}:{x_type}"),
-                    y=alt.value(0),
-                )
-                layers.append(label_chart)
-        elif line_type == "H" and "y" in line:
-            # Use the same field name as the main chart so Vega-Lite merges
-            # the y-scale domain and the rule is visible.
-            line_data = pd.DataFrame([{y_field: line["y"], "label": label}])
-            chart = alt.Chart(line_data).mark_rule(
-                color=line.get("color", "red"),
-                strokeWidth=line.get("width", 1),
-                strokeDash=_stroke_dash_for_style(line.get("stroke")),
-            ).encode(
-                y=alt.Y(f"{y_field}:{y_type}")
-            )
-            layers.append(chart)
-            if label:
-                label_chart = alt.Chart(line_data).mark_text(
-                    text=label,
-                    color=line.get("color", "red"),
-                    align="left",
-                    baseline="bottom",
-                    dx=4,
-                    dy=-4,
-                ).encode(
-                    x=alt.value(0),
-                    y=alt.Y(f"{y_field}:{y_type}"),
-                )
-                layers.append(label_chart)
-
-    return layers
+        lt = str(line.get("type") or "").upper()
+        label = line.get("label", "")
+        ls = {"color": line.get("color", "red"), "width": line.get("width", 1)}
+        if lt == "V" and "x" in line:
+            items.append({"xAxis": line["x"], "name": label, "lineStyle": ls})
+        elif lt == "H" and "y" in line:
+            items.append({"yAxis": line["y"], "name": label, "lineStyle": ls})
+    return {"silent": False, "data": items} if items else None
 
 
-def _build_categorical_x_axis(data, settings, x_field):
-    """Choose axis settings that keep dense bar-chart labels readable."""
-    axis_kwargs = {}
-    x_label_angle = settings.get("x_label_angle")
-    x_label_limit = settings.get("x_label_limit")
+# ---------------------------------------------------------------------------
+# HTML rendering
+# ---------------------------------------------------------------------------
 
-    try:
-        n_labels = int(data[x_field].nunique()) if x_field else 0
-    except Exception:
-        n_labels = 0
-
-    try:
-        max_label_length = max((len(str(v)) for v in data[x_field].dropna().unique()), default=0)
-    except Exception:
-        max_label_length = 0
-
-    if x_label_angle is not None:
-        axis_kwargs["labelAngle"] = x_label_angle
-    elif n_labels > 12 or max_label_length > 10:
-        axis_kwargs["labelAngle"] = -40
-    elif n_labels > 8 or max_label_length > 6:
-        axis_kwargs["labelAngle"] = -25
-    else:
-        axis_kwargs["labelAngle"] = 0
-
-    axis_kwargs["labelOverlap"] = settings.get(
-        "x_label_overlap",
-        "greedy" if axis_kwargs["labelAngle"] == 0 else True,
-    )
-    axis_kwargs["labelLimit"] = (
-        x_label_limit
-        if x_label_limit is not None
-        else 120 if axis_kwargs["labelAngle"] == 0 else 160
+def _chart_to_html(option: dict, chart_id: str) -> str:
+    """Serialise an ECharts option dict to an embeddable HTML+JS fragment."""
+    width = option.pop("_width", "100%")
+    height = option.pop("_height", "300px")
+    js_functions = option.pop("__js_functions__", {})
+    options_json = json.dumps(option)
+    for placeholder, func_code in js_functions.items():
+        options_json = options_json.replace(f'"{placeholder}"', func_code)
+    return (
+        f'<div id="{chart_id}" style="width:{width};height:{height};"></div>\n'
+        f"<script>\n"
+        f"(function(){{\n"
+        f'  var dom = document.getElementById("{chart_id}");\n'
+        f"  var chart = echarts.init(dom);\n"
+        f"  window.__echartsInstances = window.__echartsInstances || {{}};\n"
+        f'  window.__echartsInstances["{chart_id}"] = chart;\n'
+        f"  chart.setOption({options_json});\n"
+        f"}})();\n"
+        f"</script>"
     )
 
-    if settings.get("x_format"):
-        axis_kwargs["format"] = settings["x_format"]
 
-    return alt.Axis(**axis_kwargs)
+# ---------------------------------------------------------------------------
+# Dispatcher
+# ---------------------------------------------------------------------------
+
+NON_ECHARTS_TYPES = {"wordcloud", "map_markers", "map-markers", "choropleth", "chloropleth"}
 
 
-
-def generate_chart(data, settings, chart_id):
-    """
-    Generate a chart based on data and settings and return HTML.
-    Uses Altair for most chart types and `wordcloud` for word clouds.
-    """
+def generate_chart(data, settings, chart_id: str) -> str:
+    """Return a self-contained HTML fragment for the requested chart type."""
     try:
         chart_functions = {
             "line": create_line_chart,
             "bar": create_bar_chart,
             "bar_stacked": create_bar_stacked_chart,
-            "bar-stacked": create_bar_stacked_chart,
             "area": create_area_chart,
-            "point": create_point_chart,
             "scatter": create_point_chart,
             "pie": create_pie_chart,
             "heatmap": create_heatmap,
             "histogram": create_histogram,
-            "map-markers": create_map_markers,
-            "choropleth": create_chloropleth,
+            "map_markers": create_map_markers,
             "chloropleth": create_chloropleth,
             "wordcloud": create_word_cloud,
             "radar": create_radar_chart,
             "ranking_bar": create_ranking_bar_chart,
         }
-        chart_settings = settings.copy() if hasattr(settings, "copy") else dict(settings)
-        chart_settings.setdefault("chart_id", chart_id)
-        chart_type_value = chart_settings.get("type")
-        if hasattr(chart_type_value, "value"):
-            chart_type_value = chart_type_value.value
-        chart_type = str(chart_type_value).lower() if chart_type_value is not None else ""
-        chart_func = chart_functions.get(chart_type, create_line_chart)
-        chart = chart_func(data, chart_settings)
-
-        if chart_type not in (
-            "wordcloud",
-            "map_markers",
-            "map-markers",
-            "choropleth",
-            "chloropleth",
-        ):
-            html = chart.to_html(
-                embed_options={
-                    "actions": False,  # Hide download buttons
-                    "renderer": "svg",  # SVG is better for print/static content
-                    "theme": settings.get("theme", "default"),
-                }
-            )
-
-            html = html.replace('id="vis"', f'id="{chart_id}"')
-            html = html.replace("#vis.vega-embed", f"#{chart_id}.vega-embed")
-            html = html.replace(
-                "document.getElementById('vis')",
-                f"document.getElementById('{chart_id}')",
-            )
-            html = html.replace(
-                'document.getElementById("vis")',
-                f'document.getElementById("{chart_id}")',
-            )
-            html = html.replace('vegaEmbed("#vis"', f'vegaEmbed("#{chart_id}"')
-            embed_hook = ".then(function(result) {"
-            if embed_hook in html:
-                store_view = (
-                    "window.__vegaViews = window.__vegaViews || {};\n"
-                    f'window.__vegaViews["{chart_id}"] = result.view;'
-                )
-                html = html.replace(embed_hook, f"{embed_hook}\n{store_view}")
-        else:
-            html = chart  # wordcloud returns HTML directly
-        return html
-
+        cs = settings.copy() if hasattr(settings, "copy") else dict(settings)
+        cs.setdefault("chart_id", chart_id)
+        ct_raw = cs.get("type")
+        if hasattr(ct_raw, "value"):
+            ct_raw = ct_raw.value
+        ct = str(ct_raw).lower() if ct_raw is not None else ""
+        result = chart_functions.get(ct, create_line_chart)(data, cs)
+        if ct in NON_ECHARTS_TYPES:
+            return result
+        return _chart_to_html(result, chart_id)
     except Exception as e:
-        logger.error(f"Error generating chart: {str(e)}")
-        return f'<div id=\"{chart_id}\" class=\"chart-error\">Error generating chart: {str(e)}</div>'
+        logger.error("Error generating chart: %s", e)
+        return f'<div id="{chart_id}" class="chart-error">Error generating chart: {e}</div>'
 
 
-def generate_chloropleth(data, settings, chart_id=None):
-    """Generate a Leaflet choropleth map fragment (HTML + inline JS)."""
-    chart_settings = settings.copy() if hasattr(settings, "copy") else dict(settings)
+def generate_chloropleth(data, settings, chart_id=None) -> str:
+    cs = settings.copy() if hasattr(settings, "copy") else dict(settings)
     if chart_id:
-        chart_settings.setdefault("chart_id", chart_id)
-    return create_chloropleth(data, chart_settings)
+        cs.setdefault("chart_id", chart_id)
+    return create_chloropleth(data, cs)
 
 
-def create_line_chart(data, settings):
-    """Create a line chart with the given data and settings"""
-    settings = settings.copy() if hasattr(settings, "copy") else dict(settings)
-    data[settings['y']] = pd.to_numeric(data[settings['y']], errors='coerce')
-    if settings.get('x_type') == "T":
-        x_col = settings.get('x')
-        parsed = pd.to_datetime(data[x_col], errors='coerce')
-        data[x_col] = parsed                                   # datetime64 for the temporal axis
-        data[f"{x_col}_label"] = parsed.dt.strftime('%Y-%m-%d')  # ISO string for tooltips
+# ---------------------------------------------------------------------------
+# Line chart
+# ---------------------------------------------------------------------------
 
-    x_field = settings.get("x")
-    if (
-        x_field
-        and settings.get("x_type", "").upper() in {"", "Q", "N"}
-        and "x_tick_integer" not in settings
-    ):
-        try:
-            x_numeric = pd.to_numeric(data[x_field], errors="coerce").dropna()
-            if not x_numeric.empty:
-                is_integer_like = (x_numeric % 1 == 0).all()
-                looks_like_years = x_numeric.between(1000, 9999).all()
-                if is_integer_like and looks_like_years:
-                    settings["x_tick_integer"] = True
-                    x_axis = settings.get("x_axis", {}).copy() if hasattr(settings.get("x_axis", {}), "copy") else dict(settings.get("x_axis", {}) or {})
-                    x_axis.setdefault("format", "d")
-                    settings["x_axis"] = x_axis
-        except Exception:
-            pass
-    
-    reference_line_layers = _build_reference_line_layers(settings)
+def create_line_chart(data, settings: dict) -> dict:
+    settings = settings.copy()
+    x_col = settings.get("x", "")
+    y_col = settings.get("y", "")
+    color_col = settings.get("color")
 
-    if "focus_line" in settings:
-        focus_year = settings["focus_line"]["color_value"]
-        settings["x_type"] = 'N'
-        base = alt.Chart().encode(
-            #x=alt.X("month:O", title="Monat", sort=list(range(1, 13))),
-            #y=alt.Y("avg_temp:Q", title="Monatsmittel Temperatur (°C)"),
-            x=alt.X(f'{settings["x"]}:{settings["x_type"]}'),
-            y=alt.Y(settings["y"]),
-            tooltip=settings["tooltips"],
-        )
-        
-        ref_lines = base.transform_filter(
-            alt.datum.Year != focus_year
-        ).mark_line(
-            color=settings["bg_line"]["line_color"],
-            strokeWidth=1,
-            opacity=0.6
-        ).encode(
-            detail="Year:N"     # sorgt für eine Linie pro Jahr, ohne Legend
-        )
+    df = pd.DataFrame(data).copy()
+    df[y_col] = pd.to_numeric(df[y_col], errors="coerce")
 
-        # Fokusjahr: rot + fett
-        focus_line = base.transform_filter(
-            alt.datum.Year == focus_year
-        ).mark_line(
-            color=settings["focus_line"]["line_color"],
-            strokeWidth=settings["focus_line"]["line_width"],
-        )
+    w = _css_width(settings.get("width", "container"))
+    h = _css_height(settings.get("height", 300))
+    smooth = settings.get("interpolate") in ("monotone", "cardinal", "catmull-rom")
+    show_symbol = settings.get("show_points", False)
+    mark_line = _mark_line_opt(settings)
 
-        layers = [ref_lines, focus_line, *reference_line_layers]
-        chart = alt.layer(
-            *layers,
-            data=data   # df = Ergebnis deines SQL-Queries als DataFrame
-        ).properties(
-            width=700,
-            height=380
-        )
-    else:
-        chart = alt.Chart(data).mark_line(
-            point=settings.get('show_points', False),
-            interpolate=settings.get('interpolate', 'linear')
-        )
-        # Apply encodings and properties
-        chart = apply_common_settings(chart, settings)
-        if reference_line_layers:
-            chart = alt.layer(chart, *reference_line_layers)
-
-    # Line-specific settings
-    if 'stroke_width' in settings:
-        chart = chart.mark_line(strokeWidth=settings['stroke_width'])
-        
-    return chart
-
-
-def create_bar_chart(data, settings):
-    """Create a bar chart with the given data and settings"""
-    # Determine fields
-    x_field = settings.get('x')
-    y_field = settings.get('y')
-    x_format = settings.get('x_format')
-    color_field = settings.get('color')
-    is_horizontal = settings.get('horizontal', False)
-
-    # For bar sizing: count distinct values of the field that will be on the categorical axis
-    # For vertical bars: that's x_field
-    # For horizontal bars: that's y_field (after swap)
-    categorical_field = y_field if is_horizontal else x_field
-
-    # sensible defaults for bar sizing
-    total_plot_width = settings.get('plot_width') or settings.get('width') or 700
-    min_bar_width = settings.get('bar_min_width', 8)
-    max_bar_width = settings.get('bar_max_width', 120)
-
-    # compute number of distinct bars and size (wider when fewer bars, narrower when many)
-    try:
-        n_bars = int(data[categorical_field].nunique()) if categorical_field else 1
-    except Exception:
-        n_bars = 1
-    if n_bars > 0:
-        computed_size = int(max(min_bar_width, min(max_bar_width, (int(total_plot_width) / max(1, n_bars)) * 0.9)))
-    else:
-        computed_size = int(max(min_bar_width, min(max_bar_width, 20)))
-
-    # Build base chart with explicit size
-    chart = alt.Chart(data).mark_bar(
-        size=computed_size,
-        cornerRadiusTopLeft=settings.get('corner_radius', 0),
-        cornerRadiusTopRight=settings.get('corner_radius', 0)
-    )
-
-    # helper to build an ordered category list so Altair treats x as ordinal (no fractional ticks)
-    def _sorted_category_list(values):
-        vals = list(values)
-        try:
-            ints = [int(v) for v in vals]
-            if all(float(i) == float(v) for i, v in zip(ints, vals)):
-                return [str(i) for i in sorted(set(ints))]
-        except Exception:
-            pass
-        return [str(v) for v in sorted(set(vals), key=lambda x: str(x))]
-
-    x_sort = None
-    if x_field:
-        try:
-            unique_vals = data[x_field].dropna().unique()
-            x_sort = _sorted_category_list(unique_vals)
-        except Exception:
-            x_sort = None
-
-    # Build encodings, force x to ordinal categories to avoid numeric fractional ticks for years
-    # Build X axis (format belongs to Axis, NOT to alt.X)
-    encodings = {}
-    axis = _build_categorical_x_axis(data, settings, x_field)
-
-    x_encoding_kwargs = {
-        "title": settings.get("x_title", x_field),
-        "axis": axis,
+    option: dict = {
+        "_width": w, "_height": h,
+        "title": {"text": settings.get("title", "")},
+        "tooltip": {"trigger": "axis"},
+        "xAxis": {
+            "type": "category",
+            "name": settings.get("x_title", x_col),
+            "axisLabel": {"rotate": _x_label_rotate(df, x_col, settings)},
+        },
+        "yAxis": {"type": "value", "name": settings.get("y_title", y_col)},
     }
-    if x_sort:
-        x_encoding_kwargs["sort"] = x_sort
 
-    # Decide type: use temporal when formatting dates; otherwise keep ordinal behavior
-    x_type = settings.get("x_type")  # optional explicit override: "T", "O", "Q", "N"
-    if not x_type:
-        x_type = "T" if x_format else "O"
+    if settings.get("focus_line"):
+        fl = settings["focus_line"]
+        focus_val = str(fl["color_value"])
+        focus_color = fl["line_color"]
+        focus_width = fl.get("line_width", 2)
+        bg_color = settings.get("bg_line", {}).get("line_color", "#cccccc")
+        series_col = color_col or "Year"
 
-    encodings["x"] = alt.X(f"{x_field}:{x_type}", **x_encoding_kwargs)
+        pivot = df.pivot_table(index=x_col, columns=series_col, values=y_col, aggfunc="first")
+        pivot = pivot.sort_index()
+        option["xAxis"]["data"] = _x_labels(pivot.index)
+        option["legend"] = {"show": False}
+        option["series"] = []
+        for s_val in pivot.columns:
+            is_focus = str(s_val) == focus_val
+            s: dict = {
+                "type": "line", "name": str(s_val),
+                "data": _clean_vals(pivot[s_val]),
+                "smooth": smooth, "symbol": "none",
+                "lineStyle": {
+                    "color": focus_color if is_focus else bg_color,
+                    "width": focus_width if is_focus else 1,
+                    "opacity": 1.0 if is_focus else 0.5,
+                },
+            }
+            if is_focus and mark_line:
+                s["markLine"] = mark_line
+            option["series"].append(s)
 
-    # Y axis
+    elif color_col:
+        pivot = df.pivot_table(index=x_col, columns=color_col, values=y_col, aggfunc="first")
+        pivot = pivot.sort_index()
+        lo = settings.get("legend_order")
+        series_order = list(lo) if lo else list(pivot.columns)
+        option["xAxis"]["data"] = _x_labels(pivot.index)
+        option["legend"] = {"data": [str(s) for s in series_order]}
+        option["series"] = []
+        for s_val in series_order:
+            if s_val not in pivot.columns:
+                continue
+            s = {
+                "type": "line", "name": str(s_val),
+                "data": _clean_vals(pivot[s_val]),
+                "smooth": smooth,
+                "symbol": "circle" if show_symbol else "none",
+                "label": {"show": False},
+            }
+            if mark_line:
+                s["markLine"] = mark_line
+            option["series"].append(s)
+
+    else:
+        df_s = df.sort_values(x_col)
+        option["xAxis"]["data"] = _x_labels(df_s[x_col])
+        option["legend"] = {"show": False}
+        s = {
+            "type": "line", "name": y_col,
+            "data": _clean_vals(df_s[y_col]),
+            "smooth": smooth,
+            "symbol": "circle" if show_symbol else "none",
+            "label": {"show": False},
+        }
+        if mark_line:
+            s["markLine"] = mark_line
+        option["series"] = [s]
+
+    if settings.get("legend_order") and settings.get("color_range"):
+        option["color"] = list(settings["color_range"])
+    return option
+
+
+# ---------------------------------------------------------------------------
+# Bar chart
+# ---------------------------------------------------------------------------
+
+def create_bar_chart(data, settings: dict) -> dict:
+    x_field = settings.get("x")
+    y_field = settings.get("y")
+    color_field = settings.get("color")
+    is_horizontal = settings.get("horizontal", False)
+
+    df = pd.DataFrame(data).copy()
     if y_field:
-        encodings["y"] = alt.Y(y_field, title=settings.get("y_title", y_field))
-    else:
-        encodings["y"] = alt.Y("count()", title=settings.get("y_title", "count"))
+        df[y_field] = pd.to_numeric(df[y_field], errors="coerce")
 
-    # Color
+    w = _css_width(settings.get("width", "container"))
+    h = _css_height(settings.get("height", 300))
+    rotate = _x_label_rotate(df, x_field if not is_horizontal else y_field, settings)
+
     if color_field:
-        encodings["color"] = alt.Color(
-            color_field,
-            scale=alt.Scale(**_color_scale_kwargs(settings)),
-        )
-
-    # Tooltip support
-    tooltip = settings.get("tooltip")
-    if tooltip:
-        encodings["tooltip"] = tooltip
+        pivot = df.pivot_table(index=x_field, columns=color_field, values=y_field, aggfunc="sum")
+        pivot = pivot.sort_index()
+        x_vals = _x_labels(pivot.index)
+        lo = settings.get("legend_order")
+        series_order = list(lo) if lo else list(pivot.columns)
+        series = [
+            {"type": "bar", "name": str(s), "data": _clean_vals(pivot[s]), "label": {"show": False}}
+            for s in series_order if s in pivot.columns
+        ]
     else:
-        tt = []
-        if x_field:
-            tt.append(x_field)
-        if y_field:
-            tt.append(y_field)
-        if color_field:
-            tt.append(color_field)
-        if tt:
-            encodings["tooltip"] = tt
+        df_s = df.sort_values(x_field) if x_field else df
+        x_vals = _x_labels(df_s[x_field]) if x_field else []
+        series = [{"type": "bar", "data": _clean_vals(df_s[y_field]) if y_field else [], "label": {"show": False}}]
 
-    chart = chart.encode(**encodings)
-
-    # Horizontal bars: swap axes encoding
     if is_horizontal:
-        # swap x and y encoding by re-encoding
-        swapped = {}
-        if 'x' in encodings:
-            swapped['y'] = encodings['x']
-        if 'y' in encodings:
-            swapped['x'] = encodings['y']
-        if 'color' in encodings:
-            swapped['color'] = encodings['color']
-
-        # Apply y-axis configuration to show all category labels
-        if 'y' in swapped:
-            y_encoding = swapped['y']
-            # Update the axis on the existing encoding
-            y_encoding.axis = alt.Axis(labelOverlap=False, labelBound=True)
-
-        chart = chart.encode(**swapped)
-
-    if color_field and settings.get("legend_order"):
-        chart = _apply_legend_order(chart, color_field, settings["legend_order"])
-
-    # Apply chart properties (title/height/width)
-    props = {}
-    if 'title' in settings:
-        props['title'] = settings['title']
-    props['height'] = settings.get('height', 300)
-    props['width'] = settings.get('width', 'container')
-    chart = chart.properties(**props)
-
-    return chart
-
-
-def _color_scale_kwargs(settings: dict) -> dict:
-    """Return kwargs for alt.Scale based on color_scheme and optional legend_order."""
-    kw = {"scheme": settings.get("color_scheme", "category10")}
-    legend_order = settings.get("legend_order")
-    if legend_order:
-        kw["domain"] = legend_order
-    return kw
-
-
-def _apply_legend_order(chart, color_field: str, legend_order: list):
-    """Enforce custom stacking order via a calculated rank field."""
-    bare = color_field.split(":")[0]
-    parts = [f"datum['{bare}'] === '{v}' ? {i}" for i, v in enumerate(legend_order)]
-    expr = " : ".join(parts) + f" : {len(legend_order)}"
-    return (
-        chart
-        .transform_calculate(_stack_order=expr)
-        .encode(order=alt.Order("_stack_order:Q"))
-    )
-
-
-def create_bar_stacked_chart(data, settings):
-    """Create a stacked bar chart with the given data and settings"""
-    # Decide bar pixel size based on number of distinct bars (x values)
-    x_field = settings.get('x')
-    # sensible defaults
-    total_plot_width = settings.get('plot_width') or settings.get('width') or 700
-    min_bar_width = settings.get('bar_min_width', 6)
-    max_bar_width = settings.get('bar_max_width', 60)
-
-    try:
-        n_bars = int(data[x_field].nunique())
-    except Exception:
-        n_bars = 1
-
-    # compute ideal bar width: fraction of available width per bar, clamped
-    # the factor 0.8 leaves small gaps between bars
-    if n_bars > 0:
-        computed_size = int(max(min_bar_width, min(max_bar_width, (int(total_plot_width) / n_bars) * 0.8)))
+        option = {
+            "_width": w, "_height": h,
+            "title": {"text": settings.get("title", "")},
+            "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+            "legend": {"show": bool(color_field)},
+            "xAxis": {"type": "value", "name": settings.get("x_title", y_field)},
+            "yAxis": {"type": "category", "data": x_vals, "name": settings.get("y_title", x_field)},
+            "series": series,
+        }
     else:
-        computed_size = int(max(min_bar_width, min(max_bar_width, 20)))
+        option = {
+            "_width": w, "_height": h,
+            "title": {"text": settings.get("title", "")},
+            "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+            "legend": {"show": bool(color_field)},
+            "xAxis": {
+                "type": "category", "data": x_vals,
+                "name": settings.get("x_title", x_field),
+                "axisLabel": {"rotate": rotate},
+            },
+            "yAxis": {"type": "value", "name": settings.get("y_title", y_field)},
+            "series": series,
+        }
 
-    chart = alt.Chart(data).mark_bar(
-        size=computed_size,
-        cornerRadiusTopLeft=settings.get('corner_radius', 0),
-        cornerRadiusTopRight=settings.get('corner_radius', 0)
-    )
-    
-    # Get fields
-    y_field = settings.get('y')
-    color_field = settings.get('color')
-    
+    if settings.get("color_range"):
+        option["color"] = list(settings["color_range"])
+    return option
+
+
+# ---------------------------------------------------------------------------
+# Stacked bar chart
+# ---------------------------------------------------------------------------
+
+def create_bar_stacked_chart(data, settings: dict) -> dict:
+    x_field = settings.get("x")
+    y_field = settings.get("y")
+    color_field = settings.get("color")
+
     if not x_field or not y_field or not color_field:
         logger.error("Stacked bar chart requires 'x', 'y', and 'color' fields")
-        return alt.Chart(data).mark_point()  # Return empty chart
-    
-    # decide x axis type (O for ordinal, O for quantitative)
-    x_type = (settings.get('x_type') or 'O').upper()
-    
-    # Create stacked encoding
-    encodings = {
-        'x': alt.X(
-            f"{x_field}:{x_type}",
-            title=settings.get('x_title', x_field),
-            axis=_build_categorical_x_axis(data, settings, x_field),
-        ),
-        'y': alt.Y(
-            y_field, 
-            title=settings.get('y_title', y_field),
-            stack=True
-        ),
-        'color': alt.Color(
-            color_field,
-            title=settings.get('color_title', color_field),
-            scale=alt.Scale(**_color_scale_kwargs(settings))
-        )
+        return {"_width": "100%", "_height": "300px", "series": []}
+
+    df = pd.DataFrame(data).copy()
+    df[y_field] = pd.to_numeric(df[y_field], errors="coerce")
+
+    w = _css_width(settings.get("width", "container"))
+    h = _css_height(settings.get("height", 300))
+
+    pivot = df.pivot_table(index=x_field, columns=color_field, values=y_field, aggfunc="sum")
+    pivot = pivot.sort_index()
+    x_vals = _x_labels(pivot.index)
+
+    lo = settings.get("legend_order")
+    series_order = list(lo) if lo else list(pivot.columns)
+
+    if settings.get("percentage"):
+        totals = pivot.sum(axis=1)
+        pivot = pivot.div(totals, axis=0) * 100
+
+    series = []
+    for s_val in series_order:
+        if s_val not in pivot.columns:
+            continue
+        series.append({
+            "type": "bar", "name": str(s_val),
+            "data": _fill_vals(pivot[s_val]),
+            "stack": "total",
+            "label": {"show": False},
+            "emphasis": {"focus": "series"},
+        })
+
+    y_fmt = "{value}%" if settings.get("percentage") else "{value}"
+    rotate = _x_label_rotate(df, x_field, settings)
+
+    option = {
+        "_width": w, "_height": h,
+        "title": {"text": settings.get("title", "")},
+        "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+        "legend": {
+            "data": [str(s) for s in series_order],
+            "orient": settings.get("legend_orient", "horizontal"),
+            "top": "5%",
+        },
+        "grid": {"top": "20%"},
+        "xAxis": {
+            "type": "category", "data": x_vals,
+            "name": settings.get("x_title", x_field),
+            "axisLabel": {"rotate": rotate},
+        },
+        "yAxis": {
+            "type": "value",
+            "name": settings.get("y_title", y_field),
+            "axisLabel": {"formatter": y_fmt},
+        },
+        "series": series,
     }
 
-    # Add tooltip
-    if settings.get('show_tooltip', True):
-        encodings['tooltip'] = settings.get('tooltips')
-
-    # Apply encodings
-    chart = chart.encode(**encodings)
-
-    if settings.get('legend_order'):
-        chart = _apply_legend_order(chart, color_field, settings['legend_order'])
-    
-    # Apply percentage normalization if requested
-    if settings.get('percentage', False):
-        chart = chart.encode(
-            y=alt.Y(y_field, stack='normalize', axis=alt.Axis(format='%'))
-        )
-    
-    # Set properties
-    props = {}
-    if 'title' in settings:
-        props['title'] = settings['title']
-    props['height'] = settings.get('height', 300)
-    props['width'] = settings.get('width', 'container')
-    
-    chart = chart.properties(**props)
-    
-    # Add legend configuration if specified
-    if 'legend_orient' in settings:
-        chart = chart.configure_legend(
-            orient=settings['legend_orient'],
-            titleFontSize=settings.get('legend_title_font_size', 12),
-            labelFontSize=settings.get('legend_label_font_size', 11)
-        )
-    
-    return chart
+    if settings.get("color_range"):
+        option["color"] = list(settings["color_range"])
+    return option
 
 
-def create_area_chart(data, settings):
-    """Create an area chart with the given data and settings"""
-    # Create base chart
-    chart = alt.Chart(data).mark_area(
-        opacity=settings.get('opacity', 0.6),
-        interpolate=settings.get('interpolate', 'linear')
-    )
-    
-    # Apply encodings and properties
-    chart = apply_common_settings(chart, settings)
-    
-    # Area-specific settings
-    if settings.get('stacked', True):
-        # Use stack='normalize' for percentage stacking
-        stack_type = 'normalize' if settings.get('percentage', False) else True
-        if 'y' in chart.encoding:
-            chart = chart.encode(y=alt.Y(chart.encoding.y.field, stack=stack_type))
-    
-    return chart
+# ---------------------------------------------------------------------------
+# Area chart
+# ---------------------------------------------------------------------------
+
+def create_area_chart(data, settings: dict) -> dict:
+    x_col = settings.get("x", "")
+    y_col = settings.get("y", "")
+    color_col = settings.get("color")
+    opacity = settings.get("opacity", 0.6)
+    stacked = settings.get("stacked", True)
+
+    df = pd.DataFrame(data).copy()
+    df[y_col] = pd.to_numeric(df[y_col], errors="coerce")
+
+    w = _css_width(settings.get("width", "container"))
+    h = _css_height(settings.get("height", 300))
+    stack_val = "total" if stacked else None
+
+    if color_col:
+        pivot = df.pivot_table(index=x_col, columns=color_col, values=y_col, aggfunc="first")
+        pivot = pivot.sort_index()
+        x_vals = _x_labels(pivot.index)
+        series = []
+        for col in pivot.columns:
+            s: dict = {
+                "type": "line", "name": str(col),
+                "data": _clean_vals(pivot[col]),
+                "areaStyle": {"opacity": opacity},
+                "symbol": "none", "label": {"show": False},
+            }
+            if stack_val:
+                s["stack"] = stack_val
+            series.append(s)
+    else:
+        df_s = df.sort_values(x_col)
+        x_vals = _x_labels(df_s[x_col])
+        s = {
+            "type": "line", "data": _clean_vals(df_s[y_col]),
+            "areaStyle": {"opacity": opacity},
+            "symbol": "none", "label": {"show": False},
+        }
+        if stack_val:
+            s["stack"] = stack_val
+        series = [s]
+
+    y_fmt = "{value}%" if settings.get("percentage") else "{value}"
+    return {
+        "_width": w, "_height": h,
+        "title": {"text": settings.get("title", "")},
+        "tooltip": {"trigger": "axis"},
+        "legend": {"show": bool(color_col)},
+        "xAxis": {"type": "category", "data": x_vals, "name": settings.get("x_title", x_col)},
+        "yAxis": {"type": "value", "name": settings.get("y_title", y_col), "axisLabel": {"formatter": y_fmt}},
+        "series": series,
+    }
 
 
-def create_point_chart(data, settings):
-    """Create a scatter/point chart with the given data and settings"""
-    # Create base chart
-    chart = alt.Chart(data).mark_point(
-        size=settings.get('point_size', 60),
-        filled=settings.get('filled', True),
-        opacity=settings.get('opacity', 0.7)
-    )
-    
-    # Apply encodings and properties
-    chart = apply_common_settings(chart, settings)
-    
-    # Point-specific settings
-    if 'size' in settings:
-        size_field = settings['size']
-        chart = chart.encode(size=size_field)
-    
-    # Add tooltip with multiple fields if specified
-    if 'tooltip' in settings:
-        tooltip_fields = settings['tooltip']
-        if isinstance(tooltip_fields, list):
-            chart = chart.encode(tooltip=tooltip_fields)
-    
-    return chart
+# ---------------------------------------------------------------------------
+# Scatter / point chart
+# ---------------------------------------------------------------------------
+
+def create_point_chart(data, settings: dict) -> dict:
+    x_col = settings.get("x", "")
+    y_col = settings.get("y", "")
+    color_col = settings.get("color")
+    size_col = settings.get("size")
+    point_size = settings.get("point_size", 10)
+
+    df = pd.DataFrame(data).copy()
+    df[x_col] = pd.to_numeric(df[x_col], errors="coerce")
+    df[y_col] = pd.to_numeric(df[y_col], errors="coerce")
+
+    w = _css_width(settings.get("width", "container"))
+    h = _css_height(settings.get("height", 300))
+
+    def _rows(sub):
+        sub = sub.dropna(subset=[x_col, y_col])
+        if size_col and size_col in sub.columns:
+            sub[size_col] = pd.to_numeric(sub[size_col], errors="coerce")
+            return [[float(r[x_col]), float(r[y_col]), float(r[size_col])] for _, r in sub.iterrows()]
+        return [[float(r[x_col]), float(r[y_col])] for _, r in sub.iterrows()]
+
+    if color_col:
+        series = [
+            {"type": "scatter", "name": str(s_val), "data": _rows(group),
+             "symbolSize": point_size, "label": {"show": False}}
+            for s_val, group in df.groupby(color_col)
+        ]
+    else:
+        series = [{"type": "scatter", "data": _rows(df), "symbolSize": point_size, "label": {"show": False}}]
+
+    return {
+        "_width": w, "_height": h,
+        "title": {"text": settings.get("title", "")},
+        "tooltip": {"trigger": "item"},
+        "legend": {"show": bool(color_col)},
+        "xAxis": {"type": "value", "name": settings.get("x_title", x_col), "scale": True},
+        "yAxis": {"type": "value", "name": settings.get("y_title", y_col), "scale": True},
+        "series": series,
+    }
 
 
-def create_pie_chart(data, settings):
-    """Create a pie chart with the given data and settings"""
-    # For pie charts, we need theta and color encodings
-    theta_field = settings.get('theta', settings.get('y'))
-    color_field = settings.get('color', settings.get('x'))
-    
+# ---------------------------------------------------------------------------
+# Pie chart
+# ---------------------------------------------------------------------------
+
+def create_pie_chart(data, settings: dict) -> dict:
+    theta_field = settings.get("theta", settings.get("y"))
+    color_field = settings.get("color", settings.get("x"))
+
     if not theta_field or not color_field:
-        logger.error("Pie chart requires 'theta' (or 'y') and 'color' (or 'x') fields")
-        return alt.Chart(data).mark_point()  # Return empty chart
-    
-    # Create the pie chart
-    chart = alt.Chart(data).mark_arc(
-        innerRadius=settings.get('inner_radius', 0),
-        outerRadius=settings.get('outer_radius', 100)
-    ).encode(
-        theta=theta_field,
-        color=color_field
-    )
-    
-    # Set properties
-    props = {}
-    if 'title' in settings:
-        props['title'] = settings['title']
-    props['height'] = settings.get('height', 300)
-    props['width'] = settings.get('width', 300)  # Square for pie charts
-    
-    chart = chart.properties(**props)
-    
-    return chart
+        logger.error("Pie chart requires 'theta'/'y' and 'color'/'x' fields")
+        return {"_width": "300px", "_height": "300px", "series": []}
+
+    df = pd.DataFrame(data).copy()
+    df[theta_field] = pd.to_numeric(df[theta_field], errors="coerce")
+
+    w = _css_width(settings.get("width", 300))
+    h = _css_height(settings.get("height", 300))
+
+    inner_r = settings.get("inner_radius", 0)
+    outer_r = settings.get("outer_radius", 75)
+    inner_pct = f"{inner_r}%" if isinstance(inner_r, (int, float)) else str(inner_r)
+    outer_pct = f"{outer_r}%" if isinstance(outer_r, (int, float)) else str(outer_r)
+
+    pie_data = [
+        {"name": str(row[color_field]), "value": float(row[theta_field])}
+        for _, row in df.dropna(subset=[theta_field]).iterrows()
+    ]
+
+    return {
+        "_width": w, "_height": h,
+        "title": {"text": settings.get("title", "")},
+        "tooltip": {"trigger": "item", "formatter": "{b}: {d}%"},
+        "legend": {"orient": "vertical", "left": "left"},
+        "series": [{
+            "type": "pie",
+            "radius": [inner_pct, outer_pct],
+            "data": pie_data,
+            "label": {"formatter": "{b}: {d}%"},
+            "emphasis": {"itemStyle": {"shadowBlur": 10, "shadowColor": "rgba(0,0,0,0.5)"}},
+        }],
+    }
 
 
-def create_heatmap(data, settings):
-    """Create a heatmap with the given data and settings"""
-    # Create base chart
-    chart = alt.Chart(data).mark_rect()
-    
-    # Heatmap requires x, y, and color
-    x_field = settings.get('x')
-    y_field = settings.get('y')
-    color_field = settings.get('color')
-    
+# ---------------------------------------------------------------------------
+# Heatmap
+# ---------------------------------------------------------------------------
+
+def create_heatmap(data, settings: dict) -> dict:
+    x_field = settings.get("x")
+    y_field = settings.get("y")
+    color_field = settings.get("color")
+
     if not x_field or not y_field or not color_field:
-        logger.error("Heatmap requires 'x', 'y', and 'color' (or 'z') fields")
-        return alt.Chart(data).mark_point()  # Return empty chart
-    
-    # build x encoding as ORDINAL with an explicit sort/domain so Altair won't render
-    # numeric axis ticks like 2020, 2020.5, 2021. Convert categories to ints when
-    # all values are integer-like, otherwise keep string categories.
-    x_unique = []
-    try:
-        x_unique = list(data[x_field].dropna().unique())
-    except Exception:
-        x_unique = []
+        logger.error("Heatmap requires 'x', 'y', and 'color' fields")
+        return {"_width": "100%", "_height": "300px", "series": []}
 
-    def _sorted_category_list(values: List) -> List:
-        # try integer sort first
+    df = pd.DataFrame(data).copy()
+    df[color_field] = pd.to_numeric(df[color_field], errors="coerce")
+
+    w = _css_width(settings.get("width", "container"))
+    h = _css_height(settings.get("height", 300))
+
+    def _norm(v):
         try:
-            ints = [int(v) for v in values]
-            # ensure roundtrip preserves ordering (guard against floats like 2021.5)
-            if all(float(i) == float(v) for i, v in zip(ints, values)):
-                return [str(i) for i in sorted(set(ints))]
+            iv = int(float(v))
+            if float(iv) == float(v):
+                return str(iv)
+        except (TypeError, ValueError):
+            pass
+        return str(v)
+
+    def _sorted_cats(values):
+        normed = [_norm(v) for v in values]
+        try:
+            return [str(i) for i in sorted({int(v) for v in normed})]
+        except (ValueError, TypeError):
+            pass
+        return sorted(set(normed), key=str)
+
+    x_vals = _sorted_cats(df[x_field].dropna().unique())
+    y_vals = _sorted_cats(df[y_field].dropna().unique())
+    x_idx = {v: i for i, v in enumerate(x_vals)}
+    y_idx = {v: i for i, v in enumerate(y_vals)}
+
+    value_rows = []
+    for _, row in df.iterrows():
+        xv, yv = _norm(row[x_field]), _norm(row[y_field])
+        cv = row[color_field]
+        xi, yi = x_idx.get(xv), y_idx.get(yv)
+        if xi is not None and yi is not None and not pd.isna(cv):
+            value_rows.append([xv, yv, float(cv)])
+
+    z_min = float(df[color_field].min())
+    z_max = float(df[color_field].max())
+    if cd := settings.get("color_domain"):
+        z_min, z_max = float(cd[0]), float(cd[-1])
+
+    x_title = settings.get("x_title", x_field)
+    y_title = settings.get("y_title", y_field)
+    z_title = settings.get("color_title", color_field)
+    title = settings.get("title", "")
+
+    tooltip_fn = (
+        f"function(p){{var v=p.value;"
+        f"return '{x_title}: '+v[0]+'<br/>'+'{y_title}: '+v[1]+'<br/>'+'{z_title}: '+v[2];}}"
+    )
+
+    return {
+        "_width": w, "_height": h,
+        "__js_functions__": {"__hm_fmt__": tooltip_fn},
+        "title": [{"text": title}] if title else [],
+        "tooltip": {"position": "top", "formatter": "__hm_fmt__"},
+        "grid": {"top": "10%", "bottom": "20%", "left": "10%", "right": "5%"},
+        "xAxis": {"type": "category", "data": x_vals, "name": x_title, "splitArea": {"show": True}},
+        "yAxis": {"type": "category", "data": y_vals, "name": y_title, "splitArea": {"show": True}},
+        "visualMap": {"min": z_min, "max": z_max, "calculable": True,
+                      "orient": "horizontal", "left": "center", "bottom": "2%"},
+        "series": [{"type": "heatmap", "data": value_rows,
+                    "label": {"show": settings.get("show_labels", False)},
+                    "emphasis": {"itemStyle": {"shadowBlur": 10, "shadowColor": "rgba(0,0,0,0.5)"}}}],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Histogram
+# ---------------------------------------------------------------------------
+
+def create_histogram(data, settings: dict) -> dict:
+    x_field = settings.get("x")
+    if not x_field:
+        logger.error("Histogram requires an 'x' field.")
+        return {"_width": "100%", "_height": "300px", "series": []}
+
+    df = pd.DataFrame(data).copy()
+    x_values = pd.to_numeric(df[x_field], errors="coerce").dropna().to_numpy()
+    if x_values.size == 0:
+        return {"_width": "100%", "_height": "300px", "series": []}
+
+    edges = counts = None
+
+    def _norm_edges(ea):
+        ea = np.asarray(ea, dtype=float)
+        if ea.ndim != 1 or ea.size < 2 or not np.all(np.diff(ea) > 0):
+            raise ValueError("bin_edges must be strictly increasing with ≥2 values")
+        return ea
+
+    if settings.get("bin_edges") is not None:
+        try:
+            edges = _norm_edges(settings["bin_edges"])
+            counts, edges = np.histogram(x_values, bins=edges)
+        except Exception as exc:
+            logger.warning("Invalid bin_edges: %s", exc)
+            edges = None
+
+    if edges is None:
+        bin_min = settings.get("bin_min")
+        bin_max = settings.get("bin_max")
+        hist_range = None
+        if bin_min is not None or bin_max is not None:
+            lo = float(bin_min) if bin_min is not None else float(np.min(x_values))
+            hi = float(bin_max) if bin_max is not None else float(np.max(x_values))
+            hist_range = (lo, max(lo + 1, hi))
+
+        bin_step = settings.get("bin_step")
+        if bin_step:
+            try:
+                step = float(bin_step)
+                start = hist_range[0] if hist_range else float(np.min(x_values))
+                stop = hist_range[1] if hist_range else float(np.max(x_values))
+                edges = np.arange(start, stop + step, step)
+                if edges.size < 2:
+                    edges = np.array([start, stop + step])
+                counts, edges = np.histogram(x_values, bins=edges)
+            except Exception as exc:
+                logger.warning("Invalid bin_step: %s", exc)
+                edges = None
+
+    if edges is None:
+        bins = int(settings.get("bins") or settings.get("max_bins") or settings.get("bin_count") or 40)
+        if hist_range:
+            counts, edges = np.histogram(x_values, bins=bins, range=hist_range)
+        else:
+            counts, edges = np.histogram(x_values, bins=bins)
+
+    x_labels = [f"{edges[i]:.4g}" for i in range(len(edges) - 1)]
+    mark_line = _mark_line_opt(settings)
+    fill_color = settings.get("fill_color", "#5470c6")
+    opacity = settings.get("opacity", 0.6)
+
+    s = {
+        "type": "bar",
+        "data": counts.tolist(),
+        "barCategoryGap": "0%",
+        "itemStyle": {"color": fill_color, "opacity": opacity},
+        "label": {"show": False},
+    }
+    if mark_line:
+        s["markLine"] = mark_line
+
+    w = _css_width(settings.get("width", "container"))
+    h = _css_height(settings.get("height", 300))
+    return {
+        "_width": w, "_height": h,
+        "title": {"text": settings.get("title", "")},
+        "tooltip": {"trigger": "axis"},
+        "xAxis": {"type": "category", "data": x_labels, "name": settings.get("x_title", x_field)},
+        "yAxis": {"type": "value", "name": settings.get("y_title", "Count"), "min": 0},
+        "series": [s],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Radar chart
+# ---------------------------------------------------------------------------
+
+def create_radar_chart(data, settings: dict) -> dict:
+    df = pd.DataFrame(data).copy()
+
+    cat_field = settings.get("category") or settings.get("x")
+    val_field = settings.get("value") or settings.get("y")
+    ser_field = settings.get("series") or settings.get("color")
+
+    if not cat_field or cat_field not in df.columns:
+        cat_field = df.columns[0] if len(df.columns) > 0 else None
+    if not val_field or val_field not in df.columns:
+        rem = [c for c in df.columns if c != cat_field]
+        val_field = rem[0] if rem else None
+
+    if not cat_field or not val_field:
+        logger.error("Radar chart requires category and value fields")
+        return {"_width": "420px", "_height": "420px", "series": []}
+
+    df[val_field] = pd.to_numeric(df[val_field], errors="coerce").fillna(0)
+    categories = list(df[cat_field].unique())
+    if len(categories) < 3:
+        logger.error("Radar chart requires at least 3 categories")
+        return {"_width": "420px", "_height": "420px", "series": []}
+
+    min_val = float(settings.get("min_value", 0))
+    max_val = float(settings.get("max_value") or df[val_field].max())
+    invert = bool(settings.get("invert", False))
+    fill_alpha = float(settings.get("fill_alpha", 0.15))
+    line_width = float(settings.get("line_width", 2))
+
+    h_val = int(settings.get("height", 420))
+    w_raw = settings.get("width")
+    w_css = "100%" if (w_raw is None or str(w_raw).lower() == "container") else _css_width(w_raw)
+
+    has_series = bool(ser_field and ser_field in df.columns)
+    radar_data = []
+    for s_val in (df[ser_field].unique() if has_series else [None]):
+        subset = df[df[ser_field] == s_val] if has_series else df
+        cat_map = {str(r[cat_field]): float(r[val_field]) for _, r in subset.iterrows()}
+        vals = []
+        for cat in categories:
+            raw = cat_map.get(str(cat), min_val)
+            if invert:
+                v = max(min_val, min(max_val, max_val - (raw - min_val)))
+            else:
+                v = raw
+            vals.append(v)
+        radar_data.append({
+            "value": vals,
+            "name": str(s_val) if has_series else (settings.get("title") or ""),
+        })
+
+    return {
+        "_width": w_css, "_height": f"{h_val}px",
+        "title": {"text": settings.get("title", "")},
+        "legend": {"show": has_series},
+        "tooltip": {},
+        "radar": {
+            "indicator": [{"name": str(c), "max": max_val, "min": min_val} for c in categories],
+            "shape": "polygon",
+            "center": ["50%", "55%"],
+            "radius": "58%",
+            "axisName": {
+                "overflow": "break",
+                "width": 80,
+            },
+            "splitLine": {"lineStyle": {"color": "#cccccc", "width": 0.6}},
+        },
+        "series": [{
+            "type": "radar",
+            "data": radar_data,
+            "areaStyle": {"opacity": fill_alpha},
+            "lineStyle": {"width": line_width},
+            "symbol": "circle", "symbolSize": 5,
+        }],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Ranking bar chart
+# ---------------------------------------------------------------------------
+
+def create_ranking_bar_chart(data, settings: dict) -> dict:
+    df = pd.DataFrame(data).copy()
+    cat_field = settings.get("category") or (df.columns[0] if len(df.columns) > 0 else "category")
+    val_field = settings.get("value") or (df.columns[1] if len(df.columns) > 1 else "value")
+    highlight = str(settings.get("highlight", ""))
+    hi_color = settings.get("highlight_color", "#e45756")
+    bar_color = settings.get("bar_color", "#bbbbbb")
+
+    df[val_field] = pd.to_numeric(df[val_field], errors="coerce")
+    ascending = settings.get("sort", "descending") == "ascending"
+    df = df.sort_values(val_field, ascending=ascending).reset_index(drop=True)
+
+    w = _css_width(settings.get("width", "container"))
+    h = _css_height(settings.get("height", 400))
+
+    series_data = [
+        {
+            "value": float(row[val_field]) if not pd.isna(row[val_field]) else 0.0,
+            "itemStyle": {"color": hi_color if str(row[cat_field]) == highlight else bar_color},
+        }
+        for _, row in df.iterrows()
+    ]
+
+    return {
+        "_width": w, "_height": h,
+        "title": {"text": settings.get("title", "")},
+        "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+        "legend": {"show": False},
+        "xAxis": {"type": "value", "name": settings.get("x_title", val_field)},
+        "yAxis": {
+            "type": "category",
+            "data": df[cat_field].astype(str).tolist(),
+            "name": settings.get("y_title", cat_field),
+        },
+        "series": [{"type": "bar", "data": series_data, "label": {"show": False}}],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Word cloud  (returns HTML string, not an ECharts dict)
+# ---------------------------------------------------------------------------
+
+def create_word_cloud(data, settings: dict) -> str:
+    if WordCloud is None:
+        return '<div class="chart-error">wordcloud library is not installed</div>'
+
+    df = pd.DataFrame(data).copy()
+    text_field = settings.get("text") or settings.get("word") or settings.get("x")
+    weight_field = settings.get("weight") or settings.get("count") or settings.get("y")
+
+    if not text_field and len(df.columns) > 0:
+        text_field = df.columns[0]
+    if not text_field or text_field not in df.columns:
+        return '<div class="chart-error">Word cloud requires a text column</div>'
+
+    if not weight_field or weight_field not in df.columns:
+        rem = [c for c in df.columns if c != text_field]
+        weight_field = rem[0] if rem else "_w"
+        if weight_field == "_w":
+            df["_w"] = 1
+
+    df = df[[text_field, weight_field]].dropna(subset=[text_field])
+    df[weight_field] = pd.to_numeric(df[weight_field], errors="coerce").fillna(1)
+    df[text_field] = df[text_field].astype(str)
+
+    max_words = settings.get("max_words")
+    if max_words:
+        try:
+            df = df.sort_values(weight_field, ascending=False).head(int(max_words))
         except Exception:
             pass
-        # fallback: string sort stable
-        return [str(v) for v in sorted(set(values), key=lambda x: (str(x)))]
 
-    x_sort_field = settings.get("x_sort_field")
-    if x_sort_field:
-        x_sort = alt.EncodingSortField(field=x_sort_field, order="ascending")
-    else:
-        x_sort = _sorted_category_list(x_unique) if x_unique else None
-    x_enc = alt.X(f"{x_field}:O", title=settings.get("x_title", x_field), sort=x_sort, axis=alt.Axis(labelAngle=0))
+    frequencies: dict = {}
+    for word, weight in zip(df[text_field], df[weight_field]):
+        try:
+            w = float(weight)
+        except (TypeError, ValueError):
+            w = 1.0
+        if word and w > 0:
+            frequencies[word] = frequencies.get(word, 0) + w
 
-    # allow y domain from settings: prefer explicit y_domain, fallback to generic domain
-    domain = settings.get('y_domain', settings.get('domain'))
-    if domain is not None:
-        y_enc = alt.Y(
-            f'{y_field}:O',
-            title=settings.get('y_title', y_field),
-            sort='descending'
-        )
-    else:
-        y_enc = alt.Y(f"{y_field}:O", title=settings.get("y_title", y_field), sort='descending')
+    if not frequencies:
+        return '<div class="chart-error">No data available for word cloud</div>'
 
-    # Encode color
-    # Only include domain in the scale when it is provided (Altair/vega rejects None)
-    color_scale_kwargs = {"scheme": settings.get("color_scheme", "viridis")}
-    color_domain = settings.get("color_domain")
-    if color_domain is not None:
-        color_scale_kwargs["domain"] = color_domain
-    
-    color_enc = alt.Color(
-        f'{color_field}:Q',
+    wc = WordCloud(
+        width=int(settings.get("width", 700)),
+        height=int(settings.get("height", 500)),
+        background_color=settings.get("background_color", "white"),
+        colormap=settings.get("color_scheme", "viridis"),
+        max_words=max_words,
+        prefer_horizontal=settings.get("prefer_horizontal", 0.9),
+        stopwords=set(settings.get("stopwords", [])) if settings.get("stopwords") else None,
+    ).generate_from_frequencies(frequencies)
 
+    buf = BytesIO()
+    wc.to_image().save(buf, format="PNG")
+    img_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+    chart_id = settings.get("chart_id", "word-cloud")
+    title = settings.get("title", "Word Cloud")
+    img_style = settings.get("img_style", "width:100%;height:auto;display:block;")
+    return (
+        f'<div id="{chart_id}" class="word-cloud-chart" aria-label="{title}">'
+        f'<img src="data:image/png;base64,{img_b64}" alt="{title}" style="{img_style}"/></div>'
     )
-    
-    chart = (
-        alt.Chart(data)
-        .mark_rect()
-        .encode(
-            x=x_enc,
-            y=y_enc,
-            color=color_enc,
-            tooltip=[f"{x_field}:O", f"{y_field}:O", f"{color_field}:Q"]
-        )
-        .properties(width=settings.get("width", 700), height=settings.get("height", {'step': 18}), title=settings.get("title", "Heatmap"))
-    )
-    
-    # optional tooltip
-    if settings.get('show_tooltip', True):
-        chart = chart.encode(tooltip=[x_field, y_field, color_field])
-    
-    # Set properties
-    props = {}
-    if 'title' in settings:
-        props['title'] = settings['title']
-    props['height'] = settings.get('height', 300)
-    props['width'] = settings.get('width', 'container')
-    
-    chart = chart.properties(**props)
-    
-    return chart
 
+
+# ---------------------------------------------------------------------------
+# Leaflet map utilities (return HTML strings, not ECharts dicts)
+# ---------------------------------------------------------------------------
 
 def _sanitize_map_identifier(identifier):
-    """Turn an arbitrary identifier into a JS-friendly map name."""
     if not identifier:
         return None
-    identifier = str(identifier)
-    sanitized = re.sub(r"[^0-9a-zA-Z_]", "_", identifier)
-    if not sanitized:
+    s = re.sub(r"[^0-9a-zA-Z_]", "_", str(identifier))
+    if not s:
         return None
-    if not (sanitized[0].isalpha() or sanitized[0] == "_"):
-        sanitized = "_" + sanitized
-    return sanitized
+    return ("_" + s) if not (s[0].isalpha() or s[0] == "_") else s
 
 
 def _sanitize_js_identifier(identifier):
-    sanitized = _sanitize_map_identifier(identifier)
-    return sanitized or "_map"
+    return _sanitize_map_identifier(identifier) or "_map"
 
 
 def _css_dimension(value, *, fallback_px=400, default_unit="px"):
@@ -755,42 +943,25 @@ def _css_dimension(value, *, fallback_px=400, default_unit="px"):
     if isinstance(value, (int, float)):
         return f"{int(value)}{default_unit}"
     text = str(value).strip()
-    if text.lower() in {"container", "100%"}:
-        return f"{fallback_px}{default_unit}"
-    return text
-
-
-def _css_width(value):
-    if value is None:
-        return "100%"
-    if isinstance(value, (int, float)):
-        return f"{int(value)}px"
-    text = str(value).strip()
-    if text.lower() == "container":
-        return "100%"
-    return text
+    return f"{fallback_px}{default_unit}" if text.lower() in {"container", "100%"} else text
 
 
 def _escape_js(value):
-    if value is None:
-        return "null"
-    return json.dumps(value)
+    return "null" if value is None else json.dumps(value)
 
 
 def _format_text_for_map(record, fields):
     if not fields:
         return None
     entries = fields if isinstance(fields, (list, tuple)) else [fields]
-    values = []
+    parts = []
     for entry in entries:
-        label = None
-        key = None
+        label = key = None
         if isinstance(entry, dict):
             key = entry.get("field") or entry.get("key")
             label = entry.get("label")
         elif isinstance(entry, (list, tuple)) and len(entry) >= 2:
-            label = entry[0]
-            key = entry[1]
+            label, key = entry[0], entry[1]
         else:
             key = entry
         if not key:
@@ -798,95 +969,47 @@ def _format_text_for_map(record, fields):
         val = record.get(key)
         if pd.isna(val):
             continue
-        text = str(val)
-        if label:
-            values.append(f"{label}: {text}")
-        else:
-            values.append(text)
-    if not values:
-        return None
-    return "<br>".join(values)
+        parts.append(f"{label}: {val}" if label else str(val))
+    return "<br>".join(parts) if parts else None
 
 
 def _resolve_tile_settings(settings):
-    # Default to OpenStreetMap when the caller didn't specify any tiles setting.
-    # Only disable tiles when the key is explicitly present (None/False/"none"/...).
-    if "tiles" in settings:
-        tiles_value = settings.get("tiles")
-    else:
-        tiles_value = "OpenStreetMap"
-
+    tiles_value = settings.get("tiles", "OpenStreetMap")
     if tiles_value is None or tiles_value is False:
         return None, {}
     if isinstance(tiles_value, str):
-        normalized = tiles_value.strip().lower()
-        if normalized in {"none", "off", "false", "0", "no"}:
+        norm = tiles_value.strip().lower()
+        if norm in {"none", "off", "false", "0", "no", ""}:
             return None, {}
-        if not normalized:
-            tiles_value = "OpenStreetMap"
-    if tiles_value is None:
+    if not tiles_value:
         tiles_value = "OpenStreetMap"
-    tile_attribution = settings.get("tile_attribution")
-    default_attribution = (
-        '&copy; <a href="https://www.openstreetmap.org/copyright">'
-        "OpenStreetMap</a> contributors"
-    )
+
+    attribution = settings.get("tile_attribution")
+    default_attr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     if isinstance(tiles_value, str) and tiles_value == "OpenStreetMap":
         tile_url = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        tile_attribution = tile_attribution or default_attribution
-    elif isinstance(tiles_value, str) and (
-        "://" in tiles_value or "{z}" in tiles_value or "{x}" in tiles_value
-    ):
+    elif isinstance(tiles_value, str) and ("://" in tiles_value or "{z}" in tiles_value):
         tile_url = tiles_value
-        tile_attribution = tile_attribution or default_attribution
     else:
-        logger.warning("Unsupported tiles value '%s'; defaulting to OpenStreetMap.", tiles_value)
+        logger.warning("Unsupported tiles value '%s'; falling back to OpenStreetMap.", tiles_value)
         tile_url = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        tile_attribution = tile_attribution or default_attribution
 
-    tile_options = settings.get("tile_options") or {}
-    if not isinstance(tile_options, dict):
-        tile_options = {}
-    if "attribution" not in tile_options:
-        tile_options["attribution"] = tile_attribution
-    return tile_url, tile_options
+    tile_opts = dict(settings.get("tile_options") or {})
+    tile_opts.setdefault("attribution", attribution or default_attr)
+    return tile_url, tile_opts
 
 
-def create_chloropleth(data:pd.DataFrame, settings:dict):
-    """
-    Create a Leaflet choropleth map based on GeoJSON features + a value column.
-
-    Required settings:
-    - geojson: FeatureCollection (dict) or JSON string, OR geojson_path/geojson_file (path to JSON).
-    - data_key: column name in `data` used to join (defaults to "id").
-    - geo_key: property name on GeoJSON features used to join (defaults to data_key).
-    - value: column name in `data` to color by (defaults to "value").
-
-    Optional settings (common):
-    - tooltip / popup: like create_map_markers; if omitted, an automatic tooltip is used.
-    - colors: list of hex colors (default 6-step Blues ramp).
-    - bins: number of bins (default len(colors)); method: "quantile" (default) or "equal_interval".
-    - missing_color: fill color for missing values (default "#d9d9d9").
-    - border_color/border_weight/fill_opacity: polygon styling.
-    - legend: bool (default True), legend_title, legend_position.
-    - tiles, tile_attribution, tile_options, map_options, width, height, control_scale.
-    """
-
+def create_chloropleth(data: pd.DataFrame, settings: dict) -> str:
+    """Leaflet choropleth map — returns an HTML string (not an ECharts dict)."""
     df = pd.DataFrame(data).copy()
 
-    geojson_obj = (
-        settings.get("geojson")
-        or settings.get("geojson_data")
-        or settings.get("geojson_object")
-    )
+    geojson_obj = settings.get("geojson") or settings.get("geojson_data") or settings.get("geojson_object")
     geojson_path = settings.get("geojson_path") or settings.get("geojson_file")
-
     data_key = settings.get("data_key") or settings.get("key") or settings.get("id_field") or "id"
     geo_key = settings.get("geo_key") or settings.get("feature_key") or data_key
     value_field = settings.get("value") or settings.get("value_field") or "value"
     geojson_column = settings.get("geojson_column")
 
-    # Support: settings["geojson"] is a DataFrame column name that contains per-row geometries/features.
     if not geojson_column and isinstance(geojson_obj, str) and geojson_obj in df.columns:
         geojson_column = geojson_obj
         geojson_obj = None
@@ -895,139 +1018,105 @@ def create_chloropleth(data:pd.DataFrame, settings:dict):
     if join_on_index:
         df = df.reset_index(drop=True)
         df["__index"] = list(range(len(df)))
-        data_key = "__index"
-        geo_key = "__index"
+        data_key = geo_key = "__index"
 
-    # If geometries are provided per-row but no join key exists, default to joining by row order.
     if geojson_column and geojson_column in df.columns and data_key not in df.columns:
         df = df.reset_index(drop=True)
         df["__index"] = list(range(len(df)))
-        data_key = "__index"
-        geo_key = "__index"
+        data_key = geo_key = "__index"
 
     if geojson_column and geojson_column in df.columns:
         features = []
-        records = df.to_dict(orient="records")
-        for idx, record in enumerate(records):
+        for idx, record in enumerate(df.to_dict(orient="records")):
             item = record.get(geojson_column)
             if isinstance(item, str):
                 try:
                     item = json.loads(item)
                 except Exception:
                     item = None
-
-            if isinstance(item, dict) and item.get("type") == "FeatureCollection" and isinstance(item.get("features"), list):
+            if isinstance(item, dict) and item.get("type") == "FeatureCollection":
                 geojson_obj = item
                 features = None
                 break
-
             feature = None
             if isinstance(item, dict) and item.get("type") == "Feature":
                 feature = dict(item)
             elif isinstance(item, dict) and item.get("type") in {"Polygon", "MultiPolygon"} and "coordinates" in item:
                 feature = {"type": "Feature", "properties": {}, "geometry": item}
-
             if not feature:
-                logger.error(
-                    "Choropleth geojson column '%s' row %s is not valid GeoJSON Feature/Polygon/MultiPolygon.",
-                    geojson_column,
-                    idx,
-                )
+                logger.error("Choropleth geojson column row %s is invalid GeoJSON.", idx)
                 return '<div class="chart-error">Choropleth GeoJSON column contains invalid geometry.</div>'
-
-            props = feature.get("properties")
-            if not isinstance(props, dict):
-                props = {}
+            props = feature.get("properties") or {}
             props.setdefault("__index", idx)
-
-            join_val = record.get(data_key)
-            if join_val is not None and not pd.isna(join_val):
-                props.setdefault(geo_key, join_val)
+            jv = record.get(data_key)
+            if jv is not None and not pd.isna(jv):
+                props.setdefault(geo_key, jv)
             feature["properties"] = props
             features.append(feature)
-
         if features is not None:
             geojson_obj = {"type": "FeatureCollection", "features": features}
 
     if geojson_obj is None and geojson_path:
         try:
-            with open(str(geojson_path), "r", encoding="utf-8") as handle:
-                geojson_obj = json.load(handle)
+            with open(str(geojson_path), encoding="utf-8") as fh:
+                geojson_obj = json.load(fh)
         except Exception as exc:
-            logger.error("Choropleth failed to load geojson from '%s': %s", geojson_path, exc)
+            logger.error("Choropleth failed to load geojson: %s", exc)
             return '<div class="chart-error">Choropleth requires a valid GeoJSON input.</div>'
 
     if geojson_obj is None:
-        logger.error("Choropleth requires a 'geojson' setting (dict/JSON string/path).")
         return '<div class="chart-error">Choropleth requires GeoJSON input.</div>'
-
     if isinstance(geojson_obj, str):
         try:
             geojson_obj = json.loads(geojson_obj)
-        except Exception as exc:
-            logger.error("Choropleth geojson JSON could not be parsed: %s", exc)
+        except Exception:
             return '<div class="chart-error">Choropleth GeoJSON could not be parsed.</div>'
 
     if data_key not in df.columns:
-        logger.error("Choropleth data missing join key column '%s'.", data_key)
         return '<div class="chart-error">Choropleth data missing join key. Set join_on_index=true to align rows to polygons.</div>'
     if value_field not in df.columns:
-        logger.error("Choropleth data missing value column '%s'.", value_field)
         return '<div class="chart-error">Choropleth data missing value field.</div>'
 
     df[value_field] = pd.to_numeric(df[value_field], errors="coerce")
-
     tooltip_spec = settings.get("tooltips") or settings.get("tooltip")
     popup_spec = settings.get("popup")
 
-    payload_by_key = {}
+    payload_by_key: dict = {}
     for record in df.to_dict(orient="records"):
-        join_val = record.get(data_key)
-        if join_val is None or pd.isna(join_val):
+        jv = record.get(data_key)
+        if jv is None or pd.isna(jv):
             continue
-        key = str(join_val)
-        value = record.get(value_field)
-        value_js = None if value is None or pd.isna(value) else float(value)
-        payload_by_key[key] = {
-            "value": value_js,
+        val = record.get(value_field)
+        payload_by_key[str(jv)] = {
+            "value": None if val is None or pd.isna(val) else float(val),
             "tooltip": _format_text_for_map(record, tooltip_spec),
             "popup": _format_text_for_map(record, popup_spec),
         }
 
-    values = [entry["value"] for entry in payload_by_key.values() if entry.get("value") is not None]
-    if not values:
-        logger.warning("Choropleth has no numeric values to render; all features will be missing-color.")
-
-    colors = settings.get("colors")
-    if not colors:
-        colors = ["#eff3ff", "#c6dbef", "#9ecae1", "#6baed6", "#3182bd", "#08519c"]
+    values = [e["value"] for e in payload_by_key.values() if e["value"] is not None]
+    colors = settings.get("colors") or ["#eff3ff", "#c6dbef", "#9ecae1", "#6baed6", "#3182bd", "#08519c"]
     if not isinstance(colors, (list, tuple)) or len(colors) < 2:
         colors = ["#eff3ff", "#6baed6", "#08519c"]
     colors = [str(c) for c in colors]
 
-    requested_bins = settings.get("bins") or settings.get("steps")
     try:
-        requested_bins = int(requested_bins) if requested_bins is not None else len(colors)
+        bins = max(2, min(int(settings.get("bins") or settings.get("steps") or len(colors)), len(colors)))
     except Exception:
-        requested_bins = len(colors)
-    bins = max(2, min(int(requested_bins), len(colors)))
+        bins = len(colors)
     colors = colors[:bins]
 
     method = (settings.get("method") or settings.get("binning") or "quantile").lower()
-    thresholds = []
+    thresholds: list = []
     if values:
         arr = np.asarray(values, dtype=float)
         if method in {"equal", "equal_interval", "interval"}:
-            vmin = float(np.nanmin(arr))
-            vmax = float(np.nanmax(arr))
+            vmin, vmax = float(np.nanmin(arr)), float(np.nanmax(arr))
             if vmax > vmin:
                 step = (vmax - vmin) / bins
                 thresholds = [vmin + step * i for i in range(1, bins)]
         else:
-            # quantile
             try:
-                qs = [i / bins for i in range(1, bins)]
-                thresholds = [float(v) for v in np.quantile(arr, qs)]
+                thresholds = [float(v) for v in np.quantile(arr, [i / bins for i in range(1, bins)])]
             except Exception:
                 thresholds = []
 
@@ -1035,337 +1124,179 @@ def create_chloropleth(data:pd.DataFrame, settings:dict):
     fill_opacity = settings.get("fill_opacity", 0.75)
     border_color = settings.get("border_color", "#ffffff")
     border_weight = settings.get("border_weight", 1)
+    width_css = _css_width(settings.get("width", 700))
+    height_css = _css_dimension(settings.get("height", 420), fallback_px=420)
 
-    width = settings.get("width", 700)
-    height = settings.get("height", 420)
-    height_css = _css_dimension(height, fallback_px=420)
-    width_css = _css_width(width)
+    uid = uuid.uuid4().hex[:8]
+    cid = _sanitize_map_identifier(f"{settings.get('map_id') or settings.get('chart_id') or 'choropleth'}_{uid}") or f"choropleth_{uid}"
+    map_var = _sanitize_js_identifier(f"map_{cid}")
+    layer_var = _sanitize_js_identifier(f"layer_{cid}")
 
-    map_id = settings.get("map_id") or settings.get("chart_id") or "choropleth"
-    base_id = _sanitize_map_identifier(map_id) or "choropleth"
-    unique_suffix = uuid.uuid4().hex[:8]
-    container_id = f"{base_id}_{unique_suffix}"
-    container_id = _sanitize_map_identifier(container_id) or f"choropleth_{unique_suffix}"
-    map_var = _sanitize_js_identifier(f"map_{container_id}")
-    layer_var = _sanitize_js_identifier(f"layer_{container_id}")
+    tile_url, tile_opts = _resolve_tile_settings(settings)
+    tile_opts_json = _escape_js(tile_opts or {})
 
-    tile_url, tile_options = _resolve_tile_settings(settings)
-    try:
-        tile_options_json = _escape_js(tile_options or {})
-    except Exception:
-        tile_options_json = "{}"
+    map_opts = dict(settings.get("map_options") or {})
+    map_opts.setdefault("zoomControl", True)
+    map_opts.setdefault("scrollWheelZoom", settings.get("scroll_wheel_zoom", True))
+    map_opts.setdefault("dragging", settings.get("dragging", True))
+    map_opts_json = _escape_js(map_opts)
 
-    map_options = settings.get("map_options") or {}
-    if not isinstance(map_options, dict):
-        map_options = {}
-    if "zoomControl" not in map_options:
-        map_options["zoomControl"] = True
-    if "scrollWheelZoom" not in map_options:
-        map_options["scrollWheelZoom"] = settings.get("scroll_wheel_zoom", True)
-    if "dragging" not in map_options:
-        map_options["dragging"] = settings.get("dragging", True)
-    try:
-        map_options_json = _escape_js(map_options)
-    except Exception:
-        map_options_json = "{}"
+    zoom = settings.get("zoom_start", 6)
+    clat = settings.get("center_lat")
+    clon = settings.get("center_lon")
+    bg = settings.get("background_color") or settings.get("map_background")
+    if bg is None and not tile_url:
+        bg = "#ffffff"
+    bg_css = f"background:{bg};" if bg else ""
 
-    zoom_start = settings.get("zoom_start", 6)
-    center_lat = settings.get("center_lat")
-    center_lon = settings.get("center_lon")
+    style_block = f"<style>#{cid}{{width:{width_css};height:{height_css};{bg_css}}}#{cid}.leaflet-container{{{bg_css}}}</style>"
+    container_div = f'<div id="{cid}" class="leaflet-map" data-leaflet-map="1" data-markercluster="0"></div>'
 
-    background_color = settings.get("background_color") or settings.get("map_background")
-    if background_color is None and not tile_url:
-        background_color = "#ffffff"
-    bg_css = f"background:{background_color};" if background_color else ""
-    style_block = (
-        f"<style>#{container_id}{{width:{width_css};height:{height_css};{bg_css}}}"
-        f"#{container_id}.leaflet-container{{{bg_css}}}</style>"
-    )
-    container_div = (
-        f'<div id="{container_id}" class="leaflet-map" data-leaflet-map="1" '
-        'data-markercluster="0"></div>'
-    )
+    js = ["(function(){",
+          f"  var containerId = {_escape_js(cid)};",
+          "  var mapEl = document.getElementById(containerId);",
+          "  if (!mapEl) { return; }",
+          f"  var dataByKey = {_escape_js(payload_by_key)};",
+          f"  var geoKey = {_escape_js(geo_key)};",
+          f"  var colors = {_escape_js(colors)};",
+          f"  var thresholds = {_escape_js(thresholds)};",
+          f"  var missingColor = {_escape_js(missing_color)};",
+          "  function getColor(v){",
+          "    if(v===null||v===undefined||isNaN(v)){return missingColor;}",
+          "    for(var i=0;i<thresholds.length;i++){if(v<=thresholds[i])return colors[i];}",
+          "    return colors[colors.length-1];",
+          "  }",
+          "  function style(f){",
+          "    var p=(f&&f.properties)?f.properties:{};",
+          "    var k=p[geoKey];",
+          "    if(k===null||k===undefined)k=(f&&f.id!==null&&f.id!==undefined)?f.id:null;",
+          "    var e=(k!==null&&k!==undefined)?dataByKey[String(k)]:null;",
+          f"    return{{fillColor:getColor(e?e.value:null),weight:{border_weight},opacity:1,color:{_escape_js(border_color)},fillOpacity:{fill_opacity}}};",
+          "  }"]
 
-    js_lines = [
-        "(function(){",
-        f"  var containerId = {_escape_js(container_id)};",
-        "  var mapEl = document.getElementById(containerId);",
-        "  if (!mapEl) { return; }",
-        f"  var dataByKey = {_escape_js(payload_by_key)};",
-        f"  var geoKey = {_escape_js(geo_key)};",
-        f"  var colors = {_escape_js(colors)};",
-        f"  var thresholds = {_escape_js(thresholds)};",
-        f"  var missingColor = {_escape_js(missing_color)};",
-        "  function getColor(value){",
-        "    if (value === null || value === undefined || isNaN(value)) { return missingColor; }",
-        "    for (var i = 0; i < thresholds.length; i++) {",
-        "      if (value <= thresholds[i]) { return colors[i]; }",
-        "    }",
-        "    return colors[colors.length - 1];",
-        "  }",
-        "  function style(feature){",
-        "    var props = (feature && feature.properties) ? feature.properties : {};",
-        "    var keyVal = props[geoKey];",
-        "    if (keyVal === null || keyVal === undefined) {",
-        "      keyVal = (feature && (feature.id !== null && feature.id !== undefined)) ? feature.id : null;",
-        "    }",
-        "    var entry = (keyVal !== null && keyVal !== undefined) ? dataByKey[String(keyVal)] : null;",
-        "    var value = entry ? entry.value : null;",
-        "    return {",
-        f"      fillColor: getColor(value),",
-        f"      weight: {border_weight},",
-        f"      opacity: 1.0,",
-        f"      color: {_escape_js(border_color)},",
-        f"      fillOpacity: {fill_opacity}",
-        "    };",
-        "  }",
-    ]
-
-    if center_lat is not None and center_lon is not None:
+    if clat is not None and clon is not None:
         try:
-            center_lat = float(center_lat)
-            center_lon = float(center_lon)
-            js_lines.append(
-                f"  var {map_var} = L.map(containerId, {map_options_json}).setView([{center_lat}, {center_lon}], {int(zoom_start)});"
-            )
+            js.append(f"  var {map_var}=L.map(containerId,{map_opts_json}).setView([{float(clat)},{float(clon)}],{int(zoom)});")
+            clat = clon = True  # mark as set
         except Exception:
-            center_lat = center_lon = None
+            clat = clon = None
 
-    if center_lat is None or center_lon is None:
-        js_lines.append(
-            f"  var {map_var} = L.map(containerId, {map_options_json}).setView([0, 0], {int(zoom_start)});"
-        )
+    if clat is None or clon is None:
+        js.append(f"  var {map_var}=L.map(containerId,{map_opts_json}).setView([0,0],{int(zoom)});")
 
-    js_lines.extend(
-        [
-            "  window.__leafletMaps = window.__leafletMaps || {};",
-            f"  window.__leafletMaps[containerId] = {map_var};",
-        ]
-    )
+    js += ["  window.__leafletMaps=window.__leafletMaps||{};",
+           f"  window.__leafletMaps[containerId]={map_var};"]
     if tile_url:
-        js_lines.insert(
-            js_lines.index("  window.__leafletMaps = window.__leafletMaps || {};"),
-            f"  L.tileLayer({_escape_js(tile_url)}, {tile_options_json}).addTo({map_var});",
-        )
+        js.insert(-2, f"  L.tileLayer({_escape_js(tile_url)},{tile_opts_json}).addTo({map_var});")
 
     if settings.get("control_scale", True):
-        js_lines.append(f"  L.control.scale().addTo({map_var});")
+        js.append(f"  L.control.scale().addTo({map_var});")
 
-    highlight_style = settings.get("highlight_style") or {}
-    if not isinstance(highlight_style, dict):
-        highlight_style = {}
-    highlight_style.setdefault("weight", border_weight + 1)
-    highlight_style.setdefault("color", "#666666")
-    highlight_style.setdefault("fillOpacity", min(1.0, float(fill_opacity) + 0.1))
+    hs = dict(settings.get("highlight_style") or {})
+    hs.setdefault("weight", border_weight + 1)
+    hs.setdefault("color", "#666666")
+    hs.setdefault("fillOpacity", min(1.0, float(fill_opacity) + 0.1))
 
-    js_lines.extend(
-        [
-            f"  var geojsonData = {_escape_js(geojson_obj)};",
-            "  function onEachFeature(feature, layer){",
-            "    var props = (feature && feature.properties) ? feature.properties : {};",
-            "    var keyVal = props[geoKey];",
-            "    if (keyVal === null || keyVal === undefined) {",
-            "      keyVal = (feature && (feature.id !== null && feature.id !== undefined)) ? feature.id : null;",
-            "    }",
-            "    var entry = (keyVal !== null && keyVal !== undefined) ? dataByKey[String(keyVal)] : null;",
-            "    if (entry && entry.popup) { layer.bindPopup(entry.popup); }",
-            "    if (entry && entry.tooltip) { layer.bindTooltip(entry.tooltip, {sticky:true}); }",
-            "    if ((!entry || (!entry.tooltip && !entry.popup)) && props) {",
-            "      var label = props.name || props[geoKey] || (keyVal !== null ? String(keyVal) : '');",
-            "      var val = entry ? entry.value : null;",
-            "      if (label) {",
-            "        var text = (val === null || val === undefined || isNaN(val)) ? (label + ': n/a') : (label + ': ' + val);",
-            "        layer.bindTooltip(text, {sticky:true});",
-            "      }",
-            "    }",
-            f"    layer.on('mouseover', function(){{ layer.setStyle({_escape_js(highlight_style)}); }});",
-            "    layer.on('mouseout', function(e){",
-            f"      {layer_var}.resetStyle(e.target);",
-            "    });",
-            "  }",
-            f"  var {layer_var} = L.geoJSON(geojsonData, {{",
-            "    style: style,",
-            "    onEachFeature: onEachFeature",
-            f"  }}).addTo({map_var});",
-        ]
-    )
+    js += [f"  var geojsonData={_escape_js(geojson_obj)};",
+           "  function onEachFeature(f,layer){",
+           "    var p=(f&&f.properties)?f.properties:{};",
+           "    var k=p[geoKey];if(k===null||k===undefined)k=(f&&f.id!==null&&f.id!==undefined)?f.id:null;",
+           "    var e=(k!==null&&k!==undefined)?dataByKey[String(k)]:null;",
+           "    if(e&&e.popup)layer.bindPopup(e.popup);",
+           "    if(e&&e.tooltip)layer.bindTooltip(e.tooltip,{sticky:true});",
+           "    if((!e||(!e.tooltip&&!e.popup))&&p){",
+           "      var lbl=p.name||p[geoKey]||(k!==null?String(k):'');",
+           "      var val=e?e.value:null;",
+           "      if(lbl){var txt=(val===null||val===undefined||isNaN(val))?(lbl+': n/a'):(lbl+': '+val);layer.bindTooltip(txt,{sticky:true});}",
+           "    }",
+           f"    layer.on('mouseover',function(){{layer.setStyle({_escape_js(hs)});}});",
+           f"    layer.on('mouseout',function(e){{{layer_var}.resetStyle(e.target);}});",
+           "  }",
+           f"  var {layer_var}=L.geoJSON(geojsonData,{{style:style,onEachFeature:onEachFeature}}).addTo({map_var});"]
 
-    if settings.get("fit_bounds", True) and (center_lat is None or center_lon is None):
-        js_lines.extend(
-            [
-                f"  try {{",
-                f"    var bounds = {layer_var}.getBounds();",
-                "    if (bounds && bounds.isValid && bounds.isValid()) {",
-                f"      {map_var}.fitBounds(bounds, {{padding:[10,10]}});",
-                "    }",
-                "  } catch (e) {}",
-            ]
+    if settings.get("fit_bounds", True) and (clat is None or clon is None):
+        fit_js = (
+            f"  try{{var b={layer_var}.getBounds();"
+            f"if(b&&b.isValid&&b.isValid()){{{map_var}.fitBounds(b,{{padding:[10,10]}});}}"
+            f"}}catch(e){{}}"
         )
+        js.append(fit_js)
 
     if settings.get("legend", True):
-        legend_title = settings.get("legend_title") or value_field
-        legend_position = settings.get("legend_position") or "bottomright"
-        js_lines.extend(
-            [
-                f"  var legend = L.control({{position: {_escape_js(legend_position)}}});",
-                "  legend.onAdd = function(){",
-                "    var div = L.DomUtil.create('div', 'leaflet-legend');",
-                "    div.style.background = 'rgba(255,255,255,0.9)';",
-                "    div.style.padding = '8px 10px';",
-                "    div.style.borderRadius = '4px';",
-                "    div.style.boxShadow = '0 0 10px rgba(0,0,0,0.15)';",
-                f"    var title = {_escape_js(str(legend_title))};",
-                "    if (title) {",
-                "      var t = document.createElement('div');",
-                "      t.style.fontWeight = '600';",
-                "      t.style.marginBottom = '6px';",
-                "      t.textContent = title;",
-                "      div.appendChild(t);",
-                "    }",
-                "    function fmt(n){",
-                "      if (n === null || n === undefined || isNaN(n)) { return 'n/a'; }",
-                "      try { return Number(n).toLocaleString(); } catch (e) { return String(n); }",
-                "    }",
-                "    var ranges = [];",
-                "    var prev = null;",
-                "    for (var i = 0; i < colors.length; i++) {",
-                "      var from = (i === 0) ? null : thresholds[i-1];",
-                "      var to = (i < thresholds.length) ? thresholds[i] : null;",
-                "      ranges.push({from: from, to: to, color: colors[i]});",
-                "    }",
-                "    ranges.forEach(function(r){",
-                "      var row = document.createElement('div');",
-                "      row.style.display = 'flex';",
-                "      row.style.alignItems = 'center';",
-                "      row.style.gap = '8px';",
-                "      var swatch = document.createElement('i');",
-                "      swatch.style.width = '14px';",
-                "      swatch.style.height = '14px';",
-                "      swatch.style.background = r.color;",
-                "      swatch.style.display = 'inline-block';",
-                "      swatch.style.border = '1px solid rgba(0,0,0,0.15)';",
-                "      row.appendChild(swatch);",
-                "      var label = document.createElement('span');",
-                "      if (r.from === null && r.to !== null) { label.textContent = '≤ ' + fmt(r.to); }",
-                "      else if (r.from !== null && r.to !== null) { label.textContent = fmt(r.from) + ' – ' + fmt(r.to); }",
-                "      else if (r.from !== null && r.to === null) { label.textContent = '≥ ' + fmt(r.from); }",
-                "      else { label.textContent = ''; }",
-                "      row.appendChild(label);",
-                "      div.appendChild(row);",
-                "    });",
-                "    return div;",
-                "  };",
-                f"  legend.addTo({map_var});",
-            ]
-        )
+        lt = _escape_js(str(settings.get("legend_title") or value_field))
+        lp = _escape_js(settings.get("legend_position") or "bottomright")
+        js += [f"  var legend=L.control({{position:{lp}}});",
+               "  legend.onAdd=function(){",
+               "    var div=L.DomUtil.create('div','leaflet-legend');",
+               "    div.style.cssText='background:rgba(255,255,255,0.9);padding:8px 10px;border-radius:4px;box-shadow:0 0 10px rgba(0,0,0,0.15)';",
+               f"    var title={lt};",
+               "    if(title){var t=document.createElement('div');t.style.fontWeight='600';t.style.marginBottom='6px';t.textContent=title;div.appendChild(t);}",
+               "    function fmt(n){if(n===null||n===undefined||isNaN(n))return 'n/a';try{return Number(n).toLocaleString();}catch(e){return String(n);}}",
+               "    for(var i=0;i<colors.length;i++){",
+               "      var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:8px';",
+               "      var sw=document.createElement('i');sw.style.cssText='width:14px;height:14px;display:inline-block;border:1px solid rgba(0,0,0,0.15)';sw.style.background=colors[i];row.appendChild(sw);",
+               "      var lbl=document.createElement('span');",
+               "      var from=(i===0)?null:thresholds[i-1];var to=(i<thresholds.length)?thresholds[i]:null;",
+               "      if(from===null&&to!==null)lbl.textContent='\\u2264 '+fmt(to);",
+               "      else if(from!==null&&to!==null)lbl.textContent=fmt(from)+' \\u2013 '+fmt(to);",
+               "      else if(from!==null&&to===null)lbl.textContent='\\u2265 '+fmt(from);",
+               "      row.appendChild(lbl);div.appendChild(row);",
+               "    }",
+               "    return div;",
+               "  };",
+               f"  legend.addTo({map_var});"]
 
-    js_lines.extend(
-        [
-            "  if (!window.__leafletMapResizeHook) {",
-            "    window.__leafletMapResizeHook = true;",
-            "    document.addEventListener('shown.bs.tab', function(){",
-            "      Object.values(window.__leafletMaps || {}).forEach(function(map){",
-            "        map.invalidateSize();",
-            "      });",
-            "    });",
-            "    document.addEventListener('shown.bs.collapse', function(){",
-            "      Object.values(window.__leafletMaps || {}).forEach(function(map){",
-            "        map.invalidateSize();",
-            "      });",
-            "    });",
-            "  }",
-            "  setTimeout(function(){",
-            f"    if (window.__leafletMaps && window.__leafletMaps[containerId]) {{",
-            "      window.__leafletMaps[containerId].invalidateSize();",
-            "    }",
-            "  }, 50);",
-            "})();",
-        ]
-    )
+    js += ["  if(!window.__leafletMapResizeHook){",
+           "    window.__leafletMapResizeHook=true;",
+           "    document.addEventListener('shown.bs.tab',function(){Object.values(window.__leafletMaps||{}).forEach(function(m){m.invalidateSize();});});",
+           "    document.addEventListener('shown.bs.collapse',function(){Object.values(window.__leafletMaps||{}).forEach(function(m){m.invalidateSize();});});",
+           "  }",
+           f"  setTimeout(function(){{if(window.__leafletMaps&&window.__leafletMaps[containerId])window.__leafletMaps[containerId].invalidateSize();}},50);",
+           "})();"]
 
-    script_block = "<script>\n" + "\n".join(js_lines) + "\n</script>"
-    return "\n".join([style_block, container_div, script_block])
+    return "\n".join([style_block, container_div, f"<script>\n{chr(10).join(js)}\n</script>"])
 
-def create_map_markers(data, settings):
-    """Create a Leaflet map populated with markers or circle markers."""
 
+def create_map_markers(data, settings: dict) -> str:
+    """Leaflet marker map — returns an HTML string (not an ECharts dict)."""
     df = pd.DataFrame(data).copy()
-
-    lat_field = (
-        settings.get("latitude")
-        or settings.get("lat")
-        or settings.get("y")
-    )
-    lon_field = (
-        settings.get("longitude")
-        or settings.get("lon")
-        or settings.get("x")
-    )
+    lat_field = settings.get("latitude") or settings.get("lat") or settings.get("y")
+    lon_field = settings.get("longitude") or settings.get("lon") or settings.get("x")
 
     if not lat_field or not lon_field:
-        logger.error("Map markers requires 'latitude' and 'longitude' fields.")
         return '<div class="chart-error">Map markers require latitude/longitude fields.</div>'
-
     if lat_field not in df.columns or lon_field not in df.columns:
-        logger.error("Map markers data missing latitude or longitude columns.")
         return '<div class="chart-error">Map markers data missing latitude/longitude fields.</div>'
 
     df[lat_field] = pd.to_numeric(df[lat_field], errors="coerce")
     df[lon_field] = pd.to_numeric(df[lon_field], errors="coerce")
-
     df = df.dropna(subset=[lat_field, lon_field])
     if df.empty:
-        logger.warning("Map markers chart has no valid coordinates.")
         return '<div class="chart-error">No valid coordinates for map markers.</div>'
 
-    center_lat = settings.get("center_lat")
-    center_lon = settings.get("center_lon")
-    if center_lat is None or pd.isna(center_lat):
-        center_lat = df[lat_field].mean()
-    if center_lon is None or pd.isna(center_lon):
-        center_lon = df[lon_field].mean()
+    clat = settings.get("center_lat")
+    clon = settings.get("center_lon")
     try:
-        center_lat = float(center_lat)
-        center_lon = float(center_lon)
+        clat = float(clat) if clat is not None and not pd.isna(clat) else float(df[lat_field].mean())
+        clon = float(clon) if clon is not None and not pd.isna(clon) else float(df[lon_field].mean())
     except Exception:
-        logger.warning("Map center could not be parsed; using first coordinate.")
-        center_lat = float(df[lat_field].iloc[0])
-        center_lon = float(df[lon_field].iloc[0])
+        clat, clon = float(df[lat_field].iloc[0]), float(df[lon_field].iloc[0])
 
-    width = settings.get("width", 700)
-    height = settings.get("height", 400)
-    height_css = _css_dimension(height, fallback_px=400)
-    width_css = _css_width(width)
+    width_css = _css_width(settings.get("width", 700))
+    height_css = _css_dimension(settings.get("height", 400), fallback_px=400)
 
-    map_id = settings.get("map_id") or settings.get("chart_id") or "map"
-    base_id = _sanitize_map_identifier(map_id) or "map"
-    unique_suffix = uuid.uuid4().hex[:8]
-    container_id = f"{base_id}_{unique_suffix}"
-    container_id = _sanitize_map_identifier(container_id) or f"map_{unique_suffix}"
-    map_var = _sanitize_js_identifier(f"map_{container_id}")
-    cluster_var = _sanitize_js_identifier(f"cluster_{container_id}")
+    uid = uuid.uuid4().hex[:8]
+    cid = _sanitize_map_identifier(f"{settings.get('map_id') or settings.get('chart_id') or 'map'}_{uid}") or f"map_{uid}"
+    map_var = _sanitize_js_identifier(f"map_{cid}")
+    cluster_var = _sanitize_js_identifier(f"cluster_{cid}")
 
-    tile_url, tile_options = _resolve_tile_settings(settings)
-    try:
-        tile_options_json = _escape_js(tile_options or {})
-    except Exception:
-        logger.warning("Tile options could not be serialized; using attribution only.")
-        tile_options_json = "{}"
-
-    map_options = settings.get("map_options") or {}
-    if not isinstance(map_options, dict):
-        map_options = {}
-    if "zoomControl" not in map_options:
-        map_options["zoomControl"] = True
-    if "scrollWheelZoom" not in map_options:
-        map_options["scrollWheelZoom"] = settings.get("scroll_wheel_zoom", True)
-    if "dragging" not in map_options:
-        map_options["dragging"] = settings.get("dragging", True)
-    try:
-        map_options_json = _escape_js(map_options)
-    except Exception:
-        logger.warning("Map options could not be serialized; using defaults.")
-        map_options_json = "{}"
+    tile_url, tile_opts = _resolve_tile_settings(settings)
+    tile_opts_json = _escape_js(tile_opts or {})
+    map_opts = dict(settings.get("map_options") or {})
+    map_opts.setdefault("zoomControl", True)
+    map_opts.setdefault("scrollWheelZoom", settings.get("scroll_wheel_zoom", True))
+    map_opts.setdefault("dragging", settings.get("dragging", True))
+    map_opts_json = _escape_js(map_opts)
 
     marker_style = (settings.get("marker_style") or "marker").lower()
     marker_color_field = settings.get("marker_color") or settings.get("color")
@@ -1374,48 +1305,28 @@ def create_map_markers(data, settings):
     tooltip_sticky = settings.get("tooltip_sticky", True)
     cluster_enabled = bool(settings.get("cluster", False))
     cluster_circles = cluster_enabled and marker_style != "circle"
-    if cluster_enabled and marker_style == "circle":
-        logger.info("Map marker clustering enabled, but circle markers are not clustered.")
-    icon_name = settings.get("icon") or settings.get("icon_name")
-    icon_color = settings.get("icon_color")
-    if (icon_name or icon_color) and marker_style != "circle":
-        logger.info("Leaflet icon customization requires extra plugins; using default icons.")
 
-    background_color = settings.get("background_color") or settings.get("map_background")
-    if background_color is None and not tile_url:
-        background_color = "#ffffff"
-    bg_css = f"background:{background_color};" if background_color else ""
-    style_block = (
-        f"<style>#{container_id}{{width:{width_css};height:{height_css};{bg_css}}}"
-        f"#{container_id}.leaflet-container{{{bg_css}}}</style>"
-    )
-    container_div = (
-        f'<div id="{container_id}" class="leaflet-map" '
-        f'data-leaflet-map="1" data-markercluster="{int(cluster_circles)}"></div>'
-    )
+    bg = settings.get("background_color") or settings.get("map_background")
+    if bg is None and not tile_url:
+        bg = "#ffffff"
+    bg_css = f"background:{bg};" if bg else ""
 
-    js_lines = [
-        "(function(){",
-        f"  var containerId = {_escape_js(container_id)};",
-        "  var mapEl = document.getElementById(containerId);",
-        "  if (!mapEl) { return; }",
-        f"  var {map_var} = L.map(containerId, {map_options_json}).setView("
-        f"[{center_lat}, {center_lon}], {settings.get('zoom_start', 11)});",
-    ]
+    style_block = f"<style>#{cid}{{width:{width_css};height:{height_css};{bg_css}}}#{cid}.leaflet-container{{{bg_css}}}</style>"
+    container_div = f'<div id="{cid}" class="leaflet-map" data-leaflet-map="1" data-markercluster="{int(cluster_circles)}"></div>'
+
+    js = ["(function(){",
+          f"  var containerId={_escape_js(cid)};",
+          "  var mapEl=document.getElementById(containerId);if(!mapEl)return;",
+          f"  var {map_var}=L.map(containerId,{map_opts_json}).setView([{clat},{clon}],{settings.get('zoom_start',11)});"]
+
     if tile_url:
-        js_lines.append(f"  L.tileLayer({_escape_js(tile_url)}, {tile_options_json}).addTo({map_var});")
-    js_lines.extend(
-        [
-            "  window.__leafletMaps = window.__leafletMaps || {};",
-            f"  window.__leafletMaps[containerId] = {map_var};",
-        ]
-    )
-
+        js.append(f"  L.tileLayer({_escape_js(tile_url)},{tile_opts_json}).addTo({map_var});")
+    js += ["  window.__leafletMaps=window.__leafletMaps||{};",
+           f"  window.__leafletMaps[containerId]={map_var};"]
     if settings.get("control_scale", True):
-        js_lines.append(f"  L.control.scale().addTo({map_var});")
-
+        js.append(f"  L.control.scale().addTo({map_var});")
     if cluster_circles:
-        js_lines.append(f"  var {cluster_var} = L.markerClusterGroup();")
+        js.append(f"  var {cluster_var}=L.markerClusterGroup();")
 
     for record in df.to_dict(orient="records"):
         lat = record.get(lat_field)
@@ -1423,836 +1334,38 @@ def create_map_markers(data, settings):
         if lat is None or lon is None or pd.isna(lat) or pd.isna(lon):
             continue
         try:
-            lat = float(lat)
-            lon = float(lon)
+            lat, lon = float(lat), float(lon)
         except Exception:
             continue
-
         popup_text = _format_text_for_map(record, popup_spec)
         tooltip_text = _format_text_for_map(record, tooltip_spec)
 
         if marker_style == "circle":
-            circle_kwargs = {
-                "radius": settings.get("radius", 6),
-                "fillOpacity": settings.get("fill_opacity", 0.7),
-                "opacity": settings.get("line_opacity", 0.9),
-            }
-            coord_color = record.get(marker_color_field) if marker_color_field else None
-            if coord_color and not pd.isna(coord_color):
-                circle_kwargs["color"] = str(coord_color)
-                circle_kwargs["fillColor"] = str(coord_color)
+            ck = {"radius": settings.get("radius", 6), "fillOpacity": settings.get("fill_opacity", 0.7), "opacity": settings.get("line_opacity", 0.9)}
+            cc = record.get(marker_color_field) if marker_color_field else None
+            if cc and not pd.isna(cc):
+                ck["color"] = ck["fillColor"] = str(cc)
             elif settings.get("circle_color"):
-                circle_kwargs["color"] = settings["circle_color"]
-                circle_kwargs["fillColor"] = settings["circle_color"]
-            circle_kwargs_json = _escape_js(circle_kwargs)
-            js_lines.append(
-                f"  var marker = L.circleMarker([{lat}, {lon}], {circle_kwargs_json});"
-            )
+                ck["color"] = ck["fillColor"] = settings["circle_color"]
+            js.append(f"  var marker=L.circleMarker([{lat},{lon}],{_escape_js(ck)});")
         else:
-            js_lines.append(f"  var marker = L.marker([{lat}, {lon}]);")
+            js.append(f"  var marker=L.marker([{lat},{lon}]);")
 
         if popup_text:
-            js_lines.append(f"  marker.bindPopup({_escape_js(popup_text)});")
+            js.append(f"  marker.bindPopup({_escape_js(popup_text)});")
         if tooltip_text:
-            sticky_opt = "{sticky:true}" if tooltip_sticky else "{}"
-            js_lines.append(
-                f"  marker.bindTooltip({_escape_js(tooltip_text)}, {sticky_opt});"
-            )
-
-        if cluster_circles:
-            js_lines.append(f"  {cluster_var}.addLayer(marker);")
-        else:
-            js_lines.append(f"  marker.addTo({map_var});")
+            js.append(f"  marker.bindTooltip({_escape_js(tooltip_text)},{'{sticky:true}' if tooltip_sticky else '{}'});")
+        js.append(f"  {''+cluster_var+'.addLayer(marker)' if cluster_circles else 'marker.addTo('+map_var+')'};")
 
     if cluster_circles:
-        js_lines.append(f"  {map_var}.addLayer({cluster_var});")
-
-    js_lines.extend(
-        [
-            "  if (!window.__leafletMapResizeHook) {",
-            "    window.__leafletMapResizeHook = true;",
-            "    document.addEventListener('shown.bs.tab', function(){",
-            "      Object.values(window.__leafletMaps || {}).forEach(function(map){",
-            "        map.invalidateSize();",
-            "      });",
-            "    });",
-            "    document.addEventListener('shown.bs.collapse', function(){",
-            "      Object.values(window.__leafletMaps || {}).forEach(function(map){",
-            "        map.invalidateSize();",
-            "      });",
-            "    });",
-            "  }",
-            "  setTimeout(function(){",
-            f"    if (window.__leafletMaps && window.__leafletMaps[containerId]) {{",
-            "      window.__leafletMaps[containerId].invalidateSize();",
-            "    }",
-            "  }, 50);",
-            "})();",
-        ]
-    )
-
-    script_block = "<script>\n" + "\n".join(js_lines) + "\n</script>"
-
-    return "\n".join([style_block, container_div, script_block])
-
-
-def create_histogram(data, settings):
-    """Create a histogram by pre-binning the data with numpy."""
-    reference_line_layers = _build_reference_line_layers(settings)
-    x_field = settings.get("x")
-    if not x_field:
-        logger.error("Histogram requires an 'x' field to bin.")
-        return alt.Chart(pd.DataFrame({"count": []})).mark_bar()
-
-    df = pd.DataFrame(data).copy()
-    if x_field not in df.columns:
-        logger.error("Histogram field '%s' not in data columns.", x_field)
-        return alt.Chart(pd.DataFrame({"count": []})).mark_bar()
-
-    x_values = pd.to_numeric(df[x_field], errors="coerce").dropna().to_numpy()
-    if x_values.size == 0:
-        logger.warning("Histogram has no valid numeric data for '%s'.", x_field)
-        return alt.Chart(pd.DataFrame({"count": []})).mark_bar()
-
-    bin_edges = settings.get("bin_edges")
-    counts = edges = None
-
-    def _normalize_edges(edge_array):
-        edge_array = np.asarray(edge_array, dtype=float)
-        if edge_array.ndim != 1 or edge_array.size < 2 or not np.all(np.diff(edge_array) > 0):
-            raise ValueError("bin_edges must be a strictly increasing list with at least two numbers.")
-        return edge_array
-
-    if bin_edges is not None:
-        try:
-            edges = _normalize_edges(bin_edges)
-            counts, edges = np.histogram(x_values, bins=edges)
-        except Exception as exc:
-            logger.warning("Invalid bin_edges provided for histogram: %s", exc)
-            edges = None
-
-    if edges is None:
-        bin_step = settings.get("bin_step")
-        hist_range = None
-        bin_min = settings.get("bin_min")
-        bin_max = settings.get("bin_max")
-        if bin_min is not None or bin_max is not None:
-            min_val = float(bin_min) if bin_min is not None else float(np.min(x_values))
-            max_val = float(bin_max) if bin_max is not None else float(np.max(x_values))
-            if max_val <= min_val:
-                max_val = min_val + 1
-            hist_range = (min_val, max_val)
-
-        if bin_step:
-            try:
-                step = float(bin_step)
-                if step <= 0:
-                    raise ValueError("bin_step must be positive.")
-                start = float(hist_range[0]) if hist_range else float(np.min(x_values))
-                stop = float(hist_range[1]) if hist_range else float(np.max(x_values))
-                edges = np.arange(start, stop + step, step)
-                if edges.size < 2:
-                    edges = np.array([start, stop + step], dtype=float)
-                counts, edges = np.histogram(x_values, bins=edges)
-            except Exception as exc:
-                logger.warning("Invalid bin_step provided for histogram: %s", exc)
-                edges = None
-
-        if edges is None:
-            bins = settings.get("bins") or settings.get("max_bins") or settings.get("bin_count") or 40
-            try:
-                bins = int(bins)
-            except Exception:
-                bins = 40
-            counts, edges = np.histogram(x_values, bins=bins, range=hist_range)
-
-    hist_df = pd.DataFrame(
-        {
-            "bin_start": edges[:-1],
-            "bin_end": edges[1:],
-            "count": counts,
-            "count_start": 0,
-        }
-    )
-
-    tooltip = settings.get("tooltip")
-    if not tooltip:
-        tooltip = ["bin_start:Q", "bin_end:Q", "count:Q"]
-    y_domain = settings.get("y_domain")
-    y_scale_kwargs = {}
-    if y_domain is not None:
-        y_scale_kwargs["domain"] = y_domain
-    else:
-        y_scale_kwargs["domainMin"] = 0
-    y_scale = alt.Scale(**y_scale_kwargs)
-    fill_color = settings.get("fill_color")
-    stroke_color = settings.get("stroke_color", "#0a2b63")
-    stroke_width = settings.get("stroke_width", 1)
-
-    bar_mark = dict(
-        opacity=settings.get("opacity", 0.5),
-        stroke=stroke_color,
-        strokeWidth=stroke_width,
-    )
-    if fill_color:
-        bar_mark["color"] = fill_color
-
-    chart = (
-        alt.Chart(hist_df)
-        .mark_bar(**bar_mark)
-        .encode(
-            x=alt.X("bin_start:Q", title=settings.get("x_title", x_field)),
-            x2="bin_end:Q",
-            y=alt.Y(
-                "count:Q",
-                title=settings.get("y_title", "Count"),
-                scale=y_scale,
-            ),
-            y2="count_start:Q",
-            tooltip=tooltip,
-        )
-    )
-
-    props = {
-        "height": settings.get("height", 300),
-        "width": settings.get("width", "container"),
-    }
-    if "title" in settings:
-        props["title"] = settings["title"]
-
-    chart = chart.properties(**props)
-    if reference_line_layers:
-        chart = alt.layer(chart, *reference_line_layers)
-    return chart
-
-
-def create_word_cloud(data, settings):
-    """Create a word cloud using the `wordcloud` library and return an HTML <img>."""
-    if WordCloud is None:
-        logger.error("wordcloud library is not installed; cannot render word cloud.")
-        return '<div class="chart-error">wordcloud library is not installed</div>'
-
-    df = pd.DataFrame(data).copy()
-
-    # Determine text and weight fields with sensible fallbacks
-    text_field = settings.get("text") or settings.get("word") or settings.get("x")
-    weight_field = settings.get("weight") or settings.get("count") or settings.get("y")
-
-    if not text_field and len(df.columns) > 0:
-        text_field = df.columns[0]
-    if not text_field or text_field not in df.columns:
-        logger.error("Word cloud requires a text field in the data")
-        return '<div class="chart-error">Word cloud requires a text/text column</div>'
-
-    if not weight_field or weight_field not in df.columns:
-        remaining_cols = [col for col in df.columns if col != text_field]
-        if remaining_cols:
-            weight_field = remaining_cols[0]
-        else:
-            weight_field = "_weight"
-            df[weight_field] = 1
-
-    df = df[[text_field, weight_field]].dropna(subset=[text_field])
-    df[weight_field] = pd.to_numeric(df[weight_field], errors="coerce").fillna(1)
-    df[text_field] = df[text_field].astype(str)
-
-    max_words_raw = settings.get("max_words")
-    max_words_val = None
-    if max_words_raw is not None:
-        try:
-            max_words_val = int(max_words_raw)
-        except Exception:
-            max_words_val = None
-
-    try:
-        if max_words_val:
-            df = df.sort_values(weight_field, ascending=False).head(max_words_val)
-    except Exception:
-        pass
-
-    frequencies = {}
-    for word, weight in zip(df[text_field], df[weight_field]):
-        if not word:
-            continue
-        try:
-            w = float(weight)
-        except Exception:
-            w = 1.0
-        if w <= 0:
-            continue
-        frequencies[word] = frequencies.get(word, 0) + w
-
-    if not frequencies:
-        logger.warning("No data available for word cloud chart")
-        return '<div class="chart-error">No data available for word cloud</div>'
-
-    wc = WordCloud(
-        width=int(settings.get("width", 700)),
-        height=int(settings.get("height", 500)),
-        background_color=settings.get("background_color", "white"),
-        colormap=settings.get("color_scheme", "viridis"),
-        max_words=max_words_val,
-        prefer_horizontal=settings.get("prefer_horizontal", 0.9),
-        stopwords=set(settings.get("stopwords", [])) if settings.get("stopwords") else None,
-    ).generate_from_frequencies(frequencies)
-
-    buffer = BytesIO()
-    wc.to_image().save(buffer, format="PNG")
-    img_b64 = base64.b64encode(buffer.getvalue()).decode("ascii")
-
-    chart_id = settings.get("chart_id", "word-cloud")
-    title = settings.get("title", settings.get("chart_title", "Word Cloud"))
-    img_style = settings.get("img_style", "width:100%;height:auto;display:block;")
-
-    return (
-        f'<div id="{chart_id}" class="word-cloud-chart" aria-label="{title}">'
-        f'<img src="data:image/png;base64,{img_b64}" alt="{title}" style="{img_style}"/></div>'
-    )
-
-
-def create_radar_chart(data, settings):
-    """Create a radar / spider chart using Altair (Vega-Embed, interactive tooltips).
-
-    Expected settings:
-        category       – column of spoke/axis labels (falls back to first column)
-        value          – column of numeric values to plot (falls back to second column)
-        series         – optional column for multiple overlapping polygons
-        tooltip_fields – list of extra column names to include in hover tooltip
-        min_value      – scale minimum (default 0)
-        max_value      – scale maximum (auto if omitted)
-        invert         – if true, lower values map to outer edge (useful for ranks
-                         where rank 1 = best; default false)
-        grid_lines     – number of concentric grid rings (default 5)
-        color_scheme   – Vega colour scheme for multi-series (default "category10")
-        fill_alpha     – polygon fill opacity 0–1 (default 0.15)
-        line_width     – polygon stroke width (default 2)
-        width / height – chart size in pixels (default container × 420)
-        title          – chart title
-
-    Data format (long):
-        indikator_label  rang  wert
-        Speed            3     82.5
-        Strength         7     65.0
-        ...
-
-    Settings for rank-on-axis with real value in tooltip:
-        {
-          "category": "indikator_label",
-          "value": "rang",
-          "tooltip_fields": ["wert"],
-          "min_value": 1,
-          "max_value": 21,
-          "invert": true,
-          "title": "Quartier 1 – Rang 2024"
-        }
-    With invert=true rank 1 (best) sits at the outer edge, rank 21 at the centre.
-    """
-    df = pd.DataFrame(data).copy()
-
-    # ── field resolution ─────────────────────────────────────────────────────
-    cat_field = settings.get("category") or settings.get("x")
-    val_field = settings.get("value") or settings.get("y")
-    ser_field = settings.get("series") or settings.get("color")
-    tooltip_extra = [c for c in (settings.get("tooltip_fields") or []) if c]
-
-    if not cat_field or cat_field not in df.columns:
-        cat_field = df.columns[0] if len(df.columns) > 0 else None
-    if not val_field or val_field not in df.columns:
-        remaining = [c for c in df.columns if c != cat_field]
-        val_field = remaining[0] if remaining else None
-
-    if not cat_field or not val_field:
-        logger.error("Radar chart requires category and value fields")
-        return alt.Chart(pd.DataFrame({"_x": [0], "_y": [0]})).mark_point()
-
-    df[val_field] = pd.to_numeric(df[val_field], errors="coerce").fillna(0)
-    # Only convert genuinely numeric extra-tooltip columns — never touch text fields
-    # (e.g. the category column itself if mistakenly listed in tooltip_fields).
-    for c in tooltip_extra:
-        if c in df.columns and c not in (cat_field, val_field):
-            converted = pd.to_numeric(df[c], errors="coerce")
-            if converted.notna().any():           # at least some values parsed → numeric
-                df[c] = converted
-
-    categories = list(df[cat_field].unique())
-    N = len(categories)
-    if N < 3:
-        logger.error("Radar chart requires at least 3 categories")
-        return alt.Chart(pd.DataFrame({"_x": [0], "_y": [0]})).mark_point()
-
-    # ── scale ────────────────────────────────────────────────────────────────
-    min_val = float(settings.get("min_value", 0))
-    max_val = settings.get("max_value")
-    if max_val is None:
-        max_val = float(df[val_field].max())
-    max_val = float(max_val)
-    rng = max_val - min_val or 1.0
-    invert = bool(settings.get("invert", False))
-    
-    def normalize(v):
-        n = (float(v) - min_val) / rng
-        return max(0.0, min(1.0, 1.0 - n if invert else n))
-
-    # ── angles: first spoke at top (π/2), clockwise ──────────────────────────
-    cat_index = {cat: i for i, cat in enumerate(categories)}
-
-    def spoke_angle(cat):
-        return np.pi / 2 - 2 * np.pi * cat_index[cat] / N
-
-    # ── series ───────────────────────────────────────────────────────────────
-    has_series = bool(ser_field and ser_field in df.columns)
-    series_vals = list(df[ser_field].unique()) if has_series else [None]
-
-    # ── polygon data ─────────────────────────────────────────────────────────
-    polygon_rows = []
-    for s_val in series_vals:
-        subset = df[df[ser_field] == s_val] if has_series else df
-        cat_to_row = {str(r[cat_field]): r for _, r in subset.iterrows()}
-
-        for i, cat in enumerate(categories + [categories[0]]):  # +1 closes the polygon
-            row = cat_to_row.get(str(cat))
-            raw_val = float(row[val_field]) if row is not None else min_val
-            r = normalize(raw_val)
-            a = spoke_angle(cat)
-            prow = {
-                "_x": r * np.cos(a),
-                "_y": r * np.sin(a),
-                "_order": i,
-                cat_field: cat,
-                val_field: raw_val,
-            }
-            if has_series:
-                prow[ser_field] = s_val
-            for c in tooltip_extra:
-                if c in df.columns and row is not None:
-                    prow[c] = row[c]
-            polygon_rows.append(prow)
-
-    polygon_df = pd.DataFrame(polygon_rows)
-    # hover points exclude the closing duplicate
-    hover_df = polygon_df[polygon_df["_order"] < N].copy()
-
-    # ── grid circles ─────────────────────────────────────────────────────────
-    grid_n = int(settings.get("grid_lines", 5))
-    grid_radii = np.linspace(0, 1, grid_n + 1)[1:]
-    circle_rows = []
-    thetas = np.linspace(0, 2 * np.pi, 121)
-    for r in grid_radii:
-        for j, theta in enumerate(thetas):
-            circle_rows.append({"_x": r * np.cos(theta), "_y": r * np.sin(theta), "_r": str(r), "_ord": j})
-    circle_df = pd.DataFrame(circle_rows)
-
-    # ── spoke lines ───────────────────────────────────────────────────────────
-    spoke_rows = []
-    for cat in categories:
-        a = spoke_angle(cat)
-        spoke_rows += [
-            {"_x": 0.0, "_y": 0.0, "_spoke": cat, "_ord": 0},
-            {"_x": np.cos(a), "_y": np.sin(a), "_spoke": cat, "_ord": 1},
-        ]
-    spoke_df = pd.DataFrame(spoke_rows)
-
-    # ── scale tick labels (between first and second spoke for readability) ────
-    # Place labels halfway between spoke 0 (top) and spoke 1 so they sit in
-    # an open gap and don't overlap either spoke or the category labels.
-    angle_0 = np.pi / 2                       # first spoke (top)
-    angle_1 = np.pi / 2 - 2 * np.pi / N      # second spoke (clockwise)
-    tick_angle = (angle_0 + angle_1) / 2      # midpoint between them
-    # Also include r=0 with the minimum value label so the centre is labelled.
-    tick_radii = np.concatenate([[0.0], grid_radii])
-    tick_rows = []
-    for r in tick_radii:
-        actual = (min_val + (1.0 - r) * rng) if invert else (min_val + r * rng)
-        tick_rows.append({
-            "_x": r * np.cos(tick_angle),
-            "_y": r * np.sin(tick_angle),
-            "_tick": f"{actual:.4g}",
-        })
-    tick_df = pd.DataFrame(tick_rows)
-
-    # ── category labels (outside outer ring) ─────────────────────────────────
-    label_r = 1.18
-    clabel_rows = []
-    for cat in categories:
-        a = spoke_angle(cat)
-        x, y = label_r * np.cos(a), label_r * np.sin(a)
-        clabel_rows.append({"_x": x, "_y": y, "_label": str(cat)})
-    clabel_df = pd.DataFrame(clabel_rows)
-
-    # ── Altair layers ─────────────────────────────────────────────────────────
-    domain = [-1.38, 1.38]
-    h = int(settings.get("height", 420))
-    # Radar must be square so grid circles aren't distorted into ellipses.
-    # If the user passes width="container" or omits it, default to height.
-    w_raw = settings.get("width")
-    w = h if (w_raw is None or w_raw == "container") else int(w_raw)
-
-    def xy(extra_x=None, extra_y=None):
-        return dict(
-            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
-            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
-        )
-
-    grid_layer = (
-        alt.Chart(circle_df)
-        .mark_line(color="#cccccc", strokeWidth=0.6, strokeDash=[3, 3])
-        .encode(
-            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
-            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
-            detail=alt.Detail("_r:N"),
-            order=alt.Order("_ord:Q"),
-        )
-    )
-
-    spoke_layer = (
-        alt.Chart(spoke_df)
-        .mark_line(color="#cccccc", strokeWidth=0.6)
-        .encode(
-            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
-            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
-            detail=alt.Detail("_spoke:N"),
-            order=alt.Order("_ord:Q"),
-        )
-    )
-
-    tick_layer = (
-        alt.Chart(tick_df)
-        .mark_text(fontSize=8, color="#999999", align="left", baseline="middle")
-        .encode(
-            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
-            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
-            text=alt.Text("_tick:N"),
-        )
-    )
-
-    clabel_layer = (
-        alt.Chart(clabel_df)
-        .mark_text(fontSize=10, align="center", baseline="middle")
-        .encode(
-            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
-            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
-            text=alt.Text("_label:N"),
-        )
-    )
-
-    fill_alpha = float(settings.get("fill_alpha", 0.15))
-    line_width = float(settings.get("line_width", 2))
-
-    if has_series:
-        color_enc = alt.Color(f"{ser_field}:N", scale=alt.Scale(**_color_scale_kwargs(settings)))
-        detail_enc = alt.Detail(f"{ser_field}:N")
-    else:
-        color_enc = alt.value("steelblue")
-        detail_enc = alt.Undefined
-
-    # Outline: polygon_df has N+1 points per series (last = first) to close the stroke.
-    polygon_line = (
-        alt.Chart(polygon_df)
-        .mark_line(strokeWidth=line_width)
-        .encode(
-            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
-            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
-            color=color_enc,
-            detail=detail_enc,
-            order=alt.Order("_order:Q"),
-        )
-    )
-
-    # Fill: mark_line with fill + interpolate="linear-closed" closes the path
-    # and fills the enclosed polygon area.  mark_area is wrong here because it
-    # fills toward the y=0 baseline rather than the polygon interior.
-    area_df = polygon_df[polygon_df["_order"] < N].copy()
-    fill_color = "steelblue" if not has_series else alt.Undefined
-    polygon_area = (
-        alt.Chart(area_df)
-        .mark_line(
-            interpolate="linear-closed",
-            fill=fill_color,
-            fillOpacity=fill_alpha,
-            strokeWidth=0,
-        )
-        .encode(
-            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
-            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
-            color=color_enc if has_series else alt.Undefined,
-            detail=detail_enc,
-            order=alt.Order("_order:Q"),
-        )
-    )
-
-    already_in_tooltip = {cat_field, val_field, ser_field}
-    tooltip_enc = [
-        alt.Tooltip(f"{cat_field}:N", title=cat_field),
-        alt.Tooltip(f"{val_field}:Q", title=val_field),
-    ]
-    for c in tooltip_extra:
-        if c not in hover_df.columns or c in already_in_tooltip:
-            continue
-        vtype = "Q" if pd.api.types.is_numeric_dtype(hover_df[c]) else "N"
-        tooltip_enc.append(alt.Tooltip(f"{c}:{vtype}", title=c))
-    if has_series:
-        tooltip_enc.insert(0, alt.Tooltip(f"{ser_field}:N", title=ser_field))
-
-    point_layer = (
-        alt.Chart(hover_df)
-        .mark_point(size=80, filled=True)
-        .encode(
-            x=alt.X("_x:Q", axis=None, scale=alt.Scale(domain=domain)),
-            y=alt.Y("_y:Q", axis=None, scale=alt.Scale(domain=domain)),
-            color=color_enc,
-            tooltip=tooltip_enc,
-        )
-    )
-
-    chart = alt.layer(
-        grid_layer, spoke_layer, tick_layer,
-        polygon_area, polygon_line, point_layer,
-        clabel_layer,
-    ).properties(width=w, height=h)
-
-    if settings.get("title"):
-        chart = chart.properties(title=settings["title"])
-
-    return chart
-
-
-def create_ranking_bar_chart(data, settings):
-    """Create a horizontal ranking bar chart.
-
-    All bars are grey; one bar is highlighted in a distinct colour based on a
-    label match.  Bars are sorted so the highest value is at the top.
-
-    Expected settings:
-        category        – column with bar labels (falls back to first column)
-        value           – column with numeric values (falls back to second column)
-        highlight       – label value that should be coloured differently
-        highlight_color – colour for the highlighted bar  (default "#e45756")
-        bar_color       – colour for all other bars        (default "#bbbbbb")
-        sort            – "descending" (default) or "ascending"
-        width / height  – chart dimensions (defaults: "container" / 400)
-        title           – optional chart title
-        x_title / y_title – axis labels
-        tooltips        – ordered list of column names to show in tooltip
-    """
-    df = data.copy()
-
-    cat_field = settings.get("category") or (df.columns[0] if len(df.columns) > 0 else "category")
-    val_field = settings.get("value") or (df.columns[1] if len(df.columns) > 1 else "value")
-
-    highlight_label = settings.get("highlight", "")
-    highlight_color = settings.get("highlight_color", "#e45756")
-    bar_color = settings.get("bar_color", "#bbbbbb")
-    sort_order = settings.get("sort", "descending")
-
-    w = settings.get("width", "container")
-    h = settings.get("height", 400)
-    if isinstance(h, str) and h.lower() != "container":
-        try:
-            h = int(h)
-        except ValueError:
-            h = 400
-
-    # Sort the dataframe so Altair sees the desired order
-    ascending = sort_order == "ascending"
-    df = df.sort_values(val_field, ascending=ascending).reset_index(drop=True)
-
-    # Ordered list of categories after sorting (top of chart = last in ascending list)
-    sorted_categories = df[cat_field].tolist()
-
-    # Conditional colour: highlighted bar vs all others
-    color_condition = alt.condition(
-        alt.datum[cat_field] == highlight_label,
-        alt.value(highlight_color),
-        alt.value(bar_color),
-    )
-
-    # Tooltip — accept both "tooltips" and "tooltip_fields" keys
-    tooltip_fields = settings.get("tooltips") or settings.get("tooltip_fields") or []
-
-    # Numeric-convert any extra columns (guard against corrupting text columns)
-    for c in tooltip_fields:
-        if c in df.columns and c not in (cat_field, val_field):
-            converted = pd.to_numeric(df[c], errors="coerce")
-            if converted.notna().any():
-                df[c] = converted
-
-    if tooltip_fields:
-        # User supplied an explicit ordered list — honour it exactly
-        seen = set()
-        tooltip_enc = []
-        for c in tooltip_fields:
-            if c not in df.columns or c in seen:
-                continue
-            seen.add(c)
-            vtype = "Q" if pd.api.types.is_numeric_dtype(df[c]) else "N"
-            tooltip_enc.append(alt.Tooltip(f"{c}:{vtype}", title=c))
-    else:
-        # Fallback: category + value only, using column names as labels
-        tooltip_enc = [
-            alt.Tooltip(f"{cat_field}:N", title=cat_field),
-            alt.Tooltip(f"{val_field}:Q", title=val_field),
-        ]
-
-    chart = (
-        alt.Chart(df)
-        .mark_bar()
-        .encode(
-            x=alt.X(
-                f"{val_field}:Q",
-                title=settings.get("x_title", val_field),
-            ),
-            y=alt.Y(
-                f"{cat_field}:N",
-                sort=sorted_categories,
-                title=settings.get("y_title", cat_field),
-            ),
-            color=color_condition,
-            tooltip=tooltip_enc,
-        )
-        .properties(width=w, height=h)
-    )
-
-    if settings.get("title"):
-        chart = chart.properties(title=settings["title"])
-
-    return chart
-
-
-def apply_common_settings(chart, settings):
-    """Apply common chart settings like axes, title, and encodings
-
-    Dynamic behaviour controlled via settings:
-      - x_type / y_type: 'Q' (quant), 'O' (ordinal), 'T' (time). Defaults to 'Q'.
-      - x_sort / y_sort: list of categories to use as explicit sort/domain for ordinal axes.
-      - x_domain / y_domain: explicit numeric domain for quantitative axes.
-      - x_tick_integer / y_tick_integer: force integer ticks (tickMinStep=1 + integer format)
-      - x_axis / y_axis: dict of axis options (labelAngle, tickCount, format, etc.)
-      - x_axis_labels / y_axis_labels: optional list of labels to map numeric tick values to strings.
-        Example: x_axis_labels=['Jan','Feb',...], with data values 1..12 will display month names.
-    """
-    encodings = {}
-
-    def _build_axis(axis_settings: dict | None, integer_ticks: bool):
-        ax_opts = {}
-        if axis_settings:
-            # copy known simple options through
-            for k in ("labelAngle", "tickCount", "format", "title", "orient"):
-                if k in axis_settings:
-                    ax_opts[k] = axis_settings[k]
-        if integer_ticks:
-            ax_opts.setdefault("format", "d")
-            ax_opts.setdefault("tickMinStep", 1)
-        # always provide an Axis object
-        return ax_opts
-
-    def _build_scale(domain):
-        if domain is None:
-            return None
-        return alt.Scale(domain=domain, nice=False)
-
-    # helper to produce a Vega-Lite labelExpr for mapping numeric tick values to labels
-    def _label_expr_for_labels(labels: list):
-        # build a JSON array in JS and index by datum.value-1 (assumes 1-based values)
-        # Limitations: this expects numeric 1..N values. If your data uses strings, consider
-        # converting them to integers or using an ordinal axis with explicit sort.
-        import json as _json
-        js_array = _json.dumps(labels)
-        # label expression: (labels)[datum.value - 1] || datum.value
-        return f"({js_array})[datum.value - 1] || datum.value"
-
-    # X-axis
-    x_field = settings.get("x")
-    if x_field:
-        x_type = (settings.get("x_type") or "Q").upper()
-        x_axis_settings = settings.get("x_axis") or {}
-        x_integer = bool(settings.get("x_tick_integer", False))
-        x_sort = settings.get("x_sort", None)
-        x_domain = settings.get("x_domain", None)
-        x_axis_labels = settings.get("x_axis_labels")
-
-        axis_opts = _build_axis(x_axis_settings, x_integer)
-        scale_obj = _build_scale(x_domain)
-
-        # if axis labels provided and numeric mapping desired, set tickValues and labelExpr
-        axis_kwargs = dict(axis_opts)
-        if x_axis_labels:
-            # tick values will be 1..len(labels)
-            tick_vals = list(range(1, len(x_axis_labels) + 1))
-            axis_kwargs["values"] = tick_vals
-            axis_kwargs["labelExpr"] = _label_expr_for_labels(x_axis_labels)
-
-        axis_obj = alt.Axis(**axis_kwargs) if axis_kwargs else alt.Axis()
-
-        encodings["x"] = alt.X(
-            f"{x_field}:{x_type}",
-            title=settings.get("x_title", x_field),
-            axis=axis_obj,
-        )
-        if scale_obj:
-            encodings["x"].scale=scale_obj
-        if x_sort:
-            encodings["x"].sort=x_sort
-
-    # Y-axis
-    y_field = settings.get('y')
-    if y_field:
-        y_type = (settings.get("y_type") or "Q").upper()
-        y_axis_settings = settings.get("y_axis") or {}
-        y_integer = bool(settings.get("y_tick_integer", False))
-        y_domain = settings.get("y_domain", None)
-        y_axis_labels = settings.get("y_axis_labels")
-        y_sort = settings.get("y_sort", None)
-        axis_opts = _build_axis(y_axis_settings, y_integer)
-        scale_obj = _build_scale(y_domain)
-
-        axis_kwargs = dict(axis_opts)
-        if y_axis_labels:
-            tick_vals = list(range(1, len(y_axis_labels) + 1))
-            axis_kwargs["Values"] = tick_vals
-            axis_kwargs["labelExpr"] = _label_expr_for_labels(y_axis_labels)
-        axis_obj = alt.Axis(**axis_kwargs) if axis_kwargs else alt.Axis()
-
-        encodings["y"] = alt.Y(
-            f"{y_field}:{y_type}",
-            title=settings.get("y_title", y_field),
-            axis=axis_obj,
-            sort=settings.get("y_sort", None),
-        )
-        if scale_obj:
-            encodings["y"].scale=scale_obj
-        if y_sort:
-            encodings["y"].sort=y_sort
-               
-    # Color encoding (optional)
-    color_field = settings.get('color')
-    if color_field:
-        encodings['color'] = color_field
-
-    # Tooltip (optional)
-    tooltip_fields = settings.get('tooltips')
-    if tooltip_fields:
-        x_field = settings.get("x")
-        x_type = (settings.get("x_type") or "").upper()
-        processed = []
-        for t in tooltip_fields:
-            if isinstance(t, str) and t == x_field and x_type == "T":
-                # Use the _label column (ISO string) so the tooltip shows a
-                # readable date rather than the datetime64 millisecond value.
-                processed.append(alt.Tooltip(f"{t}_label:N", title=t))
-            else:
-                processed.append(t)
-        encodings['tooltip'] = processed
-
-    # Apply encodings
-    chart = chart.encode(**encodings)
-
-    # Set properties
-    props = {}
-    if 'title' in settings:
-        props['title'] = settings['title']
-    props['height'] = settings.get('height', 300)
-    props['width'] = settings.get('width', 'container')
-
-    chart = chart.properties(**props)
-
-    return chart
+        js.append(f"  {map_var}.addLayer({cluster_var});")
+
+    js += ["  if(!window.__leafletMapResizeHook){",
+           "    window.__leafletMapResizeHook=true;",
+           "    document.addEventListener('shown.bs.tab',function(){Object.values(window.__leafletMaps||{}).forEach(function(m){m.invalidateSize();});});",
+           "    document.addEventListener('shown.bs.collapse',function(){Object.values(window.__leafletMaps||{}).forEach(function(m){m.invalidateSize();});});",
+           "  }",
+           f"  setTimeout(function(){{if(window.__leafletMaps&&window.__leafletMaps[containerId])window.__leafletMaps[containerId].invalidateSize();}},50);",
+           "})();"]
+
+    return "\n".join([style_block, container_div, f"<script>\n{chr(10).join(js)}\n</script>"])
