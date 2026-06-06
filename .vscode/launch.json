@@ -144,7 +144,7 @@
       "args": [
         "generate_appendices",
         "--graphic_template_id",
-        "94",
+        "68",
         "--graphics",
         "-v",
         "2"
