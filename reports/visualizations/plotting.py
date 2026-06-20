@@ -135,7 +135,7 @@ def _chart_to_html(option: dict, chart_id: str) -> str:
 # Dispatcher
 # ---------------------------------------------------------------------------
 
-NON_ECHARTS_TYPES = {"wordcloud", "map_markers", "map-markers", "choropleth", "chloropleth"}
+NON_ECHARTS_TYPES = {"wordcloud", "map_markers", "map-markers", "choropleth", "chloropleth", "simulation"}
 
 
 def generate_chart(data, settings, chart_id: str) -> str:
@@ -603,16 +603,21 @@ def create_heatmap(data, settings: dict) -> dict:
             pass
         return str(v)
 
-    def _sorted_cats(values):
+    def _sorted_cats(values, explicit_order=None):
         normed = [_norm(v) for v in values]
+        if explicit_order:
+            present = set(normed)
+            ordered = [str(v) for v in explicit_order if str(v) in present]
+            remaining = [v for v in normed if v not in set(ordered)]
+            return ordered + sorted(set(remaining), key=str)
         try:
             return [str(i) for i in sorted({int(v) for v in normed})]
         except (ValueError, TypeError):
             pass
         return sorted(set(normed), key=str)
 
-    x_vals = _sorted_cats(df[x_field].dropna().unique())
-    y_vals = _sorted_cats(df[y_field].dropna().unique())
+    x_vals = _sorted_cats(df[x_field].dropna().unique(), settings.get("x_order"))
+    y_vals = _sorted_cats(df[y_field].dropna().unique(), settings.get("y_order"))
     x_idx = {v: i for i, v in enumerate(x_vals)}
     y_idx = {v: i for i, v in enumerate(y_vals)}
 

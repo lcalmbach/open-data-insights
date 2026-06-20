@@ -23,7 +23,9 @@ class StoryTemplateGraphic(models.Model):
         help_text="Settings for the graphic, e.g., {'type': 'bar', 'x': 'date', 'y': 'value'}. This can include any settings required by the graphic library used.",
     )
     sql_command = models.TextField(
-        help_text="SQL command to get the data for the graphic, e.g., 'SELECT date, value FROM weather_data WHERE date >= %s AND date <= %s'. This command should return the data in a format suitable for the graphic library used.",
+        blank=True,
+        default="",
+        help_text="SQL command to get the data for the graphic. Leave empty for simulation-type graphics.",
     )
     graphic_type = models.ForeignKey(
         GraphType,

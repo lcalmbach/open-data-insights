@@ -16,18 +16,21 @@ StoryTemplateFocus = apps.get_model("reports", "StoryTemplateFocus")
 StoryTemplateGraphic = apps.get_model("reports", "StoryTemplateGraphic")
 StoryTemplateTable = apps.get_model("reports", "StoryTemplateTable")
 StoryTemplateContext = apps.get_model("reports", "StoryTemplateContext")
+SimulationTemplate = apps.get_model("reports", "SimulationTemplate")
+SimulationParameter = apps.get_model("reports", "SimulationParameter")
 LookupValue = apps.get_model("reports", "LookupValue")
 
 # Resolve the project's custom user model from settings.AUTH_USER_MODEL
 user_app_label, user_model_name = settings.AUTH_USER_MODEL.rsplit(".", 1)
 CustomUser = apps.get_model(user_app_label, user_model_name)
 
-PARENT_MODELS = [Dataset, StoryTemplate, CustomUser]
+PARENT_MODELS = [Dataset, StoryTemplate, SimulationTemplate, CustomUser]
 CHILD_SPECS = [
     (StoryTemplateFocus, "story_template", StoryTemplate),
     (StoryTemplateGraphic, "story_template", StoryTemplate),
     (StoryTemplateTable, "story_template", StoryTemplate),
     (StoryTemplateContext, "story_template", StoryTemplate),
+    (SimulationParameter, "simulation", SimulationTemplate),
 ]
 
 MODEL_NAME = {
@@ -37,6 +40,8 @@ MODEL_NAME = {
     StoryTemplateGraphic: "StoryTemplateGraphic",
     StoryTemplateTable: "StoryTemplateTable",
     StoryTemplateContext: "StoryTemplateContext",
+    SimulationTemplate: "SimulationTemplate",
+    SimulationParameter: "SimulationParameter",
     CustomUser: "CustomUser",
 }
 
@@ -47,6 +52,8 @@ EXCLUDE_FIELDS_BY_MODEL = {
     StoryTemplateGraphic: {"id", "slug"},
     StoryTemplateTable: {"id", "slug"},
     StoryTemplateContext: {"id", "slug"},
+    SimulationTemplate: {"id", "slug"},
+    SimulationParameter: {"id"},
     CustomUser: {"id"},  # adjust if you want to exclude more user fields (e.g. password)
 }
 
@@ -54,7 +61,7 @@ EXCLUDE_FIELDS_BY_MODEL = {
 # This will pick up Subscription (or any other user-owned model) regardless of its name.
 for m in apps.get_models():
     # skip parent models already known
-    if m in (Dataset, StoryTemplate, StoryTemplateGraphic, StoryTemplateTable, StoryTemplateContext, CustomUser):
+    if m in (Dataset, StoryTemplate, StoryTemplateGraphic, StoryTemplateTable, StoryTemplateContext, SimulationTemplate, SimulationParameter, CustomUser):
         continue
     for f in m._meta.get_fields():
         if isinstance(f, models.ForeignKey) and getattr(f.remote_field, "model", None) == CustomUser:
@@ -242,7 +249,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--only",
             nargs="*",
-            choices=[MODEL_NAME[m] for m in [Dataset, StoryTemplate, StoryTemplateFocus, StoryTemplateGraphic, StoryTemplateTable, StoryTemplateContext, CustomUser]],
+            choices=[MODEL_NAME[m] for m in [Dataset, StoryTemplate, StoryTemplateFocus, StoryTemplateGraphic, StoryTemplateTable, StoryTemplateContext, SimulationTemplate, SimulationParameter, CustomUser]],
             help="(Batch mode) Limit to specific models.",
         )
 

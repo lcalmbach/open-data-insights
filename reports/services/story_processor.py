@@ -496,6 +496,11 @@ class StoryProcessor:
     def generate_graphic(self, graphic: Graphic):
         try:
             graphic_template = graphic.graphic_template
+
+            # Simulation graphics: generate widget HTML, skip SQL pipeline
+            if getattr(graphic_template.graphic_type, "value", None) == "simulation":
+                return self._generate_simulation_graphic(graphic)
+
             sql_command = self._replace_sql_expressions(graphic_template.sql_command)
             if not sql_command:
                 self.logger.warning(
@@ -573,6 +578,30 @@ class StoryProcessor:
             import traceback
 
             self.logger.error(traceback.format_exc())
+            return False
+
+    def _generate_simulation_graphic(self, graphic: Graphic) -> bool:
+        from reports.services.simulation_processor import generate_simulation
+        from reports.models.simulation import SimulationTemplate
+        graphic_template = graphic.graphic_template
+        settings = graphic_template.settings or {}
+        sim_template_slug = settings.get("simulation_template_slug")
+        if not sim_template_slug:
+            self.logger.error(
+                f"Simulation graphic '{graphic_template.title}' missing simulation_template_slug in settings"
+            )
+            return False
+        try:
+            tmpl = SimulationTemplate.objects.get(slug=sim_template_slug)
+            sim = generate_simulation(tmpl.pk)
+            graphic.title = self._replace_reference_period_expression(graphic_template.title)
+            graphic.content_html = sim.html
+            graphic.sort_order = graphic_template.sort_order
+            graphic.save()
+            self.logger.info(f"Generated simulation graphic: {graphic_template.title}")
+            return True
+        except Exception as exc:
+            self.logger.error(f"Error generating simulation graphic '{graphic_template.title}': {exc}")
             return False
 
     def _resolve_reference_line_settings(self, settings: Dict[str, Any]) -> Dict[str, Any]:
@@ -683,22 +712,25 @@ class StoryProcessor:
 
             self.story.save()
 
-            self.logger.info("Validating story...")
-            validator = StoryValidator()
-            result = validator.validate(self.story, self.ai_client)
-            self.story.save(update_fields=["validation_status", "validation_notes"])
-            if not result.passed:
-                self.logger.warning(
-                    "Story failed validation — will not be shown publicly. Notes: %s",
-                    result.notes,
-                )
-                try:
-                    from reports.services.email_service import EmailService
-                    EmailService().send_validation_failure_email(self.story, result.notes or "")
-                except Exception as exc:
-                    self.logger.warning("Could not send validation failure email: %s", exc)
+            if self.force_generation:
+                self.logger.info("Skipping validation (--force mode).")
             else:
-                self.logger.info("Story passed validation. Notes: %s", result.notes or "none")
+                self.logger.info("Validating story...")
+                validator = StoryValidator()
+                result = validator.validate(self.story, self.ai_client)
+                self.story.save(update_fields=["validation_status", "validation_notes"])
+                if not result.passed:
+                    self.logger.warning(
+                        "Story failed validation — will not be shown publicly. Notes: %s",
+                        result.notes,
+                    )
+                    try:
+                        from reports.services.email_service import EmailService
+                        EmailService().send_validation_failure_email(self.story, result.notes or "")
+                    except Exception as exc:
+                        self.logger.warning("Could not send validation failure email: %s", exc)
+                else:
+                    self.logger.info("Story passed validation. Notes: %s", result.notes or "none")
 
             self.logger.info("Generating tables...")
             self._generate_tables()

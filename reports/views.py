@@ -1276,6 +1276,7 @@ def view_story(request, story_id=None):
     _attach_resolved_focus_images(selected_story)
     _attach_story_render_fields(selected_story)
     tables = get_tables(selected_story) if selected_story else []
+
     graphics = _get_story_graphics(selected_story)
     _attach_graphic_chart_ids(graphics)
     needs_leaflet, needs_markercluster = _attach_graphic_requirements(graphics)
@@ -1321,6 +1322,7 @@ def story_detail(request, story_id=None):
     _attach_resolved_focus_images(selected_story)
     _attach_story_render_fields(selected_story)
     tables = get_tables(selected_story) if selected_story else []
+
     graphics = _get_story_graphics(selected_story)
     _attach_graphic_chart_ids(graphics)
     needs_leaflet, needs_markercluster = _attach_graphic_requirements(graphics)

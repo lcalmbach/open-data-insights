@@ -13,7 +13,7 @@ class Command(BaseCommand):
             "--chart_type",
             type=str,
             help=(
-                "Comma-separated chart type(s) to regenerate, e.g. 'line' or 'bar,pie'. "
+                "Comma-separated chart type(s) to regenerate, e.g. 'line' or 'bar,pie' or 'simulation'. "
                 "Omit to regenerate all plot types (maps and word clouds are always skipped)."
             ),
         )

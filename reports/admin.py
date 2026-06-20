@@ -1,6 +1,7 @@
 import copy
 
 from django.contrib import admin
+from .models.simulation import Simulation, SimulationParameter, SimulationTemplate
 from .models.story import Story
 from .models.story_template import (
     StoryImage,
@@ -427,4 +428,29 @@ class StoryAccessAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
+        return False
+
+
+class SimulationParameterInline(admin.TabularInline):
+    model = SimulationParameter
+    extra = 1
+    fields = ("parameter_name", "description", "parameter_type", "value", "sql_expression", "sort_order")
+
+
+@admin.register(SimulationTemplate)
+class SimulationTemplateAdmin(admin.ModelAdmin):
+    list_display = ("title", "updated_at")
+    search_fields = ("title", "description")
+    inlines = [SimulationParameterInline]
+    fields = ("title", "description", "text", "js_template")
+
+
+@admin.register(Simulation)
+class SimulationAdmin(admin.ModelAdmin):
+    list_display = ("simulation_template", "generated_at")
+    list_filter = ("simulation_template",)
+    readonly_fields = ("simulation_template", "parameters_used", "generated_at", "html")
+    ordering = ("-generated_at",)
+
+    def has_add_permission(self, request):
         return False
