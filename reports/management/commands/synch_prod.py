@@ -163,6 +163,21 @@ class Command(BaseCommand):
         )
         return prepared
 
+    def _prepare_storytemplategraphic_defaults(
+        self,
+        obj,
+        data: Dict[str, Any],
+        src_alias: str,
+        dst_alias: str,
+    ) -> Dict[str, Any]:
+        prepared = dict(data)
+        prepared["graphic_type_id"] = self._resolve_lookupvalue_pk(
+            getattr(obj, "graphic_type_id", None),
+            src_alias,
+            dst_alias,
+        )
+        return prepared
+
     def _sync_story_template_topics(self, src_obj, dst_obj, src_alias: str, dst_alias: str, dry: bool) -> None:
         src_topics = (
             LookupValue.objects.using(src_alias)
@@ -398,6 +413,8 @@ class Command(BaseCommand):
         # Upsert Child (Lookup: (parent, slug))
         exclude = set(EXCLUDE_FIELDS_BY_MODEL.get(child_model, set())) | {"id", parent_field + "_id"}
         data = _values_dict_from_instance(child, exclude=exclude)
+        if child_model is StoryTemplateGraphic:
+            data = self._prepare_storytemplategraphic_defaults(child, data, src_alias, dst_alias)
 
         dst_child_mgr = child_model.objects.using(dst_alias)
         dst_parent_mgr = parent.__class__.objects.using(dst_alias)
@@ -528,6 +545,8 @@ class Command(BaseCommand):
                     dst_parent_obj = dst_parent.get(**{lookup_field: lookup_value})
 
                 defaults = _values_dict_from_instance(obj, exclude=exclude)
+                if child_model is StoryTemplateGraphic:
+                    defaults = self._prepare_storytemplategraphic_defaults(obj, defaults, src_alias, dst_alias)
                 lookup, default_focus = self._get_child_lookup(obj, parent_field, dst_parent_obj)
                 dst_obj = self._find_child(dst_child, lookup, default_focus=default_focus)
                 if dst_obj is not None:
@@ -579,6 +598,8 @@ class Command(BaseCommand):
         for obj in src_qs.iterator(chunk_size=1000):
             slug = getattr(obj, "slug", None)
             defaults = _values_dict_from_instance(obj, exclude=exclude)
+            if child_model is StoryTemplateGraphic:
+                defaults = self._prepare_storytemplategraphic_defaults(obj, defaults, src_alias, dst_alias)
 
             if dry:
                 lookup, default_focus = self._get_child_lookup(obj, parent_field, dst_parent_obj)
