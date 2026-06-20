@@ -1,0 +1,501 @@
+<style>
+.sim{font-family:sans-serif;color:inherit;padding:1.5rem 0;}
+.sim h2{font-size:1.4rem;font-weight:400;line-height:1.2;margin-bottom:.25rem;}
+.subtitle{font-size:.8rem;color:#888;margin-bottom:1.5rem;letter-spacing:.04em;text-transform:uppercase;}
+.baseline-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem;}
+.b-card{background:#f5f5f5;border-radius:8px;padding:.75rem 1rem;}
+.b-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.b-val{font-size:1.2rem;font-weight:500;}
+.b-note{font-size:10px;color:#aaa;margin-top:2px;}
+.panels{display:grid;grid-template-columns:220px 1fr;gap:1.5rem;align-items:start;}
+.controls{display:flex;flex-direction:column;gap:1rem;}
+.ctrl-group{background:#f5f5f5;border-radius:10px;padding:1rem;}
+.ctrl-group-title{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:#888;margin-bottom:.75rem;font-weight:500;}
+.ctrl{margin-bottom:.6rem;}.ctrl:last-child{margin-bottom:0;}
+.ctrl-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+.ctrl-label{font-size:12px;color:#888;}
+.ctrl-val{font-size:12px;font-weight:500;}
+input[type=range]{width:100%;cursor:pointer;}
+.scenario-btns{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;}
+.scen-btn{font-size:11px;padding:4px 10px;border:0.5px solid #ccc;border-radius:20px;background:transparent;color:#888;cursor:pointer;}
+.scen-btn:hover,.scen-btn.active{background:#333;color:#fff;border-color:#333;}
+.outcome-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:1rem;}
+.o-card{border-radius:8px;padding:.75rem;text-align:center;}
+.o-card.grow{background:rgba(29,158,117,.12);border:0.5px solid rgba(29,158,117,.3);}
+.o-card.shrink{background:rgba(226,75,74,.1);border:0.5px solid rgba(226,75,74,.3);}
+.o-card.neutral{background:#f5f5f5;border:0.5px solid #ddd;}
+.o-label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:4px;}
+.o-val{font-size:1.1rem;font-weight:500;}
+.o-subval{font-size:11px;color:#888;margin-top:2px;}
+.pc-playbar{display:flex;align-items:center;gap:8px;margin:.75rem 0 .5rem;}
+.pc-play-btn{font-size:11px;padding:4px 12px;border:0.5px solid #ccc;border-radius:20px;background:transparent;color:inherit;cursor:pointer;white-space:nowrap;}
+.pc-play-btn:hover{background:#f0f0f0;}
+.pc-year-label{font-size:1.1rem;font-weight:500;min-width:38px;text-align:right;}
+.pc-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:.75rem;}
+.pc-s-card{background:#f5f5f5;border-radius:8px;padding:.55rem .7rem;}
+.pc-s-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px;}
+.pc-s-val{font-size:.95rem;font-weight:500;}
+.pc-legend{display:flex;gap:12px;font-size:11px;color:#888;margin-top:.6rem;flex-wrap:wrap;}
+.pc-leg-box{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:3px;vertical-align:middle;}
+@media(max-width:600px){.panels{grid-template-columns:1fr;}.baseline-bar{grid-template-columns:repeat(2,1fr);}}
+</style>
+
+<div class="sim" id="sim-popcurve">
+  <h2>Population Trends Basel-Stadt</h2>
+  <div class="subtitle">Interactive Simulator · Base Year 2023 · 50-Year Projection</div>
+
+  <div class="baseline-bar">
+    <div class="b-card"><div class="b-label">Residents 2023</div><div class="b-val" id="pc-init-pop-display"></div><div class="b-note">Source: StatA BS</div></div>
+    <div class="b-card"><div class="b-label">Natural Growth</div><div class="b-val" style="color:#e24b4a;">−255</div><div class="b-note">more deaths than births</div></div>
+    <div class="b-card"><div class="b-label">Net Migration</div><div class="b-val" style="color:#1D9E75;">+2'000</div><div class="b-note">net migration p.a.</div></div>
+    <div class="b-card"><div class="b-label">Life Expectancy</div><div class="b-val" id="pc-le-display"></div><div class="b-note">Swiss average</div></div>
+  </div>
+
+  <div class="scenario-btns">
+    <button class="scen-btn active" onclick="pcApplyScenario('status_quo',this)">Status Quo</button>
+    <button class="scen-btn" onclick="pcApplyScenario('high_migration',this)">High Immigration</button>
+    <button class="scen-btn" onclick="pcApplyScenario('low_migration',this)">Low Immigration</button>
+    <button class="scen-btn" onclick="pcApplyScenario('baby_boom',this)">Baby Boom</button>
+    <button class="scen-btn" onclick="pcApplyScenario('aging_city',this)">Shrinking City</button>
+  </div>
+
+  <div class="panels">
+    <div class="controls">
+      <div class="ctrl-group">
+        <div class="ctrl-group-title">Natural Population Change</div>
+        <div class="ctrl">
+          <div class="ctrl-header"><span class="ctrl-label">Swiss TFR</span><span class="ctrl-val" style="color:#378ADD" id="pc-tfr-ch-out">1.20</span></div>
+          <input type="range" id="pc-tfr-ch" min="0.8" max="4.0" step="0.05" value="1.20">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-header"><span class="ctrl-label">Foreign TFR</span><span class="ctrl-val" style="color:#D85A30" id="pc-tfr-f-out">2.00</span></div>
+          <input type="range" id="pc-tfr-f" min="0.8" max="4.0" step="0.05" value="2.00">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-header"><span class="ctrl-label">Life Expectancy (Years)</span><span class="ctrl-val" id="pc-le-out">83.8</span></div>
+          <input type="range" id="pc-le" min="60" max="100" step="0.5" value="83.8">
+        </div>
+      </div>
+      <div class="ctrl-group">
+        <div class="ctrl-group-title">Migration</div>
+        <div class="ctrl">
+          <div class="ctrl-header"><span class="ctrl-label">Immigrants per Year</span><span class="ctrl-val" id="pc-imm-out">12'500</span></div>
+          <input type="range" id="pc-imm" min="0" max="30000" step="500" value="12500">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-header"><span class="ctrl-label">Emigrants per Year</span><span class="ctrl-val" id="pc-emi-out">10'500</span></div>
+          <input type="range" id="pc-emi" min="0" max="30000" step="500" value="10500">
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div id="pc-echart" style="width:100%;height:250px;"></div>
+
+      <div class="pc-playbar">
+        <button class="pc-play-btn" id="pc-play-btn" onclick="pcTogglePlay()">&#9654; Play</button>
+        <input type="range" id="pc-year-slider" min="0" max="50" step="1" value="0" style="flex:1">
+        <span class="pc-year-label" id="pc-year-label">2023</span>
+      </div>
+
+      <div id="pc-pyramid" style="width:100%;height:380px;"></div>
+
+      <div class="pc-legend">
+        <span><span class="pc-leg-box" style="background:#378ADD"></span>Swiss Males</span>
+        <span><span class="pc-leg-box" style="background:#7ab8e8"></span>Foreign Males</span>
+        <span><span class="pc-leg-box" style="background:#D85A30"></span>Swiss Females</span>
+        <span><span class="pc-leg-box" style="background:#e89a7a"></span>Foreign Females</span>
+      </div>
+
+      <div class="pc-stat-row" id="pc-stats"></div>
+      <div class="outcome-bar" id="pc-outcomes"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var BASE_YEAR = 2023;
+  var YEARS = 50;
+  var AG = 101;
+  var INIT_POP           = BASELINE.init_pop;
+  var INIT_FOREIGN_SHARE = BASELINE.init_foreign_share;
+  var DEFAULT_LE         = BASELINE.default_le;
+  var DEFAULT_IMM        = BASELINE.default_imm;
+  var DEFAULT_EMI        = BASELINE.default_emi;
+  var DEFAULT_TFR_SWISS  = BASELINE.default_tfr_swiss;
+  var DEFAULT_TFR_FOREIGN= BASELINE.default_tfr_foreign;
+
+  var AGE_LABELS = [];
+  for (var g = 0; g < 20; g++) AGE_LABELS.push(g*5 + '–' + (g*5+4));
+  AGE_LABELS.push('100+');
+
+  var currentFrame = 0;
+  var playing = false;
+  var timer = null;
+  var allFrames = [];
+
+  // Baseline bar
+  document.getElementById('pc-init-pop-display').textContent = Math.round(INIT_POP).toLocaleString('de-CH');
+  document.getElementById('pc-le-display').textContent = DEFAULT_LE.toFixed(1) + ' yrs';
+
+  // Seed sliders from BASELINE
+  document.getElementById('pc-tfr-ch').value = DEFAULT_TFR_SWISS;
+  document.getElementById('pc-tfr-f').value  = DEFAULT_TFR_FOREIGN;
+  document.getElementById('pc-le').value  = DEFAULT_LE;
+  document.getElementById('pc-imm').value = DEFAULT_IMM;
+  document.getElementById('pc-emi').value = DEFAULT_EMI;
+
+  var SCENARIOS = {
+    status_quo:    {tfrCh: DEFAULT_TFR_SWISS, tfrF: DEFAULT_TFR_FOREIGN, le: DEFAULT_LE, imm: DEFAULT_IMM, emi: DEFAULT_EMI},
+    high_migration:{tfrCh: DEFAULT_TFR_SWISS, tfrF: DEFAULT_TFR_FOREIGN, le: DEFAULT_LE, imm: 20000,       emi: DEFAULT_EMI},
+    low_migration: {tfrCh: DEFAULT_TFR_SWISS, tfrF: DEFAULT_TFR_FOREIGN, le: DEFAULT_LE, imm: 7000,        emi: DEFAULT_EMI},
+    baby_boom:     {tfrCh: 2.5,              tfrF: 2.8,                  le: DEFAULT_LE, imm: DEFAULT_IMM, emi: DEFAULT_EMI},
+    aging_city:    {tfrCh: 1.0,              tfrF: 1.5,                  le: DEFAULT_LE, imm: 7000,        emi: 14000},
+  };
+
+  // ── helpers ──────────────────────────────────────────────────────────────
+
+  function makeSurvival(le) {
+    var s = new Array(AG).fill(0);
+    for (var a = 0; a < AG - 1; a++) {
+      var q = 0.0005 * Math.exp(0.08 * a);
+      var adj = Math.max(0, (a - le * 0.7)) / 15;
+      s[a] = Math.min(0.999, Math.max(0.001, Math.exp(-(q + adj * adj * 0.05))));
+    }
+    s[AG - 1] = 0;
+    return s;
+  }
+
+  function makeFertility(tfr) {
+    var f = new Array(AG).fill(0);
+    var mu = 30, sigma = 6, tot = 0;
+    for (var a = 15; a <= 49; a++) { f[a] = Math.exp(-0.5 * Math.pow((a - mu) / sigma, 2)); tot += f[a]; }
+    var scale = tfr / (tot * 2);
+    for (var a = 15; a <= 49; a++) f[a] *= scale;
+    return f;
+  }
+
+  function initPop(total, fShare) {
+    var raw = [3.8,3.8,3.9,3.9,3.8,3.7,3.6,3.6,3.5,3.5,3.5,3.6,3.6,3.6,3.7,4.0,4.2,4.5,4.8,5.0,5.5,5.8,5.8,5.6,5.4,5.2,5.0,5.0,5.0,5.0,5.2,5.5,5.8,6.0,6.2,6.5,6.8,7.0,7.0,6.8,6.5,6.2,6.0,5.8,5.5,5.2,5.0,4.8,4.5,4.2,4.0,3.8,3.6,3.5,3.4,3.5,3.6,3.7,3.8,3.8,3.5,3.2,3.0,2.8,2.6,2.4,2.2,2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0,0.9,0.8,0.7,0.6,0.5,0.4,0.35,0.3,0.25,0.2,0.15,0.1,0.08,0.06,0.04,0.03,0.02,0.015,0.01,0.008,0.005,0.003,0.001];
+    var tot = raw.reduce(function(s, v) { return s + v; }, 0);
+    var base = raw.map(function(v) { return v / tot * total; });
+    var fw = raw.map(function(v, a) {
+      return a < 5 ? v*0.5 : a < 15 ? v*0.4 : a < 50 ? v*1.4 : a < 65 ? v*0.8 : v*0.3;
+    });
+    var fTot = fw.reduce(function(s, v) { return s + v; }, 0);
+    var foreign = fw.map(function(v) { return v / fTot * total * fShare; });
+    var swiss = base.map(function(v, i) { return Math.max(0, v - foreign[i]); });
+    return {swiss: swiss, foreign: foreign};
+  }
+
+  function migrationByAge(net) {
+    var w = new Array(AG).fill(0);
+    for (var a = 0; a < AG; a++) {
+      if      (a < 5)  w[a] = 0.6;
+      else if (a < 15) w[a] = 0.3;
+      else if (a < 40) w[a] = 1.5 - Math.abs(a - 28) / 30;
+      else if (a < 65) w[a] = 0.3;
+      else             w[a] = 0.1;
+    }
+    var ws = w.reduce(function(s, v) { return s + v; }, 0);
+    return w.map(function(v) { return net * v / ws; });
+  }
+
+  function agg5(pop) {
+    var out = [];
+    for (var g = 0; g < 20; g++) {
+      var s = 0;
+      for (var a = g*5; a < g*5+5 && a < AG; a++) s += pop[a];
+      out.push(s);
+    }
+    out.push(pop[100]);
+    return out;
+  }
+
+  function sum(arr) { return arr.reduce(function(s, v) { return s + v; }, 0); }
+  function fmt(n)   { return Math.round(n).toLocaleString('de-CH'); }
+  function fmtSign(n) { var r = Math.round(n); return (r >= 0 ? '+' : '') + r.toLocaleString('de-CH'); }
+
+  // ── projection ───────────────────────────────────────────────────────────
+
+  function projectAll(tfrCh, tfrF, le, imm, emi) {
+    var sCh = makeSurvival(le);
+    var sF  = makeSurvival(le - 2);   // foreign slightly lower LE
+    var fCh = makeFertility(tfrCh);
+    var fF  = makeFertility(tfrF);
+    var immByAge  = migrationByAge(imm);
+    var emigByAge = migrationByAge(emi);
+
+    var p0      = initPop(INIT_POP, INIT_FOREIGN_SHARE);
+    var swiss   = p0.swiss;
+    var foreign = p0.foreign;
+
+    var frames      = [{ch: agg5(swiss), f: agg5(foreign)}];
+    var totalSeries = [sum(swiss) + sum(foreign)];
+    var natSeries   = [0];
+    var migSeries   = [0];
+
+    for (var y = 0; y < YEARS; y++) {
+      var nCh = new Array(AG).fill(0);
+      var nF  = new Array(AG).fill(0);
+      var bCh = 0, bF = 0;
+      for (var a = 15; a <= 49; a++) { bCh += fCh[a] * swiss[a]; bF += fF[a] * foreign[a]; }
+      nCh[0] = bCh; nF[0] = bF;
+      for (var a = 1; a < AG; a++) { nCh[a] = swiss[a-1] * sCh[a-1]; nF[a] = foreign[a-1] * sF[a-1]; }
+
+      var prevTotal  = sum(swiss) + sum(foreign);
+      var naturalChange = (sum(nCh) + sum(nF)) - prevTotal;
+
+      var totAll = sum(swiss) + sum(foreign);
+      for (var a = 0; a < AG; a++) {
+        var fFrac = totAll > 0 ? foreign[a] / totAll : 0;
+        var cFrac = totAll > 0 ? swiss[a]   / totAll : 0;
+        nF[a]  = Math.max(0, nF[a]  - emigByAge[a] * fFrac * 2 + immByAge[a]);
+        nCh[a] = Math.max(0, nCh[a] - emigByAge[a] * cFrac * 0.3);
+        var nat = nF[a] * 0.01;   // ~1% naturalisation per year
+        nF[a]  -= nat;
+        nCh[a] += nat;
+      }
+      swiss   = nCh;
+      foreign = nF;
+
+      frames.push({ch: agg5(swiss), f: agg5(foreign)});
+      totalSeries.push(sum(swiss) + sum(foreign));
+      natSeries.push(Math.round(naturalChange));
+      migSeries.push(imm - emi);
+    }
+    return {frames: frames, totalSeries: totalSeries, natSeries: natSeries, migSeries: migSeries};
+  }
+
+  // ── ECharts init ─────────────────────────────────────────────────────────
+
+  var yearLabels = Array.from({length: YEARS + 1}, function(_, i) { return BASE_YEAR + i; });
+
+  var curveChart   = echarts.init(document.getElementById('pc-echart'),  null, {renderer: 'svg'});
+  var pyramidChart = echarts.init(document.getElementById('pc-pyramid'), null, {renderer: 'svg'});
+
+  curveChart.setOption({
+    animation: false,
+    grid: {left: 64, right: 72, top: 16, bottom: 36},
+    tooltip: {
+      trigger: 'axis', axisPointer: {type: 'line'},
+      formatter: function(params) {
+        var s = '<div style="font-size:12px;font-weight:500;margin-bottom:4px">' + params[0].axisValue + '</div>';
+        params.forEach(function(p) {
+          var v = p.seriesIndex === 0 ? fmt(p.value) : fmtSign(p.value);
+          s += '<div style="display:flex;gap:8px;align-items:center;font-size:11px">' +
+            '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + p.color + '"></span>' +
+            '<span style="flex:1">' + p.seriesName + '</span>' +
+            '<span style="font-weight:500">' + v + '</span></div>';
+        });
+        return s;
+      }
+    },
+    xAxis: {type: 'category', data: yearLabels, axisLine: {lineStyle: {color: '#ddd'}}, axisTick: {show: false}, axisLabel: {color: '#888', fontSize: 11, interval: 9}},
+    yAxis: [
+      {type: 'value', name: 'Population', nameTextStyle: {color: '#888', fontSize: 11},
+       axisLabel: {color: '#888', fontSize: 11, formatter: function(v) { return fmt(v); }},
+       splitLine: {lineStyle: {color: '#eee'}}, axisLine: {show: false}, axisTick: {show: false}},
+      {type: 'value', name: 'Change/Year', nameTextStyle: {color: '#888', fontSize: 11},
+       axisLabel: {color: '#888', fontSize: 11, formatter: function(v) { return fmtSign(v); }},
+       splitLine: {show: false}, axisLine: {show: false}, axisTick: {show: false}, position: 'right'}
+    ],
+    series: [
+      {name: 'Population',    type: 'line', yAxisIndex: 0, smooth: true, symbol: 'none',
+       lineStyle: {color: '#378ADD', width: 2.5},
+       areaStyle: {color: {type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{offset: 0, color: 'rgba(55,138,221,.15)'}, {offset: 1, color: 'rgba(55,138,221,.01)'}]}},
+       data: [],
+       markLine: {silent: true, symbol: 'none', lineStyle: {color: '#aaa', type: 'dashed', width: 1}, data: [{xAxis: 0}]}},
+      {name: 'Natural Growth', type: 'line', yAxisIndex: 1, smooth: true, symbol: 'none',
+       lineStyle: {color: '#1D9E75', width: 1.5, type: 'dashed'}, data: []},
+      {name: 'Net Migration',  type: 'line', yAxisIndex: 1, smooth: true, symbol: 'none',
+       lineStyle: {color: '#D85A30', width: 1.5, type: 'dotted'}, data: []}
+    ]
+  });
+
+  // ── pyramid option builder ────────────────────────────────────────────────
+
+  function buildPyramidOption(frame) {
+    var ch = allFrames[frame].ch;
+    var f  = allFrames[frame].f;
+    var maxVal = 0;
+    for (var i = 0; i < ch.length; i++) {
+      var half = (ch[i] + f[i]) / 2;
+      if (half > maxVal) maxVal = half;
+    }
+    maxVal = Math.ceil(maxVal * 1.2 / 500) * 500;
+    var chM  = ch.map(function(v) { return Math.round(v / 2); });
+    var fM   = f.map(function(v)  { return Math.round(v / 2); });
+    var chFem = ch.map(function(v) { return Math.round(v / 2); });
+    var fFem  = f.map(function(v)  { return Math.round(v / 2); });
+    return {
+      animation: true, animationDuration: 200, animationEasing: 'cubicOut',
+      grid: [
+        {left: 8,    right: '50%', top: 8, bottom: 28},
+        {left: '50%', right: 8,   top: 8, bottom: 28},
+      ],
+      tooltip: {
+        trigger: 'axis', axisPointer: {type: 'shadow'},
+        formatter: function(params) {
+          var ag = AGE_LABELS[params[0].dataIndex];
+          var chMv = params[0] ? params[0].value || 0 : 0;
+          var fMv  = params[1] ? params[1].value || 0 : 0;
+          var chFv = params[2] ? params[2].value || 0 : 0;
+          var fFv  = params[3] ? params[3].value || 0 : 0;
+          return '<div style="font-size:12px;font-weight:500;margin-bottom:4px">' + ag + '</div>' +
+            '<div style="font-size:11px;margin-bottom:2px"><b>Males:</b> Swiss ' + fmt(chMv) + ' · Foreign ' + fmt(fMv) + '</div>' +
+            '<div style="font-size:11px"><b>Females:</b> Swiss ' + fmt(chFv) + ' · Foreign ' + fmt(fFv) + '</div>';
+        }
+      },
+      xAxis: [
+        {gridIndex: 0, type: 'value', min: 0, max: maxVal, inverse: true,
+         axisLabel: {color: '#888', fontSize: 10, formatter: function(v) { return Math.round(v/1000) + 'k'; }},
+         splitLine: {lineStyle: {color: '#eee'}}, axisLine: {show: false}, axisTick: {show: false}},
+        {gridIndex: 1, type: 'value', min: 0, max: maxVal,
+         axisLabel: {color: '#888', fontSize: 10, formatter: function(v) { return Math.round(v/1000) + 'k'; }},
+         splitLine: {lineStyle: {color: '#eee'}}, axisLine: {show: false}, axisTick: {show: false}},
+      ],
+      yAxis: [
+        {gridIndex: 0, type: 'category', data: AGE_LABELS,
+         axisLabel: {color: '#888', fontSize: 9}, axisLine: {show: false}, axisTick: {show: false}, splitLine: {show: false}},
+        {gridIndex: 1, type: 'category', data: AGE_LABELS,
+         axisLabel: {show: false}, axisLine: {show: false}, axisTick: {show: false}, splitLine: {show: false}},
+      ],
+      series: [
+        {name: 'Swiss Males',    type: 'bar', xAxisIndex: 0, yAxisIndex: 0, stack: 'male',
+         data: chM,  barMaxWidth: 18, itemStyle: {color: '#378ADD'}},
+        {name: 'Foreign Males',  type: 'bar', xAxisIndex: 0, yAxisIndex: 0, stack: 'male',
+         data: fM,   barMaxWidth: 18, itemStyle: {color: '#7ab8e8'}},
+        {name: 'Swiss Females',  type: 'bar', xAxisIndex: 1, yAxisIndex: 1, stack: 'female',
+         data: chFem, barMaxWidth: 18, itemStyle: {color: '#D85A30'}},
+        {name: 'Foreign Females',type: 'bar', xAxisIndex: 1, yAxisIndex: 1, stack: 'female',
+         data: fFem,  barMaxWidth: 18, itemStyle: {color: '#e89a7a'}},
+      ]
+    };
+  }
+
+  // ── stat bar ─────────────────────────────────────────────────────────────
+
+  function updateStats(frame) {
+    var ch    = allFrames[frame].ch;
+    var f     = allFrames[frame].f;
+    var totCh = Math.round(sum(ch));
+    var totF  = Math.round(sum(f));
+    var total = totCh + totF;
+    var fPct  = (totF / total * 100).toFixed(1);
+    var all   = ch.map(function(v, i) { return v + f[i]; });
+    var youth   = Math.round(sum(all.slice(0, 4)));   // groups 0-3 = ages 0-19
+    var elderly = Math.round(sum(all.slice(13)));      // groups 13+ = ages 65+
+    var working = total - youth - elderly;
+    var dep     = working > 0 ? ((youth + elderly) / working * 100).toFixed(1) : '–';
+    document.getElementById('pc-stats').innerHTML =
+      '<div class="pc-s-card"><div class="pc-s-label">Total</div><div class="pc-s-val">' + fmt(total) + '</div></div>' +
+      '<div class="pc-s-card"><div class="pc-s-label">Swiss</div><div class="pc-s-val" style="color:#378ADD">' + fmt(totCh) + '</div></div>' +
+      '<div class="pc-s-card"><div class="pc-s-label">Foreign</div><div class="pc-s-val" style="color:#D85A30">' + fmt(totF) + ' <span style="font-size:.75rem;font-weight:400">(' + fPct + '%)</span></div></div>' +
+      '<div class="pc-s-card"><div class="pc-s-label">Dep. Ratio</div><div class="pc-s-val">' + dep + '%</div></div>';
+  }
+
+  // ── frame navigation ─────────────────────────────────────────────────────
+
+  function showFrame(frame) {
+    currentFrame = Math.max(0, Math.min(YEARS, frame));
+    document.getElementById('pc-year-slider').value = currentFrame;
+    document.getElementById('pc-year-label').textContent = BASE_YEAR + currentFrame;
+    pyramidChart.setOption(buildPyramidOption(currentFrame));
+    updateStats(currentFrame);
+    curveChart.setOption({series: [{markLine: {data: [{xAxis: currentFrame}]}}]});
+  }
+
+  function pcTogglePlay() {
+    playing = !playing;
+    document.getElementById('pc-play-btn').innerHTML = playing ? '&#9646;&#9646; Pause' : '&#9654; Play';
+    if (playing) {
+      if (currentFrame >= YEARS) showFrame(0);
+      timer = setInterval(function() {
+        if (currentFrame >= YEARS) {
+          clearInterval(timer);
+          playing = false;
+          document.getElementById('pc-play-btn').innerHTML = '&#9654; Play';
+          return;
+        }
+        showFrame(currentFrame + 1);
+      }, 130);
+    } else {
+      clearInterval(timer);
+    }
+  }
+
+  // ── main recompute ────────────────────────────────────────────────────────
+
+  function pcRun() {
+    var tfrCh = parseFloat(document.getElementById('pc-tfr-ch').value);
+    var tfrF  = parseFloat(document.getElementById('pc-tfr-f').value);
+    var le    = parseFloat(document.getElementById('pc-le').value);
+    var imm   = parseInt(document.getElementById('pc-imm').value);
+    var emi   = parseInt(document.getElementById('pc-emi').value);
+
+    document.getElementById('pc-tfr-ch-out').textContent = tfrCh.toFixed(2);
+    document.getElementById('pc-tfr-f-out').textContent  = tfrF.toFixed(2);
+    document.getElementById('pc-le-out').textContent     = le.toFixed(1);
+    document.getElementById('pc-imm-out').textContent    = imm.toLocaleString('de-CH');
+    document.getElementById('pc-emi-out').textContent    = emi.toLocaleString('de-CH');
+
+    var result = projectAll(tfrCh, tfrF, le, imm, emi);
+    allFrames  = result.frames;
+
+    curveChart.setOption({series: [
+      {data: result.totalSeries, markLine: {data: [{xAxis: currentFrame}]}},
+      {data: [null].concat(result.natSeries.slice(1))},
+      {data: [null].concat(result.migSeries.slice(1))}
+    ]});
+
+    var final       = result.totalSeries[YEARS];
+    var change      = final - INIT_POP;
+    var pct         = change / INIT_POP * 100;
+    var annRate     = (Math.pow(final / INIT_POP, 1 / YEARS) - 1) * 100;
+    var netMigTotal = (imm - emi) * YEARS;
+    var cl          = Math.abs(pct) < 2 ? 'neutral' : (change > 0 ? 'grow' : 'shrink');
+    document.getElementById('pc-outcomes').innerHTML =
+      '<div class="o-card ' + cl + '"><div class="o-label">Population 2073</div><div class="o-val">' + fmt(final) + '</div>' +
+      '<div class="o-subval">' + fmtSign(Math.round(change)) + ' (' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%)</div></div>' +
+      '<div class="o-card ' + (annRate > 0 ? 'grow' : annRate < -0.1 ? 'shrink' : 'neutral') + '">' +
+      '<div class="o-label">Ann. Growth Rate</div><div class="o-val">' + (annRate >= 0 ? '+' : '') + annRate.toFixed(2) + '%</div>' +
+      '<div class="o-subval">avg. per year</div></div>' +
+      '<div class="o-card ' + ((imm - emi) > 0 ? 'grow' : (imm - emi) < 0 ? 'shrink' : 'neutral') + '">' +
+      '<div class="o-label">Cumul. Net Migration</div><div class="o-val">' + fmtSign(netMigTotal) + '</div>' +
+      '<div class="o-subval">over 50 years</div></div>';
+
+    showFrame(currentFrame);
+  }
+
+  function pcApplyScenario(key, btn) {
+    document.querySelectorAll('#sim-popcurve .scen-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    var s = SCENARIOS[key];
+    document.getElementById('pc-tfr-ch').value = s.tfrCh;
+    document.getElementById('pc-tfr-f').value  = s.tfrF;
+    document.getElementById('pc-le').value  = s.le;
+    document.getElementById('pc-imm').value = s.imm;
+    document.getElementById('pc-emi').value = s.emi;
+    pcRun();
+  }
+
+  window.pcApplyScenario = pcApplyScenario;
+  window.pcTogglePlay    = pcTogglePlay;
+
+  document.querySelectorAll('#sim-popcurve input[type=range]:not(#pc-year-slider)').forEach(function(el) {
+    el.addEventListener('input', function() {
+      document.querySelectorAll('#sim-popcurve .scen-btn').forEach(function(b) { b.classList.remove('active'); });
+      pcRun();
+    });
+  });
+
+  document.getElementById('pc-year-slider').addEventListener('input', function(e) {
+    if (playing) { clearInterval(timer); playing = false; document.getElementById('pc-play-btn').innerHTML = '&#9654; Play'; }
+    showFrame(parseInt(e.target.value));
+  });
+
+  pcRun();
+})();
+</script>
