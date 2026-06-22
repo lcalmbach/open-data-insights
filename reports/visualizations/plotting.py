@@ -61,8 +61,18 @@ def _x_label_rotate(data: pd.DataFrame, x_field, settings: dict) -> int:
     return 0
 
 
-def _x_labels(series) -> list:
-    """Convert a Series/iterable to string category labels, collapsing float-like ints."""
+def _x_labels(series, fmt: str | None = None) -> list:
+    """Convert a Series/iterable to string category labels, collapsing float-like ints.
+
+    fmt="year" extracts the 4-digit year from date-like strings (e.g. "2003-07-15" → "2003").
+    """
+    if fmt == "year":
+        try:
+            parsed = pd.to_datetime(pd.Series(list(series)), errors="coerce")
+            return [str(int(y)) if not pd.isna(y) else str(v)
+                    for v, y in zip(series, parsed.dt.year)]
+        except Exception:
+            pass  # fall through to default
     result = []
     for v in series:
         try:
@@ -182,11 +192,79 @@ def generate_chloropleth(data, settings, chart_id=None) -> str:
 # Line chart
 # ---------------------------------------------------------------------------
 
+def _build_series_data(
+    y_series,
+    x_series=None,
+    r_series=None,
+    extra_df=None,
+    extra_cols: list | None = None,
+    r_min_px: int = 4,
+    r_max_px: int = 30,
+    r_scale: str = "linear",
+    r_lo_override=None,
+    r_hi_override=None,
+) -> list:
+    """Build ECharts per-point data items, optionally with proportional symbolSize and extra tooltip fields.
+
+    r_scale controls how the normalized radius [0,1] maps to pixel size:
+      "linear" — uniform mapping (default)
+      "sqrt"   — emphasises large values moderately
+      "pow2"   — squares the ratio, making outliers stand out strongly
+    """
+    import math
+
+    def _apply_scale(t: float) -> float:
+        if r_scale == "sqrt":
+            return math.sqrt(t)
+        if r_scale == "pow2":
+            return t * t
+        return t  # linear
+
+    r_num = pd.to_numeric(r_series, errors="coerce") if r_series is not None else None
+    if r_num is not None:
+        r_lo = r_lo_override if r_lo_override is not None else r_num.min()
+        r_hi = r_hi_override if r_hi_override is not None else r_num.max()
+        r_span = (r_hi - r_lo) if r_hi != r_lo else 1
+
+    items = []
+    indices = range(len(y_series))
+    for i, y in zip(indices, y_series):
+        if pd.isna(y):
+            items.append(None)
+            continue
+        if x_series is not None:
+            x_val = x_series.iloc[i] if hasattr(x_series, "iloc") else x_series[i]
+            item: dict = {"value": [str(x_val), float(y)]}
+        else:
+            item: dict = {"value": float(y)}
+        if r_num is not None:
+            r = r_num.iloc[i] if hasattr(r_num, "iloc") else r_num[i]
+            if pd.isna(r):
+                size = r_min_px
+            else:
+                t = _apply_scale((r - r_lo) / r_span)
+                size = round(r_min_px + t * (r_max_px - r_min_px))
+            item["symbolSize"] = size
+            item["symbol"] = "circle"
+        if extra_df is not None and extra_cols:
+            row = extra_df.iloc[i] if hasattr(extra_df, "iloc") else extra_df[i]
+            item["extra"] = {col: str(row[col]) if not pd.isna(row[col]) else "" for col in extra_cols if col in row}
+        items.append(item)
+    return items
+
+
 def create_line_chart(data, settings: dict) -> dict:
     settings = settings.copy()
     x_col = settings.get("x", "")
     y_col = settings.get("y", "")
     color_col = settings.get("color")
+    radius_col = settings.get("radius")
+    radius_max_px = int(settings.get("radius_max", 30))
+    radius_min_px = int(settings.get("radius_min", 4))
+    radius_scale = settings.get("radius_scale", "linear")
+    x_fmt = settings.get("x_format")
+    x_type = settings.get("x_type", "category")  # "time" for date-proportional axis
+    tooltip_cols = [c for c in (settings.get("tooltips") or []) if c != y_col]
 
     df = pd.DataFrame(data).copy()
     df[y_col] = pd.to_numeric(df[y_col], errors="coerce")
@@ -197,15 +275,29 @@ def create_line_chart(data, settings: dict) -> dict:
     show_symbol = settings.get("show_points", False)
     mark_line = _mark_line_opt(settings)
 
+    _TEN_YEARS_MS = 10 * 365.25 * 24 * 3600 * 1000
+
+    if x_type == "time":
+        x_interval_ms = int(settings.get("x_tick_years", 10)) * _TEN_YEARS_MS / 10
+        x_axis_cfg: dict = {
+            "type": "time",
+            "name": settings.get("x_title", ""),
+            "minInterval": x_interval_ms,
+            "maxInterval": x_interval_ms,
+            "axisLabel": {"formatter": "{yyyy}"},
+        }
+    else:
+        x_axis_cfg = {
+            "type": "category",
+            "name": settings.get("x_title", x_col),
+            "axisLabel": {"rotate": _x_label_rotate(df, x_col, settings)},
+        }
+
     option: dict = {
         "_width": w, "_height": h,
         "title": {"text": settings.get("title", "")},
         "tooltip": {"trigger": "axis"},
-        "xAxis": {
-            "type": "category",
-            "name": settings.get("x_title", x_col),
-            "axisLabel": {"rotate": _x_label_rotate(df, x_col, settings)},
-        },
+        "xAxis": x_axis_cfg,
         "yAxis": {"type": "value", "name": settings.get("y_title", y_col)},
     }
 
@@ -224,7 +316,7 @@ def create_line_chart(data, settings: dict) -> dict:
 
         pivot = df.pivot_table(index=x_col, columns=series_col, values=y_col, aggfunc="first")
         pivot = pivot.sort_index()
-        option["xAxis"]["data"] = _x_labels(pivot.index)
+        option["xAxis"]["data"] = _x_labels(pivot.index, x_fmt)
         option["legend"] = {"show": False}
         option["series"] = []
         for s_val in pivot.columns:
@@ -243,22 +335,94 @@ def create_line_chart(data, settings: dict) -> dict:
                 s["markLine"] = mark_line
             option["series"].append(s)
 
+    elif color_col and x_type == "time":
+        # Single grey connecting line + one scatter series per colour group.
+        # Pivot approach breaks here because it creates disconnected per-month lines.
+        df_s = df.sort_values(x_col).reset_index(drop=True)
+        use_radius = bool(radius_col and radius_col in df_s.columns)
+        use_extra = bool(tooltip_cols)
+
+        # Global radius bounds so dot sizes are comparable across groups
+        r_global = pd.to_numeric(df_s[radius_col], errors="coerce") if use_radius else None
+        r_lo_g = float(r_global.min()) if r_global is not None else None
+        r_hi_g = float(r_global.max()) if r_global is not None else None
+
+        # Base line — connects all points in time order, no markers
+        base_data = _build_series_data(df_s[y_col], x_series=df_s[x_col])
+        base_s: dict = {
+            "type": "line", "name": "_base",
+            "data": base_data,
+            "smooth": smooth,
+            "symbol": "none",
+            "lineStyle": {"color": settings.get("line_color", "#e0e0e0")},
+            "emphasis": {"disabled": True},
+            "tooltip": {"show": False},
+        }
+        option["series"] = [base_s]
+
+        lo = settings.get("legend_order")
+        color_vals = df_s[color_col].dropna().unique()
+        if lo:
+            present = set(str(v) for v in color_vals)
+            color_vals = [v for v in lo if str(v) in present] + [
+                v for v in color_vals if str(v) not in {str(x) for x in lo}
+            ]
+        option["legend"] = {"data": [str(v) for v in color_vals]}
+
+        for cv in color_vals:
+            df_cv = df_s[df_s[color_col] == cv].reset_index(drop=True)
+            scatter_data = _build_series_data(
+                df_cv[y_col],
+                x_series=df_cv[x_col],
+                r_series=df_cv[radius_col] if use_radius else None,
+                extra_df=df_cv if use_extra else None,
+                extra_cols=tooltip_cols if use_extra else None,
+                r_min_px=radius_min_px,
+                r_max_px=radius_max_px,
+                r_scale=radius_scale,
+                r_lo_override=r_lo_g,
+                r_hi_override=r_hi_g,
+            )
+            scatter_s: dict = {
+                "type": "scatter", "name": str(cv),
+                "data": scatter_data,
+                "label": {"show": False},
+            }
+            option["series"].append(scatter_s)
+
     elif color_col:
         pivot = df.pivot_table(index=x_col, columns=color_col, values=y_col, aggfunc="first")
         pivot = pivot.sort_index()
         lo = settings.get("legend_order")
         series_order = list(lo) if lo else list(pivot.columns)
-        option["xAxis"]["data"] = _x_labels(pivot.index)
+        option["xAxis"]["data"] = _x_labels(pivot.index, x_fmt)
         option["legend"] = {"data": [str(s) for s in series_order]}
+        r_pivot = None
+        if radius_col and radius_col in df.columns:
+            r_pivot = df.pivot_table(index=x_col, columns=color_col, values=radius_col, aggfunc="first")
+            r_pivot = r_pivot.sort_index()
         option["series"] = []
         for s_val in series_order:
             if s_val not in pivot.columns:
                 continue
+            use_radius = r_pivot is not None and s_val in r_pivot.columns
+            if use_radius or tooltip_cols:
+                series_data = _build_series_data(
+                    pivot[s_val],
+                    r_series=r_pivot[s_val] if use_radius else None,
+                    r_min_px=radius_min_px,
+                    r_max_px=radius_max_px,
+                    r_scale=radius_scale,
+                )
+                sym = "circle" if use_radius else ("circle" if show_symbol else "none")
+            else:
+                series_data = _clean_vals(pivot[s_val])
+                sym = "circle" if show_symbol else "none"
             s = {
                 "type": "line", "name": str(s_val),
-                "data": _clean_vals(pivot[s_val]),
+                "data": series_data,
                 "smooth": smooth,
-                "symbol": "circle" if show_symbol else "none",
+                "symbol": sym,
                 "label": {"show": False},
             }
             if mark_line:
@@ -266,19 +430,66 @@ def create_line_chart(data, settings: dict) -> dict:
             option["series"].append(s)
 
     else:
-        df_s = df.sort_values(x_col)
-        option["xAxis"]["data"] = _x_labels(df_s[x_col])
+        df_s = df.sort_values(x_col).reset_index(drop=True)
         option["legend"] = {"show": False}
+        use_radius = radius_col and radius_col in df_s.columns
+        use_extra = bool(tooltip_cols)
+        if x_type == "time":
+            # Time axis: pass x values as part of each data item; no xAxis.data needed
+            series_data = _build_series_data(
+                df_s[y_col],
+                x_series=df_s[x_col],
+                r_series=df_s[radius_col] if use_radius else None,
+                extra_df=df_s if use_extra else None,
+                extra_cols=tooltip_cols if use_extra else None,
+                r_min_px=radius_min_px,
+                r_max_px=radius_max_px,
+                r_scale=radius_scale,
+            )
+            sym = "circle" if use_radius else ("circle" if show_symbol else "none")
+        elif use_radius or use_extra:
+            option["xAxis"]["data"] = _x_labels(df_s[x_col], x_fmt)
+            series_data = _build_series_data(
+                df_s[y_col],
+                r_series=df_s[radius_col] if use_radius else None,
+                extra_df=df_s if use_extra else None,
+                extra_cols=tooltip_cols if use_extra else None,
+                r_min_px=radius_min_px,
+                r_max_px=radius_max_px,
+                r_scale=radius_scale,
+            )
+            sym = "circle" if use_radius else ("circle" if show_symbol else "none")
+        else:
+            option["xAxis"]["data"] = _x_labels(df_s[x_col], x_fmt)
+            series_data = _clean_vals(df_s[y_col])
+            sym = "circle" if show_symbol else "none"
         s = {
             "type": "line", "name": y_col,
-            "data": _clean_vals(df_s[y_col]),
+            "data": series_data,
             "smooth": smooth,
-            "symbol": "circle" if show_symbol else "none",
+            "symbol": sym,
             "label": {"show": False},
         }
+        if settings.get("line_color") or settings.get("marker_color"):
+            s["lineStyle"] = {"color": settings.get("line_color", "inherit")}
+            s["itemStyle"] = {"color": settings.get("marker_color") or settings.get("line_color")}
         if mark_line:
             s["markLine"] = mark_line
         option["series"] = [s]
+
+    if tooltip_cols:
+        tooltip_fn = (
+            "function(params){"
+            "var p=Array.isArray(params)?params[0]:params;"
+            "var yVal=Array.isArray(p.value)?p.value[1]:p.value;"
+            "var html='<b>'+p.name+'</b><br/>'+p.seriesName+': '+yVal;"
+            "if(p.data&&p.data.extra){"
+            "var e=p.data.extra;"
+            "for(var k in e){if(e.hasOwnProperty(k))html+='<br/>'+k+': '+e[k];}}"
+            "return html;}"
+        )
+        option["tooltip"] = {"trigger": "item", "formatter": "__line_tt__"}
+        option["__js_functions__"] = {"__line_tt__": tooltip_fn}
 
     if settings.get("legend_order") and settings.get("color_range"):
         option["color"] = list(settings["color_range"])
@@ -303,10 +514,21 @@ def create_bar_chart(data, settings: dict) -> dict:
     h = _css_height(settings.get("height", 300))
     rotate = _x_label_rotate(df, x_field if not is_horizontal else y_field, settings)
 
+    x_order = settings.get("x_order")
+    tooltip_cols: list = []
+
     if color_field:
         pivot = df.pivot_table(index=x_field, columns=color_field, values=y_field, aggfunc="sum")
-        pivot = pivot.sort_index()
-        x_vals = _x_labels(pivot.index)
+        pivot.index = [str(v) for v in pivot.index]
+        if x_order:
+            order_strs = [str(v) for v in x_order]
+            present = set(pivot.index)
+            ordered = [v for v in order_strs if v in present]
+            remaining = [v for v in sorted(present, key=str) if v not in set(ordered)]
+            pivot = pivot.reindex(ordered + remaining, fill_value=0)
+        else:
+            pivot = pivot.sort_index()
+        x_vals = list(pivot.index)
         lo = settings.get("legend_order")
         series_order = list(lo) if lo else list(pivot.columns)
         series = [
@@ -314,9 +536,29 @@ def create_bar_chart(data, settings: dict) -> dict:
             for s in series_order if s in pivot.columns
         ]
     else:
-        df_s = df.sort_values(x_field) if x_field else df
+        if x_field and x_order:
+            order_map = {str(v): i for i, v in enumerate(x_order)}
+            df_s = df.copy()
+            df_s["__x_sort__"] = df_s[x_field].astype(str).map(order_map)
+            df_s = df_s.sort_values("__x_sort__").drop(columns="__x_sort__")
+        else:
+            df_s = df.sort_values(x_field) if x_field else df
+        tooltip_cols = [c for c in (settings.get("tooltips") or []) if c != y_field]
         x_vals = _x_labels(df_s[x_field]) if x_field else []
-        series = [{"type": "bar", "data": _clean_vals(df_s[y_field]) if y_field else [], "label": {"show": False}}]
+        if tooltip_cols and y_field:
+            bar_data = []
+            for _, row in df_s.iterrows():
+                v = row[y_field]
+                item: dict = {"value": None if pd.isna(v) else float(v)}
+                item["extra"] = {
+                    col: str(row[col]) if not pd.isna(row[col]) else ""
+                    for col in tooltip_cols if col in row
+                }
+                bar_data.append(item)
+        else:
+            bar_data = _clean_vals(df_s[y_field]) if y_field else []
+            tooltip_cols = []
+        series = [{"type": "bar", "data": bar_data, "label": {"show": False}}]
 
     if is_horizontal:
         option = {
@@ -349,6 +591,20 @@ def create_bar_chart(data, settings: dict) -> dict:
         option["yAxis"]["max"] = y_domain[1]
     if settings.get("color_range"):
         option["color"] = list(settings["color_range"])
+
+    if tooltip_cols:
+        tooltip_fn = (
+            "function(params){"
+            "var p=Array.isArray(params)?params[0]:params;"
+            "var html='<b>'+p.name+'</b><br/>'+p.seriesName+': '+p.value;"
+            "if(p.data&&p.data.extra){"
+            "var e=p.data.extra;"
+            "for(var k in e){if(e.hasOwnProperty(k))html+='<br/>'+k+': '+e[k];}}"
+            "return html;}"
+        )
+        option["tooltip"] = {"trigger": "item", "formatter": "__bar_tt__"}
+        option["__js_functions__"] = {"__bar_tt__": tooltip_fn}
+
     return option
 
 
