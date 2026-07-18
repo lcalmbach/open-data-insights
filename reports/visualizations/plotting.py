@@ -265,6 +265,8 @@ def create_line_chart(data, settings: dict) -> dict:
     x_fmt = settings.get("x_format")
     x_type = settings.get("x_type", "category")  # "time" for date-proportional axis
     tooltip_cols = [c for c in (settings.get("tooltips") or []) if c != y_col]
+    symbol_size = settings.get("symbol_size")  # explicit px size; None = ECharts default
+    _use_item_trigger = False  # pivot branch keeps trigger:"axis"; others switch to "item"
 
     df = pd.DataFrame(data).copy()
     df[y_col] = pd.to_numeric(df[y_col], errors="coerce")
@@ -389,6 +391,7 @@ def create_line_chart(data, settings: dict) -> dict:
                 "label": {"show": False},
             }
             option["series"].append(scatter_s)
+        _use_item_trigger = True
 
     elif color_col:
         pivot = df.pivot_table(index=x_col, columns=color_col, values=y_col, aggfunc="first")
@@ -476,8 +479,14 @@ def create_line_chart(data, settings: dict) -> dict:
         if mark_line:
             s["markLine"] = mark_line
         option["series"] = [s]
+        _use_item_trigger = True
 
-    if tooltip_cols:
+    if symbol_size is not None:
+        for s in option.get("series", []):
+            if s.get("type") == "line":
+                s["symbolSize"] = int(symbol_size)
+
+    if tooltip_cols and _use_item_trigger:
         tooltip_fn = (
             "function(params){"
             "var p=Array.isArray(params)?params[0]:params;"
