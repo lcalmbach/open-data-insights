@@ -948,6 +948,25 @@ class OdsDatasetConnector:
         )
         return True
 
+    @staticmethod
+    def _coerce_year(value) -> Optional[int]:
+        """Extract a 4-digit year from an int, a date/datetime/Timestamp, or a
+        date string like '2025-01-01 00:00:00+00:00'. Some ODS sources (e.g.
+        data.bl.ch) expose the year as a year-precision ``date`` field rather
+        than a plain integer, so ``int(value)`` alone fails on those."""
+        if value is None:
+            return None
+        if isinstance(value, (datetime, date)):
+            return value.year
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            pass
+        text = str(value).strip()
+        if len(text) >= 4 and text[:4].isdigit():
+            return int(text[:4])
+        return None
+
     def _sync_new_year(
         self, filename: Path, agg_filename: Path, remote_table: str
     ) -> bool:
@@ -962,18 +981,14 @@ class OdsDatasetConnector:
             self.logger.warning("Could not read last year from DB; falling back to full download.")
             return self._sync_new_table(filename, agg_filename, remote_table)
 
-        try:
-            db_last_year = int(last_db_record[year_field])
-        except (TypeError, ValueError, KeyError):
+        db_last_year = self._coerce_year(last_db_record[year_field])
+        if db_last_year is None:
             self.logger.error("Could not parse last year from DB record: %r", last_db_record)
             return False
 
         ods_year = None
         if self.ods_last_record:
-            try:
-                ods_year = int(self.ods_last_record.get(year_field))
-            except (TypeError, ValueError):
-                pass
+            ods_year = self._coerce_year(self.ods_last_record.get(year_field))
 
         if ods_year is None:
             self.logger.warning("Could not determine last year from ODS; skipping.")
