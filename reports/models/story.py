@@ -4,7 +4,7 @@ from datetime import datetime
 
 from django.db import models
 from django.urls import reverse
-from pydantic import ValidationError
+from django.core.exceptions import ValidationError
 
 from report_generator import settings
 from reports.utils import default_yesterday

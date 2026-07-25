@@ -267,7 +267,7 @@ class StoryProcessor:
         if self._is_anthropic_model():
             api_key = getattr(settings, "ANTHROPIC_API_KEY", None)
             return anthropic.Anthropic(api_key=api_key)
-        elif self.story.ai_model == "deepseek-chat":
+        elif (self.story.ai_model or "").startswith("deepseek"):
             api_key = getattr(settings, "DEEPSEEK_API_KEY", None)
             return OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
         else:
@@ -1392,11 +1392,14 @@ class StoryProcessor:
                     },
                 ]
 
-                # Generate response
+                # Generate response. Reasoning models (e.g. deepseek-v4-pro)
+                # spend a variable, sometimes large share of the completion
+                # budget on hidden reasoning tokens before emitting the article;
+                # keep enough headroom that content isn't truncated to empty.
             self.story.content = self._call_llm(
                 messages,
                 temperature=self.story.template.temperature,
-                max_tokens=3000,
+                max_tokens=8000,
             )
             self.story.prompt_text = messages
             if not self.story.content:
@@ -1433,7 +1436,12 @@ class StoryProcessor:
                     Return only the title."""
                     )
                 )
-                max_tokens = 60
+                # Reasoning models (e.g. deepseek-v4-pro/flash) spend a large,
+                # variable share of the completion budget on hidden reasoning
+                # tokens before emitting the title — and reason over the full
+                # article fed in below — so keep generous headroom or content
+                # comes back empty (finish_reason=length, all tokens reasoning).
+                max_tokens = 2048
                 temperature = min(
                     max(getattr(self.story.template, "temperature", 0.5), 0.2), 1.0
                 )
@@ -1444,7 +1452,8 @@ class StoryProcessor:
                     if self.story.template.lead_prompt
                     else "Summarize the following insight text in one or two clear sentences."
                 )
-                max_tokens = 200
+                # Headroom for reasoning-model tokens (see title note above).
+                max_tokens = 2048
                 temperature = getattr(self.story.template, "temperature", 0.2)
 
             # Construct messages

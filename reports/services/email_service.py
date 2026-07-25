@@ -48,7 +48,7 @@ class EmailService(ETLBaseService):
         self.from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@example.com")
         self.dbclient = DjangoPostgresClient()
         self.ai_model = getattr(settings, "DEFAULT_AI_MODEL", "gpt-4o")
-        if self.ai_model == "deepseek-chat":
+        if (self.ai_model or "").startswith("deepseek"):
             api_key = getattr(settings, "DEEPSEEK_API_KEY", None)
             self.ai_client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
         else:

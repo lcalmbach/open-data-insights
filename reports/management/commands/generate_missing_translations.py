@@ -109,7 +109,7 @@ class Command(BaseCommand):
         ).exists()
 
     def _get_client(self, model_name: str) -> OpenAI:
-        if model_name == "deepseek-chat":
+        if (model_name or "").startswith("deepseek"):
             return OpenAI(
                 api_key=getattr(settings, "DEEPSEEK_API_KEY", None),
                 base_url="https://api.deepseek.com",
