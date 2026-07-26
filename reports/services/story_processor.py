@@ -262,6 +262,9 @@ class StoryProcessor:
 
     def _is_anthropic_model(self) -> bool:
         return (self.story.ai_model or "").startswith("claude-")
+    
+    def _is_deepseek_model(self) -> bool:
+        return (self.story.ai_model or "").startswith("deepseek-")
 
     def get_ai_client(self):
         if self._is_anthropic_model():
@@ -295,6 +298,15 @@ class StoryProcessor:
                 kwargs["temperature"] = temperature
             response = self.ai_client.messages.create(**kwargs)
             return (response.content[0].text or "").strip()
+        elif self._is_deepseek_model():
+            response = self.ai_client.chat.completions.create(
+                model=self.story.ai_model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                extra_body={"thinking": {"type": "disabled"}},
+            )
+            return response.choices[0].message.content
         else:
             response = self.ai_client.chat.completions.create(
                 model=self.story.ai_model,
