@@ -1292,6 +1292,37 @@ class StoryProcessor:
                 f"Failed to populate story from context for template {self.story.template.id}"
             )
 
+    @staticmethod
+    def _unwrap_json_text(content: str | None) -> str | None:
+        """Defensively unwrap a JSON-wrapped article.
+
+        Despite the prompt asking for plain prose, a model may still return the
+        whole article as a JSON object like {"insight": "..."}. If the entire
+        response parses as such an object with a single string value (or a
+        recognised text key), return that inner string; otherwise return the
+        content unchanged.
+        """
+        if not content:
+            return content
+        stripped = content.strip()
+        if not (stripped.startswith("{") and stripped.endswith("}")):
+            return content
+        try:
+            obj = json.loads(stripped)
+        except (json.JSONDecodeError, ValueError):
+            return content
+        if not isinstance(obj, dict):
+            return content
+        for key in ("insight", "article", "text", "content", "story"):
+            value = obj.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+        # Fall back to the sole string value if the object has exactly one.
+        string_values = [v for v in obj.values() if isinstance(v, str) and v.strip()]
+        if len(string_values) == 1:
+            return string_values[0].strip()
+        return content
+
     def _generate_insight_text(self, target_language: str | None = None) -> bool:
         """Generate story text using OpenAI API"""
         try:
@@ -1329,7 +1360,10 @@ class StoryProcessor:
             )
 
             if self.is_data_based:
-                user_parts = ["Write an insight about the following data in JSON format."]
+                user_parts = [
+                    "Write an insight about the data provided below. The data is "
+                    "given in JSON format; your response must be plain prose, not JSON."
+                ]
                 if web_context_section:
                     user_parts.append(web_context_section)
                 user_parts.append("```json\n" + self.story.context_values + "\n```")
@@ -1396,10 +1430,12 @@ class StoryProcessor:
                 # spend a variable, sometimes large share of the completion
                 # budget on hidden reasoning tokens before emitting the article;
                 # keep enough headroom that content isn't truncated to empty.
-            self.story.content = self._call_llm(
-                messages,
-                temperature=self.story.template.temperature,
-                max_tokens=8000,
+            self.story.content = self._unwrap_json_text(
+                self._call_llm(
+                    messages,
+                    temperature=self.story.template.temperature,
+                    max_tokens=8000,
+                )
             )
             self.story.prompt_text = messages
             if not self.story.content:
