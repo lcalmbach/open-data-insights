@@ -1439,9 +1439,11 @@ class StoryProcessor:
                 # Reasoning models (e.g. deepseek-v4-pro/flash) spend a large,
                 # variable share of the completion budget on hidden reasoning
                 # tokens before emitting the title — and reason over the full
-                # article fed in below — so keep generous headroom or content
-                # comes back empty (finish_reason=length, all tokens reasoning).
-                max_tokens = 2048
+                # article fed in below, so long articles need more headroom or
+                # the title comes back empty (finish_reason=length, all tokens
+                # reasoning). generate_title() falls back to the default title
+                # if this still returns empty.
+                max_tokens = 4096
                 temperature = min(
                     max(getattr(self.story.template, "temperature", 0.5), 0.2), 1.0
                 )
@@ -1534,9 +1536,18 @@ class StoryProcessor:
             return bool(self.story.title)
 
         if self.story.template.create_title:
-            self.story.title = self._fit_story_title(self._generate_summary(
+            generated = self._fit_story_title(self._generate_summary(
                 kind="title", target_language=target_language
             ))
+            # A reasoning model can occasionally return an empty title (all of
+            # the token budget spent on reasoning). Fall back to the template
+            # default so an empty LLM response never hard-fails generation.
+            if not generated:
+                self.logger.warning(
+                    "Empty title from LLM; falling back to default title."
+                )
+                generated = self._fit_story_title(self._get_default_story_title())
+            self.story.title = generated
         else:
             self.story.title = self._fit_story_title(self._get_default_story_title())
         return bool(self.story.title)
