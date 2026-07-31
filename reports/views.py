@@ -1171,6 +1171,7 @@ def press_review_view(request):
 
     preview_limit = settings.PRESSREVIEW_PREVIEW_MAX_ARTICLES
     preview_truncated = 0
+    scored_count = None  # only meaningful on the stored-scores path
 
     if topics_changed and topics:
         # Harvest first so brand-new topics find articles straight away instead of
@@ -1219,16 +1220,21 @@ def press_review_view(request):
     elif not topics:
         score_rows = []
     else:
+        stored = UserPressReviewArticleScore.objects.filter(
+            user=request.user
+        ).select_related("article", "article__source")
+        if selected_source_ids:
+            stored = stored.filter(article__source_id__in=selected_source_ids)
+        # Distinguish "nothing scored yet" from "scored, but all below threshold" so the
+        # empty state can say which — they need very different actions from the user.
+        scored_count = stored.count()
         score_rows = list(
-            UserPressReviewArticleScore.objects.filter(
-                user=request.user, score__gte=threshold
-            )
-            .select_related("article", "article__source")
-            .filter(
-                **({"article__source_id__in": selected_source_ids} if selected_source_ids else {})
-            )
-            .order_by("-article__published_date")
+            stored.filter(score__gte=threshold).order_by("-article__published_date")
         )
+
+    articles_in_scope = PressReviewArticle.objects.all()
+    if selected_source_ids:
+        articles_in_scope = articles_in_scope.filter(source_id__in=selected_source_ids)
 
     return render(
         request,
@@ -1244,6 +1250,8 @@ def press_review_view(request):
             "is_preview": topics_changed and bool(topics),
             "preview_truncated": preview_truncated,
             "unsaved_changes": topics_changed or threshold_changed,
+            "articles_in_scope": articles_in_scope.count(),
+            "scored_count": scored_count,
             # Empty selection means "all active sources" — say so rather than
             # showing a blank list the user might read as "none".
             "selected_sources": list(

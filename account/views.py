@@ -115,8 +115,26 @@ def profile_view(request):
 
             press_review_form = PressReviewPreferencesForm(request.POST, user=user)
             if press_review_form.is_valid():
-                press_review_form.save()
-                messages.success(request, "Your press review preferences have been saved.")
+                topics_changed = press_review_form.save()
+                message = "Your press review preferences have been saved."
+                if topics_changed:
+                    # Stored scores were judged against the previous topics, so without
+                    # this the press review page stays empty (or stale) until the next
+                    # scheduled run — the same rescore the Press Review tool performs.
+                    from reports.services.press_review_service import (
+                        PressReviewRelevanceService,
+                    )
+
+                    result = PressReviewRelevanceService().rescore_user(user)
+                    message += (
+                        f" Re-scored {result['rated']} article(s) against your new topics."
+                    )
+                    if result["remaining"]:
+                        message += (
+                            f" {result['remaining']} more will be scored in the next"
+                            " scheduled run."
+                        )
+                messages.success(request, message)
                 return redirect("account:profile")
 
         else:

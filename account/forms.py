@@ -97,6 +97,7 @@ class PressReviewPreferencesForm(forms.Form):
         self.fields["sources"].queryset = PressReviewSource.objects.filter(active=True)
 
     def save(self):
+        """Persist preferences. Returns True when topics changed and scores are stale."""
         submitted = {
             kw.strip() for kw in self.cleaned_data["keywords"].split(",") if kw.strip()
         }
@@ -114,6 +115,7 @@ class PressReviewPreferencesForm(forms.Form):
         self.user.press_review_frequency = self.cleaned_data["frequency"]
         self.user.press_review_threshold = self.cleaned_data["threshold"]
         self.user.save(update_fields=["press_review_frequency", "press_review_threshold"])
+        return submitted != existing
 
 
 class SubscriptionForm(forms.Form):

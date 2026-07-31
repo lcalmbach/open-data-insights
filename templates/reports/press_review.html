@@ -131,9 +131,20 @@
     </div>
   {% empty %}
     <div class="alert alert-info">
-      No matching articles yet. Set your topics and sources on your
-      <a href="{% url 'account:profile' %}">profile page</a> — articles appear here
-      once the daily harvest finds news matching them.
+      {% if not topics %}
+        No topics set. Add some above, or on your
+        <a href="{% url 'account:profile' %}">profile page</a>.
+      {% elif not articles_in_scope %}
+        No articles have been collected from your selected sources yet. They appear
+        after the next harvest — check your source selection on your
+        <a href="{% url 'account:profile' %}">profile page</a>.
+      {% elif scored_count == 0 %}
+        {{ articles_in_scope }} article(s) collected, but none scored for you yet.
+        Scoring runs on a schedule; press <strong>Apply</strong> above to score them now.
+      {% else %}
+        {{ scored_count }} article(s) scored, but none reached {{ threshold }}/10.
+        Lower the threshold above to see more.
+      {% endif %}
     </div>
   {% endfor %}
 </div>
