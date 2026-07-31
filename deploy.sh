@@ -57,12 +57,10 @@ git push origin main
 # ── 6. Push to Heroku ───────────────────────────────────────────────────────
 
 echo "▶ Pushing to Heroku …"
+# Migrations run in the Procfile `release` phase, which Heroku executes *before*
+# routing traffic to the new release. Running them here instead left a window where
+# new code served requests against the old schema.
 git push heroku main
-
-# ── 7. Run migrations ───────────────────────────────────────────────────────
-
-echo "▶ Running migrations on Heroku …"
-heroku run python manage.py migrate --app "$HEROKU_APP"
 
 echo ""
 echo "✅  Deployed $new_version to https://ogd-data-insights-d6c65d72da95.herokuapp.com/"

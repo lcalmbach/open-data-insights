@@ -1,1 +1,2 @@
+release: python manage.py migrate --noinput
 web: gunicorn report_generator.wsgi --workers 2 --max-requests 1000 --max-requests-jitter 100
