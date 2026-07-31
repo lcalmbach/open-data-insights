@@ -16,6 +16,7 @@ from django.contrib.auth.tokens import default_token_generator
 from .forms import RegistrationForm
 from .forms import SubscriptionForm
 from .forms import CustomUserUpdateForm
+from .forms import PressReviewPreferencesForm
 from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
 from django.db import transaction
@@ -53,6 +54,7 @@ def profile_view(request):
                 user=user, cancellation_date__isnull=True, story_template__active=True
             ).values_list("story_template_id", flat=True)
             subscriptions_form = SubscriptionForm(initial={"subscriptions": current_subscriptions}, user=user)
+            press_review_form = PressReviewPreferencesForm(user=user)
 
             if profile_form.is_valid():
                 profile_form.save()
@@ -64,6 +66,7 @@ def profile_view(request):
         # --- Subscriptions speichern ---
         elif action == "save_subscriptions":
             profile_form = CustomUserUpdateForm(instance=user)
+            press_review_form = PressReviewPreferencesForm(user=user)
 
             subscriptions_form = SubscriptionForm(request.POST, user=user)
             if subscriptions_form.is_valid():
@@ -105,15 +108,28 @@ def profile_view(request):
                 messages.success(request, "Your subscriptions have been saved.")
                 return redirect("account:profile")
 
+        # --- Press review preferences speichern ---
+        elif action == "save_press_review_preferences":
+            profile_form = CustomUserUpdateForm(instance=user)
+            subscriptions_form = SubscriptionForm(initial={"subscriptions": current_subscriptions}, user=user)
+
+            press_review_form = PressReviewPreferencesForm(request.POST, user=user)
+            if press_review_form.is_valid():
+                press_review_form.save()
+                messages.success(request, "Your press review preferences have been saved.")
+                return redirect("account:profile")
+
         else:
-            # Fallback: beide Formulare binden, damit Fehler sichtbar sind
+            # Fallback: alle Formulare binden, damit Fehler sichtbar sind
             profile_form = CustomUserUpdateForm(request.POST, instance=user)
             subscriptions_form = SubscriptionForm(request.POST, user=user)
+            press_review_form = PressReviewPreferencesForm(request.POST, user=user)
 
     else:
-        # GET: beide Formulare befüllen
+        # GET: alle Formulare befüllen
         profile_form = CustomUserUpdateForm(instance=user)
         subscriptions_form = SubscriptionForm(initial={"subscriptions": current_subscriptions}, user=user)
+        press_review_form = PressReviewPreferencesForm(user=user)
 
     return render(
         request,
@@ -121,6 +137,7 @@ def profile_view(request):
         {
             "profile_form": profile_form,    # oben im Template verwenden
             "form": subscriptions_form,      # dein bestehender Name unten
+            "press_review_form": press_review_form,
             "active_subscriptions": current_subscriptions.count()
         },
     )

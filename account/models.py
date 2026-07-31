@@ -4,10 +4,16 @@ import uuid
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django_countries.fields import CountryField
 
 DEFAULT_PREFERRED_LANGUAGE_ID = int(getattr(settings, "DEFAULT_PREFERRED_LANGUAGE_ID", 94))
+
+
+def default_press_review_threshold():
+    """Seed new users from the site-wide default so there is one source of truth."""
+    return int(getattr(settings, "PRESSREVIEW_RELEVANCE_THRESHOLD", 7))
 
 
 class NaturalKeyManager(models.Manager):
@@ -104,6 +110,43 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             "Automatically subscribe to new insights and updates. "
             "This only applies to new content; it will not retroactively "
             "re-subscribe cancelled subscriptions."
+        ),
+    )
+    PRESS_REVIEW_FREQUENCY_NONE = "none"
+    PRESS_REVIEW_FREQUENCY_DAILY = "daily"
+    PRESS_REVIEW_FREQUENCY_WEEKLY = "weekly"
+    PRESS_REVIEW_FREQUENCY_CHOICES = (
+        (PRESS_REVIEW_FREQUENCY_NONE, "No press review digest"),
+        (PRESS_REVIEW_FREQUENCY_DAILY, "Daily digest"),
+        (PRESS_REVIEW_FREQUENCY_WEEKLY, "Weekly digest"),
+    )
+
+    press_review_threshold = models.PositiveSmallIntegerField(
+        default=default_press_review_threshold,
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        help_text=(
+            "Minimum AI relevance score (1-10) an article must reach to appear in "
+            "this user's digest. Lower it to widen the net, raise it to cut noise. "
+            "Scores are stored for every article, so lowering it also surfaces "
+            "previously scored articles at no extra cost."
+        ),
+    )
+    press_review_frequency = models.CharField(
+        max_length=16,
+        choices=PRESS_REVIEW_FREQUENCY_CHOICES,
+        default=PRESS_REVIEW_FREQUENCY_DAILY,
+        help_text=(
+            "How often to send this user's press review digest. "
+            "Mutually exclusive so an article is never sent twice."
+        ),
+    )
+    press_review_sources = models.ManyToManyField(
+        "reports.PressReviewSource",
+        blank=True,
+        related_name="subscribed_users",
+        help_text=(
+            "RSS sources to include in this user's press review digest. "
+            "Leave empty to include all active sources."
         ),
     )
     is_active = models.BooleanField(default=True)

@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Press Review{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 class="mb-3">
+    Press Review
+    (<span id="press-review-count">{{ score_rows|length }}</span>)
+  </h2>
+  <p>
+    News articles from your sources, scored for relevance by AI against the topics below.
+    Showing articles scoring {{ threshold }} or higher. Adjust the topics and threshold to
+    explore, then save them as your defaults when you're happy.
+  </p>
+
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-8">
+          <label class="form-label mb-1" for="topics">Topics</label>
+          <input type="text" id="topics" name="topics" class="form-control"
+                 value="{{ topics_text }}"
+                 placeholder="e.g. Wohnen, Klima, Verkehr">
+          <div class="form-text">Comma-separated. Changing these re-scores the articles below.</div>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label mb-1" for="threshold">Threshold</label>
+          <select id="threshold" name="threshold" class="form-select">
+            {% for value in threshold_choices %}
+              <option value="{{ value }}" {% if value == threshold %}selected{% endif %}>
+                {{ value }}/10+
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100"
+                  onclick="this.disabled=true; this.textContent='Scoring…'; this.form.submit();">
+            Apply
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-3">
+        <span class="form-label d-block mb-1">Sources</span>
+        {% if all_sources_selected %}
+          <span class="badge bg-secondary">All active sources</span>
+        {% else %}
+          {% for source in selected_sources %}
+            <span class="badge bg-secondary">{{ source }}</span>
+          {% endfor %}
+        {% endif %}
+        <small class="text-muted d-block mt-1">
+          Change sources on your <a href="{% url 'account:profile' %}">profile</a>.
+        </small>
+      </div>
+
+      <hr>
+
+      {% if unsaved_changes %}
+        <div class="alert alert-warning py-2 mb-3">
+          These settings are not saved — your email digest still uses your saved topics
+          and threshold.
+          {% if is_preview %}
+            Scores below were computed just for this view and were not stored.
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if preview_truncated %}
+        <div class="alert alert-info py-2 mb-3">
+          Previewing the {{ score_rows|length }} most recent matching article(s);
+          {{ preview_truncated }} older one(s) were not scored for this preview.
+        </div>
+      {% endif %}
+
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <form method="post" action="{% url 'press_review_save_preferences' %}" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="topics" value="{{ topics_text }}">
+          <input type="hidden" name="threshold" value="{{ threshold }}">
+          <button type="submit" class="btn btn-outline-primary btn-sm"
+                  onclick="this.disabled=true; this.textContent='Saving…'; this.form.submit();">
+            Save to user preferences
+          </button>
+        </form>
+        {% if unsaved_changes %}
+          <a class="btn btn-outline-secondary btn-sm" href="{% url 'press_review' %}">
+            Reset to my preferences
+          </a>
+        {% endif %}
+      </div>
+      <small class="text-muted d-block mt-2">
+        Saving stores these topics and threshold as your defaults and re-scores your
+        articles so your digest matches.
+      </small>
+    </div>
+  </div>
+
+  {% for row in score_rows %}
+    <div class="card mb-3 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <h5 class="card-title mb-1">
+            <a href="{{ row.article.link }}" target="_blank" rel="noopener noreferrer">
+              {{ row.article.title }}
+            </a>
+          </h5>
+          <span class="badge bg-primary flex-shrink-0" title="AI relevance score">
+            {{ row.score }}/10
+          </span>
+        </div>
+        <h6 class="card-subtitle mb-2 text-muted">
+          {{ row.article.source.name }}
+          {% if row.article.published_date %} &middot; {{ row.article.published_date|date:"d.m.Y H:i" }}{% endif %}
+          {% if row.digest_sent %} &middot; <span class="text-success">sent</span>{% endif %}
+        </h6>
+        {% if row.article.summary %}
+          {# striptags, not safe: feed summaries are attacker-controllable HTML #}
+          <p class="card-text">{{ row.article.summary|striptags }}</p>
+        {% endif %}
+        {% if row.reason %}
+          <p class="card-text"><small class="text-muted">Why: {{ row.reason }}</small></p>
+        {% endif %}
+        {% if row.article.matched_keywords %}
+          <p class="mb-0">
+            <small class="text-muted">Matched: {{ row.article.matched_keywords }}</small>
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <div class="alert alert-info">
+      No matching articles yet. Set your topics and sources on your
+      <a href="{% url 'account:profile' %}">profile page</a> — articles appear here
+      once the daily harvest finds news matching them.
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

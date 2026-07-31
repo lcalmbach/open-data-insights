@@ -102,4 +102,53 @@
   {% if form.toggle_script %}
     {{ form.toggle_script }}
   {% endif %}
+
+  <hr>
+
+  <h3>Press Review</h3>
+  <p>Tell us which topics you're interested in and which news sources to watch, and we'll email you a daily digest of matching articles.</p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">{{ press_review_form.frequency.label }}</label>
+      {{ press_review_form.frequency }}
+      <div class="form-text">{{ press_review_form.frequency.help_text }}</div>
+      {% if press_review_form.frequency.errors %}
+        <div class="text-danger small">{{ press_review_form.frequency.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ press_review_form.keywords.id_for_label }}">{{ press_review_form.keywords.label }}</label>
+      {{ press_review_form.keywords }}
+      <div class="form-text">{{ press_review_form.keywords.help_text }}</div>
+      {% if press_review_form.keywords.errors %}
+        <div class="text-danger small">{{ press_review_form.keywords.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ press_review_form.sources.label }}</label>
+      {{ press_review_form.sources }}
+      <div class="form-text">{{ press_review_form.sources.help_text }}</div>
+      {% if press_review_form.sources.errors %}
+        <div class="text-danger small">{{ press_review_form.sources.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3 col-md-3">
+      <label class="form-label" for="{{ press_review_form.threshold.id_for_label }}">{{ press_review_form.threshold.label }}</label>
+      {{ press_review_form.threshold }}
+      <div class="form-text">{{ press_review_form.threshold.help_text }}</div>
+      {% if press_review_form.threshold.errors %}
+        <div class="text-danger small">{{ press_review_form.threshold.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="d-flex mt-3">
+      <button type="submit" name="action" value="save_press_review_preferences" class="btn btn-primary">
+        Save Press Review Preferences
+      </button>
+    </div>
+  </form>
 {% endblock %}

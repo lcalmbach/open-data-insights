@@ -1,6 +1,7 @@
 import copy
 
 from django.contrib import admin
+from django.utils.html import format_html
 from .models.simulation import Simulation, SimulationParameter, SimulationTemplate
 from .models.story import Story
 from .models.story_template import (
@@ -21,6 +22,12 @@ from .models.story_table_template import StoryTemplateTable
 from .models.user_comment import UserComment
 from .models.lookups import Region, Topic, REGION_CATEGORY_ID, TOPIC_CATEGORY_ID
 from .models.story_access import StoryAccess
+from .models.press_review import (
+    PressReviewArticle,
+    PressReviewHarvestLog,
+    PressReviewKeyword,
+    PressReviewSource,
+)
 
 
 class StoryTemplateFocusInline(admin.TabularInline):
@@ -450,7 +457,73 @@ class SimulationAdmin(admin.ModelAdmin):
     list_display = ("simulation_template", "generated_at")
     list_filter = ("simulation_template",)
     readonly_fields = ("simulation_template", "parameters_used", "generated_at", "html")
-    ordering = ("-generated_at",)
+
+
+# ── Press Review ──────────────────────────────────────────────────────────────
+
+@admin.register(PressReviewSource)
+class PressReviewSourceAdmin(admin.ModelAdmin):
+    list_display = ["name", "active", "local", "feed_type", "rss_url", "last_fetched_at"]
+    list_filter = ["active", "local", "feed_type"]
+    search_fields = ["name", "rss_url"]
+    list_editable = ["active", "local", "feed_type"]
+    fields = ["name", "url", "rss_url", "feed_type", "active", "local"]
+
+
+@admin.register(PressReviewKeyword)
+class PressReviewKeywordAdmin(admin.ModelAdmin):
+    list_display = ["keyword_display", "active", "required", "created_date"]
+    list_filter = ["active", "required"]
+    search_fields = ["keyword"]
+    list_editable = ["active", "required"]
+    fields = ["keyword", "active", "required"]
+
+    def keyword_display(self, obj):
+        if obj.required:
+            return format_html("<strong>🔒 {}</strong>", obj.keyword)
+        return obj.keyword
+    keyword_display.short_description = "Keyword"
+    keyword_display.admin_order_field = "keyword"
+
+
+@admin.register(PressReviewArticle)
+class PressReviewArticleAdmin(admin.ModelAdmin):
+    list_display = ["title_short", "source", "published_date", "harvested_date"]
+    list_filter = ["source"]
+    search_fields = ["title", "summary", "matched_keywords"]
+    readonly_fields = [
+        "source", "title", "summary", "link_clickable", "published_date",
+        "harvested_date", "matched_keywords",
+    ]
+    fields = [
+        "source", "published_date", "harvested_date", "title", "summary",
+        "link_clickable", "matched_keywords",
+    ]
+    ordering = ["-published_date"]
+
+    def title_short(self, obj):
+        return (obj.title or "")[:90]
+    title_short.short_description = "Title"
+
+    def link_clickable(self, obj):
+        return format_html('<a href="{}" target="_blank">{}</a>', obj.link, obj.link)
+    link_clickable.short_description = "Link"
 
     def has_add_permission(self, request):
+        return False
+
+
+@admin.register(PressReviewHarvestLog)
+class PressReviewHarvestLogAdmin(admin.ModelAdmin):
+    list_display = ["run_date", "sources_checked", "articles_new", "articles_skipped"]
+    readonly_fields = ["run_date", "sources_checked", "articles_new", "articles_skipped", "errors"]
+    ordering = ["-run_date"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
         return False

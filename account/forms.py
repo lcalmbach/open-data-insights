@@ -6,6 +6,7 @@ from account.models import CustomUser
 from django_countries.widgets import CountrySelectWidget
 
 from reports.models.story_template import StoryTemplate
+from reports.models.press_review import PressReviewSource, UserPressReviewKeyword
 
 
 class CustomUserUpdateForm(forms.ModelForm):
@@ -51,6 +52,69 @@ class RegistrationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+class PressReviewPreferencesForm(forms.Form):
+    frequency = forms.ChoiceField(
+        choices=CustomUser.PRESS_REVIEW_FREQUENCY_CHOICES,
+        widget=forms.RadioSelect,
+        label="Digest frequency",
+        help_text="Daily and weekly are mutually exclusive, so you never get the same article twice.",
+    )
+    threshold = forms.IntegerField(
+        min_value=1,
+        max_value=10,
+        label="Relevance threshold",
+        help_text=(
+            "Only articles the AI scores at or above this value (1-10) reach you. "
+            "Lower it to widen the net, raise it to cut noise."
+        ),
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": 1}),
+    )
+    keywords = forms.CharField(
+        required=False,
+        label="Press review topics",
+        help_text="Comma-separated topics you're interested in, e.g. 'Basel, Wohnen, Klima'.",
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+    )
+    sources = forms.ModelMultipleChoiceField(
+        queryset=PressReviewSource.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="News sources",
+        help_text="Leave all unchecked to include every available source.",
+    )
+
+    def __init__(self, *args, user=None, **kwargs):
+        self.user = user
+        if user is not None and "initial" not in kwargs:
+            kwargs["initial"] = {
+                "frequency": user.press_review_frequency,
+                "threshold": user.press_review_threshold,
+                "keywords": ", ".join(user.press_review_keywords.values_list("keyword", flat=True)),
+                "sources": user.press_review_sources.all(),
+            }
+        super().__init__(*args, **kwargs)
+        self.fields["sources"].queryset = PressReviewSource.objects.filter(active=True)
+
+    def save(self):
+        submitted = {
+            kw.strip() for kw in self.cleaned_data["keywords"].split(",") if kw.strip()
+        }
+        existing = set(
+            self.user.press_review_keywords.values_list("keyword", flat=True)
+        )
+        UserPressReviewKeyword.objects.bulk_create(
+            [
+                UserPressReviewKeyword(user=self.user, keyword=kw)
+                for kw in submitted - existing
+            ]
+        )
+        self.user.press_review_keywords.filter(keyword__in=existing - submitted).delete()
+        self.user.press_review_sources.set(self.cleaned_data["sources"])
+        self.user.press_review_frequency = self.cleaned_data["frequency"]
+        self.user.press_review_threshold = self.cleaned_data["threshold"]
+        self.user.save(update_fields=["press_review_frequency", "press_review_threshold"])
+
 
 class SubscriptionForm(forms.Form):
     subscriptions = forms.ModelMultipleChoiceField(

@@ -24,6 +24,18 @@
           </ul>
         </li>
         {% endif %}
+        <!-- Tools dropdown - only for logged-in users -->
+        {% if user.is_authenticated %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="toolsDropdown" role="button" data-bs-toggle="dropdown"
+            aria-expanded="false">
+            Tools
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="toolsDropdown">
+            <li><a class="dropdown-item" href="{% url 'press_review' %}">Press Review</a></li>
+          </ul>
+        </li>
+        {% endif %}
         {% if user.is_authenticated %}
         {% if user.is_staff %}
         <li class="nav-item dropdown">

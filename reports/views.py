@@ -1,5 +1,6 @@
 import csv
 from decimal import Decimal
+from types import SimpleNamespace
 import json
 import logging
 import re
@@ -12,6 +13,7 @@ import pandas as pd
 from iommi import Column, Table
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.management import get_commands
 import importlib.util
@@ -42,10 +44,21 @@ from .models.story_table import StoryTable
 from .models.lookups import Period, Region, Topic
 from .models.story_rating import StoryRating
 from .models.subscription import StoryTemplateSubscription
+from .models.press_review import (
+    PressReviewArticle,
+    UserPressReviewArticleScore,
+    UserPressReviewKeyword,
+)
 from .models.user_comment import UserComment
 from .models.story_access import StoryAccess
 from .models.quote import Quote
+from django.views.decorators.http import require_POST
+
 from .services.database_client import DjangoPostgresClient
+from .services.press_review_service import (
+    PressReviewHarvestService,
+    PressReviewRelevanceService,
+)
 from .services.focus_images import resolve_story_images
 from .services.utils import normalize_sql_query
 from .taxonomy_utils import collect_descendant_ids, taxonomy_choices
@@ -1102,6 +1115,225 @@ def datasets_view(request):
             "insight_templates": insight_templates,
         },
     )
+
+
+def _parse_topics(raw: str) -> list:
+    """Split a comma-separated topic string, preserving the user's order."""
+    seen = set()
+    topics = []
+    for part in (raw or "").split(","):
+        topic = part.strip()
+        if topic and topic.lower() not in seen:
+            seen.add(topic.lower())
+            topics.append(topic)
+    return topics
+
+
+@login_required
+def press_review_view(request):
+    """Standalone press review tool, seeded from the user's saved preferences.
+
+    Topics and threshold are both adjustable per request so the user can explore an
+    ad-hoc set — and then either save it as their default or walk away leaving the
+    email digest untouched.
+
+    The two behave very differently under the hood. The threshold only filters stored
+    scores, so it is instant and free. Topics change what the AI judges, so exploring
+    them requires scoring against the ad-hoc set; those scores are computed transiently
+    and never persisted, otherwise ad-hoc research would silently rewrite the scores
+    that drive the digest.
+    """
+    saved_topics = list(
+        request.user.press_review_keywords.values_list("keyword", flat=True)
+    )
+    default_threshold = request.user.press_review_threshold
+
+    threshold = default_threshold
+    try:
+        requested = int(request.GET.get("threshold", ""))
+    except (TypeError, ValueError):
+        requested = None
+    if requested is not None:
+        threshold = min(max(requested, 1), 10)
+
+    if "topics" in request.GET:
+        topics = _parse_topics(request.GET["topics"])
+    else:
+        topics = list(saved_topics)
+
+    topics_changed = [t.lower() for t in topics] != [t.lower() for t in saved_topics]
+    threshold_changed = threshold != default_threshold
+
+    # An empty source selection means "all active sources" — mirrors the mailer.
+    selected_source_ids = list(
+        request.user.press_review_sources.values_list("id", flat=True)
+    )
+
+    preview_limit = settings.PRESSREVIEW_PREVIEW_MAX_ARTICLES
+    preview_truncated = 0
+
+    if topics_changed and topics:
+        # Harvest first so brand-new topics find articles straight away instead of
+        # waiting for the next scheduled run. Fetching is cheap (HTTP only) and the
+        # interval guard stops repeated Apply clicks from hammering publishers.
+        try:
+            PressReviewHarvestService().harvest(
+                extra_keywords=topics,
+                only_source_ids=selected_source_ids or None,
+                min_interval_minutes=settings.PRESSREVIEW_HARVEST_MIN_INTERVAL_MINUTES,
+            )
+        except Exception as exc:  # never block the page on a flaky feed
+            logger.warning("Press review on-demand harvest failed: %s", exc)
+
+        # Ad-hoc topics: score a bounded, most-recent slice on the fly.
+        window_start = timezone.now() - timedelta(
+            days=settings.PRESSREVIEW_PREVIEW_WINDOW_DAYS
+        )
+        articles = PressReviewArticle.objects.select_related("source").filter(
+            harvested_date__gte=window_start
+        )
+        if selected_source_ids:
+            articles = articles.filter(source_id__in=selected_source_ids)
+        articles = articles.order_by("-published_date", "-harvested_date")
+        candidate_count = articles.count()
+        preview_truncated = max(0, candidate_count - preview_limit)
+
+        # A fast, non-reasoning model: this runs inside the request.
+        scored = PressReviewRelevanceService(
+            model=settings.PRESSREVIEW_PREVIEW_AI_MODEL
+        ).score_articles_preview(", ".join(topics), articles[:preview_limit])
+        score_rows = [
+            SimpleNamespace(
+                article=item["article"],
+                score=item["score"],
+                reason=item["reason"],
+                digest_sent=False,
+            )
+            for item in scored
+            if item["score"] >= threshold
+        ]
+        score_rows.sort(
+            key=lambda row: (row.article.published_date is not None, row.article.published_date),
+            reverse=True,
+        )
+    elif not topics:
+        score_rows = []
+    else:
+        score_rows = list(
+            UserPressReviewArticleScore.objects.filter(
+                user=request.user, score__gte=threshold
+            )
+            .select_related("article", "article__source")
+            .filter(
+                **({"article__source_id__in": selected_source_ids} if selected_source_ids else {})
+            )
+            .order_by("-article__published_date")
+        )
+
+    return render(
+        request,
+        "reports/press_review.html",
+        {
+            "score_rows": score_rows,
+            "threshold": threshold,
+            "threshold_choices": range(1, 11),
+            "topics": topics,
+            "topics_text": ", ".join(topics),
+            "topics_changed": topics_changed,
+            "threshold_changed": threshold_changed,
+            "is_preview": topics_changed and bool(topics),
+            "preview_truncated": preview_truncated,
+            "unsaved_changes": topics_changed or threshold_changed,
+            # Empty selection means "all active sources" — say so rather than
+            # showing a blank list the user might read as "none".
+            "selected_sources": list(
+                request.user.press_review_sources.values_list("name", flat=True)
+            ),
+            "all_sources_selected": not selected_source_ids,
+        },
+    )
+
+
+@login_required
+@require_POST
+def press_review_save_preferences(request):
+    """Persist the tool's current topics and threshold as the user's defaults.
+
+    Saving topics invalidates every stored score (they were judged against the old
+    topics), so this re-scores afterwards to keep the digest consistent with what the
+    user just saved.
+    """
+    topics = _parse_topics(request.POST.get("topics", ""))
+    try:
+        threshold = int(request.POST.get("threshold", ""))
+    except (TypeError, ValueError):
+        threshold = request.user.press_review_threshold
+    threshold = min(max(threshold, 1), 10)
+
+    if not topics:
+        messages.warning(
+            request, "Add at least one topic before saving to your preferences."
+        )
+        return redirect("press_review")
+
+    existing = set(
+        request.user.press_review_keywords.values_list("keyword", flat=True)
+    )
+    submitted = set(topics)
+    UserPressReviewKeyword.objects.bulk_create(
+        [
+            UserPressReviewKeyword(user=request.user, keyword=topic)
+            for topic in submitted - existing
+        ]
+    )
+    request.user.press_review_keywords.filter(
+        keyword__in=existing - submitted
+    ).delete()
+
+    request.user.press_review_threshold = threshold
+    request.user.save(update_fields=["press_review_threshold"])
+
+    message = "Saved to your preferences."
+    if submitted != existing:
+        # Stored scores were judged against the previous topics — redo them.
+        result = PressReviewRelevanceService().rescore_user(request.user)
+        message += f" Re-scored {result['rated']} article(s) against your new topics."
+        if result["remaining"]:
+            message += (
+                f" {result['remaining']} more will be scored in the next scheduled run."
+            )
+    messages.success(request, message)
+    return redirect("press_review")
+
+
+@login_required
+@require_POST
+def press_review_rescore(request):
+    """Re-judge the current user's articles against their current topics.
+
+    POST-only and user-triggered: it discards this user's scores and spends one LLM
+    call per article, so it must not happen on a page load or a stray GET.
+    """
+    if not request.user.press_review_keywords.exists():
+        messages.warning(
+            request, "Add at least one press review topic before re-scoring."
+        )
+        return redirect("press_review")
+
+    service = PressReviewRelevanceService()
+    result = service.rescore_user(request.user)
+
+    message = f"Re-scored {result['rated']} article(s) against your current topics."
+    if result["remaining"]:
+        message += (
+            f" {result['remaining']} more will be scored in the next scheduled run."
+        )
+    if result["errors"]:
+        message += f" {len(result['errors'])} failed."
+        messages.warning(request, message)
+    else:
+        messages.success(request, message)
+    return redirect("press_review")
 
 
 @login_required

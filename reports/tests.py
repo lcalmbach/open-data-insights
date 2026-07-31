@@ -10,7 +10,9 @@ import pandas as pd
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import SimpleTestCase, TestCase
+from django.conf import settings
+from django.test import SimpleTestCase, TestCase, override_settings
+from django.utils import timezone
 from django.urls import reverse
 
 from account.models import CustomUser
@@ -27,6 +29,14 @@ from reports.models.lookups import (
     Region,
     Topic,
 )
+from reports.models.press_review import (
+    PressReviewArticle,
+    PressReviewHarvestLog,
+    PressReviewKeyword,
+    PressReviewSource,
+    UserPressReviewArticleScore,
+    UserPressReviewKeyword,
+)
 from reports.models.story import Story
 from reports.models.story_rating import StoryRating
 from reports.models.story_table import StoryTable
@@ -38,6 +48,14 @@ from reports.models.story_template import (
     StoryTemplateFocusImage,
 )
 from reports.models.subscription import StoryTemplateSubscription
+from reports.services.press_review_service import (
+    PressReviewHarvestService,
+    PressReviewMailer,
+    parse_news_sitemap,
+    PressReviewRelevanceService,
+    _parse_response,
+    keyword_matches,
+)
 from reports.management.commands.import_market_events import (
     _parse_bool,
     _parse_int,
@@ -1811,3 +1829,727 @@ class StoryTableGenerationTests(TestCase):
                 }
             ],
         )
+
+
+class PressReviewKeywordMatchTests(SimpleTestCase):
+    def test_case_insensitive_and_word_boundary(self):
+        self.assertEqual(keyword_matches("Die Basler Zeitung berichtet.", ["Basel"]), [])
+        self.assertEqual(
+            keyword_matches("Die Stadt Basel plant ein neues Projekt.", ["Basel", "Bern"]),
+            ["Basel"],
+        )
+
+    def test_umlaut_normalization(self):
+        self.assertEqual(
+            keyword_matches("Neue Spitäler in der Region", ["Spitaeler"]), ["Spitaeler"]
+        )
+
+    def test_or_logic_multiple_matches(self):
+        matches = keyword_matches("Wohnen und Klima sind Basel-Themen", ["Wohnen", "Klima", "Museen"])
+        self.assertEqual(sorted(matches), ["Klima", "Wohnen"])
+
+
+class PressReviewRelevanceParsingTests(SimpleTestCase):
+    def test_parse_valid_response(self):
+        score, reason = _parse_response(
+            '{"score": 8, "reason": "Directly about Basel housing policy."}'
+        )
+        self.assertEqual(score, 8)
+        self.assertEqual(reason, "Directly about Basel housing policy.")
+
+    def test_parse_response_embedded_in_prose(self):
+        text = 'Sure, here is the rating:\n{"score": 3, "reason": "Minor mention."}\nThanks.'
+        score, reason = _parse_response(text)
+        self.assertEqual(score, 3)
+
+    def test_parse_response_missing_json_raises(self):
+        with self.assertRaises(ValueError):
+            _parse_response("no json here")
+
+    def test_parse_response_out_of_range_raises(self):
+        with self.assertRaises(ValueError):
+            _parse_response('{"score": 15, "reason": "too high"}')
+
+
+class PressReviewHarvestServiceTests(TestCase):
+    """Ports pressreview's proven mandatory/topic/local-source filter behavior."""
+
+    def setUp(self):
+        self.source = PressReviewSource.objects.create(
+            name="Test Source", rss_url="https://example.test/rss", active=True, local=False
+        )
+        self.local_source = PressReviewSource.objects.create(
+            name="Local Source", rss_url="https://example.test/local-rss", active=True, local=True
+        )
+        PressReviewKeyword.objects.create(keyword="Basel", active=True, required=True)
+        PressReviewKeyword.objects.create(keyword="Wohnen", active=True, required=False)
+
+    def test_harvest_applies_mandatory_topic_and_local_exemption(self):
+        entries_by_url = {
+            self.source.rss_url: [
+                {
+                    "title": "Wohnen wird teurer in Basel",
+                    "summary": "Ein Bericht ueber steigende Mieten.",
+                    "link": "https://example.test/basel-wohnen",
+                },
+                {
+                    "title": "Sport News",
+                    "summary": "Ein Fussballspiel in Zuerich.",
+                    "link": "https://example.test/sport",
+                },
+                {
+                    "title": "Wohnen in der Schweiz allgemein",
+                    "summary": "Kein Bezug zur Stadt.",
+                    "link": "https://example.test/general-wohnen",
+                },
+            ],
+            self.local_source.rss_url: [
+                {
+                    "title": "Neues Kulturzentrum eroeffnet",
+                    "summary": "Wohnen und Kultur im neuen Zentrum.",
+                    "link": "https://example.test/local-wohnen",
+                },
+            ],
+        }
+
+        def fake_session_get(url, timeout=None):
+            response = Mock()
+            response.raise_for_status.return_value = None
+            response.content = url.encode()
+            return response
+
+        def fake_feedparser_parse(content):
+            feed = Mock()
+            feed.entries = entries_by_url.get(content.decode(), [])
+            return feed
+
+        with patch("reports.services.press_review_service.requests.Session") as session_cls, \
+                patch(
+                    "reports.services.press_review_service.feedparser.parse",
+                    side_effect=fake_feedparser_parse,
+                ):
+            session_cls.return_value.get.side_effect = fake_session_get
+            result = PressReviewHarvestService().harvest()
+
+        self.assertEqual(result["articles_new"], 2)
+        self.assertTrue(
+            PressReviewArticle.objects.filter(link="https://example.test/basel-wohnen").exists()
+        )
+        self.assertTrue(
+            PressReviewArticle.objects.filter(link="https://example.test/local-wohnen").exists()
+        )
+        self.assertFalse(
+            PressReviewArticle.objects.filter(link="https://example.test/sport").exists()
+        )
+        self.assertFalse(
+            PressReviewArticle.objects.filter(link="https://example.test/general-wohnen").exists()
+        )
+
+        basel_article = PressReviewArticle.objects.get(link="https://example.test/basel-wohnen")
+        self.assertIn("Basel", basel_article.matched_keywords)
+        self.assertIn("Wohnen", basel_article.matched_keywords)
+
+        self.assertEqual(PressReviewHarvestLog.objects.count(), 1)
+
+
+NEWS_SITEMAP_XML = b"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+  <url>
+    <loc>https://example.test/article-one</loc>
+    <news:news>
+      <news:publication><news:name>Example</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-07-31T09:00:00.000Z</news:publication_date>
+      <news:title>Wohnen in Basel wird teurer</news:title>
+      <news:keywords>housing, Basel</news:keywords>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://example.test/article-two</loc>
+    <news:news>
+      <news:publication><news:name>Example</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-07-30T08:30:00Z</news:publication_date>
+      <news:title>Sport results roundup</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://example.test/not-a-news-entry</loc>
+  </url>
+</urlset>
+"""
+
+
+class PressReviewNewsSitemapParserTests(SimpleTestCase):
+    """Google News sitemaps replace RSS for publishers that stopped maintaining feeds."""
+
+    def test_parses_entries_into_the_feed_entry_shape(self):
+        entries = parse_news_sitemap(NEWS_SITEMAP_XML)
+
+        # The third <url> has no <news:news> block and must be ignored.
+        self.assertEqual(len(entries), 2)
+        first = entries[0]
+        self.assertEqual(first["title"], "Wohnen in Basel wird teurer")
+        self.assertEqual(first["link"], "https://example.test/article-one")
+        self.assertEqual(first["tags_text"], "housing, Basel")
+        # Sitemaps carry no article body — scoring works from the headline alone.
+        self.assertEqual(first["summary"], "")
+
+    def test_publication_dates_are_timezone_aware(self):
+        entries = parse_news_sitemap(NEWS_SITEMAP_XML)
+
+        for entry in entries:
+            self.assertIsNotNone(entry["published_dt"])
+            self.assertIsNotNone(entry["published_dt"].tzinfo)
+        self.assertEqual(entries[0]["published_dt"].year, 2026)
+
+    def test_entries_without_news_block_are_skipped(self):
+        links = [entry["link"] for entry in parse_news_sitemap(NEWS_SITEMAP_XML)]
+        self.assertNotIn("https://example.test/not-a-news-entry", links)
+
+
+class PressReviewSitemapHarvestTests(TestCase):
+    """A sitemap source flows through the same keyword filter and storage as RSS."""
+
+    def setUp(self):
+        self.source = PressReviewSource.objects.create(
+            name="Sitemap Source",
+            rss_url="https://example.test/sitemap/news.xml",
+            feed_type=PressReviewSource.FEED_TYPE_NEWS_SITEMAP,
+            active=True,
+            local=True,
+        )
+        PressReviewKeyword.objects.create(keyword="Wohnen", active=True, required=False)
+
+    def test_harvest_stores_articles_from_a_news_sitemap(self):
+        def fake_get(url, timeout=None):
+            response = Mock()
+            response.raise_for_status.return_value = None
+            response.content = NEWS_SITEMAP_XML
+            return response
+
+        with patch("reports.services.press_review_service.requests.Session") as session_cls, \
+                patch(
+                    "reports.services.press_review_service.settings."
+                    "PRESSREVIEW_HARVEST_MAX_AGE_DAYS",
+                    36500,
+                ):
+            session_cls.return_value.get.side_effect = fake_get
+            result = PressReviewHarvestService().harvest()
+
+        self.assertEqual(result["articles_new"], 1)
+        article = PressReviewArticle.objects.get()
+        self.assertEqual(article.link, "https://example.test/article-one")
+        self.assertEqual(article.title, "Wohnen in Basel wird teurer")
+        self.assertIn("Wohnen", article.matched_keywords)
+        self.assertIsNotNone(article.published_date)
+
+
+class PressReviewUserTopicHarvestTests(TestCase):
+    """A user's own topics must widen the harvest, not just re-rank what was collected."""
+
+    def setUp(self):
+        self.source = PressReviewSource.objects.create(
+            name="Source",
+            rss_url="https://example.test/sitemap-topics.xml",
+            feed_type=PressReviewSource.FEED_TYPE_NEWS_SITEMAP,
+            active=True,
+            local=True,
+        )
+        PressReviewKeyword.objects.create(keyword="housing", active=True, required=False)
+        self.user = CustomUser.objects.create_user(
+            email="topics@example.test", first_name="T", last_name="T"
+        )
+
+    SITEMAP = b"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+  <url><loc>https://example.test/war-story</loc><news:news>
+    <news:publication><news:name>X</news:name><news:language>en</news:language></news:publication>
+    <news:publication_date>2026-07-31T09:00:00Z</news:publication_date>
+    <news:title>Signs the war is expanding</news:title>
+  </news:news></url>
+  <url><loc>https://example.test/other-story</loc><news:news>
+    <news:publication><news:name>X</news:name><news:language>en</news:language></news:publication>
+    <news:publication_date>2026-07-31T09:00:00Z</news:publication_date>
+    <news:title>Local sports roundup</news:title>
+  </news:news></url>
+</urlset>
+"""
+
+    def _harvest(self):
+        def fake_get(url, timeout=None):
+            response = Mock()
+            response.raise_for_status.return_value = None
+            response.content = self.SITEMAP
+            return response
+
+        with patch("reports.services.press_review_service.requests.Session") as session_cls, \
+                patch(
+                    "reports.services.press_review_service.settings."
+                    "PRESSREVIEW_HARVEST_MAX_AGE_DAYS",
+                    36500,
+                ):
+            session_cls.return_value.get.side_effect = fake_get
+            return PressReviewHarvestService().harvest()
+
+    def test_topic_not_in_global_list_is_not_collected_without_a_user(self):
+        self._harvest()
+        self.assertFalse(
+            PressReviewArticle.objects.filter(link="https://example.test/war-story").exists()
+        )
+
+    def test_a_user_topic_widens_the_harvest(self):
+        UserPressReviewKeyword.objects.create(user=self.user, keyword="war")
+
+        self._harvest()
+
+        article = PressReviewArticle.objects.get(link="https://example.test/war-story")
+        self.assertIn("war", article.matched_keywords)
+        # Unrelated articles are still filtered out.
+        self.assertFalse(
+            PressReviewArticle.objects.filter(link="https://example.test/other-story").exists()
+        )
+
+    def test_extra_keywords_collect_articles_for_unsaved_topics(self):
+        """The tool passes topics a user is still trying out into the harvest."""
+        result = self._harvest_with(extra_keywords=["war"])
+
+        self.assertEqual(result["articles_new"], 1)
+        self.assertTrue(
+            PressReviewArticle.objects.filter(link="https://example.test/war-story").exists()
+        )
+
+    def test_recently_fetched_sources_are_skipped(self):
+        self.source.last_fetched_at = timezone.now()
+        self.source.save(update_fields=["last_fetched_at"])
+
+        result = self._harvest_with(extra_keywords=["war"], min_interval_minutes=15)
+
+        self.assertEqual(result["sources_checked"], 0)
+        self.assertEqual(PressReviewArticle.objects.count(), 0)
+
+    def _harvest_with(self, **kwargs):
+        def fake_get(url, timeout=None):
+            response = Mock()
+            response.raise_for_status.return_value = None
+            response.content = self.SITEMAP
+            return response
+
+        with patch("reports.services.press_review_service.requests.Session") as session_cls, \
+                patch(
+                    "reports.services.press_review_service.settings."
+                    "PRESSREVIEW_HARVEST_MAX_AGE_DAYS",
+                    36500,
+                ):
+            session_cls.return_value.get.side_effect = fake_get
+            return PressReviewHarvestService().harvest(**kwargs)
+
+    def test_user_topics_do_not_duplicate_global_keywords(self):
+        UserPressReviewKeyword.objects.create(user=self.user, keyword="Housing")
+        PressReviewArticle.objects.all().delete()
+
+        self._harvest()
+
+        # 'Housing' differs only by case from the global 'housing'; it must not be
+        # applied twice and produce a doubled matched_keywords entry.
+        for article in PressReviewArticle.objects.all():
+            matched = [m.strip().casefold() for m in article.matched_keywords.split(",")]
+            self.assertEqual(len(matched), len(set(matched)))
+
+
+class PressReviewSourceSelectionTests(TestCase):
+    """An empty per-user source selection means 'all active sources'."""
+
+    def setUp(self):
+        self.included = PressReviewSource.objects.create(
+            name="Included", rss_url="https://example.test/included"
+        )
+        self.excluded = PressReviewSource.objects.create(
+            name="Excluded", rss_url="https://example.test/excluded"
+        )
+        self.included_article = PressReviewArticle.objects.create(
+            source=self.included, title="Included article", link="https://example.test/a"
+        )
+        self.excluded_article = PressReviewArticle.objects.create(
+            source=self.excluded, title="Excluded article", link="https://example.test/b"
+        )
+        self.user = CustomUser.objects.create_user(
+            email="source-selection@example.test", first_name="S", last_name="S"
+        )
+        UserPressReviewKeyword.objects.create(user=self.user, keyword="Wohnen")
+
+    def test_empty_selection_includes_all_sources(self):
+        for article in (self.included_article, self.excluded_article):
+            UserPressReviewArticleScore.objects.create(
+                user=self.user, article=article, score=9
+            )
+
+        with patch("reports.services.press_review_service.EmailMultiAlternatives") as mail_cls:
+            mail_cls.return_value.send.return_value = None
+            result = PressReviewMailer().send_digests_for_date()
+
+        self.assertEqual(result["total_articles"], 2)
+
+    def test_selection_restricts_digest_to_chosen_sources(self):
+        for article in (self.included_article, self.excluded_article):
+            UserPressReviewArticleScore.objects.create(
+                user=self.user, article=article, score=9
+            )
+        self.user.press_review_sources.set([self.included])
+
+        with patch("reports.services.press_review_service.EmailMultiAlternatives") as mail_cls:
+            mail_cls.return_value.send.return_value = None
+            result = PressReviewMailer().send_digests_for_date()
+
+        self.assertEqual(result["total_articles"], 1)
+        # The deselected source's score stays unsent, so it is not silently consumed.
+        self.assertTrue(
+            UserPressReviewArticleScore.objects.get(
+                user=self.user, article=self.included_article
+            ).digest_sent
+        )
+        self.assertFalse(
+            UserPressReviewArticleScore.objects.get(
+                user=self.user, article=self.excluded_article
+            ).digest_sent
+        )
+
+
+class PressReviewThresholdTests(TestCase):
+    """The relevance threshold is a per-user dial applied at send time."""
+
+    def setUp(self):
+        self.source = PressReviewSource.objects.create(
+            name="Source", rss_url="https://example.test/threshold"
+        )
+        self.user = CustomUser.objects.create_user(
+            email="threshold@example.test", first_name="T", last_name="T"
+        )
+        UserPressReviewKeyword.objects.create(user=self.user, keyword="Wohnen")
+        for index, score in enumerate((10, 7, 4, 2)):
+            article = PressReviewArticle.objects.create(
+                source=self.source,
+                title=f"Article scoring {score}",
+                link=f"https://example.test/threshold-{index}",
+            )
+            UserPressReviewArticleScore.objects.create(
+                user=self.user, article=article, score=score
+            )
+
+    def _send(self):
+        with patch("reports.services.press_review_service.EmailMultiAlternatives") as mail_cls:
+            mail_cls.return_value.send.return_value = None
+            return PressReviewMailer().send_digests_for_date()
+
+    def test_new_user_defaults_to_the_site_wide_threshold(self):
+        self.assertEqual(
+            self.user.press_review_threshold,
+            settings.PRESSREVIEW_RELEVANCE_THRESHOLD,
+        )
+
+    def test_threshold_controls_how_many_articles_are_sent(self):
+        self.user.press_review_threshold = 7
+        self.user.save(update_fields=["press_review_threshold"])
+        self.assertEqual(self._send()["total_articles"], 2)  # scores 10 and 7
+
+    def test_lower_threshold_widens_the_net(self):
+        self.user.press_review_threshold = 3
+        self.user.save(update_fields=["press_review_threshold"])
+        self.assertEqual(self._send()["total_articles"], 3)  # 10, 7 and 4
+
+    def test_threshold_is_per_user(self):
+        strict = self.user
+        strict.press_review_threshold = 10
+        strict.save(update_fields=["press_review_threshold"])
+
+        lenient = CustomUser.objects.create_user(
+            email="lenient@example.test", first_name="L", last_name="L"
+        )
+        lenient.press_review_threshold = 1
+        lenient.save(update_fields=["press_review_threshold"])
+        UserPressReviewKeyword.objects.create(user=lenient, keyword="Wohnen")
+        for article in PressReviewArticle.objects.all():
+            UserPressReviewArticleScore.objects.create(
+                user=lenient, article=article, score=4
+            )
+
+        result = self._send()
+        # strict user gets only the 10; lenient user gets all four of their 4s.
+        self.assertEqual(result["total_sent"], 2)
+        self.assertEqual(result["total_articles"], 5)
+
+
+class PressReviewDigestCapTests(TestCase):
+    """Articles are never pruned, so one digest is capped and the rest stays queued."""
+
+    def setUp(self):
+        self.source = PressReviewSource.objects.create(
+            name="Source", rss_url="https://example.test/cap"
+        )
+        self.user = CustomUser.objects.create_user(
+            email="cap@example.test", first_name="C", last_name="C"
+        )
+        UserPressReviewKeyword.objects.create(user=self.user, keyword="Wohnen")
+        for index in range(5):
+            article = PressReviewArticle.objects.create(
+                source=self.source,
+                title=f"Article {index}",
+                link=f"https://example.test/cap-{index}",
+            )
+            UserPressReviewArticleScore.objects.create(
+                user=self.user, article=article, score=9
+            )
+
+    def _send(self):
+        with patch("reports.services.press_review_service.EmailMultiAlternatives") as mail_cls:
+            mail_cls.return_value.send.return_value = None
+            return PressReviewMailer().send_digests_for_date()
+
+    @override_settings(PRESSREVIEW_DIGEST_MAX_ITEMS=2)
+    def test_cap_limits_one_digest_and_reports_the_remainder(self):
+        result = self._send()
+        self.assertEqual(result["total_articles"], 2)
+        self.assertEqual(result["total_held_back"], 3)
+
+    @override_settings(PRESSREVIEW_DIGEST_MAX_ITEMS=2)
+    def test_held_back_articles_go_out_on_later_runs(self):
+        sent = 0
+        for _ in range(3):
+            sent += self._send()["total_articles"]
+        # Nothing is dropped: all five arrive across successive runs.
+        self.assertEqual(sent, 5)
+        self.assertFalse(
+            UserPressReviewArticleScore.objects.filter(
+                user=self.user, digest_sent=False
+            ).exists()
+        )
+
+
+class PressReviewRescoreTests(TestCase):
+    """Editing topics leaves old scores stale, so re-scoring must clear and redo them."""
+
+    def setUp(self):
+        self.source = PressReviewSource.objects.create(
+            name="Source", rss_url="https://example.test/rescore"
+        )
+        self.user = CustomUser.objects.create_user(
+            email="rescore@example.test", first_name="R", last_name="R"
+        )
+        UserPressReviewKeyword.objects.create(user=self.user, keyword="Wohnen")
+        self.articles = [
+            PressReviewArticle.objects.create(
+                source=self.source,
+                title=f"Article {index}",
+                link=f"https://example.test/rescore-{index}",
+            )
+            for index in range(3)
+        ]
+        for article in self.articles:
+            UserPressReviewArticleScore.objects.create(
+                user=self.user, article=article, score=2, reason="old topics"
+            )
+
+    def test_plain_rating_skips_already_scored_articles(self):
+        """The gap that makes re-scoring necessary: existing scores are never revisited."""
+        with patch.object(PressReviewRelevanceService, "_call_llm") as call_llm:
+            result = PressReviewRelevanceService().rate_user(self.user)
+
+        call_llm.assert_not_called()
+        self.assertEqual(result["rated"], 0)
+
+    def test_rescore_clears_and_recomputes_every_score(self):
+        with patch.object(
+            PressReviewRelevanceService,
+            "_call_llm",
+            return_value='{"score": 9, "reason": "new topics"}',
+        ):
+            result = PressReviewRelevanceService().rescore_user(self.user)
+
+        self.assertEqual(result["rated"], 3)
+        self.assertEqual(result["remaining"], 0)
+        scores = UserPressReviewArticleScore.objects.filter(user=self.user)
+        self.assertEqual(scores.count(), 3)
+        self.assertTrue(all(s.score == 9 and s.reason == "new topics" for s in scores))
+
+    def test_rescore_is_bounded_and_reports_the_remainder(self):
+        with patch.object(
+            PressReviewRelevanceService,
+            "_call_llm",
+            return_value='{"score": 9, "reason": "new topics"}',
+        ):
+            result = PressReviewRelevanceService().rescore_user(self.user, limit=2)
+
+        self.assertEqual(result["rated"], 2)
+        self.assertEqual(result["remaining"], 1)
+        # The unscored remainder is exactly what the next scheduled run looks for.
+        self.assertEqual(
+            UserPressReviewArticleScore.objects.filter(user=self.user).count(), 2
+        )
+
+    def test_leftover_articles_are_picked_up_by_the_scheduled_run(self):
+        with patch.object(
+            PressReviewRelevanceService,
+            "_call_llm",
+            return_value='{"score": 9, "reason": "new topics"}',
+        ):
+            PressReviewRelevanceService().rescore_user(self.user, limit=2)
+            PressReviewRelevanceService().rate_user(self.user)
+
+        self.assertEqual(
+            UserPressReviewArticleScore.objects.filter(user=self.user).count(), 3
+        )
+
+    def test_rescore_without_topics_does_nothing(self):
+        self.user.press_review_keywords.all().delete()
+
+        with patch.object(PressReviewRelevanceService, "_call_llm") as call_llm:
+            result = PressReviewRelevanceService().rescore_user(self.user)
+
+        call_llm.assert_not_called()
+        self.assertEqual(result["rated"], 0)
+
+    def test_rescore_endpoint_rejects_get(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("press_review_rescore"))
+        self.assertEqual(response.status_code, 405)
+
+
+class PressReviewPruningTests(TestCase):
+    """Retention pruning bounds table growth; scores cascade with their article."""
+
+    def setUp(self):
+        self.source = PressReviewSource.objects.create(
+            name="Source", rss_url="https://example.test/prune"
+        )
+        self.user = CustomUser.objects.create_user(
+            email="prune@example.test", first_name="P", last_name="P"
+        )
+        self.old = PressReviewArticle.objects.create(
+            source=self.source, title="Old", link="https://example.test/prune-old"
+        )
+        self.recent = PressReviewArticle.objects.create(
+            source=self.source, title="Recent", link="https://example.test/prune-recent"
+        )
+        # harvested_date is auto_now_add, so backdate through the queryset.
+        PressReviewArticle.objects.filter(pk=self.old.pk).update(
+            harvested_date=timezone.now() - timedelta(days=120)
+        )
+        for article in (self.old, self.recent):
+            UserPressReviewArticleScore.objects.create(
+                user=self.user, article=article, score=9
+            )
+
+    def test_prunes_only_articles_past_the_retention_window(self):
+        result = PressReviewHarvestService().prune_stale_articles(retention_days=90)
+
+        self.assertEqual(result["deleted_articles"], 1)
+        self.assertFalse(PressReviewArticle.objects.filter(pk=self.old.pk).exists())
+        self.assertTrue(PressReviewArticle.objects.filter(pk=self.recent.pk).exists())
+
+    def test_scores_cascade_with_the_pruned_article(self):
+        PressReviewHarvestService().prune_stale_articles(retention_days=90)
+
+        self.assertFalse(
+            UserPressReviewArticleScore.objects.filter(article_id=self.old.pk).exists()
+        )
+        self.assertTrue(
+            UserPressReviewArticleScore.objects.filter(article_id=self.recent.pk).exists()
+        )
+
+    def test_dry_run_deletes_nothing(self):
+        result = PressReviewHarvestService().prune_stale_articles(
+            retention_days=90, dry_run=True
+        )
+
+        self.assertEqual(result["would_delete_articles"], 1)
+        self.assertEqual(result["deleted_articles"], 0)
+        self.assertEqual(PressReviewArticle.objects.count(), 2)
+
+    def test_zero_retention_disables_pruning(self):
+        result = PressReviewHarvestService().prune_stale_articles(retention_days=0)
+
+        self.assertFalse(result["enabled"])
+        self.assertEqual(PressReviewArticle.objects.count(), 2)
+
+
+class PressReviewFrequencyTests(TestCase):
+    """Digest frequency is a single per-user choice: none, daily or weekly."""
+
+    def setUp(self):
+        self.source = PressReviewSource.objects.create(
+            name="Source", rss_url="https://example.test/freq"
+        )
+        self.article = PressReviewArticle.objects.create(
+            source=self.source, title="An article", link="https://example.test/freq-a"
+        )
+
+    def _user(self, email, frequency):
+        user = CustomUser.objects.create_user(
+            email=email, first_name="F", last_name="F"
+        )
+        user.press_review_frequency = frequency
+        user.save(update_fields=["press_review_frequency"])
+        UserPressReviewKeyword.objects.create(user=user, keyword="Wohnen")
+        UserPressReviewArticleScore.objects.create(
+            user=user, article=self.article, score=9
+        )
+        return user
+
+    def _send(self, frequency):
+        with patch("reports.services.press_review_service.EmailMultiAlternatives") as mail_cls:
+            mail_cls.return_value.send.return_value = None
+            return PressReviewMailer().send_digests_for_date(frequency=frequency)
+
+    def test_daily_run_only_mails_daily_users(self):
+        daily = self._user("daily@example.test", CustomUser.PRESS_REVIEW_FREQUENCY_DAILY)
+        weekly = self._user("weekly@example.test", CustomUser.PRESS_REVIEW_FREQUENCY_WEEKLY)
+
+        result = self._send(CustomUser.PRESS_REVIEW_FREQUENCY_DAILY)
+
+        self.assertEqual(result["total_sent"], 1)
+        self.assertTrue(
+            UserPressReviewArticleScore.objects.get(user=daily).digest_sent
+        )
+        # The weekly user's score is untouched, waiting for the weekly run.
+        self.assertFalse(
+            UserPressReviewArticleScore.objects.get(user=weekly).digest_sent
+        )
+
+    def test_weekly_run_only_mails_weekly_users(self):
+        weekly = self._user("weekly@example.test", CustomUser.PRESS_REVIEW_FREQUENCY_WEEKLY)
+        self._user("daily@example.test", CustomUser.PRESS_REVIEW_FREQUENCY_DAILY)
+
+        result = self._send(CustomUser.PRESS_REVIEW_FREQUENCY_WEEKLY)
+
+        self.assertEqual(result["total_sent"], 1)
+        self.assertTrue(
+            UserPressReviewArticleScore.objects.get(user=weekly).digest_sent
+        )
+
+    def test_frequency_none_never_receives_a_digest(self):
+        opted_out = self._user("none@example.test", CustomUser.PRESS_REVIEW_FREQUENCY_NONE)
+
+        for frequency in (
+            CustomUser.PRESS_REVIEW_FREQUENCY_DAILY,
+            CustomUser.PRESS_REVIEW_FREQUENCY_WEEKLY,
+        ):
+            self.assertEqual(self._send(frequency)["total_sent"], 0)
+
+        self.assertFalse(
+            UserPressReviewArticleScore.objects.get(user=opted_out).digest_sent
+        )
+
+    def test_scoring_skips_opted_out_users(self):
+        self._user("none@example.test", CustomUser.PRESS_REVIEW_FREQUENCY_NONE)
+        # A second, unscored article so there would be work to do if not skipped.
+        PressReviewArticle.objects.create(
+            source=self.source, title="Another", link="https://example.test/freq-b"
+        )
+
+        with patch.object(
+            PressReviewRelevanceService, "_call_llm"
+        ) as call_llm:
+            result = PressReviewRelevanceService().rate_all_users()
+
+        call_llm.assert_not_called()
+        self.assertEqual(result["rated"], 0)

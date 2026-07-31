@@ -63,6 +63,11 @@ open-data-insights/
 │   │   ├── generate_stories.py     # Run story generation pipeline
 │   │   ├── run_etl_pipeline.py     # Sync datasets + generate stories
 │   │   ├── send_stories.py         # Email published stories
+│   │   ├── run_press_review_pipeline.py   # Harvest + score + send press review
+│   │   ├── harvest_press_review.py # Harvest RSS sources into PressReviewArticle
+│   │   ├── rate_press_review_relevance.py # LLM-score articles per user keywords
+│   │   ├── send_press_review_digests.py   # Email the press review digest
+│   │   ├── prune_press_review_articles.py # Delete articles past retention
 │   │   ├── synch_data.py           # Sync data tables between DBs
 │   │   ├── synch_prod.py           # Sync template objects between environments
 │   │   └── clone_story_template.py # Clone a template with all children
@@ -80,6 +85,7 @@ open-data-insights/
 │   │   ├── story_processor.py      # LLM story generation
 │   │   ├── dataset_sync.py         # Dataset synchronisation
 │   │   ├── email_service.py        # Email delivery
+│   │   ├── press_review_service.py # RSS harvesting, relevance scoring, digest mailer
 │   │   └── database_client.py      # Query runner
 │   ├── sitemaps.py                 # Sitemap classes
 │   ├── feeds.py                    # RSS feed classes (per language)
@@ -188,6 +194,163 @@ python manage.py send_stories
 python manage.py clone_story_template 42
 python manage.py clone_story_template my-slug --title "Copy of My Template"
 python manage.py clone_story_template 42 --dry-run
+```
+
+### Press Review
+
+A second, independent insight channel, parallel to story generation: news sources and
+keywords are curated by staff (Django admin), users pick their own topics *and which
+sources to include* on their profile page, and a daily pipeline harvests articles,
+scores them per user with an LLM, and emails a digest. Harvesting is global (every
+active source, once); each user's source selection filters what gets scored and sent
+to them, and an empty selection means "all active sources". Users can also browse
+their matched articles in the app under **Tools → Press Review**.
+
+Run the whole pipeline with one command — the press review equivalent of
+`run_etl_pipeline`, with the same skip flags and admin-alert-on-failure behaviour:
+
+```bash
+python manage.py run_press_review_pipeline
+```
+
+```
+--frequency daily|weekly   Which cadence to mail (default: daily)
+--model MODEL              Override the scoring model
+--skip-harvest             Skip RSS harvesting
+--skip-rating              Skip relevance scoring
+--skip-email               Skip digest sending
+--stop-on-error            Abort on failure (default: continue)
+```
+
+The individual steps can also be run on their own:
+
+```bash
+# 1. Harvest active RSS sources into PressReviewArticle (two-tier keyword filter)
+python manage.py harvest_press_review
+
+# 2. Score new articles for relevance against each user's press review keywords
+python manage.py rate_press_review_relevance
+
+# 3. Email the digest to users with unsent, above-threshold scores
+python manage.py send_press_review_digests
+```
+
+Each user picks a digest frequency on their profile — **None**, **Daily**, or **Weekly**
+(mutually exclusive, so an article is never delivered twice). Add a second, weekly
+scheduler entry for the weekly cohort:
+
+```bash
+# Weekly schedule (only mails users who chose "Weekly digest")
+python manage.py run_press_review_pipeline --frequency weekly --skip-harvest --skip-rating
+```
+
+Harvesting and scoring stay on the daily schedule regardless — they run for everyone,
+and weekly users simply accumulate unsent scores until their weekly run picks them up.
+Hence `--skip-harvest --skip-rating` on the weekly entry: it only needs to mail.
+
+Each user also sets their own **relevance threshold** (1–10) on their profile — only
+articles the AI scores at or above it reach them. Since a score is stored for *every*
+article, lowering the threshold retroactively surfaces already-scored articles at no
+extra LLM cost.
+
+Environment variables:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `PRESSREVIEW_RELEVANCE_THRESHOLD` | `7` | Threshold seeded for *new* users; each user can override it |
+| `PRESSREVIEW_HARVEST_MAX_AGE_DAYS` | `2` | Ignore feed entries older than this |
+| `PRESSREVIEW_DIGEST_MAX_ITEMS` | `25` | Max articles in one digest |
+| `PRESSREVIEW_ARTICLE_RETENTION_DAYS` | `90` | Delete articles older than this (`0` disables) |
+| `PRESSREVIEW_RESCORE_MAX_ARTICLES` | `50` | Max articles re-scored in one user-triggered rescore |
+| `PRESSREVIEW_PREVIEW_MAX_ARTICLES` | `20` | Max articles scored for an ad-hoc topic preview |
+| `PRESSREVIEW_AI_MODEL` | `claude-haiku-4-5` | Model used for relevance scoring |
+| `PRESSREVIEW_PREVIEW_AI_MODEL` | (same as above) | Override just the in-request preview |
+| `PRESSREVIEW_PREVIEW_WINDOW_DAYS` | `7` | How far back the tool looks when previewing |
+| `PRESSREVIEW_HARVEST_MIN_INTERVAL_MINUTES` | `2` | Skip refetching a source fetched this recently |
+
+**Keywords are two-tiered, and the distinction matters.** Global keywords (admin) decide
+what gets *collected*; a user's topics decide how collected articles are *ranked*. So the
+harvest filter is the union of the global topic keywords and every active user's topics —
+without that union, adding a personal topic nobody curated globally would silently return
+nothing, because the articles were never stored in the first place.
+
+The tool's **Apply** button harvests before previewing, passing the (possibly unsaved)
+topics into that filter, so a brand-new topic finds articles immediately instead of
+waiting for the next scheduled run. Fetching is cheap (HTTP only); the LLM scoring is the
+cost, which is why scoring uses a fast model and previews are capped. Measured per
+article: `deepseek-v4-pro` ~7.1s, `deepseek-v4-flash` ~3.0s (it still spends reasoning
+tokens), `claude-haiku-4-5` ~1.5s. A typical Apply runs ~30s (harvest plus 20 scored
+articles); a single scoring call is ~221 input / ~50 output tokens.
+
+`PRESSREVIEW_AI_MODEL` is deliberately separate from `DEFAULT_AI_MODEL`, which drives
+story generation — rating a headline 1–10 is short-text classification and gains nothing
+from reasoning tokens, whereas story writing does. Scoring cost scales as
+**articles × users**, so it is the term to watch as the user base grows.
+
+On a 12-article comparison, Haiku and Pro agreed on the send/skip decision for 11 of 12
+(mean score difference 1.3). The one disagreement was an on-topic war headline Pro rated
+9 and Haiku 3 — worth knowing that with sitemap sources there is no article summary, so
+the model judges the headline alone. If misses like that matter more than cost, set
+`PRESSREVIEW_AI_MODEL=deepseek-v4-flash` (or `-pro`) to trade latency back for accuracy.
+
+Over the digest cap, the highest-scoring articles are sent and the remainder stays
+queued for the next run — nothing is dropped, and the held-back count is reported in the
+command output.
+
+### Source formats: RSS and news sitemaps
+
+Each `PressReviewSource` has a **feed type**:
+
+| Feed type | When to use |
+|---|---|
+| `rss` (default) | Normal RSS/Atom feeds — parsed with `feedparser` |
+| `news_sitemap` | Publishers that no longer maintain RSS |
+
+Many large publishers quietly stopped updating their RSS feeds (CNN's return HTTP 200
+but are years stale), while keeping a **Google News sitemap** fresh — because Google News
+depends on it. Those provide direct article URLs, headlines and precise publication
+timestamps, usually at `/sitemap/news.xml` and declared in the site's `robots.txt`.
+
+Both formats normalise to the same internal entry shape, so the keyword filter, scoring
+and digest are identical either way. The one difference: **sitemaps carry no article
+summary**, so keyword matching and LLM scoring work from the headline alone.
+
+Two things to watch when adding a foreign-language source:
+
+- Mandatory keywords (`Basel`, `Basler`, …) reject anything that doesn't mention them.
+  Set **local = true** on the source to bypass that check.
+- Topic keywords must match the source's language. German keywords never match English
+  headlines, so an English source needs English topic keywords or it yields nothing.
+
+Articles older than the retention window are deleted automatically at the end of each
+harvest, which bounds table growth and keeps stale news out of digests. Per-user scores
+cascade with their article — they are derived data. To run it manually or preview it:
+
+```bash
+python manage.py prune_press_review_articles --dry-run   # report only, delete nothing
+python manage.py prune_press_review_articles --days 30    # override the window
+python manage.py prune_press_review_articles --days 0     # disable
+```
+
+On the **Tools → Press Review** page the relevance threshold is also adjustable per view
+(starting from the user's saved default), so they can explore a wider or narrower net
+without changing the threshold their email digest uses. This is instant and free: a
+score is stored for *every* article regardless of any threshold, so filtering never
+needs new LLM calls.
+
+Changing **topics** is the case that does need work. Scoring only looks at articles with
+no score yet, so existing articles keep scores computed against the previous topics.
+The **Re-score against my topics** button on that page clears the user's scores and
+re-judges their articles against the current topic list. It costs one LLM call per
+article, so it is explicit rather than automatic, and bounded by
+`PRESSREVIEW_RESCORE_MAX_ARTICLES` (default `50`) to keep the request responsive —
+anything past the bound is left unscored and picked up by the next scheduled rating run.
+
+To bootstrap sources/keywords/subscribers from the legacy `work/pressreview`
+proof-of-concept's Postgres schema (one-off, historical articles are not migrated):
+
+```bash
+python manage.py import_pressreview_data
 ```
 
 ## 📈 Chart Types

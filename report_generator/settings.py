@@ -285,6 +285,42 @@ DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY')
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
 DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL', 'deepseek-v4-pro')
 
+# Press Review (RSS harvesting + per-user relevance scoring), parallel to story generation
+# Default relevance threshold for new users; each user can override it on their profile.
+PRESSREVIEW_RELEVANCE_THRESHOLD = int(os.environ.get('PRESSREVIEW_RELEVANCE_THRESHOLD', '7'))
+PRESSREVIEW_HARVEST_MAX_AGE_DAYS = int(os.environ.get('PRESSREVIEW_HARVEST_MAX_AGE_DAYS', '2'))
+# Cap one digest; the remainder stays queued for the next run.
+PRESSREVIEW_DIGEST_MAX_ITEMS = int(os.environ.get('PRESSREVIEW_DIGEST_MAX_ITEMS', '25'))
+# Delete harvested articles (and their derived per-user scores) older than this.
+# Set to 0 to disable pruning and retain articles indefinitely.
+PRESSREVIEW_ARTICLE_RETENTION_DAYS = int(os.environ.get('PRESSREVIEW_ARTICLE_RETENTION_DAYS', '90'))
+# Max articles re-scored synchronously in one user-triggered rescore request. The rest
+# is left unscored and picked up by the next scheduled rating run, so the request stays
+# responsive (each article costs one LLM call).
+PRESSREVIEW_RESCORE_MAX_ARTICLES = int(os.environ.get('PRESSREVIEW_RESCORE_MAX_ARTICLES', '50'))
+# Max articles scored for an ad-hoc topic preview on the Press Review tool page. Kept
+# smaller than the rescore cap: preview results are transient and pay the LLM cost on
+# every request, so this bounds how slow one exploratory page load can get.
+PRESSREVIEW_PREVIEW_MAX_ARTICLES = int(os.environ.get('PRESSREVIEW_PREVIEW_MAX_ARTICLES', '20'))
+# Model used to score article relevance. Kept separate from DEFAULT_AI_MODEL, which
+# drives story generation: rating a headline 1-10 is a classification task that gains
+# nothing from reasoning tokens. Measured per article: deepseek-v4-pro ~7.1s,
+# deepseek-v4-flash ~3.0s (still reasons), claude-haiku-4-5 ~1.5s.
+PRESSREVIEW_AI_MODEL = os.environ.get('PRESSREVIEW_AI_MODEL', 'claude-haiku-4-5')
+# Preview scoring runs inside a web request; defaults to the same fast model.
+PRESSREVIEW_PREVIEW_AI_MODEL = os.environ.get(
+    'PRESSREVIEW_PREVIEW_AI_MODEL', PRESSREVIEW_AI_MODEL
+)
+# How far back the tool looks when previewing ad-hoc topics.
+PRESSREVIEW_PREVIEW_WINDOW_DAYS = int(os.environ.get('PRESSREVIEW_PREVIEW_WINDOW_DAYS', '7'))
+# Guard against repeated Apply clicks hammering publishers. Deliberately short: a new
+# topic changes the keyword filter, so the same feed must be re-read to pick up entries
+# the previous run filtered out. Long enough to absorb double-clicks, short enough that
+# trying a topic actually fetches.
+PRESSREVIEW_HARVEST_MIN_INTERVAL_MINUTES = int(
+    os.environ.get('PRESSREVIEW_HARVEST_MIN_INTERVAL_MINUTES', '2')
+)
+
 APP_ROOT = "https://www.open-data-insights.org/"
 GEOIP_PATH = os.environ.get("GEOIP_PATH", str(BASE_DIR / "geoip"))
 DEVELOPER_EMAIL = DEFAULT_FROM_EMAIL

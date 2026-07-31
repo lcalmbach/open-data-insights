@@ -21,6 +21,17 @@ urlpatterns = [
     ),
     path("stories/<int:story_id>/rate/", views.rate_story, name="rate_story"),
     path("feedback/", views.user_feedback_view, name="user_feedback"),
+    path("tools/press-review/", views.press_review_view, name="press_review"),
+    path(
+        "tools/press-review/rescore/",
+        views.press_review_rescore,
+        name="press_review_rescore",
+    ),
+    path(
+        "tools/press-review/save-preferences/",
+        views.press_review_save_preferences,
+        name="press_review_save_preferences",
+    ),
     path(
         "tables/<int:table_id>/download/",
         views.download_story_table_csv,
