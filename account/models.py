@@ -134,10 +134,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     press_review_frequency = models.CharField(
         max_length=16,
         choices=PRESS_REVIEW_FREQUENCY_CHOICES,
-        default=PRESS_REVIEW_FREQUENCY_DAILY,
+        default=PRESS_REVIEW_FREQUENCY_NONE,
         help_text=(
-            "How often to send this user's press review digest. "
-            "Mutually exclusive so an article is never sent twice."
+            "How often to send this user's press review digest. Opt-in: defaults to "
+            "no digest, so setting a topic never starts mailing someone who did not "
+            "ask for it. Mutually exclusive so an article is never sent twice."
         ),
     )
     press_review_sources = models.ManyToManyField(
