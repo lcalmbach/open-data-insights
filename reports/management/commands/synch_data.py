@@ -12,18 +12,30 @@ class Command(BaseCommand):
             help='ID of the specific dataset to synchronize'
         )
         parser.add_argument(
-            '--keep-files', 
+            '--keep-files',
             action='store_true',
-            help='Do not delete downloaded files after run'
+            help='Do not delete the ./files working folder after run'
+        )
+        parser.add_argument(
+            '--keep-csv', '--keep_csv',
+            dest='keep_csv',
+            action='store_true',
+            help=(
+                'Do not delete CSVs downloaded from URL sources. Use for large '
+                'downloads so a failed load can be retried without re-fetching. '
+                'The path is written to the log.'
+            )
         )
 
     def handle(self, *args, **options):
         dataset_id = options.get('id')
         keep_files = options.get('keep_files', False)
+        keep_csv = options.get('keep_csv', False)
         service = DatasetSyncService()
         result = service.synchronize_datasets(
             dataset_id=dataset_id,
             keep_files=keep_files,
+            keep_csv=keep_csv,
         )
         
         if result['success']:

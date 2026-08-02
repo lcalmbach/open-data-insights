@@ -12,6 +12,7 @@ and are listed in NON_ECHARTS_TYPES in generate_chart().
 """
 from __future__ import annotations
 import base64
+import html as html_lib
 import json
 import logging
 import re
@@ -1234,6 +1235,88 @@ def _escape_js(value):
     return "null" if value is None else json.dumps(value)
 
 
+def _parse_color_bins(spec):
+    """Validate a `color_bins` spec into (thresholds, colors, labels).
+
+    Keeps the palette in the graphic settings instead of hand-written hex codes in
+    every SQL query. `thresholds` must be ascending, and `colors` must hold exactly
+    one more entry than `thresholds` (values below the first threshold, each interval,
+    and values at or above the last). Returns None when no usable spec is given.
+    """
+    if not isinstance(spec, dict):
+        return None
+    thresholds = spec.get("thresholds") or spec.get("bins")
+    colors = spec.get("colors") or spec.get("palette")
+    if not thresholds or not colors:
+        return None
+    try:
+        thresholds = [float(t) for t in thresholds]
+    except (TypeError, ValueError):
+        return None
+    if sorted(thresholds) != thresholds:
+        raise ValueError("color_bins.thresholds must be in ascending order")
+    if len(colors) != len(thresholds) + 1:
+        raise ValueError(
+            f"color_bins needs {len(thresholds) + 1} colors for "
+            f"{len(thresholds)} thresholds, got {len(colors)}"
+        )
+    labels = spec.get("labels")
+    if labels and len(labels) != len(colors):
+        raise ValueError("color_bins.labels must have one entry per color")
+    return thresholds, [str(c) for c in colors], list(labels) if labels else None
+
+
+def _color_for_value(value, thresholds, colors):
+    """Map a numeric value onto its bin colour, or None when it is not numeric.
+
+    Bins are half-open [lower, upper): a value equal to a threshold falls into the
+    bin starting at it, so boundary values land in exactly one bin.
+    """
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return None
+    if numeric != numeric:  # NaN
+        return None
+    for index, threshold in enumerate(thresholds):
+        if numeric < threshold:
+            return colors[index]
+    return colors[-1]
+
+
+def _default_bin_labels(thresholds):
+    labels = [f"< {thresholds[0]:g}"]
+    for lower, upper in zip(thresholds, thresholds[1:]):
+        labels.append(f"{lower:g} – {upper:g}")
+    labels.append(f"≥ {thresholds[-1]:g}")
+    return labels
+
+
+def _render_map_legend(container_id, colors, labels, settings):
+    """Absolutely-positioned legend inside the map container."""
+    title = settings.get("legend_title") or ""
+    rows = "".join(
+        f'<div class="odi-legend-row"><span class="odi-legend-swatch" '
+        f'style="background:{color}"></span>{html_lib.escape(str(label))}</div>'
+        for color, label in zip(colors, labels)
+    )
+    title_html = (
+        f'<div class="odi-legend-title">{html_lib.escape(str(title))}</div>' if title else ""
+    )
+    return (
+        f"<style>"
+        f"#{container_id} .odi-legend{{position:absolute;z-index:500;right:10px;bottom:16px;"
+        f"background:rgba(255,255,255,.9);padding:6px 8px;border-radius:4px;"
+        f"font:12px/1.4 sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.3);}}"
+        f"#{container_id} .odi-legend-title{{font-weight:600;margin-bottom:3px;}}"
+        f"#{container_id} .odi-legend-row{{white-space:nowrap;}}"
+        f"#{container_id} .odi-legend-swatch{{display:inline-block;width:12px;height:12px;"
+        f"margin-right:5px;vertical-align:-1px;border:1px solid rgba(0,0,0,.25);}}"
+        f"</style>"
+        f'<div class="odi-legend">{title_html}{rows}</div>'
+    )
+
+
 def _format_text_for_map(record, fields):
     if not fields:
         return None
@@ -1584,6 +1667,15 @@ def create_map_markers(data, settings: dict) -> str:
 
     marker_style = (settings.get("marker_style") or "marker").lower()
     marker_color_field = settings.get("marker_color") or settings.get("color")
+    # Optional value->colour binning. Without it the field is still read as a literal
+    # colour string, so existing map graphics keep working unchanged.
+    try:
+        bin_spec = _parse_color_bins(settings.get("color_bins"))
+    except ValueError as exc:
+        return f'<div class="chart-error">Invalid color_bins: {html_lib.escape(str(exc))}</div>'
+    bin_thresholds = bin_colors = bin_labels = None
+    if bin_spec:
+        bin_thresholds, bin_colors, bin_labels = bin_spec
     tooltip_spec = settings.get("tooltips") or settings.get("tooltip")
     popup_spec = settings.get("popup")
     tooltip_sticky = settings.get("tooltip_sticky", True)
@@ -1597,6 +1689,23 @@ def create_map_markers(data, settings: dict) -> str:
 
     style_block = f"<style>#{cid}{{width:{width_css};height:{height_css};{bg_css}}}#{cid}.leaflet-container{{{bg_css}}}</style>"
     container_div = f'<div id="{cid}" class="leaflet-map" data-leaflet-map="1" data-markercluster="{int(cluster_circles)}"></div>'
+
+    # Legend lives in a positioned wrapper around the map, not inside the Leaflet
+    # container, which Leaflet manages and re-renders.
+    legend_requested = settings.get("legend", bool(bin_thresholds is not None))
+    if legend_requested and bin_thresholds is not None:
+        wrap_id = f"{cid}_wrap"
+        labels = bin_labels or _default_bin_labels(bin_thresholds)
+        style_block += (
+            f"<style>#{wrap_id}{{position:relative;display:inline-block;"
+            f"width:{width_css};}}</style>"
+        )
+        container_div = (
+            f'<div id="{wrap_id}" class="odi-map-wrap">'
+            f"{container_div}"
+            f"{_render_map_legend(wrap_id, bin_colors, labels, settings)}"
+            f"</div>"
+        )
 
     js = ["(function(){",
           f"  var containerId={_escape_js(cid)};",
@@ -1626,8 +1735,17 @@ def create_map_markers(data, settings: dict) -> str:
 
         if marker_style == "circle":
             ck = {"radius": settings.get("radius", 6), "fillOpacity": settings.get("fill_opacity", 0.7), "opacity": settings.get("line_opacity", 0.9)}
+            # Leaflet defaults to a 3px stroke, which dominates small radii and
+            # inflates apparent marker size. Only emitted when set, so existing
+            # map graphics render exactly as before.
+            if settings.get("weight") is not None:
+                ck["weight"] = settings["weight"]
+            if settings.get("stroke") is False:
+                ck["stroke"] = False
             cc = record.get(marker_color_field) if marker_color_field else None
-            if cc and not pd.isna(cc):
+            if bin_thresholds is not None:
+                cc = _color_for_value(cc, bin_thresholds, bin_colors)
+            if cc is not None and not pd.isna(cc) and cc != "":
                 ck["color"] = ck["fillColor"] = str(cc)
             elif settings.get("circle_color"):
                 ck["color"] = ck["fillColor"] = settings["circle_color"]

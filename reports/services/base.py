@@ -28,9 +28,9 @@ class ETLBaseService:
             data = cursor.fetchall()
             return pd.DataFrame(data, columns=columns)
 
-    def cleanup_temp_files(self, folder_path: str = "./files"):
-        """Clean up temporary files"""
+    def cleanup_temp_files(self, folder_path: str = "./files", keep_suffixes: tuple = ()):
+        """Clean up temporary files, optionally preserving some suffixes."""
         folder = Path(folder_path)
         if folder.exists():
-            delete_all_files_in_folder(folder)
+            delete_all_files_in_folder(folder, keep_suffixes=keep_suffixes)
             self.logger.info(f"Cleaned up temporary files in: {folder}")

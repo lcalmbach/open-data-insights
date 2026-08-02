@@ -48,6 +48,11 @@ from reports.models.story_template import (
     StoryTemplateFocusImage,
 )
 from reports.models.subscription import StoryTemplateSubscription
+from reports.visualizations.plotting import (
+    _color_for_value,
+    _parse_color_bins,
+    create_map_markers,
+)
 from reports.services.press_review_service import (
     PressReviewHarvestService,
     PressReviewMailer,
@@ -2553,3 +2558,96 @@ class PressReviewFrequencyTests(TestCase):
 
         call_llm.assert_not_called()
         self.assertEqual(result["rated"], 0)
+
+
+class MapColorBinTests(SimpleTestCase):
+    """Value->colour binning for marker maps (settings-driven, not hand-written SQL)."""
+
+    THRESHOLDS = [-1.2, -0.8, -0.4, 0, 0.4, 0.8, 1.2]
+    COLORS = [
+        "#b2182b", "#d6604d", "#f4a582", "#fddbc7",
+        "#d1e5f0", "#92c5de", "#4393c3", "#2166ac",
+    ]
+
+    def _bins(self):
+        return _parse_color_bins(
+            {"thresholds": self.THRESHOLDS, "colors": self.COLORS}
+        )
+
+    def test_values_map_to_expected_bins(self):
+        thresholds, colors, _ = self._bins()
+        cases = {
+            -2.0: "#b2182b",
+            -0.69: "#f4a582",
+            -0.001: "#fddbc7",
+            0.55: "#92c5de",
+            5.0: "#2166ac",
+        }
+        for value, expected in cases.items():
+            self.assertEqual(_color_for_value(value, thresholds, colors), expected, value)
+
+    def test_threshold_values_land_in_exactly_one_bin(self):
+        """A value equal to a threshold belongs to the bin starting at it."""
+        thresholds, colors, _ = self._bins()
+        # -1.2 is the 1st threshold, so it must NOT fall in the "below first" bin.
+        self.assertEqual(_color_for_value(-1.2, thresholds, colors), "#d6604d")
+        self.assertEqual(_color_for_value(0, thresholds, colors), "#d1e5f0")
+        self.assertEqual(_color_for_value(1.2, thresholds, colors), "#2166ac")
+
+    def test_non_numeric_values_get_no_colour(self):
+        thresholds, colors, _ = self._bins()
+        for value in (None, "", "n/a", float("nan")):
+            self.assertIsNone(_color_for_value(value, thresholds, colors))
+
+    def test_colour_count_must_exceed_threshold_count_by_one(self):
+        with self.assertRaises(ValueError):
+            _parse_color_bins(
+                {"thresholds": self.THRESHOLDS, "colors": self.COLORS[:-1]}
+            )
+
+    def test_thresholds_must_ascend(self):
+        with self.assertRaises(ValueError):
+            _parse_color_bins({"thresholds": [0, -1], "colors": ["#a", "#b", "#c"]})
+
+    def test_missing_spec_returns_none(self):
+        self.assertIsNone(_parse_color_bins(None))
+        self.assertIsNone(_parse_color_bins({"colors": self.COLORS}))
+
+    def test_map_applies_binned_colours_and_legend(self):
+        rows = [
+            {"lat": 47.564, "lon": 7.624, "change_5y": -0.69},
+            {"lat": 47.556, "lon": 7.590, "change_5y": -1.40},
+        ]
+        html = create_map_markers(
+            rows,
+            {
+                "lat": "lat", "lon": "lon",
+                "marker_style": "circle", "marker_color": "change_5y",
+                "color_bins": {"thresholds": self.THRESHOLDS, "colors": self.COLORS},
+                "legend": True, "legend_title": "5y change",
+            },
+        )
+        self.assertIn("#f4a582", html)
+        self.assertIn("#b2182b", html)
+        self.assertIn("odi-legend", html)
+        self.assertIn("5y change", html)
+
+    def test_literal_colour_field_still_works_without_bins(self):
+        """Existing map graphics pass a colour string directly; must not regress."""
+        html = create_map_markers(
+            [{"lat": 47.5, "lon": 7.6, "color": "#ff0000"}],
+            {"lat": "lat", "lon": "lon", "marker_style": "circle", "marker_color": "color"},
+        )
+        self.assertIn("#ff0000", html)
+        self.assertNotIn("odi-legend", html)
+
+    def test_invalid_spec_reports_error_instead_of_silently_defaulting(self):
+        html = create_map_markers(
+            [{"lat": 47.5, "lon": 7.6, "change_5y": -0.5}],
+            {
+                "lat": "lat", "lon": "lon",
+                "marker_style": "circle", "marker_color": "change_5y",
+                "color_bins": {"thresholds": self.THRESHOLDS, "colors": self.COLORS[:-1]},
+            },
+        )
+        self.assertIn("chart-error", html)

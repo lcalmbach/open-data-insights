@@ -43,7 +43,7 @@ class DatasetSyncService(ETLBaseService):
         self.files_path = Path(settings.BASE_DIR) / "files"
         self.files_path.mkdir(exist_ok=True)
 
-    def synchronize_dataset(self, dataset: Dataset) -> bool:
+    def synchronize_dataset(self, dataset: Dataset, keep_csv: bool = False) -> bool:
         """Synchronize a single dataset"""
         try:
             if self._is_skipped_dataset(dataset):
@@ -58,6 +58,9 @@ class DatasetSyncService(ETLBaseService):
                 f"Starting synchronization for dataset ID {dataset.id}: {dataset.name}"
             )
             processor = create_dataset_processor(dataset)
+            if keep_csv:
+                # Only connectors that download a CSV honour this; harmless elsewhere.
+                processor.keep_csv = True
             if hasattr(processor, "persist_data"):
                 result = self._persist_connector_data(dataset, processor)
             elif hasattr(processor, "fetch_dataframe"):
@@ -195,8 +198,14 @@ class DatasetSyncService(ETLBaseService):
         self,
         dataset_id: Optional[int] = None,
         keep_files: bool = False,
+        keep_csv: bool = False,
     ) -> Dict[str, Any]:
-        """Synchronize multiple datasets"""
+        """Synchronize multiple datasets.
+
+        `keep_csv` preserves CSVs downloaded from URL sources instead of deleting them
+        when the run ends. Distinct from `keep_files`, which only spares the ./files
+        working folder: downloaded CSVs go to a temp file and are removed regardless.
+        """
 
         if dataset_id:
             matching_datasets = Dataset.objects.filter(active=True, id=dataset_id)
@@ -249,7 +258,7 @@ class DatasetSyncService(ETLBaseService):
             self.logger.info(f"Synchronizing dataset ID {dataset.id}: {dataset.name}")
 
             try:
-                success = self.synchronize_dataset(dataset)
+                success = self.synchronize_dataset(dataset, keep_csv=keep_csv)
                 if success:
                     results["successful"] += 1
                 else:
@@ -280,10 +289,18 @@ class DatasetSyncService(ETLBaseService):
                 )
 
         # Cleanup temporary files unless explicitly preserved for retry/debugging.
+        # ODS datasets download to ./files/<id>.csv (not a temp file), so --keep-csv
+        # must spare them here too — that path already reuses an existing CSV.
         if keep_files:
             self.logger.info("Keeping temporary files in %s", self.files_path)
         else:
-            self.cleanup_temp_files()
+            self.cleanup_temp_files(keep_suffixes=(".csv",) if keep_csv else ())
+            if keep_csv:
+                self.logger.info(
+                    "Kept downloaded CSV(s) in %s — rerun with --keep-csv to reuse "
+                    "them instead of downloading again.",
+                    self.files_path,
+                )
 
         # Enhanced logging with failed dataset IDs
         if results["failed"] > 0:
@@ -389,9 +406,25 @@ class EiaDatasetConnector:
 class UrlDatasetConnector:
     """Connector that downloads a CSV file from a URL and replaces the target table."""
 
+    # Set by DatasetSyncService when --keep-csv is passed. Large downloads are
+    # expensive to repeat, so keeping the file allows a failed load to be retried
+    # without re-fetching it.
+    keep_csv = False
+
     def __init__(self, dataset: Dataset):
         self.dataset = dataset
         self.logger = logging.getLogger(f"UrlDatasetConnector.{dataset.name}")
+
+    def _cleanup_csv(self, csv_path: str) -> None:
+        if self.keep_csv:
+            size_mb = Path(csv_path).stat().st_size / (1024 * 1024) if Path(csv_path).exists() else 0
+            self.logger.info(
+                "Kept CSV (%.1f MB) for reuse: %s — rerun with --keep-csv to load it "
+                "again without downloading, or delete it to force a fresh download.",
+                size_mb, csv_path,
+            )
+            return
+        Path(csv_path).unlink(missing_ok=True)
 
     def fetch_dataframe(self) -> pd.DataFrame:
         if not self.dataset.source_url:
@@ -413,7 +446,7 @@ class UrlDatasetConnector:
             )
             return df
         finally:
-            Path(csv_path).unlink(missing_ok=True)
+            self._cleanup_csv(csv_path)
 
     def get_write_mode(self) -> str:
         return "replace"
@@ -436,9 +469,39 @@ class UrlDatasetConnector:
             )
             return written
         finally:
-            Path(csv_path).unlink(missing_ok=True)
+            self._cleanup_csv(csv_path)
+
+    def _cached_csv_path(self) -> Path:
+        """Stable path for --keep-csv, so a later run can find and reuse the download."""
+        return Path(tempfile.gettempdir()) / f"odi_dataset_{self.dataset.id}.csv"
 
     def _download_csv_to_temp_file(self) -> str:
+        if not self.keep_csv:
+            return self._stream_to(None)
+
+        cached = self._cached_csv_path()
+        if cached.exists():
+            age_h = (time.time() - cached.stat().st_mtime) / 3600
+            self.logger.warning(
+                "Reusing cached CSV instead of downloading: %s (%.1f MB, %.1f h old). "
+                "Delete it to force a fresh download.",
+                cached, cached.stat().st_size / (1024 * 1024), age_h,
+            )
+            return str(cached)
+
+        # Download to a .part file and rename only on success, so an interrupted
+        # download can never be mistaken for a complete cached file next run.
+        partial = cached.with_suffix(".csv.part")
+        self._stream_to(partial)
+        partial.replace(cached)
+        self.logger.info(
+            "Cached CSV for reuse: %s (%.1f MB)",
+            cached, cached.stat().st_size / (1024 * 1024),
+        )
+        return str(cached)
+
+    def _stream_to(self, target: Optional[Path]) -> str:
+        """Stream the source URL to `target`, or to a throwaway temp file when None."""
         response = requests.get(
             self.dataset.source_url,
             stream=True,
@@ -446,11 +509,17 @@ class UrlDatasetConnector:
         )
         try:
             response.raise_for_status()
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp_file:
+            if target is None:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp_file:
+                    for chunk in response.iter_content(chunk_size=1024 * 1024):
+                        if chunk:
+                            tmp_file.write(chunk)
+                    return tmp_file.name
+            with open(target, "wb") as handle:
                 for chunk in response.iter_content(chunk_size=1024 * 1024):
                     if chunk:
-                        tmp_file.write(chunk)
-                return tmp_file.name
+                        handle.write(chunk)
+            return str(target)
         finally:
             response.close()
 

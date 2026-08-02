@@ -30,12 +30,14 @@ def make_utc(dt: Optional[datetime]) -> Optional[datetime]:
     return dt.astimezone(timezone.utc) if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
 
 
-def delete_all_files_in_folder(folder: Path) -> None:
+def delete_all_files_in_folder(folder: Path, keep_suffixes: tuple = ()) -> None:
     """
     Delete all files (not directories) in the given Path object folder.
 
     Args:
         folder (Path): A pathlib.Path object pointing to a folder.
+        keep_suffixes (tuple): Lowercase suffixes to preserve, e.g. ('.csv',).
+            Used by --keep-csv so an expensive download survives cleanup.
     """
     if not folder.exists() or not folder.is_dir():
         print(f"Folder '{folder}' does not exist or is not a directory.")
@@ -43,6 +45,9 @@ def delete_all_files_in_folder(folder: Path) -> None:
 
     for file in folder.glob("*"):
         if file.is_file():
+            if keep_suffixes and file.suffix.lower() in keep_suffixes:
+                print(f"Kept: {file.name}")
+                continue
             file.unlink()
             print(f"Deleted: {file.name}")
 
