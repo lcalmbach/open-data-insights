@@ -1701,12 +1701,12 @@ class GraphicRenderingTests(SimpleTestCase):
         english_graphics.exists.return_value = True
         english_story = SimpleNamespace(
             id=75,
-            story_graphics=SimpleNamespace(all=Mock(return_value=english_graphics)),
+            story_graphics=SimpleNamespace(defer=Mock(return_value=english_graphics)),
         )
         translated_story = SimpleNamespace(
             id=90,
             language_id=LanguageEnum.GERMAN.value,
-            story_graphics=SimpleNamespace(all=Mock(return_value=empty_graphics)),
+            story_graphics=SimpleNamespace(defer=Mock(return_value=empty_graphics)),
         )
         mock_resolve_story.return_value = english_story
 

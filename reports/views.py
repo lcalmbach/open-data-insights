@@ -9,8 +9,12 @@ import sys
 from pathlib import Path
 
 import markdown2
-import pandas as pd
 from iommi import Column, Table
+
+# pandas, the SQL client and the press review services are imported inside the few
+# functions that need them. At module level they cost a web worker ~120 MB of
+# libraries (pandas, pyarrow, sqlalchemy, anthropic, openai) that serving a stored
+# story page never touches — which is what pushed the dynos over their memory quota.
 
 from django.conf import settings
 from django.contrib import messages
@@ -54,11 +58,6 @@ from .models.story_access import StoryAccess
 from .models.quote import Quote
 from django.views.decorators.http import require_POST
 
-from .services.database_client import DjangoPostgresClient
-from .services.press_review_service import (
-    PressReviewHarvestService,
-    PressReviewRelevanceService,
-)
 from .services.focus_images import resolve_story_images
 from .services.utils import normalize_sql_query
 from .taxonomy_utils import collect_descendant_ids, taxonomy_choices
@@ -452,6 +451,7 @@ class _DatasetRow:
 
 
 def _format_dataset_cell_value(value):
+    import pandas as pd  # local: keeps pandas off the story-serving path
     """Format numeric preview values for the dataset table."""
     if value is None:
         return value
@@ -960,6 +960,7 @@ def stories_view(request):
 
 
 def datasets_view(request):
+    from .services.database_client import DjangoPostgresClient  # local: pulls pandas/sqlalchemy
     search = (request.GET.get("search") or "").strip()
     source_filter = (request.GET.get("source") or "").strip()
     frequency_filter = (request.GET.get("frequency") or "").strip()
@@ -1182,6 +1183,8 @@ def press_review_view(request):
         # waiting for the next scheduled run. Fetching is cheap (HTTP only) and the
         # interval guard stops repeated Apply clicks from hammering publishers.
         try:
+            from .services.press_review_service import PressReviewHarvestService
+
             PressReviewHarvestService().harvest(
                 extra_keywords=topics,
                 only_source_ids=selected_source_ids or None,
@@ -1204,6 +1207,8 @@ def press_review_view(request):
         preview_truncated = max(0, candidate_count - preview_limit)
 
         # A fast, non-reasoning model: this runs inside the request.
+        from .services.press_review_service import PressReviewRelevanceService
+
         scored = PressReviewRelevanceService(
             model=settings.PRESSREVIEW_PREVIEW_AI_MODEL
         ).score_articles_preview(", ".join(topics), articles[:preview_limit])
@@ -1308,6 +1313,8 @@ def press_review_save_preferences(request):
     message = "Saved to your preferences."
     if submitted != existing:
         # Stored scores were judged against the previous topics — redo them.
+        from .services.press_review_service import PressReviewRelevanceService
+
         result = PressReviewRelevanceService().rescore_user(request.user)
         message += f" Re-scored {result['rated']} article(s) against your new topics."
         if result["remaining"]:
@@ -1331,6 +1338,8 @@ def press_review_rescore(request):
             request, "Add at least one press review topic before re-scoring."
         )
         return redirect("press_review")
+
+    from .services.press_review_service import PressReviewRelevanceService
 
     service = PressReviewRelevanceService()
     result = service.rescore_user(request.user)
@@ -1613,6 +1622,7 @@ def delete_story(request, story_id):
 
 @login_required
 def story_access_stats(request, story_id):
+    import pandas as pd  # local: staff analytics only
     template_ids = _accessible_template_ids(request.user)
     story = get_object_or_404(
         Story.objects.filter(templatefocus__story_template_id__in=template_ids),

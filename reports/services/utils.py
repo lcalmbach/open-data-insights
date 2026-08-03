@@ -3,7 +3,6 @@ ETL Utilities
 Common utility functions for ETL operations
 """
 
-import pyarrow.parquet as pq
 import logging
 import re
 from pathlib import Path
@@ -16,6 +15,10 @@ import json
 
 def get_parquet_row_count(file_path: str) -> int:
     """Get the number of rows in a parquet file"""
+    # Local import: this module is also imported by views for normalize_sql_query,
+    # and pyarrow costs a web worker ~40 MB it never uses to serve a page.
+    import pyarrow.parquet as pq
+
     parquet_file = pq.ParquetFile(file_path)
     return parquet_file.metadata.num_rows
 
