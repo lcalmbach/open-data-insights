@@ -1,3 +1,5 @@
+import subprocess
+import sys
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from io import StringIO
@@ -2651,3 +2653,66 @@ class MapColorBinTests(SimpleTestCase):
             },
         )
         self.assertIn("chart-error", html)
+
+
+class WebImportBoundaryTests(SimpleTestCase):
+    """Serving a page must not drag in the ETL / LLM stack.
+
+    reports/services/__init__.py once imported every service eagerly, so a single
+    `from .services.database_client import ...` in views loaded pandas, pyarrow,
+    wordcloud, matplotlib, anthropic and openai too. That put ~160 MB of unused
+    libraries into every web worker and pushed the dynos past their 512 MB memory
+    quota (hundreds of R14 errors). Nothing but this test stops it recurring the
+    next time an import is added to the request path.
+    """
+
+    # Cost measured per library on this project, in MB of RSS.
+    HEAVY_MODULES = {
+        "pandas": 86, "pyarrow": 41, "wordcloud": 43, "matplotlib": 35,
+        "anthropic": 36, "openai": 36, "sqlalchemy": 27, "numpy": 17,
+        "feedparser": 11,
+    }
+
+    def _modules_loaded_by(self, target: str) -> set:
+        """Import `target` in a clean interpreter and report which heavy libs load."""
+        code = (
+            "import django, os, sys\n"
+            "os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'report_generator.settings')\n"
+            "django.setup()\n"
+            f"__import__({target!r})\n"
+            f"print(','.join(m for m in {sorted(self.HEAVY_MODULES)!r} if m in sys.modules))\n"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True, text=True, cwd=str(settings.BASE_DIR),
+        )
+        self.assertEqual(
+            result.returncode, 0,
+            f"could not import {target} in a subprocess:\n{result.stderr[-2000:]}",
+        )
+        return {m for m in result.stdout.strip().split(",") if m}
+
+    def test_importing_views_does_not_load_the_etl_stack(self):
+        loaded = self._modules_loaded_by("reports.views")
+        if loaded:
+            cost = sum(self.HEAVY_MODULES[m] for m in loaded)
+            self.fail(
+                f"reports.views imports {sorted(loaded)} at module level, adding "
+                f"~{cost} MB to every web worker. Move the import inside the "
+                f"function that needs it (see _format_dataset_cell_value or "
+                f"press_review_view for the pattern)."
+            )
+
+    def test_importing_urls_does_not_load_the_etl_stack(self):
+        """URL loading happens at startup, so it must stay light too."""
+        loaded = self._modules_loaded_by("reports.urls")
+        self.assertEqual(loaded, set(), f"reports.urls pulls in {sorted(loaded)}")
+
+    def test_services_package_stays_lazy(self):
+        """`reports.services` must not import its submodules eagerly."""
+        loaded = self._modules_loaded_by("reports.services")
+        self.assertEqual(
+            loaded, set(),
+            f"importing reports.services loaded {sorted(loaded)} — the package "
+            "should expose names lazily via __getattr__, not import them.",
+        )
