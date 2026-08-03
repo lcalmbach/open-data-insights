@@ -3,6 +3,7 @@ Allow: /
 Allow: /about/
 Allow: /stories/
 Allow: /story/
+Crawl-delay: 10
 
 Disallow: /admin/
 Disallow: /account/
@@ -12,5 +13,33 @@ Disallow: /story_detail/
 Disallow: /stories/*/rate/
 Disallow: /tables/*/download/
 Disallow: /feedback/
+Disallow: /tools/
+
+# Story pages embed large inline chart payloads, so aggressive crawling pushes the web
+# dyno past its memory quota. Slow down the search engines worth having, and refuse the
+# SEO/scraper bots that send no traffic back.
+User-agent: Googlebot
+Crawl-delay: 5
+
+User-agent: bingbot
+Crawl-delay: 10
+
+User-agent: Amazonbot
+Crawl-delay: 30
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
 
 Sitemap: https://www.open-data-insights.org/sitemap.xml

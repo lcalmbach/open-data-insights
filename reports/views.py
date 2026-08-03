@@ -535,13 +535,17 @@ def _get_story_graphics(story: Story | None):
     if not story:
         return []
 
-    graphics = story.story_graphics.all()
+    # `data` holds the chart's source rows and is only needed when (re)generating a
+    # graphic — the page renders `content_html`. It is roughly as large as the HTML
+    # (100 MB vs 104 MB across all graphics, up to ~330 KB per row), so loading it
+    # here doubled the memory each story page pulled in for nothing.
+    graphics = story.story_graphics.defer("data")
     if graphics.exists() or story.language_id == ENGLISH_LANGUAGE_ID:
         return graphics
 
     english_story = _resolve_story_for_language(story, ENGLISH_LANGUAGE_ID)
     if english_story and english_story.id != story.id:
-        fallback_graphics = english_story.story_graphics.all()
+        fallback_graphics = english_story.story_graphics.defer("data")
         if fallback_graphics.exists():
             return fallback_graphics
 
