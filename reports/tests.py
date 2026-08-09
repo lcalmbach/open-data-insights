@@ -2183,6 +2183,8 @@ class PressReviewSourceSelectionTests(TestCase):
         self.user = CustomUser.objects.create_user(
             email="source-selection@example.test", first_name="S", last_name="S"
         )
+        self.user.press_review_frequency = CustomUser.PRESS_REVIEW_FREQUENCY_DAILY
+        self.user.save(update_fields=["press_review_frequency"])
         UserPressReviewKeyword.objects.create(user=self.user, keyword="Wohnen")
 
     def test_empty_selection_includes_all_sources(self):
@@ -2232,6 +2234,8 @@ class PressReviewThresholdTests(TestCase):
         self.user = CustomUser.objects.create_user(
             email="threshold@example.test", first_name="T", last_name="T"
         )
+        self.user.press_review_frequency = CustomUser.PRESS_REVIEW_FREQUENCY_DAILY
+        self.user.save(update_fields=["press_review_frequency"])
         UserPressReviewKeyword.objects.create(user=self.user, keyword="Wohnen")
         for index, score in enumerate((10, 7, 4, 2)):
             article = PressReviewArticle.objects.create(
@@ -2273,7 +2277,10 @@ class PressReviewThresholdTests(TestCase):
             email="lenient@example.test", first_name="L", last_name="L"
         )
         lenient.press_review_threshold = 1
-        lenient.save(update_fields=["press_review_threshold"])
+        lenient.press_review_frequency = CustomUser.PRESS_REVIEW_FREQUENCY_DAILY
+        lenient.save(
+            update_fields=["press_review_threshold", "press_review_frequency"]
+        )
         UserPressReviewKeyword.objects.create(user=lenient, keyword="Wohnen")
         for article in PressReviewArticle.objects.all():
             UserPressReviewArticleScore.objects.create(
@@ -2296,6 +2303,8 @@ class PressReviewDigestCapTests(TestCase):
         self.user = CustomUser.objects.create_user(
             email="cap@example.test", first_name="C", last_name="C"
         )
+        self.user.press_review_frequency = CustomUser.PRESS_REVIEW_FREQUENCY_DAILY
+        self.user.save(update_fields=["press_review_frequency"])
         UserPressReviewKeyword.objects.create(user=self.user, keyword="Wohnen")
         for index in range(5):
             article = PressReviewArticle.objects.create(
@@ -2417,7 +2426,9 @@ class PressReviewRescoreTests(TestCase):
 
     def test_rescore_endpoint_rejects_get(self):
         self.client.force_login(self.user)
-        response = self.client.get(reverse("press_review_rescore"))
+        # LocaleMiddleware redirects the unprefixed URL to /en/..., so follow it;
+        # otherwise this asserts on the redirect and never reaches require_POST.
+        response = self.client.get(reverse("press_review_rescore"), follow=True)
         self.assertEqual(response.status_code, 405)
 
 

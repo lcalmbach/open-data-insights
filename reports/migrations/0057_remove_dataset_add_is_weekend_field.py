@@ -4,11 +4,23 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
+    """Remove Dataset.add_is_weekend_field (re-added by 0058, removed again by 0059).
+
+    `operations` was empty, so the column added in 0006 was never dropped and 0058's
+    AddField failed with "column add_is_weekend_field already exists" on any database
+    built from scratch. That is why no test database could be created.
+
+    Restoring the removal only affects fresh databases. Every deployed environment
+    recorded this migration as applied on 2025-06-14, so it will not run there again.
+    """
 
     dependencies = [
         ("reports", "0056_storytemplatecontext_create_condition"),
     ]
 
     operations = [
-        
+        migrations.RemoveField(
+            model_name="dataset",
+            name="add_is_weekend_field",
+        ),
     ]

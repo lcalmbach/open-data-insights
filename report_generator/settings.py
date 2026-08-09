@@ -3,6 +3,8 @@ import os
 import re
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 """
 Django settings for report_generator project.
 
@@ -17,6 +19,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env here rather than only in manage.py: pytest imports settings directly and
+# never runs manage.py, so DB_NAME and friends were unset and no test database could
+# be built. Existing environment variables win, so Heroku config vars are unaffected.
+load_dotenv(BASE_DIR / ".env", override=False)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/

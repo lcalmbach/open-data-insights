@@ -1,0 +1,36 @@
+"""Pytest configuration.
+
+Seeds the reference data that model defaults depend on. `CustomUser.preferred_language`
+defaults to `DEFAULT_PREFERRED_LANGUAGE_ID` (94), so creating any user in a freshly
+migrated test database raised a ForeignKeyViolation — the languages are seeded by hand
+in the real databases, not by a migration. Seeding once here, straight after the test
+database is built, keeps it out of every individual test's setUp.
+"""
+
+import pytest
+
+# Mirrors reports.language: these ids are referenced by model defaults and by
+# ENGLISH_LANGUAGE_ID, so they must match the real data rather than be arbitrary.
+LANGUAGE_CATEGORY_ID = 10
+LANGUAGES = [
+    (94, "en", "English"),
+    (95, "de", "Deutsch"),
+    (96, "fr", "Français"),
+]
+
+
+@pytest.fixture(scope="session")
+def django_db_setup(django_db_setup, django_db_blocker):
+    """Seed language lookups once, after migrations, before any test runs."""
+    with django_db_blocker.unblock():
+        from reports.models.lookups import LookupCategory, LookupValue
+
+        category, _ = LookupCategory.objects.get_or_create(
+            id=LANGUAGE_CATEGORY_ID,
+            defaults={"name": "language", "description": "English, Deutsch, Français"},
+        )
+        for pk, key, label in LANGUAGES:
+            LookupValue.objects.get_or_create(
+                id=pk,
+                defaults={"category": category, "key": key, "value": label},
+            )
