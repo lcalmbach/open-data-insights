@@ -34,3 +34,19 @@ def django_db_setup(django_db_setup, django_db_blocker):
                 id=pk,
                 defaults={"category": category, "key": key, "value": label},
             )
+
+        # Inserting with explicit ids does not advance the Postgres sequence, so
+        # later inserts would eventually reach 94 and collide with the rows above.
+        # Sequences are not rolled back, so this surfaced only in full-suite runs.
+        from django.db import connection
+
+        with connection.cursor() as cursor:
+            for table in ("reports_lookupvalue", "reports_lookupcategory"):
+                cursor.execute(
+                    f"""
+                    SELECT setval(
+                        pg_get_serial_sequence('{table}', 'id'),
+                        COALESCE((SELECT MAX(id) FROM {table}), 1)
+                    )
+                    """
+                )
