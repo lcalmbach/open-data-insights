@@ -740,21 +740,18 @@ class DirectContextStoryTests(SimpleTestCase):
         processor = self._build_processor(
             {
                 "context_data": {
-                    "full_article": {
-                        "description": "Stored article",
-                        "data": [
-                            {
-                                "title": "Interactive oil outlook",
-                                "lead": "Lead written during the interactive session.",
-                                "article_text": "The complete article is already available in the context payload.",
-                            }
-                        ],
+                    "article": {
+                        "data": {
+                            "title": "Interactive oil outlook",
+                            "lead": "Lead written during the interactive session.",
+                            "text": "The complete article is already available in the context payload.",
+                        }
                     }
                 }
             }
         )
 
-        ok = StoryProcessor._generate_insight_text(processor)
+        ok = StoryProcessor._populate_story_from_context(processor)
 
         self.assertTrue(ok)
         self.assertEqual(processor.story.title, "Interactive oil outlook")
@@ -769,24 +766,33 @@ class DirectContextStoryTests(SimpleTestCase):
         self.assertIsNone(processor.story.prompt_text)
 
     def test_promptless_story_keeps_context_title_and_lead_without_llm(self):
+        """A list payload selects the record matching the story's language, and the
+        title and lead survive without any model call."""
         processor = self._build_processor(
             {
-                "story": {
-                    "title": "AI co-written market recap",
-                    "summary": "Short lead stored directly in JSON.",
-                    "content": "Body text stored directly in the story payload.",
+                "context_data": {
+                    "article": {
+                        "data": [
+                            {
+                                "language": "en",
+                                "title": "AI co-written market recap",
+                                "lead": "Short lead stored directly in JSON.",
+                                "text": "Body text stored directly in the story payload.",
+                            }
+                        ]
+                    }
                 }
             }
         )
 
-        StoryProcessor._generate_insight_text(processor)
-        lead_ok = StoryProcessor.generate_lead(processor)
-        title_ok = StoryProcessor.generate_title(processor)
+        self.assertTrue(StoryProcessor._populate_story_from_context(processor))
 
-        self.assertTrue(lead_ok)
-        self.assertTrue(title_ok)
         self.assertEqual(processor.story.title, "AI co-written market recap")
         self.assertEqual(processor.story.summary, "Short lead stored directly in JSON.")
+        self.assertEqual(
+            processor.story.content, "Body text stored directly in the story payload."
+        )
+        self.assertIsNone(processor.story.prompt_text)
 
 
 class StoryTemplateValidationTests(SimpleTestCase):
@@ -1720,24 +1726,21 @@ class GraphicRenderingTests(SimpleTestCase):
         self.assertIs(graphics, english_graphics)
 
     @patch("reports.visualizations.plotting.create_line_chart")
-    def test_generate_chart_rewrites_all_vis_placeholders(self, mock_create_line_chart):
-        chart = Mock()
-        chart.to_html.return_value = (
-            '<style>#vis.vega-embed{width:100%}</style>'
-            '<div id="vis"></div>'
-            "<script>"
-            "const el = document.getElementById('vis');"
-            'vegaEmbed("#vis", spec)'
-            "</script>"
-        )
-        mock_create_line_chart.return_value = chart
+    def test_generate_chart_binds_the_option_to_the_given_chart_id(self, mock_create_line_chart):
+        """Post-ECharts, chart builders return an option dict rather than an Altair
+        chart, and generate_chart renders it into a container bound to chart_id.
+        This previously asserted on Vega placeholder rewriting, which no longer
+        happens."""
+        mock_create_line_chart.return_value = {
+            "series": [{"type": "line", "data": [1, 2, 3]}]
+        }
 
         html = generate_chart(pd.DataFrame({"x": [], "y": []}), {"type": "line"}, "chart-123")
 
         self.assertIn('id="chart-123"', html)
-        self.assertIn("#chart-123.vega-embed", html)
-        self.assertIn("document.getElementById('chart-123')", html)
-        self.assertIn('vegaEmbed("#chart-123"', html)
+        self.assertIn('getElementById("chart-123")', html)
+        self.assertIn('__echartsInstances["chart-123"]', html)
+        self.assertNotIn("vega", html.lower())
 
 
 class MarketEventsImportHelpersTests(SimpleTestCase):
