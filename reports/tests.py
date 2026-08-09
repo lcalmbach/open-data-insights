@@ -546,13 +546,13 @@ class StoryTemplateFocusSqlReplacementTests(TestCase):
             active=True,
         )
 
-    def test_focus_filter_placeholder_is_a_noop_even_with_a_filter_value(self):
-        """StoryTemplate.focus_filter_fields was removed in migration 0164.
+    def test_focus_conditions_use_filter_value_not_focus_filter(self):
+        """`:focus_filter` no longer exists; templates use `:filter_value`.
 
-        _build_focus_filter reads it via getattr(..., None), so it can no longer
-        build a condition and always substitutes the 1=1 no-op — even for a focus
-        that has a filter_value. This test pins that behaviour; restoring real
-        focus filtering means reinstating the field, not just editing the test.
+        It used to expand to a condition built from StoryTemplate.focus_filter_fields,
+        removed in migration 0164, after which it could only produce 1=1 — silently
+        generating stories over unfiltered data. It is now left untouched, so a
+        template still using it fails loudly instead.
         """
         from datetime import date
 
@@ -562,26 +562,20 @@ class StoryTemplateFocusSqlReplacementTests(TestCase):
             story_template=self.template,
             filter_value="Zurich",
         )
-        processor = StoryProcessor(published_date=date(2026, 2, 7), template=self.template, focus=focus)
+        processor = StoryProcessor(
+            published_date=date(2026, 2, 7), template=self.template, focus=focus
+        )
+
         replaced = processor._replace_sql_expressions(
-            "SELECT 1 WHERE :focus_filter AND %(year)s = 2026"
+            "SELECT 1 WHERE district = ':filter_value'"
         )
-        self.assertIn("1=1", replaced)
-        self.assertNotIn(":focus_filter", replaced)
+        self.assertIn("Zurich", replaced)
+        self.assertNotIn(":filter_value", replaced)
 
-    def test_default_focus_replaces_to_noop(self):
-        from datetime import date
-
-        from reports.services.story_processor import StoryProcessor
-
-        focus = StoryTemplateFocus.objects.create(
-            story_template=self.template,
-            filter_value=None,
-        )
-        processor = StoryProcessor(published_date=date(2026, 2, 7), template=self.template, focus=focus)
-        replaced = processor._replace_sql_expressions("SELECT 1 WHERE :focus_filter")
-        self.assertIn("1=1", replaced)
-
+        # Not substituted any more, so it cannot silently become a no-op.
+        untouched = processor._replace_sql_expressions("SELECT 1 WHERE :focus_filter")
+        self.assertIn(":focus_filter", untouched)
+        self.assertNotIn("1=1", untouched)
 
 class LineChartReferenceLineTests(TestCase):
     def test_line_chart_supports_configured_reference_lines(self):

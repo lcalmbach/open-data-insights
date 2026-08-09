@@ -343,64 +343,17 @@ class StoryProcessor:
         return result
 
 
-    def _get_focus_filter_expression(self) -> str:
-        """
-        Return the SQL snippet used to restrict queries to the current focus.
-
-        Templates should embed `:focus_filter` in their SQL where a focus condition
-        is expected.
-        - For default/no-filter focuses, substitute `1=1` (no-op).
-        - For filtered focuses, build an expression from
-          `template.focus_filter_fields` and `focus.filter_value`.
-        """
-        if not self.focus:
-            return "1=1"
-
-        filter_value = (getattr(self.focus, "filter_value", None) or "").strip()
-        if not filter_value:
-            return "1=1"
-
-        focus_fields_raw = (getattr(self.template, "focus_filter_fields", None) or "").strip()
-        if not focus_fields_raw:
-            return "1=1"
-
-        def quote_ident(ident: str) -> str:
-            parts = [p.strip() for p in ident.split(".") if p.strip()]
-            if not parts:
-                raise ValueError("empty identifier")
-            for part in parts:
-                if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", part):
-                    raise ValueError(f"invalid identifier part: {part!r}")
-            return ".".join(f'"{p}"' for p in parts)
-
-        fields: list[str] = []
-        for raw in focus_fields_raw.split(","):
-            name = raw.strip()
-            if not name:
-                continue
-            try:
-                fields.append(quote_ident(name))
-            except Exception as exc:  # noqa: BLE001
-                self.logger.warning("Invalid focus_filter_fields entry %r: %s", name, exc)
-
-        if not fields:
-            return "1=1"
-
-        value_sql = filter_value.replace("'", "''")
-        clauses = [f"{field} = '{value_sql}'" for field in fields]
-        if len(clauses) == 1:
-            return clauses[0]
-        return "(" + " OR ".join(clauses) + ")"
-
     def _replace_sql_expressions(self, sql: str) -> str:
-        """
-        Replace placeholders in SQL statements, including reference period
-        expressions and the `:focus_filter` token.
+        """Replace reference-period placeholders in a SQL statement.
+
+        The old `:focus_filter` token is gone: it built a condition from
+        StoryTemplate.focus_filter_fields, removed in migration 0164, so it could
+        only ever expand to 1=1. Templates express focus conditions themselves
+        using `:filter_value` / `:filter_expression`.
         """
         if not sql:
             return sql
-        result = self._replace_reference_period_expression(sql)
-        return result.replace(":focus_filter", self._get_focus_filter_expression())
+        return self._replace_reference_period_expression(sql)
 
     def story_is_due(self, reference_period_start) -> bool:
         """

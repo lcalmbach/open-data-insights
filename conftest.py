@@ -7,7 +7,32 @@ in the real databases, not by a migration. Seeding once here, straight after the
 database is built, keeps it out of every individual test's setUp.
 """
 
+import tempfile
+
 import pytest
+
+
+def pytest_configure():
+    """Keep test file uploads on local disk.
+
+    Settings load .env so pytest can reach the database, which also switches
+    USE_S3_MEDIA on — tests that save an ImageField were uploading to the real
+    media bucket. Force filesystem storage into a temp directory for the run.
+    """
+    from django.test.utils import override_settings
+
+    override_settings(
+        DEFAULT_FILE_STORAGE="django.core.files.storage.FileSystemStorage",
+        STORAGES={
+            "default": {
+                "BACKEND": "django.core.files.storage.FileSystemStorage",
+            },
+            "staticfiles": {
+                "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+            },
+        },
+        MEDIA_ROOT=tempfile.mkdtemp(prefix="odi-test-media-"),
+    ).enable()
 
 # Mirrors reports.language: these ids are referenced by model defaults and by
 # ENGLISH_LANGUAGE_ID, so they must match the real data rather than be arbitrary.
