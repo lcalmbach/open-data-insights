@@ -486,11 +486,18 @@ def create_line_chart(data, settings: dict) -> dict:
             if style.get("opacity") is not None:
                 line_style["opacity"] = style["opacity"]
 
+            # The legend takes its swatch colour from itemStyle, not lineStyle, so
+            # without this it would fall back to the default palette and show
+            # colours the lines do not use. For a gradient group the first series is
+            # the palest member, so prefer an explicit colour to represent the group.
+            legend_colour = style.get("legend_color") or style.get("color") or colour
+
             series: dict = {
                 "type": "line",
                 # Series in a group share a name so the legend shows one entry per
                 # group rather than one per year; ECharts dedupes legend by name.
                 "name": group or str(s_val),
+                "itemStyle": {"color": legend_colour} if legend_colour else {},
                 # Coerce x: psycopg returns numeric columns as Decimal, which
                 # json.dumps cannot serialise.
                 "data": [
@@ -520,7 +527,15 @@ def create_line_chart(data, settings: dict) -> dict:
         legend_order = settings.get("legend_order") or []
         ordered = [g for g in legend_order if g in groups_seen]
         ordered += [g for g in groups_seen if g not in ordered]
-        option["legend"] = {"data": ordered}
+        # ECharts draws a line *with the series symbol* for line legends and does not
+        # inherit symbol:"none", so the default swatch shows a marker this chart never
+        # plots. A thin roundRect reads as a plain line segment instead.
+        option["legend"] = {
+            "data": ordered,
+            "icon": settings.get("legend_icon", "roundRect"),
+            "itemWidth": settings.get("legend_item_width", 26),
+            "itemHeight": settings.get("legend_item_height", 3),
+        }
 
     elif color_col:
         pivot = df.pivot_table(index=x_col, columns=color_col, values=y_col, aggfunc="first")

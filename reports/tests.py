@@ -2814,6 +2814,32 @@ class LineChartSeriesPerValueTests(SimpleTestCase):
         option = create_line_chart(rows, self.SETTINGS)
         json.dumps({k: v for k, v in option.items() if k != "__js_functions__"})
 
+    def test_legend_icon_is_a_line_not_a_marker(self):
+        """ECharts draws a line with the series symbol for line legends and does not
+        inherit symbol:"none", so the default swatch shows a marker the chart never
+        plots. A thin roundRect reads as a plain line segment."""
+        legend = self._option()["legend"]
+        self.assertEqual(legend["icon"], "roundRect")
+        self.assertLess(legend["itemHeight"], legend["itemWidth"])
+
+    def test_legend_swatch_colour_matches_the_lines(self):
+        """The legend reads itemStyle, not lineStyle; without it ECharts falls back
+        to the default palette and shows colours the chart does not use."""
+        series = {}
+        for entry in self._option()["series"]:
+            series.setdefault(entry["name"], entry)
+        self.assertEqual(series["current_year"]["itemStyle"]["color"], "#1f77b4")
+        self.assertEqual(series["since_2000"]["itemStyle"]["color"], "#ff7f0e")
+
+    def test_legend_color_overrides_a_gradient_groups_palest_member(self):
+        settings = json.loads(json.dumps(self.SETTINGS))
+        settings["series_group_styles"]["before_2000"]["legend_color"] = "#9a9a9a"
+        option = create_line_chart(self.ROWS, settings)
+        greys = [s for s in option["series"] if s["name"] == "before_2000"]
+        self.assertEqual(greys[0]["itemStyle"]["color"], "#9a9a9a")
+        # the lines keep their gradient
+        self.assertEqual(greys[0]["lineStyle"]["color"], "#e8e8e8")
+
     def test_tooltip_triggers_per_item_not_per_axis(self):
         """An axis tooltip would list every series at that x — 163 for this chart."""
         option = self._option()
