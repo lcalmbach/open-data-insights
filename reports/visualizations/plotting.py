@@ -12,6 +12,7 @@ and are listed in NON_ECHARTS_TYPES in generate_chart().
 """
 from __future__ import annotations
 import base64
+from decimal import Decimal
 import html as html_lib
 import json
 import logging
@@ -254,11 +255,82 @@ def _build_series_data(
     return items
 
 
+def _json_scalar(value):
+    """Convert a cell to something json.dumps accepts (Decimal -> int/float)."""
+    if isinstance(value, Decimal):
+        as_float = float(value)
+        return int(as_float) if as_float.is_integer() else as_float
+    if hasattr(value, "item"):  # numpy scalar
+        return value.item()
+    return value
+
+
+def _sort_key(value):
+    """Sort series values numerically when possible, else as text."""
+    try:
+        return (0, float(value), "")
+    except (TypeError, ValueError):
+        return (1, 0.0, str(value))
+
+
+def _series_group_values(df, series_by_col: str, group_col: str | None) -> dict:
+    """Map each group to the numeric range of its series values, for gradients."""
+    if not group_col or group_col not in df.columns:
+        return {}
+    ranges: dict = {}
+    for group, chunk in df.groupby(group_col):
+        values = []
+        for v in chunk[series_by_col].dropna().unique():
+            try:
+                values.append(float(v))
+            except (TypeError, ValueError):
+                continue
+        if values:
+            ranges[str(group)] = (min(values), max(values))
+    return ranges
+
+
+def _lerp_hex(lo_hex: str, hi_hex: str, t: float) -> str:
+    """Linearly interpolate between two #rrggbb colours."""
+    t = 0.0 if t < 0 else (1.0 if t > 1 else t)
+    lo, hi = lo_hex.lstrip("#"), hi_hex.lstrip("#")
+    parts = []
+    for i in (0, 2, 4):
+        a, b = int(lo[i:i + 2], 16), int(hi[i:i + 2], 16)
+        parts.append(f"{round(a + (b - a) * t):02x}")
+    return "#" + "".join(parts)
+
+
+def _group_series_colour(style: dict, group: str, series_value, group_years: dict):
+    """Resolve one series' colour, applying a within-group gradient when configured.
+
+    A `gradient` of two colours shades members by their position in the group's
+    range — older years lighter, recent years darker — so a long-term trend stays
+    visible instead of collapsing into a flat block of grey.
+    """
+    gradient = style.get("gradient")
+    if gradient and len(gradient) == 2 and group in group_years:
+        lo, hi = group_years[group]
+        try:
+            value = float(series_value)
+        except (TypeError, ValueError):
+            return style.get("color")
+        t = 0.5 if hi == lo else (value - lo) / (hi - lo)
+        return _lerp_hex(gradient[0], gradient[1], t)
+    return style.get("color")
+
+
 def create_line_chart(data, settings: dict) -> dict:
     settings = settings.copy()
     x_col = settings.get("x", "")
     y_col = settings.get("y", "")
     color_col = settings.get("color")
+    # Draw one line per `series_by` value, styled by `series_group`. Without this a
+    # `color` column produces one line per *group*, merging all its members.
+    series_by_col = settings.get("series_by")
+    group_col = settings.get("series_group")
+    series_group_styles = settings.get("series_group_styles") or {}
+    series_years: list = []
     radius_col = settings.get("radius")
     radius_max_px = int(settings.get("radius_max", 30))
     radius_min_px = int(settings.get("radius_min", 4))
@@ -394,6 +466,62 @@ def create_line_chart(data, settings: dict) -> dict:
             option["series"].append(scatter_s)
         _use_item_trigger = True
 
+    elif series_by_col:
+        # One line per `series_by` value (e.g. per year), styled by the group it
+        # belongs to (e.g. year_group). Pivoting on the group instead would collapse
+        # every year sharing a group into a single line.
+        option["series"] = []
+        groups_seen: list[str] = []
+        group_years = _series_group_values(df, series_by_col, group_col)
+
+        for s_val in sorted(df[series_by_col].dropna().unique(), key=_sort_key):
+            df_s = df[df[series_by_col] == s_val].sort_values(x_col)
+            group = str(df_s[group_col].iloc[0]) if group_col else ""
+            style = dict(series_group_styles.get(group, {}))
+
+            colour = _group_series_colour(style, group, s_val, group_years)
+            line_style = {"width": style.get("width", 1)}
+            if colour:
+                line_style["color"] = colour
+            if style.get("opacity") is not None:
+                line_style["opacity"] = style["opacity"]
+
+            series: dict = {
+                "type": "line",
+                # Series in a group share a name so the legend shows one entry per
+                # group rather than one per year; ECharts dedupes legend by name.
+                "name": group or str(s_val),
+                # Coerce x: psycopg returns numeric columns as Decimal, which
+                # json.dumps cannot serialise.
+                "data": [
+                    [_json_scalar(xv), yv]
+                    for xv, yv in zip(df_s[x_col].tolist(), _clean_vals(df_s[y_col]))
+                ],
+                "smooth": smooth,
+                "symbol": "none",
+                "lineStyle": line_style,
+                "z": style.get("z", 2),
+                "emphasis": {"disabled": True},
+            }
+            if group and group not in groups_seen:
+                groups_seen.append(group)
+            option["series"].append(series)
+            series_years.append(s_val)
+
+        # x is numeric and shared across every year (e.g. day_in_year 1..366).
+        option["xAxis"] = {
+            "type": "value",
+            "name": settings.get("x_title", x_col),
+            "min": settings.get("x_min"),
+            "max": settings.get("x_max"),
+        }
+        option["xAxis"] = {k: v for k, v in option["xAxis"].items() if v is not None}
+
+        legend_order = settings.get("legend_order") or []
+        ordered = [g for g in legend_order if g in groups_seen]
+        ordered += [g for g in groups_seen if g not in ordered]
+        option["legend"] = {"data": ordered}
+
     elif color_col:
         pivot = df.pivot_table(index=x_col, columns=color_col, values=y_col, aggfunc="first")
         pivot = pivot.sort_index()
@@ -486,6 +614,23 @@ def create_line_chart(data, settings: dict) -> dict:
         for s in option.get("series", []):
             if s.get("type") == "line":
                 s["symbolSize"] = int(symbol_size)
+
+    if series_by_col and option.get("series"):
+        # An axis tooltip would list every series at that x — 163 lines for a
+        # per-year chart. Trigger on the hovered line instead, and look the series
+        # value up by index because series share a name for legend grouping.
+        years_json = json.dumps([str(v) for v in series_years])
+        tooltip_fn = (
+            "function(p){"
+            f"var names={years_json};"
+            "var v=Array.isArray(p.value)?p.value:[p.name,p.value];"
+            "var label=names[p.seriesIndex]!==undefined?names[p.seriesIndex]:p.seriesName;"
+            "return '<b>'+label+'</b><br/>'"
+            f"+{json.dumps(str(settings.get('x_title', x_col)))}+': '+v[0]"
+            f"+'<br/>'+{json.dumps(str(settings.get('y_title', y_col)))}+': '+v[1];}}"
+        )
+        option["tooltip"] = {"trigger": "item", "formatter": "__series_tt__"}
+        option.setdefault("__js_functions__", {})["__series_tt__"] = tooltip_fn
 
     if tooltip_cols and _use_item_trigger:
         tooltip_fn = (

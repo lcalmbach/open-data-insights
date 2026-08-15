@@ -54,6 +54,7 @@ from reports.language import with_language_prefix
 from reports.models.subscription import StoryTemplateSubscription
 from reports.visualizations.plotting import (
     _color_for_value,
+    create_line_chart,
     _parse_color_bins,
     create_map_markers,
 )
@@ -2729,3 +2730,92 @@ class WebImportBoundaryTests(SimpleTestCase):
             f"importing reports.services loaded {sorted(loaded)} — the package "
             "should expose names lazily via __getattr__, not import them.",
         )
+
+
+class LineChartSeriesPerValueTests(SimpleTestCase):
+    """One line per `series_by` value, styled by the group it belongs to.
+
+    Setting only `color` pivots on that column, so every year sharing a group
+    collapsed into a single line — three lines instead of one per year.
+    """
+
+    ROWS = [
+        {"year": 1900, "day_in_year": 1, "cumulative_heat_days": 0, "year_group": "before_2000"},
+        {"year": 1900, "day_in_year": 2, "cumulative_heat_days": 1, "year_group": "before_2000"},
+        {"year": 1980, "day_in_year": 1, "cumulative_heat_days": 0, "year_group": "before_2000"},
+        {"year": 1980, "day_in_year": 2, "cumulative_heat_days": 2, "year_group": "before_2000"},
+        {"year": 2010, "day_in_year": 1, "cumulative_heat_days": 1, "year_group": "since_2000"},
+        {"year": 2026, "day_in_year": 1, "cumulative_heat_days": 3, "year_group": "current_year"},
+    ]
+    SETTINGS = {
+        "x": "day_in_year",
+        "y": "cumulative_heat_days",
+        "series_by": "year",
+        "series_group": "year_group",
+        "legend_order": ["current_year", "since_2000", "before_2000"],
+        "series_group_styles": {
+            "current_year": {"width": 4, "color": "#1f77b4", "opacity": 1, "z": 3},
+            "since_2000": {"width": 1.5, "color": "#ff7f0e", "opacity": 0.5, "z": 2},
+            "before_2000": {"width": 1, "opacity": 0.25, "z": 1,
+                            "gradient": ["#e8e8e8", "#8c8c8c"]},
+        },
+    }
+
+    def _option(self):
+        return create_line_chart(self.ROWS, self.SETTINGS)
+
+    def test_one_series_per_year_not_per_group(self):
+        option = self._option()
+        self.assertEqual(len(option["series"]), 4)  # 1900, 1980, 2010, 2026
+
+    def test_series_share_a_name_per_group_so_the_legend_has_three_entries(self):
+        option = self._option()
+        self.assertEqual(
+            option["legend"]["data"], ["current_year", "since_2000", "before_2000"]
+        )
+        names = [s["name"] for s in option["series"]]
+        self.assertEqual(names.count("before_2000"), 2)
+
+    def test_z_order_puts_the_current_year_on_top(self):
+        by_name = {}
+        for series in self._option()["series"]:
+            by_name.setdefault(series["name"], series["z"])
+        self.assertEqual(by_name["current_year"], 3)
+        self.assertEqual(by_name["since_2000"], 2)
+        self.assertEqual(by_name["before_2000"], 1)
+
+    def test_group_styles_are_applied(self):
+        series = {s["name"]: s for s in self._option()["series"]}
+        self.assertEqual(series["current_year"]["lineStyle"]["width"], 4)
+        self.assertEqual(series["current_year"]["lineStyle"]["color"], "#1f77b4")
+        self.assertEqual(series["since_2000"]["lineStyle"]["opacity"], 0.5)
+
+    def test_gradient_shades_older_members_lighter(self):
+        greys = [
+            s["lineStyle"]["color"]
+            for s in self._option()["series"] if s["name"] == "before_2000"
+        ]
+        self.assertEqual(greys[0], "#e8e8e8")  # 1900, oldest
+        self.assertEqual(greys[1], "#8c8c8c")  # 1980, most recent in group
+        self.assertNotEqual(greys[0], greys[1])
+
+    def test_x_axis_is_numeric_and_shared(self):
+        option = self._option()
+        self.assertEqual(option["xAxis"]["type"], "value")
+        for series in option["series"]:
+            for point in series["data"]:
+                self.assertIsInstance(point, list)
+
+    def test_decimal_x_values_are_json_serialisable(self):
+        """psycopg returns numeric columns as Decimal, which json.dumps rejects."""
+        rows = [
+            {**row, "day_in_year": Decimal(str(row["day_in_year"]))} for row in self.ROWS
+        ]
+        option = create_line_chart(rows, self.SETTINGS)
+        json.dumps({k: v for k, v in option.items() if k != "__js_functions__"})
+
+    def test_tooltip_triggers_per_item_not_per_axis(self):
+        """An axis tooltip would list every series at that x — 163 for this chart."""
+        option = self._option()
+        self.assertEqual(option["tooltip"]["trigger"], "item")
+        self.assertIn("__series_tt__", option["__js_functions__"])
