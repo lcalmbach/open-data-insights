@@ -255,6 +255,24 @@ def _build_series_data(
     return items
 
 
+def _series_points(df_s, x_col: str, y_col: str, tooltip_cols: list):
+    """Build [x, y] points, or {value, extra} items when tooltip columns are wanted."""
+    xs = [_json_scalar(v) for v in df_s[x_col].tolist()]
+    ys = _clean_vals(df_s[y_col])
+    if not tooltip_cols:
+        return [[x, y] for x, y in zip(xs, ys)]
+    points = []
+    for i, (x, y) in enumerate(zip(xs, ys)):
+        row = df_s.iloc[i]
+        extra = {
+            col: ("" if pd.isna(row[col]) else str(_json_scalar(row[col])))
+            for col in tooltip_cols
+            if col in row
+        }
+        points.append({"value": [x, y], "extra": extra})
+    return points
+
+
 def _json_scalar(value):
     """Convert a cell to something json.dumps accepts (Decimal -> int/float)."""
     if isinstance(value, Decimal):
@@ -331,6 +349,9 @@ def create_line_chart(data, settings: dict) -> dict:
     group_col = settings.get("series_group")
     series_group_styles = settings.get("series_group_styles") or {}
     series_years: list = []
+    # Unlike other branches, keep the y column: these tooltips list named columns
+    # verbatim rather than appending extras to a value line.
+    series_tooltip_cols = list(settings.get("tooltips") or []) if series_by_col else []
     radius_col = settings.get("radius")
     radius_max_px = int(settings.get("radius_max", 30))
     radius_min_px = int(settings.get("radius_min", 4))
@@ -500,15 +521,17 @@ def create_line_chart(data, settings: dict) -> dict:
                 "itemStyle": {"color": legend_colour} if legend_colour else {},
                 # Coerce x: psycopg returns numeric columns as Decimal, which
                 # json.dumps cannot serialise.
-                "data": [
-                    [_json_scalar(xv), yv]
-                    for xv, yv in zip(df_s[x_col].tolist(), _clean_vals(df_s[y_col]))
-                ],
+                "data": _series_points(df_s, x_col, y_col, series_tooltip_cols),
                 "smooth": smooth,
                 "symbol": "none",
+                # A symbol appears only under the cursor: with symbol "none" and
+                # emphasis disabled there is almost no hit area, so an item tooltip
+                # could never fire.
+                "symbolSize": 8,
+                "showSymbol": False,
                 "lineStyle": line_style,
                 "z": style.get("z", 2),
-                "emphasis": {"disabled": True},
+                "emphasis": {"focus": "series", "lineStyle": {"width": style.get("width", 1) + 1}},
             }
             if group and group not in groups_seen:
                 groups_seen.append(group)
@@ -635,16 +658,33 @@ def create_line_chart(data, settings: dict) -> dict:
         # per-year chart. Trigger on the hovered line instead, and look the series
         # value up by index because series share a name for legend grouping.
         years_json = json.dumps([str(v) for v in series_years])
-        tooltip_fn = (
-            "function(p){"
-            f"var names={years_json};"
-            "var v=Array.isArray(p.value)?p.value:[p.name,p.value];"
-            "var label=names[p.seriesIndex]!==undefined?names[p.seriesIndex]:p.seriesName;"
-            "return '<b>'+label+'</b><br/>'"
-            f"+{json.dumps(str(settings.get('x_title', x_col)))}+': '+v[0]"
-            f"+'<br/>'+{json.dumps(str(settings.get('y_title', y_col)))}+': '+v[1];}}"
-        )
-        option["tooltip"] = {"trigger": "item", "formatter": "__series_tt__"}
+        if series_tooltip_cols:
+            # Render exactly the columns named in `tooltips`, carried per point.
+            tooltip_fn = (
+                "function(p){"
+                f"var names={years_json};"
+                "var label=names[p.seriesIndex]!==undefined?names[p.seriesIndex]:p.seriesName;"
+                "var html='<b>'+label+'</b>';"
+                "var e=(p.data&&p.data.extra)||{};"
+                "for(var k in e){if(e.hasOwnProperty(k))html+='<br/>'+k+': '+e[k];}"
+                "return html;}"
+            )
+        else:
+            tooltip_fn = (
+                "function(p){"
+                f"var names={years_json};"
+                "var v=Array.isArray(p.value)?p.value:[p.name,p.value];"
+                "var label=names[p.seriesIndex]!==undefined?names[p.seriesIndex]:p.seriesName;"
+                "return '<b>'+label+'</b><br/>'"
+                f"+{json.dumps(str(settings.get('x_title', x_col)))}+': '+v[0]"
+                f"+'<br/>'+{json.dumps(str(settings.get('y_title', y_col)))}+': '+v[1];}}"
+            )
+        option["tooltip"] = {
+            "trigger": "item",
+            "formatter": "__series_tt__",
+            # Without this the pointer must land exactly on the path.
+            "triggerOn": "mousemove",
+        }
         option.setdefault("__js_functions__", {})["__series_tt__"] = tooltip_fn
 
     if tooltip_cols and _use_item_trigger:
