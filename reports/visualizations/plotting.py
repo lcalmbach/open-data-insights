@@ -255,6 +255,14 @@ def _build_series_data(
     return items
 
 
+def _fmt_scalar(value) -> str:
+    """Render a cell for display: whole numbers lose the .0 pandas gives them."""
+    scalar = _json_scalar(value)
+    if isinstance(scalar, float) and scalar.is_integer():
+        return str(int(scalar))
+    return str(scalar)
+
+
 def _series_points(df_s, x_col: str, y_col: str, tooltip_cols: list):
     """Build [x, y] points, or {value, extra} items when tooltip columns are wanted."""
     xs = [_json_scalar(v) for v in df_s[x_col].tolist()]
@@ -265,7 +273,7 @@ def _series_points(df_s, x_col: str, y_col: str, tooltip_cols: list):
     for i, (x, y) in enumerate(zip(xs, ys)):
         row = df_s.iloc[i]
         extra = {
-            col: ("" if pd.isna(row[col]) else str(_json_scalar(row[col])))
+            col: ("" if pd.isna(row[col]) else _fmt_scalar(row[col]))
             for col in tooltip_cols
             if col in row
         }
@@ -523,10 +531,11 @@ def create_line_chart(data, settings: dict) -> dict:
                 # json.dumps cannot serialise.
                 "data": _series_points(df_s, x_col, y_col, series_tooltip_cols),
                 "smooth": smooth,
-                "symbol": "none",
-                # A symbol appears only under the cursor: with symbol "none" and
-                # emphasis disabled there is almost no hit area, so an item tooltip
-                # could never fire.
+                # Deliberately NOT symbol:"none": that removes the symbol entirely,
+                # including its hit area, so an item tooltip can never fire.
+                # showSymbol:false hides symbols but ECharts still draws one under
+                # the cursor on hover, which is what the tooltip attaches to.
+                "symbol": "circle",
                 "symbolSize": 8,
                 "showSymbol": False,
                 "lineStyle": line_style,
@@ -657,7 +666,7 @@ def create_line_chart(data, settings: dict) -> dict:
         # An axis tooltip would list every series at that x — 163 lines for a
         # per-year chart. Trigger on the hovered line instead, and look the series
         # value up by index because series share a name for legend grouping.
-        years_json = json.dumps([str(v) for v in series_years])
+        years_json = json.dumps([_fmt_scalar(v) for v in series_years])
         if series_tooltip_cols:
             # Render exactly the columns named in `tooltips`, carried per point.
             tooltip_fn = (
