@@ -317,6 +317,25 @@ class StoryProcessor:
             return (response.choices[0].message.content or "").strip()
 
 
+    def _replace_placeholders_deep(self, value):
+        """Apply reference-period substitution across a settings tree, keys included.
+
+        Graphic settings may name a value the SQL also produces — a series group, a
+        legend entry — using the same placeholder. The SQL is substituted before it
+        runs, so unless the settings are substituted too, the setting no longer
+        matches the data it refers to and is silently ignored.
+        """
+        if isinstance(value, str):
+            return self._replace_reference_period_expression(value)
+        if isinstance(value, list):
+            return [self._replace_placeholders_deep(v) for v in value]
+        if isinstance(value, dict):
+            return {
+                self._replace_placeholders_deep(k): self._replace_placeholders_deep(v)
+                for k, v in value.items()
+            }
+        return value
+
     def _replace_reference_period_expression(self, expression: str) -> str:
         """Replace reference period expression in SQL command"""
         result = expression.replace(
@@ -499,6 +518,11 @@ class StoryProcessor:
                 else dict(graphic_template.settings)
             )
             settings["type"] = graphic_template.graphic_type
+            # Resolve reference-period placeholders anywhere in the settings, keys
+            # included. The SQL's placeholders are already substituted, so a setting
+            # naming a group (series_group_styles keys, legend_order) has to be
+            # substituted the same way or it will no longer match the data.
+            settings = self._replace_placeholders_deep(settings)
             settings = self._resolve_reference_line_settings(settings)
             if "highlight" in settings:
                 settings["highlight"] = self._replace_reference_period_expression(settings["highlight"])

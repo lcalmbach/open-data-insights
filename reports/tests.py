@@ -2897,3 +2897,57 @@ class LineChartSeriesPerValueTests(SimpleTestCase):
         option = self._option()
         self.assertEqual(option["tooltip"]["trigger"], "item")
         self.assertIn("__series_tt__", option["__js_functions__"])
+
+
+class GraphicSettingsPlaceholderTests(SimpleTestCase):
+    """Placeholders must resolve in settings, not only in SQL.
+
+    A template may name a value its SQL also produces — a series group, a legend
+    entry — with the same placeholder. The SQL is substituted before it runs, so
+    settings left unsubstituted stop matching the data and are silently ignored:
+    styles fall back to defaults and the group is appended to the legend as if
+    unrecognised.
+    """
+
+    def _processor(self):
+        processor = StoryProcessor.__new__(StoryProcessor)
+        processor.story = SimpleNamespace(
+            reference_period_start=date(2026, 1, 1),
+            reference_period_end=date(2026, 12, 31),
+            reference_period_expression="2026",
+            published_date=date(2026, 8, 15),
+        )
+        processor.focus = None
+        processor.template = SimpleNamespace()
+        processor.year = 2026
+        processor.month = 8
+        processor.season = 2
+        processor.season_year = 2026
+        processor.published_date = date(2026, 8, 15)
+        processor.reference_period_start = date(2026, 1, 1)
+        processor.reference_period_end = date(2026, 12, 31)
+        return processor
+
+    def test_placeholders_resolve_in_nested_values_and_keys(self):
+        processor = self._processor()
+        settings = {
+            "legend_order": [":reference_period_year", "≥ 2000"],
+            "series_group_styles": {
+                ":reference_period_year": {"width": 4},
+                "≥ 2000": {"width": 1.5},
+            },
+        }
+
+        resolved = processor._replace_placeholders_deep(settings)
+
+        self.assertEqual(resolved["legend_order"], ["2026", "≥ 2000"])
+        self.assertIn("2026", resolved["series_group_styles"])
+        self.assertNotIn(":reference_period_year", resolved["series_group_styles"])
+        self.assertEqual(resolved["series_group_styles"]["2026"]["width"], 4)
+
+    def test_non_string_values_are_left_alone(self):
+        processor = self._processor()
+        resolved = processor._replace_placeholders_deep(
+            {"x_min": 1, "opacity": 0.25, "flag": True, "missing": None}
+        )
+        self.assertEqual(resolved, {"x_min": 1, "opacity": 0.25, "flag": True, "missing": None})
