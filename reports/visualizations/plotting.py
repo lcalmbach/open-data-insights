@@ -526,18 +526,23 @@ def create_line_chart(data, settings: dict) -> dict:
                 # Series in a group share a name so the legend shows one entry per
                 # group rather than one per year; ECharts dedupes legend by name.
                 "name": group or str(s_val),
-                "itemStyle": {"color": legend_colour} if legend_colour else {},
+                # Transparent so the hover symbols stay invisible; the legend
+                # overrides opacity so its swatches still show the colour.
+                "itemStyle": ({"color": legend_colour, "opacity": 0}
+                              if legend_colour else {"opacity": 0}),
                 # Coerce x: psycopg returns numeric columns as Decimal, which
                 # json.dumps cannot serialise.
                 "data": _series_points(df_s, x_col, y_col, series_tooltip_cols),
                 "smooth": smooth,
-                # Deliberately NOT symbol:"none": that removes the symbol entirely,
-                # including its hit area, so an item tooltip can never fire.
-                # showSymbol:false hides symbols but ECharts still draws one under
-                # the cursor on hover, which is what the tooltip attaches to.
+                # An item tooltip attaches to symbols, so they must exist. Verified in
+                # a browser: symbol:"none" and showSymbol:false both remove the hit
+                # area and no tooltip ever fires. Drawing them at 1px works but makes
+                # the lines look dotted, so they are full size and fully transparent —
+                # invisible, still hoverable. The legend reads itemStyle too, so it
+                # overrides the opacity below to keep its swatches visible.
                 "symbol": "circle",
-                "symbolSize": 8,
-                "showSymbol": False,
+                "symbolSize": settings.get("hover_symbol_size", 7),
+                "showSymbol": True,
                 "lineStyle": line_style,
                 "z": style.get("z", 2),
                 "emphasis": {"focus": "series", "lineStyle": {"width": style.get("width", 1) + 1}},
@@ -564,6 +569,9 @@ def create_line_chart(data, settings: dict) -> dict:
         # plots. A thin roundRect reads as a plain line segment instead.
         option["legend"] = {
             "data": ordered,
+            # Series itemStyle is transparent to hide hover symbols; without this
+            # the legend swatches would inherit that and disappear.
+            "itemStyle": {"opacity": 1},
             "icon": settings.get("legend_icon", "roundRect"),
             "itemWidth": settings.get("legend_item_width", 26),
             "itemHeight": settings.get("legend_item_height", 3),

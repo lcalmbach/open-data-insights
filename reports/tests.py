@@ -2858,12 +2858,22 @@ class LineChartSeriesPerValueTests(SimpleTestCase):
             self.assertIsInstance(point, list)
 
     def test_hover_has_a_hit_area(self):
-        """symbol:"none" with emphasis disabled left nothing to hover, so an item
-        tooltip could never fire."""
+        """Verified in a browser: symbol:"none" and showSymbol:false both remove the
+        symbol's hit area, and an item tooltip then never fires anywhere on the plot.
+        Symbols must exist and be sized; they are hidden via opacity instead."""
         series = self._option()["series"][0]
-        self.assertNotEqual(series.get("emphasis", {}).get("disabled"), True)
+        self.assertNotEqual(series["symbol"], "none")
+        self.assertTrue(series["showSymbol"])
+        self.assertGreater(series["symbolSize"], 1)
+        self.assertEqual(series["itemStyle"]["opacity"], 0)
         self.assertEqual(series["emphasis"]["focus"], "series")
-        self.assertGreater(series["symbolSize"], 0)
+
+    def test_legend_swatches_stay_visible_despite_transparent_symbols(self):
+        """The legend reads itemStyle, so it must override the opacity used to hide
+        the hover symbols or its swatches vanish too."""
+        option = self._option()
+        self.assertEqual(option["series"][0]["itemStyle"]["opacity"], 0)
+        self.assertEqual(option["legend"]["itemStyle"]["opacity"], 1)
 
     def test_tooltip_triggers_per_item_not_per_axis(self):
         """An axis tooltip would list every series at that x — 163 for this chart."""
