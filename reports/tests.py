@@ -2846,12 +2846,29 @@ class LineChartSeriesPerValueTests(SimpleTestCase):
         settings["tooltips"] = ["year", "day_in_year", "cumulative_heat_days"]
         option = create_line_chart(self.ROWS, settings)
 
+        formatter = option["__js_functions__"]["__series_tt__"]
+        for column in ("year", "day_in_year", "cumulative_heat_days"):
+            self.assertIn(column, formatter)
+
+    def test_derivable_tooltip_columns_are_not_stored_per_point(self):
+        """year, x and y repeat the series key and the point itself. Storing them
+        cost 97 bytes a point instead of 7 — 6 MB on the 163-series chart."""
+        settings = json.loads(json.dumps(self.SETTINGS))
+        settings["tooltips"] = ["year", "day_in_year", "cumulative_heat_days"]
+        option = create_line_chart(self.ROWS, settings)
+
+        for point in option["series"][0]["data"]:
+            self.assertIsInstance(point, list)  # plain [x, y], no extra dict
+        self.assertIn('["year","series"]', option["__js_functions__"]["__series_tt__"].replace(" ", ""))
+
+    def test_non_derivable_tooltip_columns_are_still_stored(self):
+        settings = json.loads(json.dumps(self.SETTINGS))
+        settings["tooltips"] = ["year", "is_hot_day"]
+        rows = [{**row, "is_hot_day": 1} for row in self.ROWS]
+        option = create_line_chart(rows, settings)
+
         point = option["series"][0]["data"][0]
-        self.assertEqual(
-            point["extra"],
-            {"year": "1900", "day_in_year": "1", "cumulative_heat_days": "0"},
-        )
-        self.assertIn("p.data.extra", option["__js_functions__"]["__series_tt__"])
+        self.assertEqual(point["extra"], {"is_hot_day": "1"})  # only the extra one
 
     def test_points_stay_plain_pairs_without_tooltip_columns(self):
         for point in self._option()["series"][0]["data"]:
