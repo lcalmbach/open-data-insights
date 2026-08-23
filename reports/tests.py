@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import sys
 from datetime import UTC, date, datetime, timedelta
@@ -895,6 +896,9 @@ class EiaOilImportTests(SimpleTestCase):
 
         self.assertEqual(rows[0]["source"], "dataset_82_eia")
 
+    # fetch_eia_prices_df reads EIA_API_KEY before it reaches the mocked fetch, so
+    # without this the test passes only on machines with a real key in .env.
+    @patch.dict(os.environ, {"EIA_API_KEY": "test-key"})
     @patch("reports.services.eia_api._fetch_eia_daily_rows")
     def test_fetch_prices_df_fetches_from_api(
         self,
