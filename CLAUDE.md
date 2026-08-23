@@ -40,6 +40,7 @@ proposing to split them.
 
 ## Where to look
 
+- `ROADMAP.md` — what is next, what is blocked, what was decided against
 - `docs/domain-model.md` — Story, StoryTemplate, Focus, Graphic, press review models
 - `docs/pipelines.md` — what each command does and when it runs
 - `docs/charts.md` — graphic types, settings, placeholders
