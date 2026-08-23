@@ -69,3 +69,18 @@ Deploying during a long dataset sync kills it. A 5 GB download took 57 minutes.
 Inserting rows with explicit primary keys does not advance a Postgres sequence,
 and sequences are not rolled back between tests. Collisions appear only in
 full-suite runs, never when running a test alone.
+
+## Never log a request URL raw
+
+`requests` puts the full URL into `HTTPError` messages, and `response.url` carries
+the query string. An EIA failure logged both, writing a live API key into
+`logs/etl.log` — which was committed to a public repository and sat there for five
+months. `reports/services/eia_api.py::redact_url` masks credential-shaped
+parameters; route any URL through it before it reaches a log or an exception.
+Rotate the key rather than rewriting history: once pushed, it is public.
+
+## Tests can depend on your .env without saying so
+
+`fetch_eia_prices_df` reads `EIA_API_KEY` before reaching its mocked HTTP layer, so
+its test passed locally and only locally. CI has no `.env`. Patch the variable in
+the test instead of relying on the developer's environment.

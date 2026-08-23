@@ -11,6 +11,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import pandas as pd
+import requests
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.core.management.base import CommandError
@@ -86,6 +87,7 @@ from reports.services.dataset_sync import (
 from reports.services.eia_api import (
     AVAILABLE_SERIES,
     fetch_eia_prices_df,
+    redact_url,
     list_available_series,
     resolve_series_configs,
     _fetch_eia_daily_rows,
@@ -917,6 +919,49 @@ class EiaOilImportTests(SimpleTestCase):
         self.assertEqual(len(df), 2)
         self.assertEqual(set(df["quote_type"]), {"daily_close"})
         mock_fetch_eia_daily_rows.assert_called_once()
+
+    def test_redact_url_masks_credential_parameters(self):
+        """The exact URL shape that leaked a live key into logs/etl.log."""
+        redacted = redact_url(
+            "https://www.eia.gov/?api_key=Mvl123SECRET456&frequency=daily&offset=0"
+        )
+
+        self.assertNotIn("Mvl123SECRET456", redacted)
+        self.assertIn("api_key=REDACTED", redacted)
+        # Non-sensitive parameters survive, or the message stops being useful.
+        self.assertIn("frequency=daily", redacted)
+        self.assertIn("offset=0", redacted)
+
+    def test_redact_url_is_case_insensitive_and_covers_other_secrets(self):
+        redacted = redact_url("https://x.test/a?API_KEY=k&Token=t&password=p&keep=1")
+
+        for leaked in ("=k&", "=t&", "=p&"):
+            self.assertNotIn(leaked, redacted)
+        self.assertIn("keep=1", redacted)
+
+    def test_redact_url_leaves_urls_without_secrets_alone(self):
+        plain = "https://api.eia.gov/v2/x?frequency=daily&length=5000"
+
+        self.assertEqual(redact_url(plain), plain)
+        self.assertEqual(redact_url("https://api.eia.gov/v2/x"), "https://api.eia.gov/v2/x")
+
+    @patch.dict(os.environ, {"EIA_API_KEY": "test-key"})
+    @patch("reports.services.eia_api.requests.get")
+    def test_http_error_message_does_not_leak_the_api_key(self, mock_get):
+        """requests puts the full URL in HTTPError; the re-raise must not."""
+        response = Mock()
+        response.url = "https://api.eia.gov/v2/x?api_key=SUPERSECRETKEY&frequency=daily"
+        response.status_code = 403
+        response.raise_for_status.side_effect = requests.HTTPError(
+            f"403 Client Error for url: {response.url}"
+        )
+        mock_get.return_value = response
+
+        with self.assertRaises(CommandError) as ctx:
+            fetch_eia_prices_df(series_selection=["RWTC"])
+
+        self.assertNotIn("SUPERSECRETKEY", str(ctx.exception))
+        self.assertIn("api_key=REDACTED", str(ctx.exception))
 
     def test_recent_filter_keeps_only_last_week_dates(self):
         filtered = _filter_recent_daily_rows(

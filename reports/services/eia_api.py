@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from typing import Any
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import pandas as pd
 import requests
@@ -14,6 +15,31 @@ from django.core.management.base import CommandError
 
 DEFAULT_DATASET_LABEL = "eia_pet_pri_spt_s1_d"
 EIA_API_URL = "https://api.eia.gov/v2/petroleum/pri/spt/data/"
+
+# Query parameters whose values must never reach a log or an exception message.
+SENSITIVE_QUERY_PARAMS = frozenset(
+    {"api_key", "apikey", "key", "token", "access_token", "password", "secret"}
+)
+
+
+def redact_url(url: str) -> str:
+    """Mask credential-shaped query parameters so a URL is safe to log.
+
+    Failed requests used to be reported with ``response.url`` verbatim, which wrote
+    a live EIA API key into logs/etl.log — a file that was then committed to a
+    public repository. Anything that surfaces a request URL must go through here.
+    """
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return "<unparseable url>"
+    if not parts.query:
+        return url
+    cleaned = [
+        (key, "REDACTED" if key.lower() in SENSITIVE_QUERY_PARAMS else value)
+        for key, value in parse_qsl(parts.query, keep_blank_values=True)
+    ]
+    return urlunsplit(parts._replace(query=urlencode(cleaned)))
 
 
 @dataclass(frozen=True)
@@ -195,7 +221,15 @@ def _fetch_eia_daily_rows(
             if end_date:
                 params.append(("end", end_date.isoformat()))
             response = requests.get(api_url, params=params, timeout=60)
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except requests.HTTPError:
+                # requests puts the full URL, api_key and all, into the message,
+                # so re-raise with a redacted one and suppress the original.
+                raise CommandError(
+                    f"EIA request failed with HTTP {response.status_code}. "
+                    f"URL: {redact_url(response.url)}"
+                ) from None
             try:
                 payload = response.json()
             except ValueError as exc:
@@ -203,7 +237,8 @@ def _fetch_eia_daily_rows(
                 body_preview = " ".join(response.text.split())[:200]
                 raise CommandError(
                     "EIA source_url did not return JSON. "
-                    f"URL: {response.url} | content-type: {content_type or 'unknown'} | "
+                    f"URL: {redact_url(response.url)} | "
+                    f"content-type: {content_type or 'unknown'} | "
                     f"body preview: {body_preview!r}"
                 ) from exc
             data = payload.get("response", {}).get("data", [])
