@@ -61,8 +61,11 @@ Last reviewed: 2026-08-15
   default focus" invariant looks obsolete — worth confirming rather than assuming.
 - CNN yields little: the source is live via its news sitemap, but the topic
   keywords are German and CNN is English.
-- `CHANGELOG.md` stopped at 1.2.1 while the app is on 1.10.x. Either revive it or
-  drop it in favour of `git log`.
+- `release.py` is orphaned: it bumps the version and maintains a changelog, but
+  nothing calls it — `deploy.sh` does its own bumping, and the changelog it
+  maintained has been removed. Delete it, or fold its tagging into `deploy.sh`.
+- Releases are not tagged. Only one tag exists (`1.2.1`, from March), because
+  `deploy.sh` does not tag.
 
 ## Decided against
 
