@@ -49,12 +49,25 @@ git add "$PYPROJECT" uv.lock
 git diff --cached --quiet && { echo "Nothing to commit."; exit 0; }
 git commit -m "Bump version to $new_version"
 
-# ── 5. Push to GitHub ───────────────────────────────────────────────────────
+# ── 5. Tag the release ──────────────────────────────────────────────────────
+# Guarded: this script has aborted after the commit before (expired credentials),
+# and re-running it would otherwise die here on an existing tag under `set -e`.
+
+if git rev-parse -q --verify "refs/tags/$new_version" >/dev/null; then
+  echo "▶ Tag $new_version already exists — leaving it as is."
+else
+  git tag -a "$new_version" -m "Release $new_version"
+  echo "▶ Tagged $new_version"
+fi
+
+# ── 6. Push to GitHub ───────────────────────────────────────────────────────
 
 echo "▶ Pushing to GitHub (origin/main) …"
-git push origin main
+# --follow-tags pushes the annotated tag above along with the commit, without
+# dragging along unrelated local tags the way --tags would.
+git push --follow-tags origin main
 
-# ── 6. Push to Heroku ───────────────────────────────────────────────────────
+# ── 7. Push to Heroku ───────────────────────────────────────────────────────
 
 echo "▶ Pushing to Heroku …"
 # Migrations run in the Procfile `release` phase, which Heroku executes *before*
