@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A newer push to the same branch makes the older run pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        # Matches the Heroku Postgres major version in production.
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: localhost
+      DB_PORT: 5432
+      SECRET_KEY: ci-secret-not-used-for-anything-real
+      # Leave USE_S3_MEDIA unset so media stays on the local filesystem;
+      # conftest.py enforces this too, but not depending on that is cheaper
+      # than debugging a test that uploads to the production bucket.
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install dependencies
+        # --frozen fails the build if uv.lock has drifted from pyproject.toml,
+        # rather than silently resolving something different from what we ship.
+        run: uv sync --frozen
+
+      - name: Create the report_generator schema
+        # settings.DATABASES pins search_path=report_generator,public, but nothing
+        # in the codebase creates that schema. Creating it in template1 means every
+        # database Postgres subsequently creates — including Django's test_postgres —
+        # inherits it.
+        run: |
+          psql "postgresql://postgres:postgres@localhost:5432/template1" \
+            -c 'CREATE SCHEMA IF NOT EXISTS report_generator;'
+        env:
+          PGPASSWORD: postgres
+
+      - name: Django system checks
+        run: uv run python manage.py check
+
+      - name: Tests
+        run: uv run pytest

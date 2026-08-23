@@ -3,13 +3,10 @@
 Where this is going, and what has already been decided. Reference documentation
 lives in `docs/`; this file is intent, not state.
 
-Last reviewed: 2026-08-15
+Last reviewed: 2026-08-23
 
 ## Next
 
-- **CI.** No automated test run exists; the suite runs only when invoked by hand.
-  A GitHub Actions workflow running the non-DB tests on push would have caught
-  most of what broke recently. Highest value per effort of anything here.
 - **Groundwater insight.** `ds_100164` (954k rows) and `ds_100164_stations` are
   migrated to production and the map colour-binning and legend work is done, but
   no StoryTemplate exists yet. Add an index on `(stationnr, date)` when the
@@ -25,6 +22,10 @@ Last reviewed: 2026-08-15
   which 98% was inline chart payload. Serving chart data from an endpoint and
   lazy-loading would cut it sharply. The memory work made this survivable, not
   fixed.
+- **Gate deploys on CI.** `.github/workflows/ci.yml` runs the full suite on every
+  push, but `deploy.sh` still pushes to Heroku regardless of the result. Worth
+  adding once CI has been green long enough to trust it not to block a deploy for
+  a flaky reason.
 - **Task queue.** Press review "Apply" does LLM work inside a web request (~30 s,
   near Heroku's router timeout), and long dataset syncs die when a deploy
   restarts the dyno. Both point at a queue rather than an architecture change.
@@ -62,10 +63,8 @@ Last reviewed: 2026-08-15
 - CNN yields little: the source is live via its news sitemap, but the topic
   keywords are German and CNN is English.
 - `release.py` is orphaned: it bumps the version and maintains a changelog, but
-  nothing calls it — `deploy.sh` does its own bumping, and the changelog it
-  maintained has been removed. Delete it, or fold its tagging into `deploy.sh`.
-- Releases are not tagged. Only one tag exists (`1.2.1`, from March), because
-  `deploy.sh` does not tag.
+  nothing calls it — `deploy.sh` does its own bumping and tagging, and the
+  changelog it maintained has been removed. Delete it.
 
 ## Decided against
 
