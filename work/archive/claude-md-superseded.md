@@ -1,3 +1,6 @@
+> SUPERSEDED. Replaced by /CLAUDE.md and docs/ (this file was never auto-loaded;
+> Claude Code reads CLAUDE.md from the repo root). Kept for reference only.
+
 # Open Data Insights (ODI) — Project Context
 
 ## What this project is
