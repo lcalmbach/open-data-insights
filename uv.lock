@@ -1242,7 +1242,7 @@ wheels = [
 
 [[package]]
 name = "open-data-insights"
-version = "1.10.16"
+version = "1.10.17"
 source = { virtual = "." }
 dependencies = [
     { name = "anthropic" },
