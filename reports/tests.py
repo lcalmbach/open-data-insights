@@ -555,6 +555,10 @@ class StoryTemplateFocusSqlReplacementTests(TestCase):
             active=True,
         )
 
+    # StoryProcessor builds an AI client in its constructor, and the OpenAI client
+    # raises unless a key is present. Without this the test passes only on machines
+    # that happen to export OPENAI_API_KEY. Nothing here ever calls the model.
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"})
     def test_focus_conditions_use_filter_value_not_focus_filter(self):
         """`:focus_filter` no longer exists; templates use `:filter_value`.
 

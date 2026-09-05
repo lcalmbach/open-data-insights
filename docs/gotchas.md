@@ -79,8 +79,14 @@ months. `reports/services/eia_api.py::redact_url` masks credential-shaped
 parameters; route any URL through it before it reaches a log or an exception.
 Rotate the key rather than rewriting history: once pushed, it is public.
 
-## Tests can depend on your .env without saying so
+## Tests can depend on your environment without saying so
 
 `fetch_eia_prices_df` reads `EIA_API_KEY` before reaching its mocked HTTP layer, so
 its test passed locally and only locally. CI has no `.env`. Patch the variable in
 the test instead of relying on the developer's environment.
+
+The same trap twice: `StoryProcessor.__init__` builds an AI client, and the OpenAI
+client raises without `OPENAI_API_KEY`. That one passed even in a `.env`-free
+checkout, because the key was exported in the developer's shell — only a container
+with a clean environment showed it. When a test fails in CI but not locally, run it
+somewhere that inherits nothing from you.
