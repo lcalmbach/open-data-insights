@@ -1650,10 +1650,10 @@ class RecordCountImportTests(SimpleTestCase):
         connector.logger = Mock()
         connector.dataset = SimpleNamespace(
             base_url="data.bs.ch",
-            source_identifier="100254",
-            target_table_name="ds_100254",
-            db_timestamp_field="date" if ts else "",
-            source_timestamp_field="date" if ts else "",
+            source_identifier="100389",
+            target_table_name="ds_100389",
+            db_timestamp_field="erfassungszeit" if ts else "",
+            source_timestamp_field="erfassungszeit" if ts else "",
             allow_future_data=False,
             fields_selection=None,
         )
@@ -1663,7 +1663,9 @@ class RecordCountImportTests(SimpleTestCase):
         )
         connector.dbclient.delete_rows_from.return_value = True
         connector.get_ods_record_count = Mock(return_value=remote_count)
-        connector.download_ods_data = Mock(return_value=pd.DataFrame({"date": ["2026-09-01"]}))
+        connector.download_ods_data = Mock(
+            return_value=pd.DataFrame({"erfassungszeit": ["2026-09-01"]})
+        )
         connector.transform_ods_data = Mock(side_effect=lambda df: df)
         connector._sync_new_table = Mock(return_value=True)
         return connector
@@ -1678,20 +1680,36 @@ class RecordCountImportTests(SimpleTestCase):
 
         self.assertEqual(handler, connector._sync_record_count)
 
+    def test_counts_are_compared_within_the_reload_window(self):
+        """ds_100389 holds 230 rows more than its source overall, yet was missing
+        5 from the last month. A whole-table count would report a surplus and
+        never reload, so the comparison is restricted to the window."""
+        connector = self._connector(db_count=109, remote_count=114, window_rows=114)
+
+        OdsDatasetConnector._sync_record_count(
+            connector, Path("f.parquet"), Path("a.parquet"), "ds_100389"
+        )
+
+        count_kwargs = connector.dbclient.get_table_row_count.call_args_list[0].kwargs
+        self.assertEqual(count_kwargs["since_column"], "erfassungszeit")
+        self.assertIsNotNone(count_kwargs["since_value"])
+        # The source count is asked for over the same window.
+        self.assertIn("erfassungszeit >=", connector.get_ods_record_count.call_args.args[0])
+        connector.dbclient.delete_rows_from.assert_called_once()
+
     def test_equal_counts_do_not_reload(self):
-        connector = self._connector(db_count=59417, remote_count=59417)
+        connector = self._connector(db_count=114, remote_count=114)
 
         result = OdsDatasetConnector._sync_record_count(
-            connector, Path("f.parquet"), Path("a.parquet"), "ds_100254"
+            connector, Path("f.parquet"), Path("a.parquet"), "ds_100389"
         )
 
         self.assertTrue(result)
         connector.dbclient.delete_rows_from.assert_not_called()
         connector.download_ods_data.assert_not_called()
 
-    def test_surplus_rows_warn_rather_than_reload(self):
-        """Seen live: ds_100389 held 8684 rows against 8462 at source."""
-        connector = self._connector(db_count=8684, remote_count=8462)
+    def test_surplus_in_the_window_warns_rather_than_reloading(self):
+        connector = self._connector(db_count=120, remote_count=114)
 
         result = OdsDatasetConnector._sync_record_count(
             connector, Path("f.parquet"), Path("a.parquet"), "ds_100389"
@@ -1702,33 +1720,32 @@ class RecordCountImportTests(SimpleTestCase):
         self.assertTrue(connector.logger.warning.called)
 
     @patch("reports.services.dataset_sync.pd.DataFrame.to_parquet", Mock())
-    def test_short_table_reloads_the_recent_window(self):
-        connector = self._connector(db_count=59414, remote_count=59417, window_rows=59417)
+    def test_short_window_is_deleted_and_re_downloaded(self):
+        connector = self._connector(db_count=109, remote_count=114, window_rows=114)
 
         result = OdsDatasetConnector._sync_record_count(
-            connector, Path("f.parquet"), Path("a.parquet"), "ds_100254"
+            connector, Path("f.parquet"), Path("a.parquet"), "ds_100389"
         )
 
         self.assertTrue(result)
-        connector.dbclient.delete_rows_from.assert_called_once()
         self.assertEqual(
-            connector.dbclient.delete_rows_from.call_args.args[1], "date"
+            connector.dbclient.delete_rows_from.call_args.args[1], "erfassungszeit"
         )
         connector.dbclient.upload_to_db.assert_called_once()
 
     @patch("reports.services.dataset_sync.pd.DataFrame.to_parquet", Mock())
-    def test_still_short_after_window_warns_about_a_full_reload(self):
-        connector = self._connector(db_count=59000, remote_count=59417, window_rows=59100)
+    def test_still_short_after_window_warns(self):
+        connector = self._connector(db_count=100, remote_count=114, window_rows=105)
 
         result = OdsDatasetConnector._sync_record_count(
-            connector, Path("f.parquet"), Path("a.parquet"), "ds_100254"
+            connector, Path("f.parquet"), Path("a.parquet"), "ds_100389"
         )
 
         self.assertTrue(result)
         warnings = " ".join(str(c) for c in connector.logger.warning.call_args_list)
-        self.assertIn("full reload", warnings)
+        self.assertIn("predate the window", warnings)
 
-    def test_without_a_timestamp_field_the_whole_table_is_reloaded(self):
+    def test_without_a_timestamp_field_totals_drive_a_full_reload(self):
         connector = self._connector(db_count=10, remote_count=20, ts=False)
 
         result = OdsDatasetConnector._sync_record_count(
@@ -1742,19 +1759,18 @@ class RecordCountImportTests(SimpleTestCase):
     def test_record_count_uses_limit_zero_and_passes_the_where_clause(self):
         connector = OdsDatasetConnector.__new__(OdsDatasetConnector)
         connector.logger = Mock()
-        connector.dataset = SimpleNamespace(base_url="data.bs.ch", source_identifier="100254")
+        connector.dataset = SimpleNamespace(base_url="data.bs.ch", source_identifier="100389")
 
         with patch("reports.services.dataset_sync.requests.get") as mock_get:
             mock_get.return_value = Mock(
-                json=Mock(return_value={"total_count": 59417}),
-                raise_for_status=Mock(),
+                json=Mock(return_value={"total_count": 114}), raise_for_status=Mock()
             )
-            count = OdsDatasetConnector.get_ods_record_count(connector, "date < '2026-09-05'")
+            count = OdsDatasetConnector.get_ods_record_count(connector, "erfassungszeit >= '2026-08-05'")
 
-        self.assertEqual(count, 59417)
+        self.assertEqual(count, 114)
         params = mock_get.call_args.kwargs["params"]
         self.assertEqual(params["limit"], 0)
-        self.assertEqual(params["where"], "date < '2026-09-05'")
+        self.assertEqual(params["where"], "erfassungszeit >= '2026-08-05'")
 
 
 class RecordCountImportTypeMigrationTests(TestCase):

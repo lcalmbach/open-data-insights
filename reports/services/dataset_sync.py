@@ -983,13 +983,46 @@ class OdsDatasetConnector:
     ) -> bool:
         """Reload when the target table holds fewer rows than the source.
 
-        The timestamp check misses records back-dated behind the newest one, which
-        some sources do routinely. Comparing counts catches those, at the cost of
-        not knowing *where* the missing rows went — so the recent window is
-        re-imported wholesale rather than appended to.
+        The timestamp check asks whether the source has anything newer than the
+        newest local row, so records back-dated behind that watermark are never
+        seen. Counting catches them.
+
+        The count is taken over the reload window, not the whole table. Sources
+        withdraw records as well as add them: ds_100389 holds 230 rows more than
+        its source overall while still missing 5 from the last month, so a
+        whole-table comparison would report a surplus and never reload.
         """
-        where_clause = self.get_time_limit_where_clause()
-        remote_count = self.get_ods_record_count(where_clause)
+        time_limit_clause = self.get_time_limit_where_clause()
+        has_timestamp = bool(
+            self.dataset.db_timestamp_field and self.dataset.source_timestamp_field
+        )
+
+        if not has_timestamp:
+            # Nothing to window on, so compare totals and replace everything.
+            remote_total = self.get_ods_record_count(time_limit_clause)
+            db_total = self.dbclient.get_table_row_count(
+                self.dataset.target_table_name, schema="opendata"
+            )
+            if remote_total is None or db_total is None:
+                self.logger.error(f"Could not compare record counts for {remote_table}.")
+                return False
+            if db_total >= remote_total:
+                self.logger.info(f"{remote_table} is up to date ({db_total} rows).")
+                return True
+            self.logger.info(
+                f"{remote_table} is short by {remote_total - db_total} rows. Reloading."
+            )
+            return self._reload_whole_table(filename, agg_filename, remote_table)
+
+        window_days = int(getattr(settings, "DATASET_SYNC_RELOAD_WINDOW_DAYS", 31))
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=window_days)).date()
+        cutoff_str = cutoff.strftime("%Y-%m-%d")
+
+        window_clause = f"{self.dataset.source_timestamp_field} >= '{cutoff_str}'"
+        if time_limit_clause:
+            window_clause = f"{window_clause} and {time_limit_clause}"
+
+        remote_count = self.get_ods_record_count(window_clause)
         if remote_count is None:
             self.logger.error(
                 f"Could not read the source record count for {remote_table}; skipping."
@@ -997,7 +1030,10 @@ class OdsDatasetConnector:
             return False
 
         db_count = self.dbclient.get_table_row_count(
-            self.dataset.target_table_name, schema="opendata"
+            self.dataset.target_table_name,
+            schema="opendata",
+            since_column=self.dataset.db_timestamp_field,
+            since_value=cutoff,
         )
         if db_count is None:
             self.logger.error(f"Could not count rows in {remote_table}; skipping.")
@@ -1005,34 +1041,24 @@ class OdsDatasetConnector:
 
         if db_count >= remote_count:
             if db_count > remote_count:
-                # Not something this import type can fix: the table holds rows the
-                # source no longer has. Worth seeing in the log rather than silently
-                # reporting success.
+                # Rows the source no longer has. Not something a reload repairs,
+                # but worth seeing rather than reporting a clean success.
                 self.logger.warning(
                     f"{remote_table} holds {db_count - remote_count} more rows than the "
-                    f"source ({db_count} vs {remote_count}). Records may have been "
-                    f"withdrawn upstream, or the table has duplicates."
+                    f"source since {cutoff_str} ({db_count} vs {remote_count}). Records "
+                    f"may have been withdrawn upstream."
                 )
             else:
                 self.logger.info(
-                    f"{remote_table} is up to date ({db_count} rows)."
+                    f"{remote_table} is up to date ({db_count} rows since {cutoff_str})."
                 )
             return True
 
         missing = remote_count - db_count
         self.logger.info(
-            f"{remote_table} is short by {missing} rows ({db_count} local vs "
-            f"{remote_count} at source). Reloading."
+            f"{remote_table} is short by {missing} rows since {cutoff_str} "
+            f"({db_count} local vs {remote_count} at source). Reloading the window."
         )
-
-        if not (self.dataset.db_timestamp_field and self.dataset.source_timestamp_field):
-            # Nothing to window on, so the whole table has to go.
-            return self._reload_whole_table(filename, agg_filename, remote_table)
-
-        window_days = int(
-            getattr(settings, "DATASET_SYNC_RELOAD_WINDOW_DAYS", 31)
-        )
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=window_days)).date()
 
         if not self.dbclient.delete_rows_from(
             self.dataset.target_table_name,
@@ -1041,10 +1067,6 @@ class OdsDatasetConnector:
             schema="opendata",
         ):
             return False
-
-        window_clause = f"{self.dataset.source_timestamp_field} >= '{cutoff.strftime('%Y-%m-%d')}'"
-        if where_clause:
-            window_clause = f"{window_clause} and {where_clause}"
 
         df = self.download_ods_data(
             filename,
@@ -1063,20 +1085,22 @@ class OdsDatasetConnector:
             self.dbclient.upload_to_db(str(agg_filename), self.dataset.target_table_name)
 
         new_count = self.dbclient.get_table_row_count(
-            self.dataset.target_table_name, schema="opendata"
+            self.dataset.target_table_name,
+            schema="opendata",
+            since_column=self.dataset.db_timestamp_field,
+            since_value=cutoff,
         )
         if new_count is not None and new_count < remote_count:
-            # The missing rows sit further back than the window. Say so plainly:
-            # left alone this would re-run the same partial reload every day.
+            # Left alone this would re-run the same partial reload every day.
             self.logger.warning(
                 f"{remote_table} is still short after reloading the last {window_days} "
                 f"days ({new_count} vs {remote_count}). The missing rows predate the "
-                f"window — run a full reload for this dataset."
+                f"window — widen DATASET_SYNC_RELOAD_WINDOW_DAYS or run a full reload."
             )
         else:
             self.logger.info(
                 f"{remote_table} reloaded over the last {window_days} days; "
-                f"{new_count} rows."
+                f"{new_count} rows in the window."
             )
         return True
 

@@ -85,15 +85,31 @@ class DjangoPostgresClient:
             success = False
         return success
 
-    def get_table_row_count(self, table_name: str, schema: str = None) -> Optional[int]:
-        """Return the row count of a table, or None if it cannot be read."""
+    def get_table_row_count(
+        self,
+        table_name: str,
+        schema: str = None,
+        since_column: str = None,
+        since_value=None,
+    ) -> Optional[int]:
+        """Return the row count of a table, or None if it cannot be read.
+
+        With `since_column`/`since_value` the count is restricted to that window,
+        which is what makes the count comparable against a source that also
+        deletes records: a whole-table count can be higher locally than at source
+        while a recent window is still missing rows.
+        """
         if schema is None:
             schema = self.schema
 
         query = f'SELECT COUNT(*) FROM "{schema}"."{table_name}"'
+        params = None
+        if since_column is not None and since_value is not None:
+            query += f' WHERE "{since_column}" >= %(since)s'
+            params = {"since": since_value}
         try:
             with connection.cursor() as cursor:
-                cursor.execute(query)
+                cursor.execute(query, params) if params else cursor.execute(query)
                 return cursor.fetchone()[0]
         except Exception as e:
             self.logger.error(f"Error counting rows in {schema}.{table_name}: {e}")
