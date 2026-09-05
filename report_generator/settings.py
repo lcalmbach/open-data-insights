@@ -292,6 +292,10 @@ DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY')
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
 DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL', 'deepseek-v4-pro')
 
+# How far back the "Import if record count differs" type re-imports when the
+# target table is short. New rows are normally back-dated by at most two weeks.
+DATASET_SYNC_RELOAD_WINDOW_DAYS = int(os.environ.get('DATASET_SYNC_RELOAD_WINDOW_DAYS', '31'))
+
 # Press Review (RSS harvesting + per-user relevance scoring), parallel to story generation
 # Default relevance threshold for new users; each user can override it on their profile.
 PRESSREVIEW_RELEVANCE_THRESHOLD = int(os.environ.get('PRESSREVIEW_RELEVANCE_THRESHOLD', '7'))

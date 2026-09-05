@@ -21,7 +21,11 @@ from django.utils import timezone
 from django.urls import reverse
 
 from account.models import CustomUser
-from reports.models.dataset import ImportTypeEnum, PeriodEnum
+from reports.models.dataset import (
+    IMPORT_TYPE_RECORD_COUNT_KEY,
+    ImportTypeEnum,
+    PeriodEnum,
+)
 from reports.models.lookups import (
     LanguageEnum,
     PERIOD_CATEGORY_ID,
@@ -29,6 +33,7 @@ from reports.models.lookups import (
     REGION_CATEGORY_ID,
     TOPIC_CATEGORY_ID,
     LookupCategory,
+    LookupValue,
     Period,
     PeriodDirection,
     Region,
@@ -1635,6 +1640,159 @@ class DatasetSyncSkipTests(SimpleTestCase):
         self.assertTrue(results["success"])
         self.assertEqual(results["successful"], 1)
         mock_cleanup_temp_files.assert_not_called()
+
+
+class RecordCountImportTests(SimpleTestCase):
+    """The "Import if record count differs" type: catches back-dated records."""
+
+    def _connector(self, *, db_count, remote_count, ts=True, window_rows=None):
+        connector = OdsDatasetConnector.__new__(OdsDatasetConnector)
+        connector.logger = Mock()
+        connector.dataset = SimpleNamespace(
+            base_url="data.bs.ch",
+            source_identifier="100254",
+            target_table_name="ds_100254",
+            db_timestamp_field="date" if ts else "",
+            source_timestamp_field="date" if ts else "",
+            allow_future_data=False,
+            fields_selection=None,
+        )
+        connector.dbclient = Mock()
+        connector.dbclient.get_table_row_count.side_effect = (
+            [db_count] if window_rows is None else [db_count, window_rows]
+        )
+        connector.dbclient.delete_rows_from.return_value = True
+        connector.get_ods_record_count = Mock(return_value=remote_count)
+        connector.download_ods_data = Mock(return_value=pd.DataFrame({"date": ["2026-09-01"]}))
+        connector.transform_ods_data = Mock(side_effect=lambda df: df)
+        connector._sync_new_table = Mock(return_value=True)
+        return connector
+
+    def test_dispatch_selects_the_handler_by_key(self):
+        connector = self._connector(db_count=1, remote_count=1)
+        connector.dataset.import_type = SimpleNamespace(
+            key=IMPORT_TYPE_RECORD_COUNT_KEY, id=999
+        )
+
+        handler = OdsDatasetConnector._get_existing_table_handler(connector)
+
+        self.assertEqual(handler, connector._sync_record_count)
+
+    def test_equal_counts_do_not_reload(self):
+        connector = self._connector(db_count=59417, remote_count=59417)
+
+        result = OdsDatasetConnector._sync_record_count(
+            connector, Path("f.parquet"), Path("a.parquet"), "ds_100254"
+        )
+
+        self.assertTrue(result)
+        connector.dbclient.delete_rows_from.assert_not_called()
+        connector.download_ods_data.assert_not_called()
+
+    def test_surplus_rows_warn_rather_than_reload(self):
+        """Seen live: ds_100389 held 8684 rows against 8462 at source."""
+        connector = self._connector(db_count=8684, remote_count=8462)
+
+        result = OdsDatasetConnector._sync_record_count(
+            connector, Path("f.parquet"), Path("a.parquet"), "ds_100389"
+        )
+
+        self.assertTrue(result)
+        connector.dbclient.delete_rows_from.assert_not_called()
+        self.assertTrue(connector.logger.warning.called)
+
+    @patch("reports.services.dataset_sync.pd.DataFrame.to_parquet", Mock())
+    def test_short_table_reloads_the_recent_window(self):
+        connector = self._connector(db_count=59414, remote_count=59417, window_rows=59417)
+
+        result = OdsDatasetConnector._sync_record_count(
+            connector, Path("f.parquet"), Path("a.parquet"), "ds_100254"
+        )
+
+        self.assertTrue(result)
+        connector.dbclient.delete_rows_from.assert_called_once()
+        self.assertEqual(
+            connector.dbclient.delete_rows_from.call_args.args[1], "date"
+        )
+        connector.dbclient.upload_to_db.assert_called_once()
+
+    @patch("reports.services.dataset_sync.pd.DataFrame.to_parquet", Mock())
+    def test_still_short_after_window_warns_about_a_full_reload(self):
+        connector = self._connector(db_count=59000, remote_count=59417, window_rows=59100)
+
+        result = OdsDatasetConnector._sync_record_count(
+            connector, Path("f.parquet"), Path("a.parquet"), "ds_100254"
+        )
+
+        self.assertTrue(result)
+        warnings = " ".join(str(c) for c in connector.logger.warning.call_args_list)
+        self.assertIn("full reload", warnings)
+
+    def test_without_a_timestamp_field_the_whole_table_is_reloaded(self):
+        connector = self._connector(db_count=10, remote_count=20, ts=False)
+
+        result = OdsDatasetConnector._sync_record_count(
+            connector, Path("f.parquet"), Path("a.parquet"), "ds_x"
+        )
+
+        self.assertTrue(result)
+        connector.dbclient.delete_table.assert_called_once()
+        connector._sync_new_table.assert_called_once()
+
+    def test_record_count_uses_limit_zero_and_passes_the_where_clause(self):
+        connector = OdsDatasetConnector.__new__(OdsDatasetConnector)
+        connector.logger = Mock()
+        connector.dataset = SimpleNamespace(base_url="data.bs.ch", source_identifier="100254")
+
+        with patch("reports.services.dataset_sync.requests.get") as mock_get:
+            mock_get.return_value = Mock(
+                json=Mock(return_value={"total_count": 59417}),
+                raise_for_status=Mock(),
+            )
+            count = OdsDatasetConnector.get_ods_record_count(connector, "date < '2026-09-05'")
+
+        self.assertEqual(count, 59417)
+        params = mock_get.call_args.kwargs["params"]
+        self.assertEqual(params["limit"], 0)
+        self.assertEqual(params["where"], "date < '2026-09-05'")
+
+
+class RecordCountImportTypeMigrationTests(TestCase):
+    """The lookup row the new import type is selected by."""
+
+    def _run_forward(self):
+        import importlib
+
+        from django.apps import apps as global_apps
+
+        module = importlib.import_module(
+            "reports.migrations.0211_add_record_count_import_type"
+        )
+        module.add_record_count_import_type(global_apps, None)
+        return module
+
+    def test_creates_the_lookup_value_when_the_category_exists(self):
+        category = LookupCategory.objects.create(name="data-import-type")
+
+        self._run_forward()
+
+        value = LookupValue.objects.get(category=category, key="imp-CNT")
+        self.assertEqual(value.value, "Import if record count differs")
+        self.assertEqual(value.sort_order, 5)
+
+    def test_running_twice_does_not_duplicate(self):
+        LookupCategory.objects.create(name="data-import-type")
+
+        self._run_forward()
+        self._run_forward()
+
+        self.assertEqual(LookupValue.objects.filter(key="imp-CNT").count(), 1)
+
+    def test_is_a_no_op_without_the_category(self):
+        """A fresh database has no lookup seed data; assuming id 8 broke it."""
+        self._run_forward()
+
+        self.assertFalse(LookupValue.objects.filter(key="imp-CNT").exists())
 
 
 class StoryGenerationLanguageTests(SimpleTestCase):

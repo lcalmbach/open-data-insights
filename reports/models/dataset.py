@@ -15,6 +15,13 @@ class ImportTypeEnum(Enum):
     SKIP = 82
 
 
+# Matched by LookupValue.key rather than by id like ImportTypeEnum above.
+# LookupValue ids have diverged between environments — local tops out at 134,
+# production at 262 — so any id hardcoded here would be free in one and already
+# taken in the other. The key is stable everywhere and needs no coordination.
+IMPORT_TYPE_RECORD_COUNT_KEY = "imp-CNT"
+
+
 class PeriodEnum(Enum):
     DAILY = 35
     WEEKLY = 70

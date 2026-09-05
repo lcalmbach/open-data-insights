@@ -32,7 +32,12 @@ from reports.services.utils import (
     get_parquet_row_count,
     make_utc,
 )
-from reports.models.dataset import Dataset, ImportTypeEnum, PeriodEnum
+from reports.models.dataset import (
+    IMPORT_TYPE_RECORD_COUNT_KEY,
+    Dataset,
+    ImportTypeEnum,
+    PeriodEnum,
+)
 
 
 class DatasetSyncService(ETLBaseService):
@@ -658,6 +663,29 @@ class OdsDatasetConnector:
         else:
             return 0, None
 
+    def get_ods_record_count(self, where_clause: str = None) -> Optional[int]:
+        """Return the source's record count, or None if it cannot be read.
+
+        `limit=0` returns no rows, only the count, so this stays cheap on the
+        large datasets. The caller passes the same where clause the import uses:
+        without it a dataset whose import excludes today's rows would look
+        permanently short and reload on every run.
+        """
+        url = (
+            f"https://{self.dataset.base_url}/api/explore/v2.1"
+            f"/catalog/datasets/{self.dataset.source_identifier}/records"
+        )
+        params = {"limit": 0}
+        if where_clause:
+            params["where"] = where_clause
+        try:
+            response = requests.get(url, params=params, timeout=30)
+            response.raise_for_status()
+            return response.json().get("total_count")
+        except Exception as e:
+            self.logger.error(f"Failed to fetch ODS record count: {e}")
+            return None
+
     def get_ods_identifiers(self) -> List[Any]:
         """Get all record identifiers from ODS"""
         if not self.has_record_identifier_field:
@@ -857,13 +885,18 @@ class OdsDatasetConnector:
 
     def _get_existing_table_handler(self):
         """Return the handler for the configured import type."""
+        import_type = self.dataset.import_type
+        # Matched by key, not id: see IMPORT_TYPE_RECORD_COUNT_KEY.
+        if getattr(import_type, "key", None) == IMPORT_TYPE_RECORD_COUNT_KEY:
+            return self._sync_record_count
+
         handlers = {
             ImportTypeEnum.NEW_TIMESTAMP.value: self._sync_new_timestamp,
             ImportTypeEnum.NEW_PK.value: self._sync_new_identifier,
             ImportTypeEnum.NEW_YEAR.value: self._sync_new_year,
             ImportTypeEnum.NEW_YEAR_MONTH.value: self._sync_new_year_month,
         }
-        return handlers.get(self.dataset.import_type.id)
+        return handlers.get(import_type.id)
 
     def _sync_new_timestamp(
         self, filename: Path, agg_filename: Path, remote_table: str
@@ -944,6 +977,118 @@ class OdsDatasetConnector:
             f"{count} records added to target database table {remote_table}."
         )
         return True
+
+    def _sync_record_count(
+        self, filename: Path, agg_filename: Path, remote_table: str
+    ) -> bool:
+        """Reload when the target table holds fewer rows than the source.
+
+        The timestamp check misses records back-dated behind the newest one, which
+        some sources do routinely. Comparing counts catches those, at the cost of
+        not knowing *where* the missing rows went — so the recent window is
+        re-imported wholesale rather than appended to.
+        """
+        where_clause = self.get_time_limit_where_clause()
+        remote_count = self.get_ods_record_count(where_clause)
+        if remote_count is None:
+            self.logger.error(
+                f"Could not read the source record count for {remote_table}; skipping."
+            )
+            return False
+
+        db_count = self.dbclient.get_table_row_count(
+            self.dataset.target_table_name, schema="opendata"
+        )
+        if db_count is None:
+            self.logger.error(f"Could not count rows in {remote_table}; skipping.")
+            return False
+
+        if db_count >= remote_count:
+            if db_count > remote_count:
+                # Not something this import type can fix: the table holds rows the
+                # source no longer has. Worth seeing in the log rather than silently
+                # reporting success.
+                self.logger.warning(
+                    f"{remote_table} holds {db_count - remote_count} more rows than the "
+                    f"source ({db_count} vs {remote_count}). Records may have been "
+                    f"withdrawn upstream, or the table has duplicates."
+                )
+            else:
+                self.logger.info(
+                    f"{remote_table} is up to date ({db_count} rows)."
+                )
+            return True
+
+        missing = remote_count - db_count
+        self.logger.info(
+            f"{remote_table} is short by {missing} rows ({db_count} local vs "
+            f"{remote_count} at source). Reloading."
+        )
+
+        if not (self.dataset.db_timestamp_field and self.dataset.source_timestamp_field):
+            # Nothing to window on, so the whole table has to go.
+            return self._reload_whole_table(filename, agg_filename, remote_table)
+
+        window_days = int(
+            getattr(settings, "DATASET_SYNC_RELOAD_WINDOW_DAYS", 31)
+        )
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=window_days)).date()
+
+        if not self.dbclient.delete_rows_from(
+            self.dataset.target_table_name,
+            self.dataset.db_timestamp_field,
+            cutoff,
+            schema="opendata",
+        ):
+            return False
+
+        window_clause = f"{self.dataset.source_timestamp_field} >= '{cutoff.strftime('%Y-%m-%d')}'"
+        if where_clause:
+            window_clause = f"{window_clause} and {where_clause}"
+
+        df = self.download_ods_data(
+            filename,
+            where_clause=window_clause,
+            fields=(
+                self.dataset.fields_selection if self.dataset.fields_selection else None
+            ),
+        )
+        if df is False:
+            self.logger.error(f"Failed to download the reload window for {remote_table}.")
+            return False
+
+        if not df.empty:
+            df = self.transform_ods_data(df)
+            df.to_parquet(agg_filename)
+            self.dbclient.upload_to_db(str(agg_filename), self.dataset.target_table_name)
+
+        new_count = self.dbclient.get_table_row_count(
+            self.dataset.target_table_name, schema="opendata"
+        )
+        if new_count is not None and new_count < remote_count:
+            # The missing rows sit further back than the window. Say so plainly:
+            # left alone this would re-run the same partial reload every day.
+            self.logger.warning(
+                f"{remote_table} is still short after reloading the last {window_days} "
+                f"days ({new_count} vs {remote_count}). The missing rows predate the "
+                f"window — run a full reload for this dataset."
+            )
+        else:
+            self.logger.info(
+                f"{remote_table} reloaded over the last {window_days} days; "
+                f"{new_count} rows."
+            )
+        return True
+
+    def _reload_whole_table(
+        self, filename: Path, agg_filename: Path, remote_table: str
+    ) -> bool:
+        """Drop and re-download the entire table."""
+        self.logger.info(
+            f"No timestamp field on {remote_table}; performing a full reload."
+        )
+        self.dbclient.delete_table(self.dataset.target_table_name, schema="opendata")
+        return self._sync_new_table(filename, agg_filename, remote_table)
 
     def _sync_new_identifier(
         self, filename: Path, agg_filename: Path, remote_table: str

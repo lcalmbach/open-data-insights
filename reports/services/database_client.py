@@ -85,6 +85,38 @@ class DjangoPostgresClient:
             success = False
         return success
 
+    def get_table_row_count(self, table_name: str, schema: str = None) -> Optional[int]:
+        """Return the row count of a table, or None if it cannot be read."""
+        if schema is None:
+            schema = self.schema
+
+        query = f'SELECT COUNT(*) FROM "{schema}"."{table_name}"'
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(query)
+                return cursor.fetchone()[0]
+        except Exception as e:
+            self.logger.error(f"Error counting rows in {schema}.{table_name}: {e}")
+            return None
+
+    def delete_rows_from(
+        self, table_name: str, column: str, cutoff, schema: str = None
+    ) -> bool:
+        """Delete rows where `column` >= `cutoff`. Used to re-import a recent window."""
+        if schema is None:
+            schema = self.schema
+
+        query = f'DELETE FROM "{schema}"."{table_name}" WHERE "{column}" >= %(cutoff)s'
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(query, {"cutoff": cutoff})
+            return True
+        except Exception as e:
+            self.logger.error(
+                f"Error deleting rows from {schema}.{table_name} where {column} >= {cutoff}: {e}"
+            )
+            return False
+
     def table_exists(self, table_name: str, schema: str = None) -> bool:
         """Check if a table exists in the database"""
         if schema is None:
