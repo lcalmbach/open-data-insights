@@ -90,3 +90,19 @@ client raises without `OPENAI_API_KEY`. That one passed even in a `.env`-free
 checkout, because the key was exported in the developer's shell — only a container
 with a clean environment showed it. When a test fails in CI but not locally, run it
 somewhere that inherits nothing from you.
+
+## `synch_prod --dry-run` used to write
+
+When the destination lacked the parent template, `_sync_children_of_parent_slug`
+called `_sync_one_parent_by_id(..., dry=False)` so that children had something to
+attach to. A dry run therefore created the template for real and only simulated
+its children, leaving production with a story template that had no contexts,
+graphics, tables or focus. Fixed, with a regression test — but the lesson is
+wider: check what a "safe" flag actually does before trusting it against
+production.
+
+## synch_prod does not sync dataset links
+
+`StoryTemplateDataset` is in neither direction's child list, so a pushed or pulled
+template arrives without its dataset. Add the link by hand afterwards, or the
+story renders with no data source.

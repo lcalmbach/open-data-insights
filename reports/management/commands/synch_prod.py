@@ -590,6 +590,17 @@ class Command(BaseCommand):
             except StoryTemplate.DoesNotExist:
                 self.stdout.write(self.style.WARNING(f"      · Parent not found in src for slug={parent_slug}, skipping children"))
                 return
+            if dry:
+                # A dry run must not write. Without a destination parent the children
+                # cannot exist yet, so every one of them would be created; report that
+                # and leave the database alone. This previously passed dry=False and
+                # created the parent for real, leaving production holding a template
+                # with no contexts, graphics, tables or focus.
+                for obj in src_qs.iterator(chunk_size=1000):
+                    slug = getattr(obj, "slug", None)
+                    suffix = f" slug={slug}" if slug else ""
+                    self.stdout.write(self.style.SUCCESS(f"      -> would CREATE {name}{suffix}"))
+                return
             self._sync_one_parent_by_id(StoryTemplate, src_parent_obj.pk, src_alias, dst_alias, dry=False)
             dst_parent_obj = dst_parent_mgr.get(slug=parent_slug)
 

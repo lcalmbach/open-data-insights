@@ -1815,6 +1815,58 @@ class RecordCountImportTypeMigrationTests(TestCase):
         self.assertFalse(LookupValue.objects.filter(key="imp-CNT").exists())
 
 
+class SynchProdDryRunTests(SimpleTestCase):
+    """A --dry-run must not write to the destination database."""
+
+    def _command(self):
+        from reports.management.commands.synch_prod import Command
+
+        cmd = Command.__new__(Command)
+        cmd.stdout = Mock()
+        cmd.stdout.write = Mock()
+        cmd.style = SimpleNamespace(
+            MIGRATE_HEADING=str, NOTICE=str, SUCCESS=str, WARNING=str, ERROR=str
+        )
+        cmd._sync_one_parent_by_id = Mock()
+        return cmd
+
+    @patch("reports.management.commands.synch_prod.StoryTemplate")
+    def test_dry_run_does_not_create_a_missing_parent(self, mock_template):
+        """It used to pass dry=False here, leaving production with a template that
+        had no contexts, graphics, tables or focus."""
+        from reports.management.commands.synch_prod import Command
+
+        # Destination lookup misses, source lookup hits.
+        mock_template.DoesNotExist = Exception
+        dst_mgr = Mock()
+        dst_mgr.get.side_effect = mock_template.DoesNotExist("absent")
+        src_mgr = Mock()
+        src_mgr.get.return_value = SimpleNamespace(pk=96, slug="74b4365c")
+        mock_template.objects.using.side_effect = lambda alias: (
+            dst_mgr if alias == "prod" else src_mgr
+        )
+
+        child_model = Mock()
+        child_qs = Mock()
+        child_qs.iterator.return_value = iter(
+            [SimpleNamespace(slug="35b97525"), SimpleNamespace(slug="21d5a5bd")]
+        )
+        child_model.objects.using.return_value.select_related.return_value.filter.return_value = child_qs
+
+        cmd = self._command()
+        with patch.dict(
+            "reports.management.commands.synch_prod.MODEL_NAME",
+            {child_model: "StoryTemplateGraphic"},
+        ):
+            Command._sync_children_of_parent_slug(
+                cmd, child_model, "story_template", "74b4365c", "default", "prod", dry=True
+            )
+
+        cmd._sync_one_parent_by_id.assert_not_called()
+        written = " ".join(str(c) for c in cmd.stdout.write.call_args_list)
+        self.assertIn("would CREATE", written)
+
+
 class StoryGenerationLanguageTests(SimpleTestCase):
     @patch("reports.management.commands.generate_stories.StoryGenerationService")
     def test_generate_stories_command_passes_language_code(self, mock_service_cls):
